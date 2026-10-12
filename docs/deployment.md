@@ -19,9 +19,9 @@ The artifact checker independently verifies canonical manifest revisions, exact 
 
 ## Continuous verification
 
-`.github/workflows/ci.yml` runs on main pushes, pull requests, and manual dispatch, with read-only repository permissions and action commit pins resolved from the official v7 tags. It installs Node 24.18.0 and locked npm dependencies, tests standard-library dataset invariants and artifact-corruption gates, runs all engine tests, builds and audits assets, and runs production Chromium tests. It retains the static build and browser diagnostics for seven days. It does not train new weights or regenerate numerical expectations.
+`.github/workflows/ci.yml` runs on main pushes, pull requests, and manual dispatch, with read-only repository permissions and action commit pins resolved from the official v7 tags. It installs Node 24.18.0 and locked npm dependencies, tests standard-library dataset invariants and artifact-corruption gates, runs all engine tests, builds and audits assets, and runs production Chromium and Firefox tests. It retains the static build and browser diagnostics for seven days. It does not train new weights or regenerate numerical expectations.
 
-The initial CI browser is Chromium; local Chromium/WebKit checks remain separate evidence. CI has been prepared and its commands validated locally, but it has not yet run on GitHub. The workflow does not publish the application or alter Pages settings. Action references: [checkout](https://github.com/actions/checkout), [setup-node](https://github.com/actions/setup-node), [upload-artifact](https://github.com/actions/upload-artifact).
+The first remote verification passed on Ubuntu 24.04 with Chromium at commit `00e814e`: [run 38254063282](https://github.com/jtmcbride/transformer-scope/actions/runs/38254063282). The workflow now also requests Firefox; its result is recorded separately after execution. Local Chromium/WebKit checks remain separate evidence. The workflow does not publish the application or alter Pages settings. Action references: [checkout](https://github.com/actions/checkout), [setup-node](https://github.com/actions/setup-node), [upload-artifact](https://github.com/actions/upload-artifact).
 
 ## Hosted release gate
 
@@ -32,4 +32,4 @@ For GitHub Pages, the repository subpath is already configured in Vite. Enable a
 - Explicit CPU mode and automatic WebGL fallback remain usable. `?backend=cpu` selects CPU at initial load; `?backend=webgl` explicitly requests WebGL.
 - Record real Safari/Firefox and a physical lower-powered mobile device, including browser/OS/backend and end-to-end timings. Viewport emulation and Playwright WebKit do not fulfill those gates.
 
-The remaining release gates are remote CI, a real hosted-site check, Firefox on a working runtime, physical Safari/mobile checks, and broader educational evaluation. Local performance results are in `docs/browser-latency-results.json` and `docs/benchmarks.md`; do not present them as every-device guarantees.
+The remaining release gates are the extended Firefox CI result, a real hosted-site check, physical Safari/mobile checks, and broader educational evaluation. Local performance results are in `docs/browser-latency-results.json` and `docs/benchmarks.md`; do not present them as every-device guarantees.

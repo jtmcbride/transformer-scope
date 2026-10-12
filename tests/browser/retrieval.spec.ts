@@ -41,7 +41,12 @@ test('trained checkpoint reproduces reference probes and prepared recipes on CPU
     const reports = [];
     try {
       for (const backend of ['cpu', 'webgl'] as const) {
-        const loaded = await request('LOAD', { backend, manifestUrl });
+        let loaded: Commands['LOAD']['response'];
+        try { loaded = await request('LOAD', { backend, manifestUrl }); }
+        catch (error) {
+          if (backend !== 'webgl' || !(error instanceof Error) || !error.message.startsWith('UNSUPPORTED_BACKEND')) throw error;
+          reports.push({ backend, status: 'unsupported' as const, reason: error.message }); continue;
+        }
         const probe = await request('PROBE', {});
         const cases = [];
         for (const recipe of catalog.recipes) {
@@ -61,12 +66,14 @@ test('trained checkpoint reproduces reference probes and prepared recipes on CPU
           await request('RELEASE', { runId: baseline.runId });
         }
         const resources = await request('RESOURCES', {});
-        reports.push({ backend: loaded.backend, probe, cases, resources });
+        reports.push({ backend: loaded.backend, status: 'passed' as const, probe, cases, resources });
       }
       return { userAgent: navigator.userAgent, reports };
     } finally { worker.terminate(); }
   }, workerUrl);
+  expect(report.reports[0].status).toBe('passed');
   for (const result of report.reports) {
+    if (result.status === 'unsupported') { testInfo.annotations.push({ type: 'unsupported-webgl', description: result.reason }); continue; }
     expect(result.probe.retainedTensorDelta).toBe(0);
     expect(result.resources.tensorCount).toBe(36);
     expect(result.resources.cache.logicalBytes).toBe(0);

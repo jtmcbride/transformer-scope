@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { comparePredictions } from '../../src/engine/comparison';
 import type { ExperimentDocument } from '../../src/engine/experiment';
 
-test('export and replay restore completed settings, switch checkpoints and compare newly computed predictions', async ({ page }) => {
+test('export and replay restore completed settings, switch checkpoints and compare newly computed predictions', async ({ page }, testInfo) => {
   await page.goto('?model=verification');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await page.getByRole('slider', { name: 'Head strength', exact: true }).fill('0.35');
@@ -37,6 +37,12 @@ test('export and replay restore completed settings, switch checkpoints and compa
   await expect(page.getByLabel('Apply at')).toHaveValue('0');
   await expect(page.getByText('Next token after position', { exact: false })).toContainText('2');
   await page.getByLabel('Backend').selectOption('webgl');
+  const unavailable = page.getByRole('alert').filter({ hasText: 'WebGL worker unavailable:' });
+  await expect.poll(async () => await unavailable.isVisible() || await page.getByRole('button', { name: 'Export experiment' }).isEnabled(), { timeout: 30_000 }).toBe(true);
+  if (await unavailable.isVisible()) {
+    testInfo.annotations.push({ type: 'unsupported-webgl', description: (await unavailable.textContent())! });
+    await page.getByRole('button', { name: 'Load with CPU' }).click();
+  }
   await expect(page.getByRole('button', { name: 'Export experiment' })).toBeEnabled({ timeout: 30_000 });
   await page.getByLabel('Import experiment').setInputFiles({ name: 'saved.json', mimeType: 'application/json', buffer: Buffer.from(contents) });
   await expect(page.getByTestId('replay-report')).toContainText('Replay matches saved results');

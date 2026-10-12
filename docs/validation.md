@@ -66,7 +66,7 @@ The browser suite checks:
 - Invalid input recovery and a 390-pixel viewport without horizontal overflow.
 - Corrupted weight checksum rejection before computation.
 
-The current production suite passed 26 tests across Chromium and WebKit. CPU and unpacked WebGL pass the original forward/gradient probe and the new cached/full suite in both engines. Each browser/backend tests 14 cached combinations, cross-layer fallback, independent PyTorch parity, 640-byte LRU eviction, modified-run replay, zero budget, and reload invalidation.
+The current production suite passed 28 tests across Chromium and WebKit. CPU and unpacked WebGL pass the original forward/gradient probe and the new cached/full suite in both engines. Each browser/backend tests 14 cached combinations, cross-layer fallback, independent PyTorch parity, 640-byte LRU eviction, modified-run replay, zero budget, and reload invalidation.
 
 Each of the four browser/backend combinations also runs 1,000 sequential comparisons. Retained tensors remain at 40 (36 weights plus four cached tensors); releasing the baseline restores 36 tensors and zero logical cache bytes. The cache's 640-byte logical payload remains constant through the edits. Raw records are in `docs/cache-verification-results.json`; original probe records remain in `docs/browser-probe-results.json`. See `docs/benchmarks.md` for timing scope and the Firefox runtime launch limitation.
 
@@ -97,15 +97,21 @@ Cold WebGL model loading is allowed 30 seconds in the replay browser assertions;
 
 Independent UI fixtures check two attention cells (one causally masked) and the projection, attention residual, MLP, and block-output vectors in both layers for the actual BOS-prefixed screen input at factor .37. Production assertions use the existing 2e-5 absolute bound on displayed six-decimal values. Numeric strength rejection, reset to identical vectors, mobile containment, new-worker ownership during edits, and cancellation of an explicitly blocked model load pass in Chromium and WebKit. The two initially failing blocked-load checks were corrected to wait until the first request was actually intercepted before restarting; otherwise the test inadvertently blocked the replacement worker. No numerical tolerance was changed.
 
-The final production regression passed all 26 tests across Chromium and WebKit after correcting the blocked-load test ordering. Engine regressions remain 36 passing tests. See `docs/computation-inspection.md`; mobile vector-panel screenshots were inspected.
+The final production regression passed all 28 tests across Chromium and WebKit after correcting the blocked-load test ordering. Engine regressions remain 36 passing tests. See `docs/computation-inspection.md`; mobile vector-panel screenshots were inspected.
 
 ## Local release verification
 
-The final local checks passed: TypeScript/production build, 36 engine tests, 26 production browser tests, five Python dataset/reference/artifact tests, and source/built artifact audits. Standard-library dataset and artifact-corruption checks also pass without PyTorch installed in the active Python environment, matching the prepared CI commands.
+The final local checks passed: TypeScript/production build, 36 engine tests, 28 production browser tests, five Python dataset/reference/artifact tests, and source/built artifact audits. Standard-library dataset and artifact-corruption checks also pass without PyTorch installed in the active Python environment, matching the prepared CI commands.
 
 `docs/browser-latency-results.json` records eight isolated named-host browser/backend/model benchmark runs, including cold-ready observations, 40 warm UI samples per layer, and 40 full/cached RPC pairs per layer. All measured frame-opportunity p95s are at most 68 ms on the recorded M1 Pro Mac. See `docs/benchmarks.md` for timer, paint, cache, capture, and device limitations.
 
 The trained checkpoint's automatic CPU preference is tied to its measured revision. `?backend=cpu` and `?backend=webgl` permit explicit startup selection. CI and deployment inputs are documented in `docs/deployment.md`; local success does not itself confirm a remote CI run or a deployed website.
+
+## Remote CI
+
+The first GitHub Actions run passed all configured checks on Ubuntu 24.04: locked dependency install, four standard-library dataset/artifact tests, 36 engine tests, production build, source/built audits, and 13 Chromium production tests. Commit: `00e814e`; [workflow run](https://github.com/jtmcbride/transformer-scope/actions/runs/38254063282). The static build and browser diagnostics were uploaded successfully. This verifies CI, not hosted-site publication.
+
+The next workflow also requests Firefox. Browser checks record an explicitly unsupported WebGL load separately and continue validating CPU behavior. Numerical failures after a supported load are still failures. Worker WebGL now requires float32 rendering support; lower-precision contexts are rejected with `UNSUPPORTED_BACKEND` and can recover on CPU. A capability test emulates missing worker WebGL context support while running real CPU inference and recovery.
 
 ## Outstanding gates
 

@@ -31,6 +31,7 @@ async function load(request: Extract<WorkerRequest, { command: 'LOAD' }>) {
       tf.env().set('WEBGL_PACK', false);
       if (!await tf.setBackend('webgl')) throw new Error('No worker WebGL context is available.');
       await tf.ready();
+      if (!tf.env().getBool('WEBGL_RENDER_FLOAT32_ENABLED')) throw new Error('This worker does not support float32 WebGL rendering.');
       // Force a kernel and a readback before accepting the backend.
       const probe = tf.tidy(() => tf.add(tf.tensor1d([1]), tf.tensor1d([2])));
       try { await probe.data(); } finally { probe.dispose(); }

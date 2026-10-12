@@ -29,8 +29,8 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run check:artifacts
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:browser -- --project=chromium
+      - run: npx playwright install --with-deps chromium firefox
+      - run: npm run test:browser -- --project=chromium --project=firefox
       - name: Preserve production build
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

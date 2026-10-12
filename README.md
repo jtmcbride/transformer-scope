@@ -60,10 +60,10 @@ The exporter saves 411,648 weight bytes, a hash-checked manifest/tokenizer, eval
 - Implemented: scaffold and lockfiles, model contract, artifact validation, independent fixtures, full forward execution, gradients, selective baseline/modified inspection, worker probe, and an initial intervention screen.
 - Implemented in Milestone C: a 32 MiB baseline cache with LRU eviction and read leases, exact same-layer residual deltas, suffix execution, full fallback, reset/identity reuse, and cached inspection. The screen shows the actual execution strategy and reuses unchanged baseline inspector slices during slider edits.
 - Implemented in Milestone D: deterministic retrieval training, held-out and length evaluations, measured recipes, a trained default model, checkpoint switching, and responsive attention inspection.
-- Verified: 36 engine tests, five dataset/reference/artifact tests, 319 direct cached/reference cases, and 26 production tests across Chromium and WebKit, including 1,000 comparisons on each CPU/WebGL combination.
+- Verified: 36 engine tests, five dataset/reference/artifact tests, 319 direct cached/reference cases, and 28 production tests across Chromium and WebKit, including 1,000 comparisons on each CPU/WebGL combination.
 - Implemented in Milestone E: versioned experiment export/replay, exact numeric strength, attention-cell arithmetic, lazy projection/residual/MLP vectors, and CPU worker restart.
 - Implemented in Milestone F: named-host browser latency measurements, source/build artifact auditing, pinned-action CI, and static deployment instructions.
-- Remaining: remote CI, a live hosted-site check, Firefox on a working runtime, and physical Safari/mobile verification.
+- CI has passed on GitHub with Chromium; Firefox coverage is being extended. Remaining: a live hosted-site check and physical Safari/mobile verification.
 - Remaining release validation: actual Safari, physical mobile devices, wider educational evaluation, and end-to-end performance on named hardware.
 
 See `PLAN.md`, `docs/model-contract.md`, `docs/validation.md`, and `docs/benchmarks.md` for scope, semantics, and measured evidence.

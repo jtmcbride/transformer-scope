@@ -76,3 +76,15 @@ WebKit timer resolution yields integer-millisecond readings, including occasiona
 Automatic loading now chooses CPU for this exact trained revision and the tiny verification models. The measured trained checkpoint meets the warm target on CPU and avoids Chromium's GPU compilation startup cost. WebGL remains selectable and can be faster on the measured WebKit workload. A changed trained revision requires recalibration; other larger artifacts retain the prior WebGL-attempt/CPU-fallback policy.
 
 Run `npm run build`, then `npm run benchmark:browser`. Raw output is `.cache/browser-benchmark.json`. Review hardware/configuration and scope before promoting a result to documentation.
+
+## On-device harness measurements
+
+`validation.html` (see `docs/physical-device-protocol.md`) applies the same methodology on any device without Playwright. Defaults match the named-host benchmark: five warm-up and 40 measured edits per layer at the first and final layers, head 1 at all positions, strengths .25/.5/.75/1.5 for interface edits and .5 for RPC pairs. Summaries use the same median and nearest-rank p95 (`src/validation/report.ts`, shared with `tests/benchmarks/browser.benchmark.ts`). Each measurement is reported separately:
+
+- **Cold readiness:** the embedded application's navigation start until the first completed comparison is committed to the DOM. Caches are not reset; the record includes the `weights.bin` transfer size (0 usually indicates a cache hit). One observation per checkpoint/backend. A later combination can reuse HTTP or compilation caches from an earlier one.
+- **DOM commit:** a synthetic in-page input event until the completed result appears (scheduling, worker comparison, default inspector reads, React update).
+- **Frame opportunity:** DOM commit plus two animation-frame callbacks. It includes a paint opportunity but is not measured display latency. Neither interface timing includes touch hardware or OS input latency.
+- **RPC round trip** and **worker computation:** a separate fresh worker posts full and cached comparison pairs; the round trip includes transit, forward, logit readback, and metrics, while worker computation is the engine-reported comparison time. Inspection reads and rendering are excluded.
+- **CPU recovery:** the restart click until the replacement CPU worker shows the preserved experiment.
+
+The harness imposes no timing threshold. Results from headless automation in this repository's CI or development container are not device evidence; they verify that the measurement code runs.

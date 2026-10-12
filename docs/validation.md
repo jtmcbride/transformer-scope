@@ -121,11 +121,33 @@ Hosted checks verify the exact clean source commit and all 14 deployment asset h
 
 Installed Safari 27.0.1 (22625.1.29.11.28) on the recorded M1 Pro / macOS 27.0.1 host was exercised through native UI controls. Local production CPU and unpacked WebGL both passed the PyTorch probe: maximum displayed forward error 6.68e-6, gradient error 3.58e-7, Adam error 1.25e-6 CPU / 2.08e-6 WebGL, retained tensor change zero. Baseline reset, lazy computation vectors, and explicit GPU-to-CPU restart passed. The hosted HTTPS site loaded the prepared ablation and passed the CPU reference probe. `docs/native-safari-results.json` records build provenance and the scope of these manual checks; this is not a full installed-Safari automated regression or a Safari timing benchmark.
 
+## Device validation harness
+
+`validation.html` is an opt-in diagnostic page at the deployment root (https://jtmcbride.github.io/transformer-scope/validation.html). The application does not link to or load it, and it runs nothing until **Start validation** is pressed. For each selected checkpoint and backend, it records:
+
+- Release identity (`release.json` commit and model revisions), browser/OS reports, touch and viewport properties, timer resolution, and the main-thread WebGL renderer. The observer enters device model, power, and thermal state, and chooses an evidence class; `navigator.webdriver` is recorded separately.
+- In a fresh worker: actual backend and precision, the PyTorch forward/gradient/Adam probe, all three recipes through cached and full execution with recorded expectations, in-memory export/replay, and post-release tensor/cache counts. These use the existing tolerances (`2e-5 + 1e-5|expected|` for logits).
+- In the real application, embedded from the same deployment: cold readiness, warm input-to-result timings, baseline reset, and CPU worker recovery.
+
+Each check is `passed`, `failed` (with the reason), `unsupported` (the backend could not start), or `skipped` (not applicable or after an unsupported backend). An unsupported CPU fails the run. Timing definitions are in `docs/benchmarks.md`; the run also records whether the page was hidden, which invalidates its timings.
+
+Coverage: five engine tests check timing summaries, the logit bound, recipe expectations against the recorded PyTorch metrics and causal reachability, settings, and status aggregation. Two production tests run in Chromium and Firefox. The first confirms that the application loads no harness code and that the harness requests no worker, model, or release asset before Start. It then runs both checkpoints and backends, verifies identity, every check, separated timings, and an identical JSON download. The second emulates missing worker WebGL and corrupts one PyTorch probe value. It verifies that the probe fails with its mismatch, WebGL is reported as unsupported with dependent checks skipped, independent CPU checks still pass, and the page fits a 390-pixel viewport. A hosted test runs the harness against the deployed site.
+
+At commit `29b6ade`, CI passed all 32 production cases (16 each in Chromium 156 and Firefox 157, including both harness tests): [run 38263433282](https://github.com/jtmcbride/transformer-scope/actions/runs/38263433282). The deployment job then published that commit, and all three hosted Chromium checks passed against https://jtmcbride.github.io/transformer-scope/, including a harness run that identified commit `29b6ade` and had no failed checks. In this development container, headless Chromium 141 on Linux also passed all 16 Chromium cases and the three hosted-suite tests against a local production preview. These are automation results, not device evidence. A full-default run (both checkpoints and backends, 5 warm-up and 40 measured edits per layer) against a clean local build of `29b6ade` passed every applicable check; its unedited export is `docs/device-results/2026-10-12-automation-container-headless-chromium141.json`, kept as a format reference and labeled as automation.
+
+## Physical-device results
+
+None yet. No physical mobile device was available while implementing the harness and protocol. Run `docs/physical-device-protocol.md` and record the harness JSON and manual checklist in `docs/device-results/`. Do not substitute viewport emulation, Playwright WebKit, installed desktop Safari, or automated harness runs for this gate.
+
+## Educational evaluation
+
+`docs/educational-evaluation.md` defines a facilitated session around the three recipes: participants predict and explain each result before seeing it, then answer probes on attention-weight invariance under head-output scaling, downstream propagation, small effects versus no path, bounded interpretation, and a reachability transfer question. Gate criteria are fixed before data collection. `docs/educational-findings-template.md` is the findings template. No sessions have been run, and no participant results exist.
+
 ## Outstanding gates
 
 - Wider trained-model intervention/seed coverage beyond the three shipped recipes.
-- A physical lower-powered mobile device and GPU memory/context-loss recovery beyond explicit worker restart.
-- Broader educational testing with users and additional controlled tasks.
+- A physical lower-powered mobile device: run `docs/physical-device-protocol.md` (harness plus manual checklist). GPU memory/context-loss recovery beyond explicit worker restart is observed by step B12 but not otherwise tested.
+- Educational sessions under `docs/educational-evaluation.md` (at least five participants), then wider tasks if the gate is met.
 - Broader named-device end-to-end latency benchmarks, including native Safari and physical mobile; current measurements cover one desktop host.
 - Larger-model, wider-seed, ill-conditioned-input, and lower-precision backend coverage.
 

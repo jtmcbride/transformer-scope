@@ -1,0 +1,5124 @@
+{
+  "format": "transformer-microscope-device-validation",
+  "schemaVersion": 1,
+  "startedAt": "2026-10-12T14:34:25.435Z",
+  "completedAt": "2026-10-12T14:35:03.052Z",
+  "evidence": {
+    "evidenceClass": "automation",
+    "deviceDescription": "Development container: headless Chromium 141 under Playwright 1.64 on Linux x86_64, 4 logical CPUs, software-rendered WebGL. Not a physical device.",
+    "notes": "",
+    "automated": true,
+    "pageHiddenDuringRun": false,
+    "screenWakeLock": "acquired"
+  },
+  "page": {
+    "url": "http://127.0.0.1:4173/transformer-scope/validation.html",
+    "crossOriginIsolated": false
+  },
+  "release": {
+    "name": "release-identity",
+    "status": "passed",
+    "detail": "29b6ade",
+    "durationMs": 10.20000000006985,
+    "data": {
+      "commit": "29b6ade493e0e9ef8e46bfb17a1ef37b14184d6f",
+      "builtAt": "2026-10-12T14:34:23.320Z",
+      "sourceTreeDirty": false,
+      "basePath": "/transformer-scope/",
+      "models": {
+        "verification": {
+          "modelId": "verification-seed-1729",
+          "modelRevision": "a9881b79044de83a160c571312e09d041f66c44a2351f8144de9b479fbb1a5c6"
+        },
+        "retrieval": {
+          "modelId": "retrieval-seed-2026",
+          "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea"
+        }
+      }
+    }
+  },
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+    "userAgentData": {
+      "brands": [
+        {
+          "brand": "Chromium",
+          "version": "141"
+        },
+        {
+          "brand": "Not?A_Brand",
+          "version": "8"
+        }
+      ],
+      "mobile": false,
+      "platform": "Linux",
+      "architecture": "x86",
+      "fullVersionList": [
+        {
+          "brand": "Chromium",
+          "version": "141.0.7390.37"
+        },
+        {
+          "brand": "Not?A_Brand",
+          "version": "8.0.0.0"
+        }
+      ],
+      "model": "",
+      "platformVersion": "6.18.44"
+    },
+    "hardwareConcurrency": 4,
+    "deviceMemoryGiB": 8,
+    "maxTouchPoints": 0,
+    "coarsePointer": false,
+    "hoverNone": false,
+    "screen": {
+      "width": 1280,
+      "height": 720,
+      "orientation": "landscape-primary"
+    },
+    "devicePixelRatio": 1,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "offscreenCanvas": true,
+    "timerResolutionMs": 0.09999999997671694,
+    "mainThreadWebgl": {
+      "available": true,
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "vendor": "Google Inc. (Google)",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "unmasked": true,
+      "scope": "main-thread context; the computation worker creates its own context"
+    },
+    "note": "Browser reports only. Device model, power state, and thermal state must be entered by the observer."
+  },
+  "settings": {
+    "models": [
+      "retrieval",
+      "verification"
+    ],
+    "backends": [
+      "cpu",
+      "webgl"
+    ],
+    "warmupSamples": 5,
+    "measuredSamples": 40,
+    "includeInterface": true,
+    "warmFactors": [
+      0.25,
+      0.5,
+      0.75,
+      1.5
+    ],
+    "head": 0,
+    "rpcFactor": 0.5
+  },
+  "combinations": [
+    {
+      "model": "retrieval",
+      "requestedBackend": "cpu",
+      "actualBackend": "cpu",
+      "modelId": "retrieval-seed-2026",
+      "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+      "precision": {
+        "dtype": "float32",
+        "float32Textures": null,
+        "webglPacking": null
+      },
+      "checks": [
+        {
+          "name": "ui-cold-readiness",
+          "status": "passed",
+          "detail": "299.2 ms",
+          "durationMs": 301.19999999995343,
+          "data": {
+            "coldReadyMs": 299.19999999995343,
+            "observationStartedAfterCompletion": false,
+            "actualBackend": "cpu",
+            "weightsFetch": [],
+            "definition": "Embedded page navigation start until the first completed comparison is committed to the DOM. HTTP, filesystem, driver, and shader caches are not reset; transferSize 0 usually means a cache hit."
+          }
+        },
+        {
+          "name": "ui-warm-interaction",
+          "status": "passed",
+          "detail": "layer 1: commit p95 22.5 ms, frame opportunity p95 50.0 ms; layer 2: commit p95 11.8 ms, frame opportunity p95 33.7 ms",
+          "durationMs": 3213.9000000000233,
+          "data": {
+            "head": 0,
+            "scope": "all positions",
+            "factors": [
+              0.25,
+              0.5,
+              0.75,
+              1.5
+            ],
+            "layers": [
+              {
+                "layer": 0,
+                "domCommit": {
+                  "count": 40,
+                  "medianMs": 13.25,
+                  "p95Ms": 22.5,
+                  "minimumMs": 10,
+                  "maximumMs": 24.099999999976717
+                },
+                "frameOpportunity": {
+                  "count": 40,
+                  "medianMs": 33.34999999997672,
+                  "p95Ms": 50,
+                  "minimumMs": 33.09999999997672,
+                  "maximumMs": 50.300000000046566
+                },
+                "samples": [
+                  {
+                    "domCommitMs": 12.300000000046566,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 12.900000000023283,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 17.199999999953434,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 17.599999999976717,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 12.5,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 13.199999999953434,
+                    "frameOpportunityMs": 33.59999999997672
+                  },
+                  {
+                    "domCommitMs": 16.699999999953434,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 13.599999999976717,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 21.5,
+                    "frameOpportunityMs": 49.800000000046566
+                  },
+                  {
+                    "domCommitMs": 13.79999999993015,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 22.5,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 22.599999999976717,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 17.399999999906868,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 19.400000000023283,
+                    "frameOpportunityMs": 49.800000000046566
+                  },
+                  {
+                    "domCommitMs": 12.599999999976717,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 15.5,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 12.699999999953434,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 13.900000000023283,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 11.79999999993015,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 12.20000000006985,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 14,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 16,
+                    "frameOpportunityMs": 33.09999999997672
+                  },
+                  {
+                    "domCommitMs": 13,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 11.800000000046566,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 13.300000000046566,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 12.29999999993015,
+                    "frameOpportunityMs": 33.09999999997672
+                  },
+                  {
+                    "domCommitMs": 14.599999999976717,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 12.099999999976717,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 11.29999999993015,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 11.300000000046566,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 19.800000000046566,
+                    "frameOpportunityMs": 50.300000000046566
+                  },
+                  {
+                    "domCommitMs": 11.400000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 17.399999999906868,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 10,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 11.900000000023283,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 18.099999999976717,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 24.099999999976717,
+                    "frameOpportunityMs": 49.800000000046566
+                  },
+                  {
+                    "domCommitMs": 10.699999999953434,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 11.300000000046566,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 12.400000000023283,
+                    "frameOpportunityMs": 33.10000000009313
+                  }
+                ]
+              },
+              {
+                "layer": 1,
+                "domCommit": {
+                  "count": 40,
+                  "medianMs": 7.2999999999883585,
+                  "p95Ms": 11.800000000046566,
+                  "minimumMs": 5.599999999976717,
+                  "maximumMs": 13.199999999953434
+                },
+                "frameOpportunity": {
+                  "count": 40,
+                  "medianMs": 33.300000000046566,
+                  "p95Ms": 33.70000000006985,
+                  "minimumMs": 30.20000000006985,
+                  "maximumMs": 36.40000000002328
+                },
+                "samples": [
+                  {
+                    "domCommitMs": 6.699999999953434,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 7.399999999906868,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 5.599999999976717,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 5.900000000023283,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 6.100000000093132,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 11.800000000046566,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 13.199999999953434,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 5.900000000023283,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 6.400000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 7.299999999930151,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 8.199999999953434,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 6.800000000046566,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 12.5,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 9,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 6,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 10.099999999976717,
+                    "frameOpportunityMs": 33.09999999997672
+                  },
+                  {
+                    "domCommitMs": 7.200000000069849,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 8.20000000006985,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 6.799999999930151,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 8.199999999953434,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 5.699999999953434,
+                    "frameOpportunityMs": 32.699999999953434
+                  },
+                  {
+                    "domCommitMs": 7.300000000046566,
+                    "frameOpportunityMs": 33.59999999997672
+                  },
+                  {
+                    "domCommitMs": 8.800000000046566,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 7,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 6.699999999953434,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 6.400000000023283,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 6.199999999953434,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 6.200000000069849,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 6.200000000069849,
+                    "frameOpportunityMs": 33.70000000006985
+                  },
+                  {
+                    "domCommitMs": 7,
+                    "frameOpportunityMs": 32.89999999990687
+                  },
+                  {
+                    "domCommitMs": 7.5,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 10.099999999976717,
+                    "frameOpportunityMs": 36.40000000002328
+                  },
+                  {
+                    "domCommitMs": 9.800000000046566,
+                    "frameOpportunityMs": 30.20000000006985
+                  },
+                  {
+                    "domCommitMs": 7.099999999976717,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 8.300000000046566,
+                    "frameOpportunityMs": 34.40000000002328
+                  },
+                  {
+                    "domCommitMs": 8.099999999976717,
+                    "frameOpportunityMs": 32.300000000046566
+                  },
+                  {
+                    "domCommitMs": 9.400000000023283,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 9.20000000006985,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 9.5,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 8.099999999976717,
+                    "frameOpportunityMs": 33.09999999997672
+                  }
+                ]
+              }
+            ],
+            "definition": "Synthetic in-page input event to the completed result DOM commit (scheduling, worker comparison, default inspector reads, React update). Frame opportunity adds two animation-frame callbacks; it is not measured display latency and excludes touch hardware and OS input latency."
+          }
+        },
+        {
+          "name": "ui-baseline-reset",
+          "status": "passed",
+          "durationMs": 8.199999999953434,
+          "data": {
+            "strategy": "Baseline reused",
+            "displayedRows": 11
+          }
+        },
+        {
+          "name": "ui-cpu-recovery",
+          "status": "passed",
+          "detail": "214.6 ms",
+          "durationMs": 214.90000000002328,
+          "data": {
+            "recoveryMs": 214.59999999997672,
+            "definition": "Restart click until the replacement CPU worker shows the preserved experiment."
+          }
+        },
+        {
+          "name": "worker-load",
+          "status": "passed",
+          "durationMs": 84.5,
+          "data": {
+            "loadMs": 84.40000000002328,
+            "fallbackReason": null,
+            "matchesReleaseStamp": true,
+            "definition": "Worker LOAD request: static asset fetch, hash validation, backend initialization, and weight upload."
+          }
+        },
+        {
+          "name": "computation-rpc",
+          "status": "passed",
+          "detail": "layer 1: full/cached round-trip median 11.3/9.1 ms; layer 2: full/cached round-trip median 11.0/3.8 ms",
+          "durationMs": 1975,
+          "data": {
+            "sequenceLength": 16,
+            "baselineFirstMs": 56.5,
+            "layers": [
+              {
+                "layer": 0,
+                "fullRoundTrip": {
+                  "count": 40,
+                  "medianMs": 11.25,
+                  "p95Ms": 19.300000000046566,
+                  "minimumMs": 9.900000000023283,
+                  "maximumMs": 49.79999999993015
+                },
+                "cachedRoundTrip": {
+                  "count": 40,
+                  "medianMs": 9.149999999965075,
+                  "p95Ms": 16,
+                  "minimumMs": 7.699999999953434,
+                  "maximumMs": 24.5
+                },
+                "fullWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 11,
+                  "p95Ms": 18.400000000023283,
+                  "minimumMs": 9.800000000046566,
+                  "maximumMs": 19.599999999976717
+                },
+                "cachedWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 8.649999999965075,
+                  "p95Ms": 15.400000000023283,
+                  "minimumMs": 7.5,
+                  "maximumMs": 22.5
+                },
+                "samples": {
+                  "full": [
+                    {
+                      "rpcMs": 16.400000000023283,
+                      "workerMs": 16.099999999976717
+                    },
+                    {
+                      "rpcMs": 18.800000000046566,
+                      "workerMs": 18.400000000023283
+                    },
+                    {
+                      "rpcMs": 12.099999999976717,
+                      "workerMs": 11.800000000046566
+                    },
+                    {
+                      "rpcMs": 10.70000000006985,
+                      "workerMs": 10.29999999993015
+                    },
+                    {
+                      "rpcMs": 13.79999999993015,
+                      "workerMs": 11.099999999976717
+                    },
+                    {
+                      "rpcMs": 13.099999999976717,
+                      "workerMs": 12.5
+                    },
+                    {
+                      "rpcMs": 11.599999999976717,
+                      "workerMs": 11.400000000023283
+                    },
+                    {
+                      "rpcMs": 12.5,
+                      "workerMs": 12.099999999976717
+                    },
+                    {
+                      "rpcMs": 11.800000000046566,
+                      "workerMs": 11.400000000023283
+                    },
+                    {
+                      "rpcMs": 19.800000000046566,
+                      "workerMs": 19.599999999976717
+                    },
+                    {
+                      "rpcMs": 19.300000000046566,
+                      "workerMs": 18.900000000023283
+                    },
+                    {
+                      "rpcMs": 18.199999999953434,
+                      "workerMs": 17.79999999993015
+                    },
+                    {
+                      "rpcMs": 16.899999999906868,
+                      "workerMs": 16.699999999953434
+                    },
+                    {
+                      "rpcMs": 17.599999999976717,
+                      "workerMs": 17.29999999993015
+                    },
+                    {
+                      "rpcMs": 16.699999999953434,
+                      "workerMs": 16.400000000023283
+                    },
+                    {
+                      "rpcMs": 49.79999999993015,
+                      "workerMs": 16.199999999953434
+                    },
+                    {
+                      "rpcMs": 10.900000000023283,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 10.5,
+                      "workerMs": 10.400000000023283
+                    },
+                    {
+                      "rpcMs": 9.900000000023283,
+                      "workerMs": 9.800000000046566
+                    },
+                    {
+                      "rpcMs": 10.20000000006985,
+                      "workerMs": 10
+                    },
+                    {
+                      "rpcMs": 10.699999999953434,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.800000000046566
+                    },
+                    {
+                      "rpcMs": 12.099999999976717,
+                      "workerMs": 11.800000000046566
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.699999999953434
+                    },
+                    {
+                      "rpcMs": 10.400000000023283,
+                      "workerMs": 10
+                    },
+                    {
+                      "rpcMs": 10.800000000046566,
+                      "workerMs": 10.599999999976717
+                    },
+                    {
+                      "rpcMs": 11.199999999953434,
+                      "workerMs": 11
+                    },
+                    {
+                      "rpcMs": 11.5,
+                      "workerMs": 11.29999999993015
+                    },
+                    {
+                      "rpcMs": 10.900000000023283,
+                      "workerMs": 10.699999999953434
+                    },
+                    {
+                      "rpcMs": 10.600000000093132,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 10.900000000023283,
+                      "workerMs": 10.70000000006985
+                    },
+                    {
+                      "rpcMs": 11.300000000046566,
+                      "workerMs": 11
+                    },
+                    {
+                      "rpcMs": 10.900000000023283,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 10.699999999953434,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 10.599999999976717,
+                      "workerMs": 10.400000000023283
+                    },
+                    {
+                      "rpcMs": 10.399999999906868,
+                      "workerMs": 9.900000000023283
+                    },
+                    {
+                      "rpcMs": 11.70000000006985,
+                      "workerMs": 11.29999999993015
+                    },
+                    {
+                      "rpcMs": 10.70000000006985,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 10.400000000023283,
+                      "workerMs": 10.300000000046566
+                    },
+                    {
+                      "rpcMs": 12.400000000023283,
+                      "workerMs": 12
+                    }
+                  ],
+                  "cached": [
+                    {
+                      "rpcMs": 12.300000000046566,
+                      "workerMs": 12.099999999976717
+                    },
+                    {
+                      "rpcMs": 9.20000000006985,
+                      "workerMs": 8.900000000023283
+                    },
+                    {
+                      "rpcMs": 8.300000000046566,
+                      "workerMs": 8.099999999976717
+                    },
+                    {
+                      "rpcMs": 8.599999999976717,
+                      "workerMs": 8.300000000046566
+                    },
+                    {
+                      "rpcMs": 8.900000000023283,
+                      "workerMs": 8.300000000046566
+                    },
+                    {
+                      "rpcMs": 9.199999999953434,
+                      "workerMs": 8.900000000023283
+                    },
+                    {
+                      "rpcMs": 8.300000000046566,
+                      "workerMs": 8
+                    },
+                    {
+                      "rpcMs": 10.100000000093132,
+                      "workerMs": 9.599999999976717
+                    },
+                    {
+                      "rpcMs": 9.800000000046566,
+                      "workerMs": 9.29999999993015
+                    },
+                    {
+                      "rpcMs": 13,
+                      "workerMs": 12.599999999976717
+                    },
+                    {
+                      "rpcMs": 16,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 14.900000000023283,
+                      "workerMs": 14.599999999976717
+                    },
+                    {
+                      "rpcMs": 13.599999999976717,
+                      "workerMs": 13.20000000006985
+                    },
+                    {
+                      "rpcMs": 15.600000000093132,
+                      "workerMs": 15.400000000023283
+                    },
+                    {
+                      "rpcMs": 14.800000000046566,
+                      "workerMs": 14.099999999976717
+                    },
+                    {
+                      "rpcMs": 12,
+                      "workerMs": 11.599999999976717
+                    },
+                    {
+                      "rpcMs": 8.5,
+                      "workerMs": 8
+                    },
+                    {
+                      "rpcMs": 8.100000000093132,
+                      "workerMs": 7.899999999906868
+                    },
+                    {
+                      "rpcMs": 7.900000000023283,
+                      "workerMs": 7.600000000093132
+                    },
+                    {
+                      "rpcMs": 7.799999999930151,
+                      "workerMs": 7.5
+                    },
+                    {
+                      "rpcMs": 8.099999999976717,
+                      "workerMs": 7.900000000023283
+                    },
+                    {
+                      "rpcMs": 12.400000000023283,
+                      "workerMs": 12.100000000093132
+                    },
+                    {
+                      "rpcMs": 8,
+                      "workerMs": 7.599999999976717
+                    },
+                    {
+                      "rpcMs": 8.199999999953434,
+                      "workerMs": 8.099999999976717
+                    },
+                    {
+                      "rpcMs": 7.699999999953434,
+                      "workerMs": 7.5
+                    },
+                    {
+                      "rpcMs": 9.599999999976717,
+                      "workerMs": 9.20000000006985
+                    },
+                    {
+                      "rpcMs": 24.5,
+                      "workerMs": 22.400000000023283
+                    },
+                    {
+                      "rpcMs": 8.699999999953434,
+                      "workerMs": 8.599999999976717
+                    },
+                    {
+                      "rpcMs": 22.899999999906868,
+                      "workerMs": 22.5
+                    },
+                    {
+                      "rpcMs": 9.099999999976717,
+                      "workerMs": 8.699999999953434
+                    },
+                    {
+                      "rpcMs": 9.800000000046566,
+                      "workerMs": 9.600000000093132
+                    },
+                    {
+                      "rpcMs": 8.099999999976717,
+                      "workerMs": 8
+                    },
+                    {
+                      "rpcMs": 9.399999999906868,
+                      "workerMs": 8.400000000023283
+                    },
+                    {
+                      "rpcMs": 9.699999999953434,
+                      "workerMs": 9.29999999993015
+                    },
+                    {
+                      "rpcMs": 8.20000000006985,
+                      "workerMs": 7.899999999906868
+                    },
+                    {
+                      "rpcMs": 8.599999999976717,
+                      "workerMs": 8.29999999993015
+                    },
+                    {
+                      "rpcMs": 8,
+                      "workerMs": 7.599999999976717
+                    },
+                    {
+                      "rpcMs": 8.400000000023283,
+                      "workerMs": 8.199999999953434
+                    },
+                    {
+                      "rpcMs": 8.300000000046566,
+                      "workerMs": 7.800000000046566
+                    },
+                    {
+                      "rpcMs": 9.900000000023283,
+                      "workerMs": 9.70000000006985
+                    }
+                  ]
+                }
+              },
+              {
+                "layer": 1,
+                "fullRoundTrip": {
+                  "count": 40,
+                  "medianMs": 11,
+                  "p95Ms": 15,
+                  "minimumMs": 10,
+                  "maximumMs": 16.900000000023283
+                },
+                "cachedRoundTrip": {
+                  "count": 40,
+                  "medianMs": 3.7999999999883585,
+                  "p95Ms": 4.799999999930151,
+                  "minimumMs": 3.199999999953434,
+                  "maximumMs": 7.800000000046566
+                },
+                "fullWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 10.75,
+                  "p95Ms": 14.900000000023283,
+                  "minimumMs": 9.599999999976717,
+                  "maximumMs": 16.70000000006985
+                },
+                "cachedWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 3.4500000000116415,
+                  "p95Ms": 4.5,
+                  "minimumMs": 3,
+                  "maximumMs": 7.599999999976717
+                },
+                "samples": {
+                  "full": [
+                    {
+                      "rpcMs": 10.199999999953434,
+                      "workerMs": 9.800000000046566
+                    },
+                    {
+                      "rpcMs": 10.79999999993015,
+                      "workerMs": 10.599999999976717
+                    },
+                    {
+                      "rpcMs": 10.900000000023283,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 10,
+                      "workerMs": 9.599999999976717
+                    },
+                    {
+                      "rpcMs": 11.400000000023283,
+                      "workerMs": 11.300000000046566
+                    },
+                    {
+                      "rpcMs": 10.199999999953434,
+                      "workerMs": 10
+                    },
+                    {
+                      "rpcMs": 10.300000000046566,
+                      "workerMs": 9.79999999993015
+                    },
+                    {
+                      "rpcMs": 10.099999999976717,
+                      "workerMs": 9.900000000023283
+                    },
+                    {
+                      "rpcMs": 10.800000000046566,
+                      "workerMs": 10.199999999953434
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.800000000046566
+                    },
+                    {
+                      "rpcMs": 10.5,
+                      "workerMs": 10.199999999953434
+                    },
+                    {
+                      "rpcMs": 10.5,
+                      "workerMs": 10.199999999953434
+                    },
+                    {
+                      "rpcMs": 11.400000000023283,
+                      "workerMs": 11.300000000046566
+                    },
+                    {
+                      "rpcMs": 11.400000000023283,
+                      "workerMs": 11.300000000046566
+                    },
+                    {
+                      "rpcMs": 11.199999999953434,
+                      "workerMs": 10.900000000023283
+                    },
+                    {
+                      "rpcMs": 14.099999999976717,
+                      "workerMs": 13.900000000023283
+                    },
+                    {
+                      "rpcMs": 10.599999999976717,
+                      "workerMs": 10.199999999953434
+                    },
+                    {
+                      "rpcMs": 12.900000000023283,
+                      "workerMs": 12.900000000023283
+                    },
+                    {
+                      "rpcMs": 13.300000000046566,
+                      "workerMs": 12.900000000023283
+                    },
+                    {
+                      "rpcMs": 15.300000000046566,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 12.599999999976717,
+                      "workerMs": 12
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.70000000006985
+                    },
+                    {
+                      "rpcMs": 13.599999999976717,
+                      "workerMs": 13.199999999953434
+                    },
+                    {
+                      "rpcMs": 16.900000000023283,
+                      "workerMs": 16.70000000006985
+                    },
+                    {
+                      "rpcMs": 12.300000000046566,
+                      "workerMs": 12.099999999976717
+                    },
+                    {
+                      "rpcMs": 13.800000000046566,
+                      "workerMs": 13.599999999976717
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 10.699999999953434,
+                      "workerMs": 10.400000000023283
+                    },
+                    {
+                      "rpcMs": 10.900000000023283,
+                      "workerMs": 10.70000000006985
+                    },
+                    {
+                      "rpcMs": 10,
+                      "workerMs": 9.800000000046566
+                    },
+                    {
+                      "rpcMs": 10.400000000023283,
+                      "workerMs": 10.099999999976717
+                    },
+                    {
+                      "rpcMs": 11.100000000093132,
+                      "workerMs": 10.79999999993015
+                    },
+                    {
+                      "rpcMs": 10.79999999993015,
+                      "workerMs": 10.300000000046566
+                    },
+                    {
+                      "rpcMs": 12.29999999993015,
+                      "workerMs": 11.70000000006985
+                    },
+                    {
+                      "rpcMs": 10.600000000093132,
+                      "workerMs": 10.29999999993015
+                    },
+                    {
+                      "rpcMs": 14.400000000023283,
+                      "workerMs": 14.20000000006985
+                    },
+                    {
+                      "rpcMs": 10.300000000046566,
+                      "workerMs": 10.099999999976717
+                    },
+                    {
+                      "rpcMs": 11.900000000023283,
+                      "workerMs": 11.70000000006985
+                    },
+                    {
+                      "rpcMs": 15,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 11.699999999953434,
+                      "workerMs": 11.400000000023283
+                    }
+                  ],
+                  "cached": [
+                    {
+                      "rpcMs": 3.599999999976717,
+                      "workerMs": 3.199999999953434
+                    },
+                    {
+                      "rpcMs": 3.199999999953434,
+                      "workerMs": 3.099999999976717
+                    },
+                    {
+                      "rpcMs": 3.300000000046566,
+                      "workerMs": 3
+                    },
+                    {
+                      "rpcMs": 4.599999999976717,
+                      "workerMs": 3.1000000000931323
+                    },
+                    {
+                      "rpcMs": 4,
+                      "workerMs": 3.800000000046566
+                    },
+                    {
+                      "rpcMs": 3.5,
+                      "workerMs": 3.300000000046566
+                    },
+                    {
+                      "rpcMs": 3.699999999953434,
+                      "workerMs": 3.400000000023283
+                    },
+                    {
+                      "rpcMs": 3.300000000046566,
+                      "workerMs": 3.200000000069849
+                    },
+                    {
+                      "rpcMs": 3.900000000023283,
+                      "workerMs": 3.599999999976717
+                    },
+                    {
+                      "rpcMs": 3.599999999976717,
+                      "workerMs": 3.300000000046566
+                    },
+                    {
+                      "rpcMs": 4.300000000046566,
+                      "workerMs": 4
+                    },
+                    {
+                      "rpcMs": 7.800000000046566,
+                      "workerMs": 7.599999999976717
+                    },
+                    {
+                      "rpcMs": 4.5,
+                      "workerMs": 4.099999999976717
+                    },
+                    {
+                      "rpcMs": 3.5,
+                      "workerMs": 3.300000000046566
+                    },
+                    {
+                      "rpcMs": 3.299999999930151,
+                      "workerMs": 3.199999999953434
+                    },
+                    {
+                      "rpcMs": 3.699999999953434,
+                      "workerMs": 3.5
+                    },
+                    {
+                      "rpcMs": 3.599999999976717,
+                      "workerMs": 3.200000000069849
+                    },
+                    {
+                      "rpcMs": 3.799999999930151,
+                      "workerMs": 3.5
+                    },
+                    {
+                      "rpcMs": 4.300000000046566,
+                      "workerMs": 4
+                    },
+                    {
+                      "rpcMs": 5.699999999953434,
+                      "workerMs": 5.300000000046566
+                    },
+                    {
+                      "rpcMs": 4.799999999930151,
+                      "workerMs": 4.5
+                    },
+                    {
+                      "rpcMs": 4.199999999953434,
+                      "workerMs": 3.900000000023283
+                    },
+                    {
+                      "rpcMs": 4,
+                      "workerMs": 3.599999999976717
+                    },
+                    {
+                      "rpcMs": 4.200000000069849,
+                      "workerMs": 4.099999999976717
+                    },
+                    {
+                      "rpcMs": 4.5,
+                      "workerMs": 4.100000000093132
+                    },
+                    {
+                      "rpcMs": 3.5,
+                      "workerMs": 3.200000000069849
+                    },
+                    {
+                      "rpcMs": 3.800000000046566,
+                      "workerMs": 3.299999999930151
+                    },
+                    {
+                      "rpcMs": 4.199999999953434,
+                      "workerMs": 3.599999999976717
+                    },
+                    {
+                      "rpcMs": 3.800000000046566,
+                      "workerMs": 3.6000000000931323
+                    },
+                    {
+                      "rpcMs": 3.3999999999068677,
+                      "workerMs": 3.099999999976717
+                    },
+                    {
+                      "rpcMs": 3.700000000069849,
+                      "workerMs": 3.3999999999068677
+                    },
+                    {
+                      "rpcMs": 3.300000000046566,
+                      "workerMs": 3.1000000000931323
+                    },
+                    {
+                      "rpcMs": 3.5,
+                      "workerMs": 3.300000000046566
+                    },
+                    {
+                      "rpcMs": 3.599999999976717,
+                      "workerMs": 3.099999999976717
+                    },
+                    {
+                      "rpcMs": 3.900000000023283,
+                      "workerMs": 3.700000000069849
+                    },
+                    {
+                      "rpcMs": 3.400000000023283,
+                      "workerMs": 3.1000000000931323
+                    },
+                    {
+                      "rpcMs": 4.299999999930151,
+                      "workerMs": 3.800000000046566
+                    },
+                    {
+                      "rpcMs": 4.599999999976717,
+                      "workerMs": 4.5
+                    },
+                    {
+                      "rpcMs": 3.599999999976717,
+                      "workerMs": 3.400000000023283
+                    },
+                    {
+                      "rpcMs": 4.599999999976717,
+                      "workerMs": 4.400000000023283
+                    }
+                  ]
+                }
+              }
+            ],
+            "definition": "Round trip: postMessage through comparison response (transit, forward pass, logit readback, metrics). Worker computation: the engine-reported comparison time. Inspection reads and rendering are excluded."
+          }
+        },
+        {
+          "name": "reference-probe",
+          "status": "passed",
+          "detail": "forward 6.68e-6, gradient 3.58e-7, Adam 1.25e-6",
+          "durationMs": 569.5999999999767,
+          "data": {
+            "backend": "cpu",
+            "elapsedMs": 204.80000000004657,
+            "forwardMaximumError": 0.00000667572021484375,
+            "gradientMaximumError": 3.5762786865234375e-7,
+            "optimizerMaximumError": 0.0000012516975402832031,
+            "loss": 7.585389137268066,
+            "retainedTensorDelta": 0,
+            "float32Textures": null,
+            "webglPacking": null
+          }
+        },
+        {
+          "name": "prepared-recipes",
+          "status": "passed",
+          "detail": "3 recipes, maximum logit error 1.43e-6",
+          "durationMs": 247.30000000004657,
+          "data": {
+            "cases": [
+              {
+                "id": "effect",
+                "title": "Ablation changes the answer",
+                "baselineMaximumError": 9.5367431640625e-7,
+                "cachedMaximumError": 0.000001430511474609375,
+                "fullMaximumError": 9.5367431640625e-7,
+                "strategy": "cached-suffix",
+                "hasComputationalPath": true,
+                "metrics": {
+                  "jsDivergence": 0.6928083975935154,
+                  "maxAbsoluteLogitChange": 13.500075101852417,
+                  "targetLogProbabilityDelta": -11.776984405040094
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0.6928083975934277,
+                  "maxAbsoluteLogitChange": 13.500075101852417,
+                  "targetLogProbabilityDelta": -11.776984399250596
+                },
+                "expectation": "target Δ log p < -1 nat",
+                "expectationHolds": true
+              },
+              {
+                "id": "small",
+                "title": "A reachable edit has little effect",
+                "baselineMaximumError": 9.5367431640625e-7,
+                "cachedMaximumError": 9.5367431640625e-7,
+                "fullMaximumError": 9.5367431640625e-7,
+                "strategy": "cached-suffix",
+                "hasComputationalPath": true,
+                "metrics": {
+                  "jsDivergence": 8.754318861759535e-12,
+                  "maxAbsoluteLogitChange": 0.0022563934326171875,
+                  "targetLogProbabilityDelta": -2.664892942048306e-8
+                },
+                "fullMetrics": {
+                  "jsDivergence": 8.754713927868625e-12,
+                  "maxAbsoluteLogitChange": 0.0022563934326171875,
+                  "targetLogProbabilityDelta": -2.6647547552338842e-8
+                },
+                "expectation": "JSD < 0.001 nats",
+                "expectationHolds": true
+              },
+              {
+                "id": "unreachable",
+                "title": "An earlier final-layer edit cannot reach the answer",
+                "baselineMaximumError": 9.5367431640625e-7,
+                "cachedMaximumError": 9.5367431640625e-7,
+                "fullMaximumError": 9.5367431640625e-7,
+                "strategy": "cached-suffix",
+                "hasComputationalPath": false,
+                "metrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "expectation": "maximum logit change exactly 0",
+                "expectationHolds": true
+              }
+            ]
+          }
+        },
+        {
+          "name": "replay-roundtrip",
+          "status": "passed",
+          "detail": "maximum difference 0.00e+0",
+          "durationMs": 96.29999999993015,
+          "data": {
+            "baselineMaximumError": 0,
+            "modifiedMaximumError": 0,
+            "matches": true,
+            "savedBackend": "cpu",
+            "currentBackend": "cpu",
+            "bytes": 2114,
+            "scope": "In-memory export, JSON parse, validation, and recomputation. File download/import is covered by the manual protocol."
+          }
+        },
+        {
+          "name": "resource-cleanup",
+          "status": "passed",
+          "durationMs": 0.7000000000698492,
+          "data": {
+            "cache": {
+              "logicalBytes": 0,
+              "budgetBytes": 33554432,
+              "baselines": 0,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 36,
+            "logicalTensorBytes": 411648,
+            "memoryEstimateUnreliable": true
+          }
+        }
+      ]
+    },
+    {
+      "model": "retrieval",
+      "requestedBackend": "webgl",
+      "actualBackend": "webgl",
+      "modelId": "retrieval-seed-2026",
+      "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+      "precision": {
+        "dtype": "float32",
+        "float32Textures": true,
+        "webglPacking": false
+      },
+      "checks": [
+        {
+          "name": "ui-cold-readiness",
+          "status": "passed",
+          "detail": "1533.3 ms",
+          "durationMs": 1535.0999999999767,
+          "data": {
+            "coldReadyMs": 1533.3000000000466,
+            "observationStartedAfterCompletion": false,
+            "actualBackend": "webgl",
+            "weightsFetch": [],
+            "definition": "Embedded page navigation start until the first completed comparison is committed to the DOM. HTTP, filesystem, driver, and shader caches are not reset; transferSize 0 usually means a cache hit."
+          }
+        },
+        {
+          "name": "ui-warm-interaction",
+          "status": "passed",
+          "detail": "layer 1: commit p95 31.9 ms, frame opportunity p95 50.3 ms; layer 2: commit p95 21.4 ms, frame opportunity p95 50.1 ms",
+          "durationMs": 4044,
+          "data": {
+            "head": 0,
+            "scope": "all positions",
+            "factors": [
+              0.25,
+              0.5,
+              0.75,
+              1.5
+            ],
+            "layers": [
+              {
+                "layer": 0,
+                "domCommit": {
+                  "count": 40,
+                  "medianMs": 25.850000000034925,
+                  "p95Ms": 31.900000000023283,
+                  "minimumMs": 19.400000000023283,
+                  "maximumMs": 33.300000000046566
+                },
+                "frameOpportunity": {
+                  "count": 40,
+                  "medianMs": 50,
+                  "p95Ms": 50.300000000046566,
+                  "minimumMs": 49.300000000046566,
+                  "maximumMs": 50.800000000046566
+                },
+                "samples": [
+                  {
+                    "domCommitMs": 24.800000000046566,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 22.800000000046566,
+                    "frameOpportunityMs": 50.199999999953434
+                  },
+                  {
+                    "domCommitMs": 24.70000000006985,
+                    "frameOpportunityMs": 50.10000000009313
+                  },
+                  {
+                    "domCommitMs": 25,
+                    "frameOpportunityMs": 49.79999999993015
+                  },
+                  {
+                    "domCommitMs": 33.300000000046566,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 31.900000000023283,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 22.300000000046566,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 22.099999999976717,
+                    "frameOpportunityMs": 50.20000000006985
+                  },
+                  {
+                    "domCommitMs": 27.79999999993015,
+                    "frameOpportunityMs": 49.79999999993015
+                  },
+                  {
+                    "domCommitMs": 24.5,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 19.5,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 23.600000000093132,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 27.099999999976717,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 28.5,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 24.70000000006985,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 27.900000000023283,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 26.70000000006985,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 28.900000000023283,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 32.800000000046566,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 25.800000000046566,
+                    "frameOpportunityMs": 50.800000000046566
+                  },
+                  {
+                    "domCommitMs": 28.5,
+                    "frameOpportunityMs": 49.300000000046566
+                  },
+                  {
+                    "domCommitMs": 26.5,
+                    "frameOpportunityMs": 49.79999999993015
+                  },
+                  {
+                    "domCommitMs": 25.900000000023283,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 26.300000000046566,
+                    "frameOpportunityMs": 50.300000000046566
+                  },
+                  {
+                    "domCommitMs": 24.400000000023283,
+                    "frameOpportunityMs": 49.699999999953434
+                  },
+                  {
+                    "domCommitMs": 27.900000000023283,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 19.400000000023283,
+                    "frameOpportunityMs": 50.10000000009313
+                  },
+                  {
+                    "domCommitMs": 23.199999999953434,
+                    "frameOpportunityMs": 49.89999999990687
+                  },
+                  {
+                    "domCommitMs": 24.900000000023283,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 24.400000000023283,
+                    "frameOpportunityMs": 49.800000000046566
+                  },
+                  {
+                    "domCommitMs": 24.699999999953434,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 25.800000000046566,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 26.20000000006985,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 29.900000000023283,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 28.100000000093132,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 27.099999999976717,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 26,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 29.5,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 23,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 24.800000000046566,
+                    "frameOpportunityMs": 50.59999999997672
+                  }
+                ]
+              },
+              {
+                "layer": 1,
+                "domCommit": {
+                  "count": 40,
+                  "medianMs": 16.899999999965075,
+                  "p95Ms": 21.400000000023283,
+                  "minimumMs": 12.300000000046566,
+                  "maximumMs": 23.70000000006985
+                },
+                "frameOpportunity": {
+                  "count": 40,
+                  "medianMs": 33.39999999990687,
+                  "p95Ms": 50.09999999997672,
+                  "minimumMs": 33,
+                  "maximumMs": 51.29999999993015
+                },
+                "samples": [
+                  {
+                    "domCommitMs": 16.29999999993015,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 16.800000000046566,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 16.599999999976717,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 17.099999999976717,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 16.400000000023283,
+                    "frameOpportunityMs": 33
+                  },
+                  {
+                    "domCommitMs": 17.699999999953434,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 16.899999999906868,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 12.300000000046566,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 16.900000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 16.399999999906868,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 17.400000000023283,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 19.900000000023283,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 16.099999999976717,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 16.5,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 15.5,
+                    "frameOpportunityMs": 36.89999999990687
+                  },
+                  {
+                    "domCommitMs": 17.800000000046566,
+                    "frameOpportunityMs": 46.300000000046566
+                  },
+                  {
+                    "domCommitMs": 23.70000000006985,
+                    "frameOpportunityMs": 50.300000000046566
+                  },
+                  {
+                    "domCommitMs": 21.400000000023283,
+                    "frameOpportunityMs": 49.699999999953434
+                  },
+                  {
+                    "domCommitMs": 17.599999999976717,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 20.5,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 16.5,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 17.400000000023283,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 17,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 16.399999999906868,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 16.300000000046566,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 17,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 16.599999999976717,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 15.900000000023283,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 17.199999999953434,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 17.099999999976717,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 16.400000000023283,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 16.599999999976717,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 22.79999999993015,
+                    "frameOpportunityMs": 51.29999999993015
+                  },
+                  {
+                    "domCommitMs": 19.20000000006985,
+                    "frameOpportunityMs": 48.70000000006985
+                  },
+                  {
+                    "domCommitMs": 20.099999999976717,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 20.29999999993015,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 17.29999999993015,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 16.599999999976717,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 16.79999999993015,
+                    "frameOpportunityMs": 33.699999999953434
+                  },
+                  {
+                    "domCommitMs": 16.199999999953434,
+                    "frameOpportunityMs": 33
+                  }
+                ]
+              }
+            ],
+            "definition": "Synthetic in-page input event to the completed result DOM commit (scheduling, worker comparison, default inspector reads, React update). Frame opportunity adds two animation-frame callbacks; it is not measured display latency and excludes touch hardware and OS input latency."
+          }
+        },
+        {
+          "name": "ui-baseline-reset",
+          "status": "passed",
+          "durationMs": 11.400000000023283,
+          "data": {
+            "strategy": "Baseline reused",
+            "displayedRows": 11
+          }
+        },
+        {
+          "name": "ui-cpu-recovery",
+          "status": "passed",
+          "detail": "209.0 ms",
+          "durationMs": 209.20000000006985,
+          "data": {
+            "recoveryMs": 209,
+            "definition": "Restart click until the replacement CPU worker shows the preserved experiment."
+          }
+        },
+        {
+          "name": "worker-load",
+          "status": "passed",
+          "durationMs": 95.09999999997672,
+          "data": {
+            "loadMs": 95.09999999997672,
+            "fallbackReason": null,
+            "matchesReleaseStamp": true,
+            "definition": "Worker LOAD request: static asset fetch, hash validation, backend initialization, and weight upload."
+          }
+        },
+        {
+          "name": "computation-rpc",
+          "status": "passed",
+          "detail": "layer 1: full/cached round-trip median 20.9/16.2 ms; layer 2: full/cached round-trip median 21.3/10.2 ms",
+          "durationMs": 4430.20000000007,
+          "data": {
+            "sequenceLength": 16,
+            "baselineFirstMs": 1161.9000000000233,
+            "layers": [
+              {
+                "layer": 0,
+                "fullRoundTrip": {
+                  "count": 40,
+                  "medianMs": 20.900000000023283,
+                  "p95Ms": 26.199999999953434,
+                  "minimumMs": 15.199999999953434,
+                  "maximumMs": 26.599999999976717
+                },
+                "cachedRoundTrip": {
+                  "count": 40,
+                  "medianMs": 16.20000000001164,
+                  "p95Ms": 19.600000000093132,
+                  "minimumMs": 11.79999999993015,
+                  "maximumMs": 21.800000000046566
+                },
+                "fullWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 20.5,
+                  "p95Ms": 25.800000000046566,
+                  "minimumMs": 15,
+                  "maximumMs": 26.199999999953434
+                },
+                "cachedWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 15.900000000023283,
+                  "p95Ms": 18.900000000023283,
+                  "minimumMs": 11.599999999976717,
+                  "maximumMs": 21.5
+                },
+                "samples": {
+                  "full": [
+                    {
+                      "rpcMs": 21,
+                      "workerMs": 20.70000000006985
+                    },
+                    {
+                      "rpcMs": 20.800000000046566,
+                      "workerMs": 20.400000000023283
+                    },
+                    {
+                      "rpcMs": 21.20000000006985,
+                      "workerMs": 20.899999999906868
+                    },
+                    {
+                      "rpcMs": 16.099999999976717,
+                      "workerMs": 15.800000000046566
+                    },
+                    {
+                      "rpcMs": 18.099999999976717,
+                      "workerMs": 17.600000000093132
+                    },
+                    {
+                      "rpcMs": 17.199999999953434,
+                      "workerMs": 16.900000000023283
+                    },
+                    {
+                      "rpcMs": 17.800000000046566,
+                      "workerMs": 17
+                    },
+                    {
+                      "rpcMs": 20.5,
+                      "workerMs": 20.100000000093132
+                    },
+                    {
+                      "rpcMs": 22.5,
+                      "workerMs": 22.099999999976717
+                    },
+                    {
+                      "rpcMs": 22.099999999976717,
+                      "workerMs": 21.70000000006985
+                    },
+                    {
+                      "rpcMs": 22.29999999993015,
+                      "workerMs": 21.79999999993015
+                    },
+                    {
+                      "rpcMs": 26.400000000023283,
+                      "workerMs": 26
+                    },
+                    {
+                      "rpcMs": 21.300000000046566,
+                      "workerMs": 21
+                    },
+                    {
+                      "rpcMs": 20.400000000023283,
+                      "workerMs": 20.100000000093132
+                    },
+                    {
+                      "rpcMs": 15.900000000023283,
+                      "workerMs": 15.79999999993015
+                    },
+                    {
+                      "rpcMs": 16.900000000023283,
+                      "workerMs": 16.599999999976717
+                    },
+                    {
+                      "rpcMs": 17.5,
+                      "workerMs": 17.399999999906868
+                    },
+                    {
+                      "rpcMs": 17.099999999976717,
+                      "workerMs": 16.900000000023283
+                    },
+                    {
+                      "rpcMs": 22.400000000023283,
+                      "workerMs": 22
+                    },
+                    {
+                      "rpcMs": 26.599999999976717,
+                      "workerMs": 26.199999999953434
+                    },
+                    {
+                      "rpcMs": 21,
+                      "workerMs": 20.699999999953434
+                    },
+                    {
+                      "rpcMs": 15.199999999953434,
+                      "workerMs": 15
+                    },
+                    {
+                      "rpcMs": 21.099999999976717,
+                      "workerMs": 20.70000000006985
+                    },
+                    {
+                      "rpcMs": 19.800000000046566,
+                      "workerMs": 19.400000000023283
+                    },
+                    {
+                      "rpcMs": 20.099999999976717,
+                      "workerMs": 19.79999999993015
+                    },
+                    {
+                      "rpcMs": 21.20000000006985,
+                      "workerMs": 20.900000000023283
+                    },
+                    {
+                      "rpcMs": 21,
+                      "workerMs": 20.699999999953434
+                    },
+                    {
+                      "rpcMs": 16.5,
+                      "workerMs": 16.300000000046566
+                    },
+                    {
+                      "rpcMs": 20.100000000093132,
+                      "workerMs": 19.699999999953434
+                    },
+                    {
+                      "rpcMs": 19.599999999976717,
+                      "workerMs": 19.400000000023283
+                    },
+                    {
+                      "rpcMs": 19.800000000046566,
+                      "workerMs": 19.5
+                    },
+                    {
+                      "rpcMs": 22.099999999976717,
+                      "workerMs": 21.800000000046566
+                    },
+                    {
+                      "rpcMs": 24.300000000046566,
+                      "workerMs": 23.900000000023283
+                    },
+                    {
+                      "rpcMs": 26.199999999953434,
+                      "workerMs": 25.800000000046566
+                    },
+                    {
+                      "rpcMs": 23.199999999953434,
+                      "workerMs": 22.900000000023283
+                    },
+                    {
+                      "rpcMs": 26.099999999976717,
+                      "workerMs": 25.29999999993015
+                    },
+                    {
+                      "rpcMs": 22.099999999976717,
+                      "workerMs": 21.900000000023283
+                    },
+                    {
+                      "rpcMs": 17.600000000093132,
+                      "workerMs": 17.29999999993015
+                    },
+                    {
+                      "rpcMs": 21.800000000046566,
+                      "workerMs": 20.599999999976717
+                    },
+                    {
+                      "rpcMs": 17,
+                      "workerMs": 16.599999999976717
+                    }
+                  ],
+                  "cached": [
+                    {
+                      "rpcMs": 15.400000000023283,
+                      "workerMs": 15.300000000046566
+                    },
+                    {
+                      "rpcMs": 15.800000000046566,
+                      "workerMs": 15.699999999953434
+                    },
+                    {
+                      "rpcMs": 15,
+                      "workerMs": 14.800000000046566
+                    },
+                    {
+                      "rpcMs": 16.5,
+                      "workerMs": 16.099999999976717
+                    },
+                    {
+                      "rpcMs": 15.300000000046566,
+                      "workerMs": 15
+                    },
+                    {
+                      "rpcMs": 17,
+                      "workerMs": 16.699999999953434
+                    },
+                    {
+                      "rpcMs": 16.300000000046566,
+                      "workerMs": 16
+                    },
+                    {
+                      "rpcMs": 16.20000000006985,
+                      "workerMs": 15.899999999906868
+                    },
+                    {
+                      "rpcMs": 16.400000000023283,
+                      "workerMs": 16.099999999976717
+                    },
+                    {
+                      "rpcMs": 17.5,
+                      "workerMs": 17.29999999993015
+                    },
+                    {
+                      "rpcMs": 16.699999999953434,
+                      "workerMs": 16.300000000046566
+                    },
+                    {
+                      "rpcMs": 17,
+                      "workerMs": 16.599999999976717
+                    },
+                    {
+                      "rpcMs": 21.800000000046566,
+                      "workerMs": 21.5
+                    },
+                    {
+                      "rpcMs": 16.699999999953434,
+                      "workerMs": 16.300000000046566
+                    },
+                    {
+                      "rpcMs": 15.20000000006985,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 16.400000000023283,
+                      "workerMs": 16.199999999953434
+                    },
+                    {
+                      "rpcMs": 15.099999999976717,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 16.099999999976717,
+                      "workerMs": 15.900000000023283
+                    },
+                    {
+                      "rpcMs": 16.800000000046566,
+                      "workerMs": 16.300000000046566
+                    },
+                    {
+                      "rpcMs": 15.5,
+                      "workerMs": 15
+                    },
+                    {
+                      "rpcMs": 17.20000000006985,
+                      "workerMs": 16.599999999976717
+                    },
+                    {
+                      "rpcMs": 15,
+                      "workerMs": 14.699999999953434
+                    },
+                    {
+                      "rpcMs": 15.70000000006985,
+                      "workerMs": 15.29999999993015
+                    },
+                    {
+                      "rpcMs": 19.099999999976717,
+                      "workerMs": 18.800000000046566
+                    },
+                    {
+                      "rpcMs": 15.699999999953434,
+                      "workerMs": 15.400000000023283
+                    },
+                    {
+                      "rpcMs": 16.099999999976717,
+                      "workerMs": 15.79999999993015
+                    },
+                    {
+                      "rpcMs": 16.099999999976717,
+                      "workerMs": 15.900000000023283
+                    },
+                    {
+                      "rpcMs": 11.79999999993015,
+                      "workerMs": 11.599999999976717
+                    },
+                    {
+                      "rpcMs": 15.29999999993015,
+                      "workerMs": 15.099999999976717
+                    },
+                    {
+                      "rpcMs": 15.79999999993015,
+                      "workerMs": 15.5
+                    },
+                    {
+                      "rpcMs": 20.900000000023283,
+                      "workerMs": 18.900000000023283
+                    },
+                    {
+                      "rpcMs": 16.199999999953434,
+                      "workerMs": 15.800000000046566
+                    },
+                    {
+                      "rpcMs": 19.600000000093132,
+                      "workerMs": 19.400000000023283
+                    },
+                    {
+                      "rpcMs": 16.5,
+                      "workerMs": 16.099999999976717
+                    },
+                    {
+                      "rpcMs": 15.70000000006985,
+                      "workerMs": 15.29999999993015
+                    },
+                    {
+                      "rpcMs": 16.100000000093132,
+                      "workerMs": 15.699999999953434
+                    },
+                    {
+                      "rpcMs": 16.300000000046566,
+                      "workerMs": 16.099999999976717
+                    },
+                    {
+                      "rpcMs": 14.900000000023283,
+                      "workerMs": 14.699999999953434
+                    },
+                    {
+                      "rpcMs": 16.900000000023283,
+                      "workerMs": 16
+                    },
+                    {
+                      "rpcMs": 18.800000000046566,
+                      "workerMs": 18.5
+                    }
+                  ]
+                }
+              },
+              {
+                "layer": 1,
+                "fullRoundTrip": {
+                  "count": 40,
+                  "medianMs": 21.25,
+                  "p95Ms": 26.300000000046566,
+                  "minimumMs": 15.099999999976717,
+                  "maximumMs": 27.599999999976717
+                },
+                "cachedRoundTrip": {
+                  "count": 40,
+                  "medianMs": 10.199999999953434,
+                  "p95Ms": 11.199999999953434,
+                  "minimumMs": 5.400000000023283,
+                  "maximumMs": 14.099999999976717
+                },
+                "fullWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 20.900000000023283,
+                  "p95Ms": 25.900000000023283,
+                  "minimumMs": 14.900000000023283,
+                  "maximumMs": 27.29999999993015
+                },
+                "cachedWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 9.800000000046566,
+                  "p95Ms": 10.79999999993015,
+                  "minimumMs": 5.199999999953434,
+                  "maximumMs": 13.900000000023283
+                },
+                "samples": {
+                  "full": [
+                    {
+                      "rpcMs": 21.699999999953434,
+                      "workerMs": 21.300000000046566
+                    },
+                    {
+                      "rpcMs": 19.800000000046566,
+                      "workerMs": 19.699999999953434
+                    },
+                    {
+                      "rpcMs": 21.199999999953434,
+                      "workerMs": 20.900000000023283
+                    },
+                    {
+                      "rpcMs": 20.900000000023283,
+                      "workerMs": 20.699999999953434
+                    },
+                    {
+                      "rpcMs": 20.099999999976717,
+                      "workerMs": 19.5
+                    },
+                    {
+                      "rpcMs": 20.900000000023283,
+                      "workerMs": 20.5
+                    },
+                    {
+                      "rpcMs": 21.79999999993015,
+                      "workerMs": 21.400000000023283
+                    },
+                    {
+                      "rpcMs": 15.29999999993015,
+                      "workerMs": 15.099999999976717
+                    },
+                    {
+                      "rpcMs": 21.300000000046566,
+                      "workerMs": 21
+                    },
+                    {
+                      "rpcMs": 21.599999999976717,
+                      "workerMs": 21.100000000093132
+                    },
+                    {
+                      "rpcMs": 20.699999999953434,
+                      "workerMs": 20.599999999976717
+                    },
+                    {
+                      "rpcMs": 20.800000000046566,
+                      "workerMs": 20.400000000023283
+                    },
+                    {
+                      "rpcMs": 23.599999999976717,
+                      "workerMs": 23.300000000046566
+                    },
+                    {
+                      "rpcMs": 20.5,
+                      "workerMs": 20.199999999953434
+                    },
+                    {
+                      "rpcMs": 21.899999999906868,
+                      "workerMs": 21.599999999976717
+                    },
+                    {
+                      "rpcMs": 23,
+                      "workerMs": 22.599999999976717
+                    },
+                    {
+                      "rpcMs": 26.70000000006985,
+                      "workerMs": 26.29999999993015
+                    },
+                    {
+                      "rpcMs": 26.300000000046566,
+                      "workerMs": 25.900000000023283
+                    },
+                    {
+                      "rpcMs": 27.599999999976717,
+                      "workerMs": 27.29999999993015
+                    },
+                    {
+                      "rpcMs": 23.900000000023283,
+                      "workerMs": 23.599999999976717
+                    },
+                    {
+                      "rpcMs": 18.300000000046566,
+                      "workerMs": 18.100000000093132
+                    },
+                    {
+                      "rpcMs": 15.099999999976717,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 24.699999999953434,
+                      "workerMs": 24.5
+                    },
+                    {
+                      "rpcMs": 22,
+                      "workerMs": 21.599999999976717
+                    },
+                    {
+                      "rpcMs": 20.5,
+                      "workerMs": 20.20000000006985
+                    },
+                    {
+                      "rpcMs": 17.70000000006985,
+                      "workerMs": 16.5
+                    },
+                    {
+                      "rpcMs": 20.5,
+                      "workerMs": 20.100000000093132
+                    },
+                    {
+                      "rpcMs": 25.900000000023283,
+                      "workerMs": 25.400000000023283
+                    },
+                    {
+                      "rpcMs": 17,
+                      "workerMs": 16.699999999953434
+                    },
+                    {
+                      "rpcMs": 16.599999999976717,
+                      "workerMs": 16.300000000046566
+                    },
+                    {
+                      "rpcMs": 21.399999999906868,
+                      "workerMs": 20.900000000023283
+                    },
+                    {
+                      "rpcMs": 21.29999999993015,
+                      "workerMs": 21.099999999976717
+                    },
+                    {
+                      "rpcMs": 21.20000000006985,
+                      "workerMs": 20.900000000023283
+                    },
+                    {
+                      "rpcMs": 21.199999999953434,
+                      "workerMs": 20.70000000006985
+                    },
+                    {
+                      "rpcMs": 23.599999999976717,
+                      "workerMs": 23.20000000006985
+                    },
+                    {
+                      "rpcMs": 21.5,
+                      "workerMs": 21
+                    },
+                    {
+                      "rpcMs": 22,
+                      "workerMs": 21.70000000006985
+                    },
+                    {
+                      "rpcMs": 21,
+                      "workerMs": 20.79999999993015
+                    },
+                    {
+                      "rpcMs": 21.599999999976717,
+                      "workerMs": 21.20000000006985
+                    },
+                    {
+                      "rpcMs": 17.699999999953434,
+                      "workerMs": 17.400000000023283
+                    }
+                  ],
+                  "cached": [
+                    {
+                      "rpcMs": 10.399999999906868,
+                      "workerMs": 9.900000000023283
+                    },
+                    {
+                      "rpcMs": 5.5,
+                      "workerMs": 5.399999999906868
+                    },
+                    {
+                      "rpcMs": 9.599999999976717,
+                      "workerMs": 9.300000000046566
+                    },
+                    {
+                      "rpcMs": 14.099999999976717,
+                      "workerMs": 13.900000000023283
+                    },
+                    {
+                      "rpcMs": 9.5,
+                      "workerMs": 9.29999999993015
+                    },
+                    {
+                      "rpcMs": 9.5,
+                      "workerMs": 9.300000000046566
+                    },
+                    {
+                      "rpcMs": 5.800000000046566,
+                      "workerMs": 5.5
+                    },
+                    {
+                      "rpcMs": 9.900000000023283,
+                      "workerMs": 9.599999999976717
+                    },
+                    {
+                      "rpcMs": 10.599999999976717,
+                      "workerMs": 10.29999999993015
+                    },
+                    {
+                      "rpcMs": 11.199999999953434,
+                      "workerMs": 10.900000000023283
+                    },
+                    {
+                      "rpcMs": 10,
+                      "workerMs": 9.79999999993015
+                    },
+                    {
+                      "rpcMs": 10.300000000046566,
+                      "workerMs": 9.599999999976717
+                    },
+                    {
+                      "rpcMs": 9.800000000046566,
+                      "workerMs": 9.599999999976717
+                    },
+                    {
+                      "rpcMs": 11.099999999976717,
+                      "workerMs": 10.699999999953434
+                    },
+                    {
+                      "rpcMs": 10.5,
+                      "workerMs": 10.199999999953434
+                    },
+                    {
+                      "rpcMs": 10.600000000093132,
+                      "workerMs": 10.400000000023283
+                    },
+                    {
+                      "rpcMs": 10.199999999953434,
+                      "workerMs": 10
+                    },
+                    {
+                      "rpcMs": 10.20000000006985,
+                      "workerMs": 9.800000000046566
+                    },
+                    {
+                      "rpcMs": 11.599999999976717,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 9.79999999993015,
+                      "workerMs": 9.400000000023283
+                    },
+                    {
+                      "rpcMs": 9.5,
+                      "workerMs": 9.29999999993015
+                    },
+                    {
+                      "rpcMs": 5.800000000046566,
+                      "workerMs": 5.400000000023283
+                    },
+                    {
+                      "rpcMs": 5.400000000023283,
+                      "workerMs": 5.199999999953434
+                    },
+                    {
+                      "rpcMs": 6.400000000023283,
+                      "workerMs": 6.200000000069849
+                    },
+                    {
+                      "rpcMs": 9.599999999976717,
+                      "workerMs": 9.5
+                    },
+                    {
+                      "rpcMs": 10.199999999953434,
+                      "workerMs": 9.900000000023283
+                    },
+                    {
+                      "rpcMs": 10.099999999976717,
+                      "workerMs": 9.79999999993015
+                    },
+                    {
+                      "rpcMs": 10.699999999953434,
+                      "workerMs": 10.300000000046566
+                    },
+                    {
+                      "rpcMs": 10.199999999953434,
+                      "workerMs": 9.79999999993015
+                    },
+                    {
+                      "rpcMs": 10.899999999906868,
+                      "workerMs": 10.79999999993015
+                    },
+                    {
+                      "rpcMs": 6.299999999930151,
+                      "workerMs": 6.099999999976717
+                    },
+                    {
+                      "rpcMs": 10.400000000023283,
+                      "workerMs": 10
+                    },
+                    {
+                      "rpcMs": 10.29999999993015,
+                      "workerMs": 10
+                    },
+                    {
+                      "rpcMs": 10.900000000023283,
+                      "workerMs": 10.599999999976717
+                    },
+                    {
+                      "rpcMs": 10.5,
+                      "workerMs": 10.29999999993015
+                    },
+                    {
+                      "rpcMs": 10.099999999976717,
+                      "workerMs": 9.800000000046566
+                    },
+                    {
+                      "rpcMs": 10.699999999953434,
+                      "workerMs": 9.900000000023283
+                    },
+                    {
+                      "rpcMs": 10.400000000023283,
+                      "workerMs": 10.199999999953434
+                    },
+                    {
+                      "rpcMs": 10.20000000006985,
+                      "workerMs": 10
+                    },
+                    {
+                      "rpcMs": 6.799999999930151,
+                      "workerMs": 6.300000000046566
+                    }
+                  ]
+                }
+              }
+            ],
+            "definition": "Round trip: postMessage through comparison response (transit, forward pass, logit readback, metrics). Worker computation: the engine-reported comparison time. Inspection reads and rendering are excluded."
+          }
+        },
+        {
+          "name": "reference-probe",
+          "status": "passed",
+          "detail": "forward 5.72e-6, gradient 4.77e-7, Adam 2.04e-6",
+          "durationMs": 2850.6999999999534,
+          "data": {
+            "backend": "webgl",
+            "elapsedMs": 2782.29999999993,
+            "forwardMaximumError": 0.0000057220458984375,
+            "gradientMaximumError": 4.76837158203125e-7,
+            "optimizerMaximumError": 0.000002037733793258667,
+            "loss": 7.585389137268066,
+            "retainedTensorDelta": 0,
+            "float32Textures": true,
+            "webglPacking": false
+          }
+        },
+        {
+          "name": "prepared-recipes",
+          "status": "passed",
+          "detail": "3 recipes, maximum logit error 1.19e-6",
+          "durationMs": 364.4000000000233,
+          "data": {
+            "cases": [
+              {
+                "id": "effect",
+                "title": "Ablation changes the answer",
+                "baselineMaximumError": 9.5367431640625e-7,
+                "cachedMaximumError": 0.0000011920928955078125,
+                "fullMaximumError": 0.0000011920928955078125,
+                "strategy": "cached-suffix",
+                "hasComputationalPath": true,
+                "metrics": {
+                  "jsDivergence": 0.6928083977186129,
+                  "maxAbsoluteLogitChange": 13.500075817108154,
+                  "targetLogProbabilityDelta": -11.776986064089622
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0.6928083977186155,
+                  "maxAbsoluteLogitChange": 13.500075817108154,
+                  "targetLogProbabilityDelta": -11.776986064050101
+                },
+                "expectation": "target Δ log p < -1 nat",
+                "expectationHolds": true
+              },
+              {
+                "id": "small",
+                "title": "A reachable edit has little effect",
+                "baselineMaximumError": 0.0000010728836059570312,
+                "cachedMaximumError": 9.5367431640625e-7,
+                "fullMaximumError": 0.0000011920928955078125,
+                "strategy": "cached-suffix",
+                "hasComputationalPath": true,
+                "metrics": {
+                  "jsDivergence": 8.75479264512277e-12,
+                  "maxAbsoluteLogitChange": 0.002256631851196289,
+                  "targetLogProbabilityDelta": -2.664844185919777e-8
+                },
+                "fullMetrics": {
+                  "jsDivergence": 8.756501382664822e-12,
+                  "maxAbsoluteLogitChange": 0.0022568702697753906,
+                  "targetLogProbabilityDelta": -2.6661325825837103e-8
+                },
+                "expectation": "JSD < 0.001 nats",
+                "expectationHolds": true
+              },
+              {
+                "id": "unreachable",
+                "title": "An earlier final-layer edit cannot reach the answer",
+                "baselineMaximumError": 9.5367431640625e-7,
+                "cachedMaximumError": 9.5367431640625e-7,
+                "fullMaximumError": 9.5367431640625e-7,
+                "strategy": "cached-suffix",
+                "hasComputationalPath": false,
+                "metrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "expectation": "maximum logit change exactly 0",
+                "expectationHolds": true
+              }
+            ]
+          }
+        },
+        {
+          "name": "replay-roundtrip",
+          "status": "passed",
+          "detail": "maximum difference 0.00e+0",
+          "durationMs": 138.09999999997672,
+          "data": {
+            "baselineMaximumError": 0,
+            "modifiedMaximumError": 0,
+            "matches": true,
+            "savedBackend": "webgl",
+            "currentBackend": "webgl",
+            "bytes": 2117,
+            "scope": "In-memory export, JSON parse, validation, and recomputation. File download/import is covered by the manual protocol."
+          }
+        },
+        {
+          "name": "resource-cleanup",
+          "status": "passed",
+          "durationMs": 0.2000000000698492,
+          "data": {
+            "cache": {
+              "logicalBytes": 0,
+              "budgetBytes": 33554432,
+              "baselines": 0,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 36,
+            "logicalTensorBytes": 411648,
+            "memoryEstimateUnreliable": false
+          }
+        }
+      ]
+    },
+    {
+      "model": "verification",
+      "requestedBackend": "cpu",
+      "actualBackend": "cpu",
+      "modelId": "verification-seed-1729",
+      "modelRevision": "a9881b79044de83a160c571312e09d041f66c44a2351f8144de9b479fbb1a5c6",
+      "precision": {
+        "dtype": "float32",
+        "float32Textures": null,
+        "webglPacking": null
+      },
+      "checks": [
+        {
+          "name": "ui-cold-readiness",
+          "status": "passed",
+          "detail": "183.4 ms",
+          "durationMs": 184.29999999993015,
+          "data": {
+            "coldReadyMs": 183.40000000002328,
+            "observationStartedAfterCompletion": false,
+            "actualBackend": "cpu",
+            "weightsFetch": [],
+            "definition": "Embedded page navigation start until the first completed comparison is committed to the DOM. HTTP, filesystem, driver, and shader caches are not reset; transferSize 0 usually means a cache hit."
+          }
+        },
+        {
+          "name": "ui-warm-interaction",
+          "status": "passed",
+          "detail": "layer 1: commit p95 6.2 ms, frame opportunity p95 33.5 ms; layer 2: commit p95 7.1 ms, frame opportunity p95 34.4 ms",
+          "durationMs": 3042.9000000000233,
+          "data": {
+            "head": 0,
+            "scope": "all positions",
+            "factors": [
+              0.25,
+              0.5,
+              0.75,
+              1.5
+            ],
+            "layers": [
+              {
+                "layer": 0,
+                "domCommit": {
+                  "count": 40,
+                  "medianMs": 4.4500000000116415,
+                  "p95Ms": 6.200000000069849,
+                  "minimumMs": 3.400000000023283,
+                  "maximumMs": 7
+                },
+                "frameOpportunity": {
+                  "count": 40,
+                  "medianMs": 33.300000000046566,
+                  "p95Ms": 33.5,
+                  "minimumMs": 32.89999999990687,
+                  "maximumMs": 33.60000000009313
+                },
+                "samples": [
+                  {
+                    "domCommitMs": 4.199999999953434,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 6.5,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 4.100000000093132,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 3.900000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 4.5,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 4.300000000046566,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 5.300000000046566,
+                    "frameOpportunityMs": 33.59999999997672
+                  },
+                  {
+                    "domCommitMs": 6.200000000069849,
+                    "frameOpportunityMs": 33.09999999997672
+                  },
+                  {
+                    "domCommitMs": 7,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 4.199999999953434,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 3.700000000069849,
+                    "frameOpportunityMs": 33.60000000009313
+                  },
+                  {
+                    "domCommitMs": 5.399999999906868,
+                    "frameOpportunityMs": 32.89999999990687
+                  },
+                  {
+                    "domCommitMs": 5.699999999953434,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 3.700000000069849,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 3.5,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 5.900000000023283,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 4,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 3.900000000023283,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4.5,
+                    "frameOpportunityMs": 33.09999999997672
+                  },
+                  {
+                    "domCommitMs": 6.100000000093132,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 4.599999999976717,
+                    "frameOpportunityMs": 33.09999999997672
+                  },
+                  {
+                    "domCommitMs": 6.199999999953434,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 4.100000000093132,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 4,
+                    "frameOpportunityMs": 33.10000000009313
+                  },
+                  {
+                    "domCommitMs": 4.599999999976717,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 4.5,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 4.300000000046566,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 5.199999999953434,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 4.800000000046566,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4.700000000069849,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 5,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 5,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 3.400000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 4.199999999953434,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 3.900000000023283,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4.400000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 4.099999999976717,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 5.299999999930151,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 4.099999999976717,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 3.8999999999068677,
+                    "frameOpportunityMs": 33.39999999990687
+                  }
+                ]
+              },
+              {
+                "layer": 1,
+                "domCommit": {
+                  "count": 40,
+                  "medianMs": 4.600000000034925,
+                  "p95Ms": 7.099999999976717,
+                  "minimumMs": 3.299999999930151,
+                  "maximumMs": 8.900000000023283
+                },
+                "frameOpportunity": {
+                  "count": 40,
+                  "medianMs": 33.300000000046566,
+                  "p95Ms": 34.40000000002328,
+                  "minimumMs": 28.20000000006985,
+                  "maximumMs": 71.90000000002328
+                },
+                "samples": [
+                  {
+                    "domCommitMs": 4.799999999930151,
+                    "frameOpportunityMs": 34.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4.599999999976717,
+                    "frameOpportunityMs": 32.29999999993015
+                  },
+                  {
+                    "domCommitMs": 5.099999999976717,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 5.400000000023283,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 5.900000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 4.300000000046566,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 4.599999999976717,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 4.199999999953434,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 6.099999999976717,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 4,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 4,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4.700000000069849,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 5.400000000023283,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 3.900000000023283,
+                    "frameOpportunityMs": 34.09999999997672
+                  },
+                  {
+                    "domCommitMs": 4.600000000093132,
+                    "frameOpportunityMs": 32.60000000009313
+                  },
+                  {
+                    "domCommitMs": 4.599999999976717,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 5,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 4.699999999953434,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4.099999999976717,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 5.099999999976717,
+                    "frameOpportunityMs": 33.59999999997672
+                  },
+                  {
+                    "domCommitMs": 4.099999999976717,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 3.800000000046566,
+                    "frameOpportunityMs": 33.09999999997672
+                  },
+                  {
+                    "domCommitMs": 4.100000000093132,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4.900000000023283,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 8.900000000023283,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 5.300000000046566,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4.800000000046566,
+                    "frameOpportunityMs": 40.09999999997672
+                  },
+                  {
+                    "domCommitMs": 6.299999999930151,
+                    "frameOpportunityMs": 28.29999999993015
+                  },
+                  {
+                    "domCommitMs": 8.900000000023283,
+                    "frameOpportunityMs": 31.5
+                  },
+                  {
+                    "domCommitMs": 7.099999999976717,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 5.599999999976717,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 3.400000000023283,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 4,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 3.8999999999068677,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 3.5,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 4.199999999953434,
+                    "frameOpportunityMs": 71.90000000002328
+                  },
+                  {
+                    "domCommitMs": 6,
+                    "frameOpportunityMs": 28.20000000006985
+                  },
+                  {
+                    "domCommitMs": 4.299999999930151,
+                    "frameOpportunityMs": 32.89999999990687
+                  },
+                  {
+                    "domCommitMs": 3.299999999930151,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 3.800000000046566,
+                    "frameOpportunityMs": 33.40000000002328
+                  }
+                ]
+              }
+            ],
+            "definition": "Synthetic in-page input event to the completed result DOM commit (scheduling, worker comparison, default inspector reads, React update). Frame opportunity adds two animation-frame callbacks; it is not measured display latency and excludes touch hardware and OS input latency."
+          }
+        },
+        {
+          "name": "ui-baseline-reset",
+          "status": "passed",
+          "durationMs": 5,
+          "data": {
+            "strategy": "Baseline reused",
+            "displayedRows": 12
+          }
+        },
+        {
+          "name": "ui-cpu-recovery",
+          "status": "passed",
+          "detail": "93.0 ms",
+          "durationMs": 93.09999999997672,
+          "data": {
+            "recoveryMs": 93,
+            "definition": "Restart click until the replacement CPU worker shows the preserved experiment."
+          }
+        },
+        {
+          "name": "worker-load",
+          "status": "passed",
+          "durationMs": 95.29999999993015,
+          "data": {
+            "loadMs": 95.19999999995343,
+            "fallbackReason": null,
+            "matchesReleaseStamp": true,
+            "definition": "Worker LOAD request: static asset fetch, hash validation, backend initialization, and weight upload."
+          }
+        },
+        {
+          "name": "computation-rpc",
+          "status": "passed",
+          "detail": "layer 1: full/cached round-trip median 2.0/1.5 ms; layer 2: full/cached round-trip median 1.8/0.7 ms",
+          "durationMs": 399.20000000006985,
+          "data": {
+            "sequenceLength": 6,
+            "baselineFirstMs": 19.599999999976717,
+            "layers": [
+              {
+                "layer": 0,
+                "fullRoundTrip": {
+                  "count": 40,
+                  "medianMs": 1.9500000000116415,
+                  "p95Ms": 3,
+                  "minimumMs": 1.400000000023283,
+                  "maximumMs": 5.5
+                },
+                "cachedRoundTrip": {
+                  "count": 40,
+                  "medianMs": 1.5499999999883585,
+                  "p95Ms": 2.700000000069849,
+                  "minimumMs": 1.099999999976717,
+                  "maximumMs": 3.699999999953434
+                },
+                "fullWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 1.7000000000698492,
+                  "p95Ms": 2.799999999930151,
+                  "minimumMs": 1.1000000000931323,
+                  "maximumMs": 5.099999999976717
+                },
+                "cachedWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 1.2999999999301508,
+                  "p95Ms": 2.5,
+                  "minimumMs": 0.7999999999301508,
+                  "maximumMs": 3.5
+                },
+                "samples": {
+                  "full": [
+                    {
+                      "rpcMs": 1.7999999999301508,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 2,
+                      "workerMs": 1.8000000000465661
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.7000000000698492
+                    },
+                    {
+                      "rpcMs": 1.7999999999301508,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 2.5,
+                      "workerMs": 2.199999999953434
+                    },
+                    {
+                      "rpcMs": 3.599999999976717,
+                      "workerMs": 3.299999999930151
+                    },
+                    {
+                      "rpcMs": 1.400000000023283,
+                      "workerMs": 1.2000000000698492
+                    },
+                    {
+                      "rpcMs": 1.400000000023283,
+                      "workerMs": 1.1000000000931323
+                    },
+                    {
+                      "rpcMs": 1.6999999999534339,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 1.5,
+                      "workerMs": 1.3000000000465661
+                    },
+                    {
+                      "rpcMs": 2.199999999953434,
+                      "workerMs": 2
+                    },
+                    {
+                      "rpcMs": 2.800000000046566,
+                      "workerMs": 2.400000000023283
+                    },
+                    {
+                      "rpcMs": 2.199999999953434,
+                      "workerMs": 1.900000000023283
+                    },
+                    {
+                      "rpcMs": 2.099999999976717,
+                      "workerMs": 1.1000000000931323
+                    },
+                    {
+                      "rpcMs": 2.900000000023283,
+                      "workerMs": 2.700000000069849
+                    },
+                    {
+                      "rpcMs": 1.400000000023283,
+                      "workerMs": 1.2000000000698492
+                    },
+                    {
+                      "rpcMs": 1.400000000023283,
+                      "workerMs": 1.1999999999534339
+                    },
+                    {
+                      "rpcMs": 1.5,
+                      "workerMs": 1.3999999999068677
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.7000000000698492
+                    },
+                    {
+                      "rpcMs": 1.599999999976717,
+                      "workerMs": 1.1000000000931323
+                    },
+                    {
+                      "rpcMs": 2.5,
+                      "workerMs": 2.199999999953434
+                    },
+                    {
+                      "rpcMs": 5.5,
+                      "workerMs": 5.099999999976717
+                    },
+                    {
+                      "rpcMs": 2.300000000046566,
+                      "workerMs": 2
+                    },
+                    {
+                      "rpcMs": 2.400000000023283,
+                      "workerMs": 2.1000000000931323
+                    },
+                    {
+                      "rpcMs": 2.5,
+                      "workerMs": 1.7999999999301508
+                    },
+                    {
+                      "rpcMs": 2.400000000023283,
+                      "workerMs": 1.900000000023283
+                    },
+                    {
+                      "rpcMs": 2.5,
+                      "workerMs": 2
+                    },
+                    {
+                      "rpcMs": 2.299999999930151,
+                      "workerMs": 1.8000000000465661
+                    },
+                    {
+                      "rpcMs": 3,
+                      "workerMs": 2.699999999953434
+                    },
+                    {
+                      "rpcMs": 2,
+                      "workerMs": 1.6999999999534339
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.6000000000931323
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.6000000000931323
+                    },
+                    {
+                      "rpcMs": 1.7999999999301508,
+                      "workerMs": 1.6999999999534339
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 1.8999999999068677,
+                      "workerMs": 1.7999999999301508
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 3,
+                      "workerMs": 2.799999999930151
+                    },
+                    {
+                      "rpcMs": 2,
+                      "workerMs": 1.8000000000465661
+                    },
+                    {
+                      "rpcMs": 1.7999999999301508,
+                      "workerMs": 1.6999999999534339
+                    },
+                    {
+                      "rpcMs": 1.7999999999301508,
+                      "workerMs": 1.599999999976717
+                    }
+                  ],
+                  "cached": [
+                    {
+                      "rpcMs": 1.6000000000931323,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 1.599999999976717,
+                      "workerMs": 1.2000000000698492
+                    },
+                    {
+                      "rpcMs": 1.2000000000698492,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.5,
+                      "workerMs": 1.2999999999301508
+                    },
+                    {
+                      "rpcMs": 2.599999999976717,
+                      "workerMs": 2
+                    },
+                    {
+                      "rpcMs": 1.2999999999301508,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.2999999999301508,
+                      "workerMs": 1.099999999976717
+                    },
+                    {
+                      "rpcMs": 1.2000000000698492,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.2999999999301508,
+                      "workerMs": 1.099999999976717
+                    },
+                    {
+                      "rpcMs": 1.1999999999534339,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.3000000000465661,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.1000000000931323,
+                      "workerMs": 0.7999999999301508
+                    },
+                    {
+                      "rpcMs": 1.3000000000465661,
+                      "workerMs": 1.099999999976717
+                    },
+                    {
+                      "rpcMs": 1.099999999976717,
+                      "workerMs": 0.9000000000232831
+                    },
+                    {
+                      "rpcMs": 3.699999999953434,
+                      "workerMs": 3.5
+                    },
+                    {
+                      "rpcMs": 1.2000000000698492,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.1999999999534339,
+                      "workerMs": 0.9000000000232831
+                    },
+                    {
+                      "rpcMs": 1.099999999976717,
+                      "workerMs": 0.9000000000232831
+                    },
+                    {
+                      "rpcMs": 1.1000000000931323,
+                      "workerMs": 0.8999999999068677
+                    },
+                    {
+                      "rpcMs": 1.099999999976717,
+                      "workerMs": 0.9000000000232831
+                    },
+                    {
+                      "rpcMs": 1.5,
+                      "workerMs": 1.3000000000465661
+                    },
+                    {
+                      "rpcMs": 2.099999999976717,
+                      "workerMs": 1.8000000000465661
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 2.5,
+                      "workerMs": 2.099999999976717
+                    },
+                    {
+                      "rpcMs": 2.700000000069849,
+                      "workerMs": 2.5
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.2999999999301508
+                    },
+                    {
+                      "rpcMs": 1.599999999976717,
+                      "workerMs": 1.3000000000465661
+                    },
+                    {
+                      "rpcMs": 3.300000000046566,
+                      "workerMs": 2.799999999930151
+                    },
+                    {
+                      "rpcMs": 1.6999999999534339,
+                      "workerMs": 1.400000000023283
+                    },
+                    {
+                      "rpcMs": 1.599999999976717,
+                      "workerMs": 1.3000000000465661
+                    },
+                    {
+                      "rpcMs": 1.5,
+                      "workerMs": 1.2999999999301508
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.400000000023283
+                    },
+                    {
+                      "rpcMs": 1.7000000000698492,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 1.2999999999301508,
+                      "workerMs": 1.099999999976717
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.7000000000698492
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.7000000000698492
+                    },
+                    {
+                      "rpcMs": 1.7000000000698492,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 1.7000000000698492,
+                      "workerMs": 1.3000000000465661
+                    },
+                    {
+                      "rpcMs": 1.400000000023283,
+                      "workerMs": 1.099999999976717
+                    }
+                  ]
+                }
+              },
+              {
+                "layer": 1,
+                "fullRoundTrip": {
+                  "count": 40,
+                  "medianMs": 1.7999999999301508,
+                  "p95Ms": 2.599999999976717,
+                  "minimumMs": 1.099999999976717,
+                  "maximumMs": 4.299999999930151
+                },
+                "cachedRoundTrip": {
+                  "count": 40,
+                  "medianMs": 0.6999999999534339,
+                  "p95Ms": 0.9000000000232831,
+                  "minimumMs": 0.5,
+                  "maximumMs": 1.2999999999301508
+                },
+                "fullWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 1.5,
+                  "p95Ms": 2.200000000069849,
+                  "minimumMs": 0.8999999999068677,
+                  "maximumMs": 3.5
+                },
+                "cachedWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 0.5,
+                  "p95Ms": 0.6999999999534339,
+                  "minimumMs": 0.19999999995343387,
+                  "maximumMs": 0.8999999999068677
+                },
+                "samples": {
+                  "full": [
+                    {
+                      "rpcMs": 2,
+                      "workerMs": 1.6999999999534339
+                    },
+                    {
+                      "rpcMs": 1.7999999999301508,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 1.6999999999534339,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.6000000000931323
+                    },
+                    {
+                      "rpcMs": 1.6999999999534339,
+                      "workerMs": 1.5
+                    },
+                    {
+                      "rpcMs": 2.199999999953434,
+                      "workerMs": 1.900000000023283
+                    },
+                    {
+                      "rpcMs": 1.7999999999301508,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 2,
+                      "workerMs": 1.7000000000698492
+                    },
+                    {
+                      "rpcMs": 2.400000000023283,
+                      "workerMs": 2.200000000069849
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.8000000000465661
+                    },
+                    {
+                      "rpcMs": 2.099999999976717,
+                      "workerMs": 1.7000000000698492
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.7000000000698492
+                    },
+                    {
+                      "rpcMs": 1.8000000000465661,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 2,
+                      "workerMs": 1.7999999999301508
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.900000000023283
+                    },
+                    {
+                      "rpcMs": 1.900000000023283,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 2,
+                      "workerMs": 1.599999999976717
+                    },
+                    {
+                      "rpcMs": 1.8999999999068677,
+                      "workerMs": 1.7999999999301508
+                    },
+                    {
+                      "rpcMs": 1.6000000000931323,
+                      "workerMs": 1.2999999999301508
+                    },
+                    {
+                      "rpcMs": 3.6000000000931323,
+                      "workerMs": 3.5
+                    },
+                    {
+                      "rpcMs": 2,
+                      "workerMs": 1.7000000000698492
+                    },
+                    {
+                      "rpcMs": 2.599999999976717,
+                      "workerMs": 2.200000000069849
+                    },
+                    {
+                      "rpcMs": 1.400000000023283,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.3000000000465661,
+                      "workerMs": 1.1000000000931323
+                    },
+                    {
+                      "rpcMs": 1.3000000000465661,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.6999999999534339,
+                      "workerMs": 1.400000000023283
+                    },
+                    {
+                      "rpcMs": 1.400000000023283,
+                      "workerMs": 1.1000000000931323
+                    },
+                    {
+                      "rpcMs": 1.2999999999301508,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.2000000000698492,
+                      "workerMs": 0.8999999999068677
+                    },
+                    {
+                      "rpcMs": 1.5,
+                      "workerMs": 1.1999999999534339
+                    },
+                    {
+                      "rpcMs": 1.599999999976717,
+                      "workerMs": 1.3000000000465661
+                    },
+                    {
+                      "rpcMs": 1.3000000000465661,
+                      "workerMs": 1.099999999976717
+                    },
+                    {
+                      "rpcMs": 1.099999999976717,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.1999999999534339,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.1999999999534339,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 1.400000000023283,
+                      "workerMs": 1.1999999999534339
+                    },
+                    {
+                      "rpcMs": 1.3999999999068677,
+                      "workerMs": 1
+                    },
+                    {
+                      "rpcMs": 4.299999999930151,
+                      "workerMs": 1.099999999976717
+                    },
+                    {
+                      "rpcMs": 1.5,
+                      "workerMs": 1
+                    }
+                  ],
+                  "cached": [
+                    {
+                      "rpcMs": 0.7999999999301508,
+                      "workerMs": 0.6999999999534339
+                    },
+                    {
+                      "rpcMs": 0.5999999999767169,
+                      "workerMs": 0.40000000002328306
+                    },
+                    {
+                      "rpcMs": 0.7000000000698492,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.8000000000465661,
+                      "workerMs": 0.5999999999767169
+                    },
+                    {
+                      "rpcMs": 0.9000000000232831,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.7000000000698492,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.8000000000465661,
+                      "workerMs": 0.5999999999767169
+                    },
+                    {
+                      "rpcMs": 0.8000000000465661,
+                      "workerMs": 0.5999999999767169
+                    },
+                    {
+                      "rpcMs": 0.9000000000232831,
+                      "workerMs": 0.5999999999767169
+                    },
+                    {
+                      "rpcMs": 0.6999999999534339,
+                      "workerMs": 0.5999999999767169
+                    },
+                    {
+                      "rpcMs": 0.8000000000465661,
+                      "workerMs": 0.5999999999767169
+                    },
+                    {
+                      "rpcMs": 0.8000000000465661,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.6999999999534339,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.7999999999301508,
+                      "workerMs": 0.6999999999534339
+                    },
+                    {
+                      "rpcMs": 0.7999999999301508,
+                      "workerMs": 0.6999999999534339
+                    },
+                    {
+                      "rpcMs": 0.9000000000232831,
+                      "workerMs": 0.5999999999767169
+                    },
+                    {
+                      "rpcMs": 0.8000000000465661,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 1.2000000000698492,
+                      "workerMs": 0.8999999999068677
+                    },
+                    {
+                      "rpcMs": 0.6999999999534339,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 1.2999999999301508,
+                      "workerMs": 0.8000000000465661
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.30000000004656613
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.39999999990686774
+                    },
+                    {
+                      "rpcMs": 0.9000000000232831,
+                      "workerMs": 0.40000000002328306
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.40000000002328306
+                    },
+                    {
+                      "rpcMs": 0.5999999999767169,
+                      "workerMs": 0.40000000002328306
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.19999999995343387
+                    },
+                    {
+                      "rpcMs": 0.6000000000931323,
+                      "workerMs": 0.30000000004656613
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.39999999990686774
+                    },
+                    {
+                      "rpcMs": 0.5999999999767169,
+                      "workerMs": 0.30000000004656613
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.30000000004656613
+                    },
+                    {
+                      "rpcMs": 0.5999999999767169,
+                      "workerMs": 0.40000000002328306
+                    },
+                    {
+                      "rpcMs": 0.6999999999534339,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.30000000004656613
+                    },
+                    {
+                      "rpcMs": 0.5999999999767169,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.6000000000931323,
+                      "workerMs": 0.2999999999301508
+                    },
+                    {
+                      "rpcMs": 0.6999999999534339,
+                      "workerMs": 0.5999999999767169
+                    },
+                    {
+                      "rpcMs": 0.5999999999767169,
+                      "workerMs": 0.5
+                    },
+                    {
+                      "rpcMs": 0.5,
+                      "workerMs": 0.30000000004656613
+                    },
+                    {
+                      "rpcMs": 0.6000000000931323,
+                      "workerMs": 0.2999999999301508
+                    }
+                  ]
+                }
+              }
+            ],
+            "definition": "Round trip: postMessage through comparison response (transit, forward pass, logit readback, metrics). Worker computation: the engine-reported comparison time. Inspection reads and rendering are excluded."
+          }
+        },
+        {
+          "name": "reference-probe",
+          "status": "passed",
+          "detail": "forward 1.19e-6, gradient 3.58e-7, Adam 5.59e-7",
+          "durationMs": 43.59999999997672,
+          "data": {
+            "backend": "cpu",
+            "elapsedMs": 33.39999999990687,
+            "forwardMaximumError": 0.0000011920928955078125,
+            "gradientMaximumError": 3.5762786865234375e-7,
+            "optimizerMaximumError": 5.587935447692871e-7,
+            "loss": 4.600515842437744,
+            "retainedTensorDelta": 0,
+            "float32Textures": null,
+            "webglPacking": null
+          }
+        },
+        {
+          "name": "prepared-recipes",
+          "status": "skipped",
+          "detail": "This checkpoint has no prepared recipes.",
+          "durationMs": 0
+        },
+        {
+          "name": "replay-roundtrip",
+          "status": "passed",
+          "detail": "maximum difference 0.00e+0",
+          "durationMs": 30.699999999953434,
+          "data": {
+            "baselineMaximumError": 0,
+            "modifiedMaximumError": 0,
+            "matches": true,
+            "savedBackend": "cpu",
+            "currentBackend": "cpu",
+            "bytes": 2213,
+            "scope": "In-memory export, JSON parse, validation, and recomputation. File download/import is covered by the manual protocol."
+          }
+        },
+        {
+          "name": "resource-cleanup",
+          "status": "passed",
+          "durationMs": 0.2000000000698492,
+          "data": {
+            "cache": {
+              "logicalBytes": 0,
+              "budgetBytes": 33554432,
+              "baselines": 0,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 36,
+            "logicalTensorBytes": 5632,
+            "memoryEstimateUnreliable": true
+          }
+        }
+      ]
+    },
+    {
+      "model": "verification",
+      "requestedBackend": "webgl",
+      "actualBackend": "webgl",
+      "modelId": "verification-seed-1729",
+      "modelRevision": "a9881b79044de83a160c571312e09d041f66c44a2351f8144de9b479fbb1a5c6",
+      "precision": {
+        "dtype": "float32",
+        "float32Textures": true,
+        "webglPacking": false
+      },
+      "checks": [
+        {
+          "name": "ui-cold-readiness",
+          "status": "passed",
+          "detail": "1653.6 ms",
+          "durationMs": 1655.0999999999767,
+          "data": {
+            "coldReadyMs": 1653.6000000000931,
+            "observationStartedAfterCompletion": false,
+            "actualBackend": "webgl",
+            "weightsFetch": [],
+            "definition": "Embedded page navigation start until the first completed comparison is committed to the DOM. HTTP, filesystem, driver, and shader caches are not reset; transferSize 0 usually means a cache hit."
+          }
+        },
+        {
+          "name": "ui-warm-interaction",
+          "status": "passed",
+          "detail": "layer 1: commit p95 24.4 ms, frame opportunity p95 50.2 ms; layer 2: commit p95 17.0 ms, frame opportunity p95 47.4 ms",
+          "durationMs": 3838.3000000000466,
+          "data": {
+            "head": 0,
+            "scope": "all positions",
+            "factors": [
+              0.25,
+              0.5,
+              0.75,
+              1.5
+            ],
+            "layers": [
+              {
+                "layer": 0,
+                "domCommit": {
+                  "count": 40,
+                  "medianMs": 21.75,
+                  "p95Ms": 24.400000000023283,
+                  "minimumMs": 17.199999999953434,
+                  "maximumMs": 31
+                },
+                "frameOpportunity": {
+                  "count": 40,
+                  "medianMs": 49.90000000002328,
+                  "p95Ms": 50.199999999953434,
+                  "minimumMs": 33.199999999953434,
+                  "maximumMs": 50.699999999953434
+                },
+                "samples": [
+                  {
+                    "domCommitMs": 21.800000000046566,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 22.300000000046566,
+                    "frameOpportunityMs": 50.40000000002328
+                  },
+                  {
+                    "domCommitMs": 21.20000000006985,
+                    "frameOpportunityMs": 49.70000000006985
+                  },
+                  {
+                    "domCommitMs": 22.79999999993015,
+                    "frameOpportunityMs": 49.89999999990687
+                  },
+                  {
+                    "domCommitMs": 21.79999999993015,
+                    "frameOpportunityMs": 49.89999999990687
+                  },
+                  {
+                    "domCommitMs": 22,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 18.5,
+                    "frameOpportunityMs": 50.10000000009313
+                  },
+                  {
+                    "domCommitMs": 19.599999999976717,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 21.599999999976717,
+                    "frameOpportunityMs": 49.79999999993015
+                  },
+                  {
+                    "domCommitMs": 21.199999999953434,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 21.29999999993015,
+                    "frameOpportunityMs": 50.699999999953434
+                  },
+                  {
+                    "domCommitMs": 21.5,
+                    "frameOpportunityMs": 49.300000000046566
+                  },
+                  {
+                    "domCommitMs": 19.599999999976717,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 17.199999999953434,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 21.699999999953434,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 24.400000000023283,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 21.70000000006985,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 21.800000000046566,
+                    "frameOpportunityMs": 50.199999999953434
+                  },
+                  {
+                    "domCommitMs": 21.600000000093132,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 19.20000000006985,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 18.800000000046566,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 25.400000000023283,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 18.800000000046566,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 31,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 22.70000000006985,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 21.800000000046566,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 21.900000000023283,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 19.300000000046566,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 24.300000000046566,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 20.900000000023283,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 22.800000000046566,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 23.599999999976717,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 21,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 24.199999999953434,
+                    "frameOpportunityMs": 50.199999999953434
+                  },
+                  {
+                    "domCommitMs": 19,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 23.900000000023283,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 24,
+                    "frameOpportunityMs": 50.09999999997672
+                  },
+                  {
+                    "domCommitMs": 23.70000000006985,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 18.800000000046566,
+                    "frameOpportunityMs": 49.90000000002328
+                  },
+                  {
+                    "domCommitMs": 24,
+                    "frameOpportunityMs": 50.09999999997672
+                  }
+                ]
+              },
+              {
+                "layer": 1,
+                "domCommit": {
+                  "count": 40,
+                  "medianMs": 15.799999999988358,
+                  "p95Ms": 17,
+                  "minimumMs": 11.199999999953434,
+                  "maximumMs": 20.400000000023283
+                },
+                "frameOpportunity": {
+                  "count": 40,
+                  "medianMs": 33.300000000046566,
+                  "p95Ms": 47.39999999990687,
+                  "minimumMs": 33.10000000009313,
+                  "maximumMs": 50
+                },
+                "samples": [
+                  {
+                    "domCommitMs": 14.400000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 13.29999999993015,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 17,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 16.300000000046566,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 16.099999999976717,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 15.800000000046566,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 16,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 15.300000000046566,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 11.5,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 15.800000000046566,
+                    "frameOpportunityMs": 33.10000000009313
+                  },
+                  {
+                    "domCommitMs": 15.899999999906868,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 16.099999999976717,
+                    "frameOpportunityMs": 33.199999999953434
+                  },
+                  {
+                    "domCommitMs": 15.70000000006985,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 15.79999999993015,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 12.199999999953434,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 11.400000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 11.199999999953434,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 16.099999999976717,
+                    "frameOpportunityMs": 36
+                  },
+                  {
+                    "domCommitMs": 15.899999999906868,
+                    "frameOpportunityMs": 47.39999999990687
+                  },
+                  {
+                    "domCommitMs": 15.5,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 15.699999999953434,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 16.5,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 12.70000000006985,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 16.800000000046566,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 15.599999999976717,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 11.599999999976717,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 15.5,
+                    "frameOpportunityMs": 33.5
+                  },
+                  {
+                    "domCommitMs": 15.599999999976717,
+                    "frameOpportunityMs": 33.39999999990687
+                  },
+                  {
+                    "domCommitMs": 16.5,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 12.099999999976717,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 12.100000000093132,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 16.100000000093132,
+                    "frameOpportunityMs": 33.20000000006985
+                  },
+                  {
+                    "domCommitMs": 11.5,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 16.20000000006985,
+                    "frameOpportunityMs": 33.40000000002328
+                  },
+                  {
+                    "domCommitMs": 15.900000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 18.699999999953434,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 12.800000000046566,
+                    "frameOpportunityMs": 33.300000000046566
+                  },
+                  {
+                    "domCommitMs": 16.399999999906868,
+                    "frameOpportunityMs": 33.29999999993015
+                  },
+                  {
+                    "domCommitMs": 20.400000000023283,
+                    "frameOpportunityMs": 50
+                  },
+                  {
+                    "domCommitMs": 15.900000000023283,
+                    "frameOpportunityMs": 33.300000000046566
+                  }
+                ]
+              }
+            ],
+            "definition": "Synthetic in-page input event to the completed result DOM commit (scheduling, worker comparison, default inspector reads, React update). Frame opportunity adds two animation-frame callbacks; it is not measured display latency and excludes touch hardware and OS input latency."
+          }
+        },
+        {
+          "name": "ui-baseline-reset",
+          "status": "passed",
+          "durationMs": 8.900000000023283,
+          "data": {
+            "strategy": "Baseline reused",
+            "displayedRows": 12
+          }
+        },
+        {
+          "name": "ui-cpu-recovery",
+          "status": "passed",
+          "detail": "97.8 ms",
+          "durationMs": 98.09999999997672,
+          "data": {
+            "recoveryMs": 97.80000000004657,
+            "definition": "Restart click until the replacement CPU worker shows the preserved experiment."
+          }
+        },
+        {
+          "name": "worker-load",
+          "status": "passed",
+          "durationMs": 75.79999999993015,
+          "data": {
+            "loadMs": 75.79999999993015,
+            "fallbackReason": null,
+            "matchesReleaseStamp": true,
+            "definition": "Worker LOAD request: static asset fetch, hash validation, backend initialization, and weight upload."
+          }
+        },
+        {
+          "name": "computation-rpc",
+          "status": "passed",
+          "detail": "layer 1: full/cached round-trip median 16.0/15.0 ms; layer 2: full/cached round-trip median 17.3/9.7 ms",
+          "durationMs": 4007,
+          "data": {
+            "sequenceLength": 6,
+            "baselineFirstMs": 1185.6000000000931,
+            "layers": [
+              {
+                "layer": 0,
+                "fullRoundTrip": {
+                  "count": 40,
+                  "medianMs": 16.04999999998836,
+                  "p95Ms": 21,
+                  "minimumMs": 11.5,
+                  "maximumMs": 22
+                },
+                "cachedRoundTrip": {
+                  "count": 40,
+                  "medianMs": 14.950000000011642,
+                  "p95Ms": 19,
+                  "minimumMs": 10.599999999976717,
+                  "maximumMs": 20.599999999976717
+                },
+                "fullWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 15.70000000006985,
+                  "p95Ms": 20.599999999976717,
+                  "minimumMs": 11.300000000046566,
+                  "maximumMs": 21.599999999976717
+                },
+                "cachedWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 14.65000000008149,
+                  "p95Ms": 18.899999999906868,
+                  "minimumMs": 10.199999999953434,
+                  "maximumMs": 20.20000000006985
+                },
+                "samples": {
+                  "full": [
+                    {
+                      "rpcMs": 16.70000000006985,
+                      "workerMs": 16.5
+                    },
+                    {
+                      "rpcMs": 16.5,
+                      "workerMs": 16.300000000046566
+                    },
+                    {
+                      "rpcMs": 16.70000000006985,
+                      "workerMs": 16.399999999906868
+                    },
+                    {
+                      "rpcMs": 16.099999999976717,
+                      "workerMs": 15.70000000006985
+                    },
+                    {
+                      "rpcMs": 15.899999999906868,
+                      "workerMs": 15.699999999953434
+                    },
+                    {
+                      "rpcMs": 16,
+                      "workerMs": 15.599999999976717
+                    },
+                    {
+                      "rpcMs": 15.400000000023283,
+                      "workerMs": 15.20000000006985
+                    },
+                    {
+                      "rpcMs": 16.100000000093132,
+                      "workerMs": 15.599999999976717
+                    },
+                    {
+                      "rpcMs": 16.20000000006985,
+                      "workerMs": 16
+                    },
+                    {
+                      "rpcMs": 15.699999999953434,
+                      "workerMs": 15.400000000023283
+                    },
+                    {
+                      "rpcMs": 15.300000000046566,
+                      "workerMs": 15.099999999976717
+                    },
+                    {
+                      "rpcMs": 11.79999999993015,
+                      "workerMs": 11.599999999976717
+                    },
+                    {
+                      "rpcMs": 15.29999999993015,
+                      "workerMs": 15.099999999976717
+                    },
+                    {
+                      "rpcMs": 11.699999999953434,
+                      "workerMs": 11.5
+                    },
+                    {
+                      "rpcMs": 11.5,
+                      "workerMs": 11.300000000046566
+                    },
+                    {
+                      "rpcMs": 17.79999999993015,
+                      "workerMs": 17.699999999953434
+                    },
+                    {
+                      "rpcMs": 16,
+                      "workerMs": 15.70000000006985
+                    },
+                    {
+                      "rpcMs": 16.800000000046566,
+                      "workerMs": 16.5
+                    },
+                    {
+                      "rpcMs": 15.5,
+                      "workerMs": 15.20000000006985
+                    },
+                    {
+                      "rpcMs": 21,
+                      "workerMs": 20.599999999976717
+                    },
+                    {
+                      "rpcMs": 15.599999999976717,
+                      "workerMs": 15.400000000023283
+                    },
+                    {
+                      "rpcMs": 15.199999999953434,
+                      "workerMs": 14.800000000046566
+                    },
+                    {
+                      "rpcMs": 15.900000000023283,
+                      "workerMs": 15.699999999953434
+                    },
+                    {
+                      "rpcMs": 16,
+                      "workerMs": 15.699999999953434
+                    },
+                    {
+                      "rpcMs": 12.899999999906868,
+                      "workerMs": 12.599999999976717
+                    },
+                    {
+                      "rpcMs": 15.599999999976717,
+                      "workerMs": 15.29999999993015
+                    },
+                    {
+                      "rpcMs": 15.899999999906868,
+                      "workerMs": 15.79999999993015
+                    },
+                    {
+                      "rpcMs": 19.699999999953434,
+                      "workerMs": 19.400000000023283
+                    },
+                    {
+                      "rpcMs": 17.79999999993015,
+                      "workerMs": 16.800000000046566
+                    },
+                    {
+                      "rpcMs": 12.599999999976717,
+                      "workerMs": 12.5
+                    },
+                    {
+                      "rpcMs": 17.29999999993015,
+                      "workerMs": 16.900000000023283
+                    },
+                    {
+                      "rpcMs": 18.699999999953434,
+                      "workerMs": 18.300000000046566
+                    },
+                    {
+                      "rpcMs": 21.400000000023283,
+                      "workerMs": 21.099999999976717
+                    },
+                    {
+                      "rpcMs": 17.300000000046566,
+                      "workerMs": 16.800000000046566
+                    },
+                    {
+                      "rpcMs": 22,
+                      "workerMs": 21.599999999976717
+                    },
+                    {
+                      "rpcMs": 16.70000000006985,
+                      "workerMs": 16.29999999993015
+                    },
+                    {
+                      "rpcMs": 20.900000000023283,
+                      "workerMs": 20.599999999976717
+                    },
+                    {
+                      "rpcMs": 15,
+                      "workerMs": 14.70000000006985
+                    },
+                    {
+                      "rpcMs": 17,
+                      "workerMs": 16.900000000023283
+                    },
+                    {
+                      "rpcMs": 17.400000000023283,
+                      "workerMs": 17
+                    }
+                  ],
+                  "cached": [
+                    {
+                      "rpcMs": 16.300000000046566,
+                      "workerMs": 16.100000000093132
+                    },
+                    {
+                      "rpcMs": 11.20000000006985,
+                      "workerMs": 10.79999999993015
+                    },
+                    {
+                      "rpcMs": 15.099999999976717,
+                      "workerMs": 14.70000000006985
+                    },
+                    {
+                      "rpcMs": 15.199999999953434,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 10.899999999906868,
+                      "workerMs": 10.599999999976717
+                    },
+                    {
+                      "rpcMs": 10.800000000046566,
+                      "workerMs": 10.599999999976717
+                    },
+                    {
+                      "rpcMs": 15.300000000046566,
+                      "workerMs": 15.20000000006985
+                    },
+                    {
+                      "rpcMs": 15.29999999993015,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 15,
+                      "workerMs": 14.79999999993015
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.800000000046566
+                    },
+                    {
+                      "rpcMs": 10.800000000046566,
+                      "workerMs": 10.599999999976717
+                    },
+                    {
+                      "rpcMs": 19,
+                      "workerMs": 18.899999999906868
+                    },
+                    {
+                      "rpcMs": 12.199999999953434,
+                      "workerMs": 12
+                    },
+                    {
+                      "rpcMs": 10.600000000093132,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 10.599999999976717,
+                      "workerMs": 10.5
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.800000000046566
+                    },
+                    {
+                      "rpcMs": 10.599999999976717,
+                      "workerMs": 10.199999999953434
+                    },
+                    {
+                      "rpcMs": 16.20000000006985,
+                      "workerMs": 16
+                    },
+                    {
+                      "rpcMs": 12.400000000023283,
+                      "workerMs": 11.900000000023283
+                    },
+                    {
+                      "rpcMs": 17.199999999953434,
+                      "workerMs": 16.900000000023283
+                    },
+                    {
+                      "rpcMs": 14.900000000023283,
+                      "workerMs": 14.5
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.699999999953434
+                    },
+                    {
+                      "rpcMs": 10.900000000023283,
+                      "workerMs": 10.599999999976717
+                    },
+                    {
+                      "rpcMs": 11.099999999976717,
+                      "workerMs": 10.70000000006985
+                    },
+                    {
+                      "rpcMs": 11.599999999976717,
+                      "workerMs": 11.300000000046566
+                    },
+                    {
+                      "rpcMs": 14.800000000046566,
+                      "workerMs": 14.600000000093132
+                    },
+                    {
+                      "rpcMs": 15,
+                      "workerMs": 14.800000000046566
+                    },
+                    {
+                      "rpcMs": 15.400000000023283,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 14.900000000023283,
+                      "workerMs": 14.800000000046566
+                    },
+                    {
+                      "rpcMs": 15.300000000046566,
+                      "workerMs": 15
+                    },
+                    {
+                      "rpcMs": 16.099999999976717,
+                      "workerMs": 15.800000000046566
+                    },
+                    {
+                      "rpcMs": 16.399999999906868,
+                      "workerMs": 16
+                    },
+                    {
+                      "rpcMs": 16.29999999993015,
+                      "workerMs": 16
+                    },
+                    {
+                      "rpcMs": 16.300000000046566,
+                      "workerMs": 15.900000000023283
+                    },
+                    {
+                      "rpcMs": 12,
+                      "workerMs": 11.599999999976717
+                    },
+                    {
+                      "rpcMs": 19.400000000023283,
+                      "workerMs": 19.100000000093132
+                    },
+                    {
+                      "rpcMs": 15,
+                      "workerMs": 14.599999999976717
+                    },
+                    {
+                      "rpcMs": 11.5,
+                      "workerMs": 11.199999999953434
+                    },
+                    {
+                      "rpcMs": 15.699999999953434,
+                      "workerMs": 15.599999999976717
+                    },
+                    {
+                      "rpcMs": 20.599999999976717,
+                      "workerMs": 20.20000000006985
+                    }
+                  ]
+                }
+              },
+              {
+                "layer": 1,
+                "fullRoundTrip": {
+                  "count": 40,
+                  "medianMs": 17.25,
+                  "p95Ms": 23.5,
+                  "minimumMs": 11.900000000023283,
+                  "maximumMs": 24.5
+                },
+                "cachedRoundTrip": {
+                  "count": 40,
+                  "medianMs": 9.70000000006985,
+                  "p95Ms": 11,
+                  "minimumMs": 5.400000000023283,
+                  "maximumMs": 15.100000000093132
+                },
+                "fullWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 17,
+                  "p95Ms": 22.599999999976717,
+                  "minimumMs": 11.600000000093132,
+                  "maximumMs": 23.70000000006985
+                },
+                "cachedWorkerComputation": {
+                  "count": 40,
+                  "medianMs": 9.400000000023283,
+                  "p95Ms": 10.70000000006985,
+                  "minimumMs": 5.099999999976717,
+                  "maximumMs": 14.699999999953434
+                },
+                "samples": {
+                  "full": [
+                    {
+                      "rpcMs": 17.300000000046566,
+                      "workerMs": 17.099999999976717
+                    },
+                    {
+                      "rpcMs": 21.900000000023283,
+                      "workerMs": 21.70000000006985
+                    },
+                    {
+                      "rpcMs": 17.800000000046566,
+                      "workerMs": 17.5
+                    },
+                    {
+                      "rpcMs": 21.400000000023283,
+                      "workerMs": 20.900000000023283
+                    },
+                    {
+                      "rpcMs": 15.699999999953434,
+                      "workerMs": 15.5
+                    },
+                    {
+                      "rpcMs": 15.5,
+                      "workerMs": 15.20000000006985
+                    },
+                    {
+                      "rpcMs": 15.300000000046566,
+                      "workerMs": 15
+                    },
+                    {
+                      "rpcMs": 15.900000000023283,
+                      "workerMs": 15.599999999976717
+                    },
+                    {
+                      "rpcMs": 20.399999999906868,
+                      "workerMs": 20.099999999976717
+                    },
+                    {
+                      "rpcMs": 23.5,
+                      "workerMs": 23.099999999976717
+                    },
+                    {
+                      "rpcMs": 17.199999999953434,
+                      "workerMs": 16.900000000023283
+                    },
+                    {
+                      "rpcMs": 16.900000000023283,
+                      "workerMs": 16.5
+                    },
+                    {
+                      "rpcMs": 11.900000000023283,
+                      "workerMs": 11.600000000093132
+                    },
+                    {
+                      "rpcMs": 19.800000000046566,
+                      "workerMs": 19.599999999976717
+                    },
+                    {
+                      "rpcMs": 19.5,
+                      "workerMs": 19.100000000093132
+                    },
+                    {
+                      "rpcMs": 20.400000000023283,
+                      "workerMs": 20
+                    },
+                    {
+                      "rpcMs": 19.900000000023283,
+                      "workerMs": 19.600000000093132
+                    },
+                    {
+                      "rpcMs": 24.5,
+                      "workerMs": 21.20000000006985
+                    },
+                    {
+                      "rpcMs": 16.5,
+                      "workerMs": 16.199999999953434
+                    },
+                    {
+                      "rpcMs": 23,
+                      "workerMs": 22.599999999976717
+                    },
+                    {
+                      "rpcMs": 16.399999999906868,
+                      "workerMs": 15.900000000023283
+                    },
+                    {
+                      "rpcMs": 20.800000000046566,
+                      "workerMs": 20.400000000023283
+                    },
+                    {
+                      "rpcMs": 15.599999999976717,
+                      "workerMs": 15.300000000046566
+                    },
+                    {
+                      "rpcMs": 19.79999999993015,
+                      "workerMs": 19.300000000046566
+                    },
+                    {
+                      "rpcMs": 19.300000000046566,
+                      "workerMs": 19.099999999976717
+                    },
+                    {
+                      "rpcMs": 16.29999999993015,
+                      "workerMs": 16
+                    },
+                    {
+                      "rpcMs": 15.800000000046566,
+                      "workerMs": 15.5
+                    },
+                    {
+                      "rpcMs": 17,
+                      "workerMs": 16.800000000046566
+                    },
+                    {
+                      "rpcMs": 17,
+                      "workerMs": 16.699999999953434
+                    },
+                    {
+                      "rpcMs": 19,
+                      "workerMs": 18.699999999953434
+                    },
+                    {
+                      "rpcMs": 15.400000000023283,
+                      "workerMs": 15.199999999953434
+                    },
+                    {
+                      "rpcMs": 17.199999999953434,
+                      "workerMs": 16.900000000023283
+                    },
+                    {
+                      "rpcMs": 17.29999999993015,
+                      "workerMs": 17.099999999976717
+                    },
+                    {
+                      "rpcMs": 17.199999999953434,
+                      "workerMs": 16.900000000023283
+                    },
+                    {
+                      "rpcMs": 23.900000000023283,
+                      "workerMs": 23.70000000006985
+                    },
+                    {
+                      "rpcMs": 19.5,
+                      "workerMs": 19.099999999976717
+                    },
+                    {
+                      "rpcMs": 17.20000000006985,
+                      "workerMs": 16.5
+                    },
+                    {
+                      "rpcMs": 15.099999999976717,
+                      "workerMs": 14.900000000023283
+                    },
+                    {
+                      "rpcMs": 15.599999999976717,
+                      "workerMs": 15.300000000046566
+                    },
+                    {
+                      "rpcMs": 19.599999999976717,
+                      "workerMs": 19.400000000023283
+                    }
+                  ],
+                  "cached": [
+                    {
+                      "rpcMs": 6.099999999976717,
+                      "workerMs": 5.699999999953434
+                    },
+                    {
+                      "rpcMs": 10.699999999953434,
+                      "workerMs": 10.29999999993015
+                    },
+                    {
+                      "rpcMs": 11.199999999953434,
+                      "workerMs": 10.70000000006985
+                    },
+                    {
+                      "rpcMs": 9.900000000023283,
+                      "workerMs": 9.5
+                    },
+                    {
+                      "rpcMs": 9.900000000023283,
+                      "workerMs": 9.599999999976717
+                    },
+                    {
+                      "rpcMs": 5.5,
+                      "workerMs": 5.200000000069849
+                    },
+                    {
+                      "rpcMs": 5.800000000046566,
+                      "workerMs": 5.699999999953434
+                    },
+                    {
+                      "rpcMs": 10.29999999993015,
+                      "workerMs": 9.900000000023283
+                    },
+                    {
+                      "rpcMs": 6.599999999976717,
+                      "workerMs": 5.699999999953434
+                    },
+                    {
+                      "rpcMs": 6.200000000069849,
+                      "workerMs": 6
+                    },
+                    {
+                      "rpcMs": 10.199999999953434,
+                      "workerMs": 9.800000000046566
+                    },
+                    {
+                      "rpcMs": 9.800000000046566,
+                      "workerMs": 9.5
+                    },
+                    {
+                      "rpcMs": 9.400000000023283,
+                      "workerMs": 9.20000000006985
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.800000000046566
+                    },
+                    {
+                      "rpcMs": 10,
+                      "workerMs": 9.79999999993015
+                    },
+                    {
+                      "rpcMs": 9.79999999993015,
+                      "workerMs": 9.5
+                    },
+                    {
+                      "rpcMs": 9.800000000046566,
+                      "workerMs": 9.399999999906868
+                    },
+                    {
+                      "rpcMs": 6.799999999930151,
+                      "workerMs": 6.300000000046566
+                    },
+                    {
+                      "rpcMs": 9.899999999906868,
+                      "workerMs": 9.5
+                    },
+                    {
+                      "rpcMs": 9.699999999953434,
+                      "workerMs": 9.400000000023283
+                    },
+                    {
+                      "rpcMs": 9.899999999906868,
+                      "workerMs": 9.5
+                    },
+                    {
+                      "rpcMs": 15.100000000093132,
+                      "workerMs": 14.699999999953434
+                    },
+                    {
+                      "rpcMs": 6.400000000023283,
+                      "workerMs": 6.099999999976717
+                    },
+                    {
+                      "rpcMs": 9.699999999953434,
+                      "workerMs": 9.400000000023283
+                    },
+                    {
+                      "rpcMs": 5.400000000023283,
+                      "workerMs": 5.100000000093132
+                    },
+                    {
+                      "rpcMs": 9.399999999906868,
+                      "workerMs": 9.099999999976717
+                    },
+                    {
+                      "rpcMs": 9.5,
+                      "workerMs": 9.300000000046566
+                    },
+                    {
+                      "rpcMs": 5.5,
+                      "workerMs": 5.099999999976717
+                    },
+                    {
+                      "rpcMs": 6.099999999976717,
+                      "workerMs": 5.700000000069849
+                    },
+                    {
+                      "rpcMs": 9.699999999953434,
+                      "workerMs": 9.300000000046566
+                    },
+                    {
+                      "rpcMs": 5.799999999930151,
+                      "workerMs": 5.5
+                    },
+                    {
+                      "rpcMs": 9.70000000006985,
+                      "workerMs": 9.5
+                    },
+                    {
+                      "rpcMs": 10.300000000046566,
+                      "workerMs": 10.100000000093132
+                    },
+                    {
+                      "rpcMs": 9.70000000006985,
+                      "workerMs": 9.399999999906868
+                    },
+                    {
+                      "rpcMs": 9.900000000023283,
+                      "workerMs": 9.600000000093132
+                    },
+                    {
+                      "rpcMs": 9.900000000023283,
+                      "workerMs": 9.5
+                    },
+                    {
+                      "rpcMs": 9.699999999953434,
+                      "workerMs": 9.199999999953434
+                    },
+                    {
+                      "rpcMs": 9.79999999993015,
+                      "workerMs": 9.599999999976717
+                    },
+                    {
+                      "rpcMs": 11,
+                      "workerMs": 10.599999999976717
+                    },
+                    {
+                      "rpcMs": 5.800000000046566,
+                      "workerMs": 5.599999999976717
+                    }
+                  ]
+                }
+              }
+            ],
+            "definition": "Round trip: postMessage through comparison response (transit, forward pass, logit readback, metrics). Worker computation: the engine-reported comparison time. Inspection reads and rendering are excluded."
+          }
+        },
+        {
+          "name": "reference-probe",
+          "status": "passed",
+          "detail": "forward 1.43e-6, gradient 2.09e-7, Adam 1.21e-6",
+          "durationMs": 3442.0999999999767,
+          "data": {
+            "backend": "webgl",
+            "elapsedMs": 3436.20000000007,
+            "forwardMaximumError": 0.000001430511474609375,
+            "gradientMaximumError": 2.086162567138672e-7,
+            "optimizerMaximumError": 0.0000012069940567016602,
+            "loss": 4.600516319274902,
+            "retainedTensorDelta": 0,
+            "float32Textures": true,
+            "webglPacking": false
+          }
+        },
+        {
+          "name": "prepared-recipes",
+          "status": "skipped",
+          "detail": "This checkpoint has no prepared recipes.",
+          "durationMs": 0
+        },
+        {
+          "name": "replay-roundtrip",
+          "status": "passed",
+          "detail": "maximum difference 0.00e+0",
+          "durationMs": 133.40000000002328,
+          "data": {
+            "baselineMaximumError": 0,
+            "modifiedMaximumError": 0,
+            "matches": true,
+            "savedBackend": "webgl",
+            "currentBackend": "webgl",
+            "bytes": 2214,
+            "scope": "In-memory export, JSON parse, validation, and recomputation. File download/import is covered by the manual protocol."
+          }
+        },
+        {
+          "name": "resource-cleanup",
+          "status": "passed",
+          "durationMs": 0.30000000004656613,
+          "data": {
+            "cache": {
+              "logicalBytes": 0,
+              "budgetBytes": 33554432,
+              "baselines": 0,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 36,
+            "logicalTensorBytes": 5632,
+            "memoryEstimateUnreliable": false
+          }
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "passed": 39,
+    "failed": 0,
+    "unsupported": 0,
+    "skipped": 2,
+    "outcome": "passed"
+  }
+}

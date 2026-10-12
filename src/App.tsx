@@ -4,7 +4,7 @@ import { hookKeys, hookLabel, parseHook, swappedQuery } from './patching';
 import type { ComparisonResult, RunSummary } from './engine/runs';
 import type { Commands } from './workers/protocol';
 import type { ProbeReport } from './engine/probe';
-import { createExperiment, headScalingOnly, parseExperiment, validateExperiment, checkReplay, MAX_EXPERIMENT_BYTES, type ExperimentDocument, type ReplayReport } from './engine/experiment';
+import { createExperiment, parseExperiment, validateExperiment, checkReplay, MAX_EXPERIMENT_BYTES, type ExperimentDocument, type ReplayReport } from './engine/experiment';
 import { validateManifest, validateTokenizer } from './engine/weights';
 import { StrengthNumber } from './components/StrengthNumber';
 import { ComputationInspector } from './components/ComputationInspector';
@@ -17,7 +17,7 @@ import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoic
 type LoadedModel = Commands['LOAD']['response'];
 /** mode 'head' scales a head's output; 'patch' copies a source input's residual row (residual.replace); 'attention' replaces one attention row (attention.override). */
 interface Controls { layer: number; head: number; factor: number; scope: string; position: number; target: number; mode: 'head' | 'patch' | 'attention'; hook: string; patchPosition: number; query: number; focus: string }
-interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport }
+interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport; sourceTokens?: number[] }
 interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument; source?: RunSummary }
 const initialChoice: ModelChoice = new URLSearchParams(window.location.search).get('model') === 'verification' ? 'verification' : 'retrieval';
 const backendParameter = new URLSearchParams(window.location.search).get('backend');
@@ -26,6 +26,15 @@ const defaults: Controls = { layer: 0, head: 0, factor: .5, scope: 'all', positi
 const shown = (c: Controls) => c.mode === 'patch' ? 'patched residual' : c.mode === 'attention' ? 'redirected attention' : `${c.factor.toFixed(2)}×`;
 /** The submitted row: one-hot on a source position, or uniform over every position the query may attend to. */
 const focusWeights = (c: Controls, length: number) => Array.from({ length }, (_, i) => c.focus === 'uniform' ? (i <= c.query ? 1 : 0) : (i === Number(c.focus) ? 1 : 0));
+/** Screen controls for a saved or prepared intervention; checkSavedIntervention guarantees each kind is representable. */
+function restoredControls(base: Controls, patch: Intervention, predictionPosition: number, targetTokenId: number): Controls {
+  const common = { ...base, position: predictionPosition, target: targetTokenId };
+  if (patch.kind === 'attention.override')
+    return { ...common, mode: 'attention', layer: patch.layer, head: patch.head, query: patch.query,
+      focus: patch.weights.filter(weight => weight === 1).length === 1 ? String(patch.weights.indexOf(1)) : 'uniform' };
+  if (patch.kind === 'residual.replace') return { ...common, mode: 'patch', hook: `${patch.layer}:${patch.stage}`, patchPosition: patch.position };
+  return { ...common, mode: 'head', layer: patch.layer, head: patch.head, factor: patch.factor, scope: patch.tokens.kind === 'all' ? 'all' : String(patch.tokens.indices[0]) };
+}
 const focusLabel = (c: Controls) => c.focus === 'uniform' ? `evenly over positions 0–${c.query}` : `all on position ${c.focus}`;
 
 function SymbolLabel({ tokenizer, tokenId }: { tokenizer: SymbolTokenizer; tokenId: number }) {
@@ -97,6 +106,8 @@ export default function App() {
           });
           created = comparison.modifiedRunId;
           if (job.version !== version.current) continue;
+          // Each mode reads the vectors its panels show; replay checking and display are shared.
+          let vectors: { attention: number[]; raw: number[]; modified: number[] };
           if (intervention.kind === 'attention.override') {
             // Overrides change the weights themselves, so this mode shows the modified run's attention.
             const at = { head: c.head, position: c.query };
@@ -105,37 +116,29 @@ export default function App() {
               owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: at }),
               owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: at }),
             ]);
-            if (job.version !== version.current) continue;
-            if (modifiedId.current) void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
-            modifiedId.current = created; created = undefined;
-            setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds, attention: Array.from(weights.values), raw: Array.from(raw.values), modified: Array.from(changed.values) });
-            setError(null);
-            continue;
-          }
-          if (intervention.kind === 'residual.replace') {
+            vectors = { attention: Array.from(weights.values), raw: Array.from(raw.values), modified: Array.from(changed.values) };
+          } else if (intervention.kind === 'residual.replace') {
             // The patched row: this input's own residual at the patch point, and the source row that replaces it.
             const own = await owner.request('INSPECT', { runId: job.baseline.runId, reference: parseHook(c.hook), selection: { position: c.patchPosition } });
-            if (job.version !== version.current) continue;
-            if (modifiedId.current) void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
-            modifiedId.current = created; created = undefined;
-            setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds, attention: [], raw: Array.from(own.values), modified: intervention.values });
-            setError(null);
-            continue;
-          }
-          const inspectorKey = JSON.stringify([job.baseline.runId, c.layer, c.head, vectorPosition]);
-          const savedInspector = baselineInspector.current;
-          const readBaseline = async () => {
-            if (savedInspector?.key === inspectorKey) return savedInspector;
-            const [attention, raw] = await Promise.all([
-              owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
-              owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
+            vectors = { attention: [], raw: Array.from(own.values), modified: intervention.values };
+          } else {
+            const inspectorKey = JSON.stringify([job.baseline.runId, c.layer, c.head, vectorPosition]);
+            const savedInspector = baselineInspector.current;
+            const readBaseline = async () => {
+              if (savedInspector?.key === inspectorKey) return savedInspector;
+              const [attention, raw] = await Promise.all([
+                owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
+                owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
+              ]);
+              return { key: inspectorKey, attention: Array.from(attention.values), raw: Array.from(raw.values) };
+            };
+            const [inspector, modified] = await Promise.all([
+              readBaseline(),
+              owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.modified', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
             ]);
-            return { key: inspectorKey, attention: Array.from(attention.values), raw: Array.from(raw.values) };
-          };
-          const [inspector, modified] = await Promise.all([
-            readBaseline(),
-            owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.modified', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
-          ]);
+            if (job.version === version.current) baselineInspector.current = inspector;
+            vectors = { attention: inspector.attention, raw: inspector.raw, modified: Array.from(modified.values) };
+          }
           if (job.version !== version.current) continue;
           let replay: ReplayReport | undefined;
           if (job.replay) {
@@ -146,11 +149,9 @@ export default function App() {
             if (job.version !== version.current) continue;
             replay = checkReplay(job.replay, baseLogits.values, modifiedLogits.values, comparison.execution.backend);
           }
-          baselineInspector.current = inspector;
           if (modifiedId.current) void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
           modifiedId.current = created; created = undefined;
-          setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds,
-            attention: inspector.attention, raw: inspector.raw, modified: Array.from(modified.values), replay });
+          setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds, ...vectors, replay, sourceTokens: job.source?.tokenIds });
           setError(null);
         } catch (failure) {
           if (alive.current && job.version === version.current) setError(failure instanceof Error ? failure.message : String(failure));
@@ -177,8 +178,8 @@ export default function App() {
     if (old && old.owner === owner) void owner.request('RELEASE', { runId: old.run.runId }).catch(() => {});
   }
 
-  async function applySource(text: string, restored?: Controls) {
-    const loaded = model, target = baseline.current, owner = client.current;
+  async function applySource(text: string, restored?: Controls, replay?: ExperimentDocument, loaded = model) {
+    const target = baseline.current, owner = client.current;
     if (!loaded || !target || !owner) return;
     setError(null); setSourceText(text);
     try {
@@ -190,7 +191,7 @@ export default function App() {
       source.current = { owner, run }; setSourceTokens(tokens);
       const differing = tokens.findIndex((token, i) => token !== target.tokenIds[i]);
       schedule(restored ? { ...restored, mode: 'patch' }
-        : { ...controlsRef.current, mode: 'patch', patchPosition: differing >= 0 ? differing : Math.min(controlsRef.current.patchPosition, tokens.length - 1) });
+        : { ...controlsRef.current, mode: 'patch', patchPosition: differing >= 0 ? differing : Math.min(controlsRef.current.patchPosition, tokens.length - 1) }, target, null, replay);
     } catch (failure) { if (alive.current && client.current === owner) setError(failure instanceof Error ? failure.message : String(failure)); }
   }
 
@@ -217,11 +218,17 @@ export default function App() {
     if (modifiedId.current) {
       void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {}); modifiedId.current = null;
     }
-    const patch = replay?.observation.interventions[0] ?? recipe?.intervention;
     releaseSource(owner);
-    schedule(settings ?? (patch ? { ...controlsRef.current, mode: 'head', layer: patch.layer, head: patch.head, factor: patch.factor,
-      scope: patch.tokens.kind === 'all' ? 'all' : String(patch.tokens.indices[0]), position: replay?.observation.predictionPosition ?? recipe!.predictionPosition, target: replay?.observation.targetTokenId ?? recipe!.targetTokenId }
-      : { ...controlsRef.current, mode: 'head', position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target }), next, recipe, replay);
+    const restored = replay ? restoredControls(controlsRef.current, replay.observation.interventions[0], replay.observation.predictionPosition, replay.observation.targetTokenId)
+      : recipe ? restoredControls(controlsRef.current, recipe.intervention, recipe.predictionPosition, recipe.targetTokenId) : undefined;
+    if (replay && restored?.mode === 'patch') {
+      // A saved patch needs its source run first; show the baseline until the replayed patch completes.
+      schedule({ ...restored, mode: 'head', factor: 1 }, next);
+      await applySource(replay.observation.source!.text, restored, replay, loaded);
+      return;
+    }
+    schedule(settings ?? restored ?? { ...controlsRef.current, mode: 'head', position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target },
+      next, recipe, replay);
   }
 
   async function load(backend: 'auto' | 'cpu' | 'webgl', selected: ModelChoice, input?: string, restored?: ExperimentDocument, settings?: Controls) {
@@ -308,7 +315,8 @@ export default function App() {
         owner.request('INSPECT', { runId: completed.comparison.modifiedRunId, reference: { stage: 'logits' }, selection: { position: completed.controls.position } }),
       ]);
       const document = createExperiment(loaded.manifest, loaded.tokenizer, completed.tokens, {
-        predictionPosition: completed.controls.position, targetTokenId: completed.controls.target, interventions: headScalingOnly(completed.comparison.interventions),
+        predictionPosition: completed.controls.position, targetTokenId: completed.controls.target, interventions: completed.comparison.interventions,
+        sourceTokenIds: completed.controls.mode === 'patch' ? completed.sourceTokens : undefined,
       }, original.values, modified.values, { backend: loaded.backend, precision: loaded.precision });
       const url = URL.createObjectURL(new Blob([JSON.stringify(document, null, 2) + '\n'], { type: 'application/json' }));
       const link = window.document.createElement('a');
@@ -428,10 +436,10 @@ export default function App() {
         </section>
         <section className="saved-experiments">
           <p className="eyebrow">Save and replay</p>
-          <button className="secondary" disabled={loading || probing || transferring || pending || !display || display.controls.mode !== 'head'} onClick={() => void exportExperiment()}>Export experiment</button>
+          <button className="secondary" disabled={loading || probing || transferring || pending || !display} onClick={() => void exportExperiment()}>Export experiment</button>
           <label className="file-label">Import experiment<input type="file" accept=".json,application/json" aria-label="Import experiment" disabled={loading || probing || transferring || pending || !model}
             onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void importExperiment(file); }} /></label>
-          <p className="hint">Save completed settings and predictions as JSON. Import recomputes them using the exact installed checkpoint.{display && display.controls.mode !== 'head' ? ' Files currently save head-scaling experiments only.' : ''}</p>
+          <p className="hint">Save completed settings and predictions as JSON. Import recomputes them using the exact installed checkpoint.{display?.controls.mode === 'patch' ? ' A saved patch includes its source input.' : ''}</p>
         </section>
         <section className="runtime">
           <p className="eyebrow">Computation runtime</p>

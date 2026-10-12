@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 
 const routing = JSON.parse(readFileSync('tests/fixtures/attention-reference.json', 'utf8')).routing as {
@@ -7,6 +8,17 @@ const softmax = (logits: number[]) => { const m = Math.max(...logits), e = logit
 async function modifiedPercent(page: Page, symbol: string) {
   const row = page.locator('.probability-row').filter({ has: page.locator('.symbol', { hasText: new RegExp(`^${symbol}$`, 'u') }) });
   return Number((await row.locator('.numbers strong').innerText()).replace('%', ''));
+}
+
+async function roundTrip(page: Page) {
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export experiment' }).click();
+  const saved = await readFile((await (await download).path())!, 'utf8');
+  await page.getByRole('button', { name: 'Reset to baseline' }).click();
+  await expect(page.locator('.status')).toHaveText('Showing 1.00×');
+  await page.getByLabel('Import experiment').setInputFiles({ name: 'saved.json', mimeType: 'application/json', buffer: Buffer.from(saved) });
+  await expect(page.getByTestId('replay-report')).toContainText('Replay matches saved results', { timeout: 30_000 });
+  return JSON.parse(saved);
 }
 
 test('redirecting a head\'s attention matches the independent PyTorch routing sweep', async ({ page }) => {
@@ -32,10 +44,19 @@ test('redirecting a head\'s attention matches the independent PyTorch routing sw
   }
   await expect(page.getByTestId('execution-strategy')).toHaveText('Full forward pass');
   await expect(page.locator('.vector-list > div')).toHaveCount(16);
-  await expect(page.getByRole('button', { name: 'Export experiment' })).toBeDisabled();
+  // A saved redirect restores its mode and controls, and replays to the same logits.
+  await page.getByLabel('Attend to').selectOption('3');
+  await expect(page.locator('.trace strong')).toHaveText('Layer 2, head 2 · query 15 · all on position 3');
+  const saved = await roundTrip(page);
+  expect(saved.schemaVersion).toBe(2);
+  expect(saved.observation.interventions[0]).toMatchObject({ kind: 'attention.override', layer: 1, head: 1, query: 15 });
+  await expect(status).toHaveText('Showing redirected attention');
+  await expect(page.getByLabel('Intervention type')).toHaveValue('attention');
+  await expect(page.getByLabel('Attend to')).toHaveValue('3');
+  await expect(page.locator('.trace strong')).toHaveText('Layer 2, head 2 · query 15 · all on position 3');
   // Moving the query before the chosen source clamps the focus; a final-layer earlier query cannot reach the prediction.
   await page.getByLabel('Query position').selectOption('2');
-  await expect(page.getByLabel('Attend to')).toHaveValue('0');
+  await expect(page.getByLabel('Attend to')).toHaveValue('2');
   await page.getByLabel('Attend to').selectOption('uniform');
   await expect(page.getByLabel('Attend to').locator('option')).toHaveCount(4);
   await expect(status).toHaveText('Showing redirected attention');

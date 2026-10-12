@@ -89,6 +89,9 @@ These finite-task checks demonstrate held-out sequence behavior and the selected
 
 ## Portable experiment validation
 
+Exports are now schema version 2 (`docs/experiment-format.md`). Three engine tests cover version 1 compatibility, redirect round trips and refusals, and patch round trips with source-input checks. Production tests export, reset, and import an attention redirect and a residual patch. They require the restored mode and controls and a matching replay, including a patch imported while the other checkpoint was loaded. The version 1 results below still apply to head scaling.
+
+
 Version 1 export/replay passes three engine contract tests and four targeted production tests across Chromium and WebKit. They verify complete-vocabulary snapshots, non-final positions, target/scope restoration, checkpoint switching, CPU-to-WebGL replay, stale-checkpoint rejection before replacing the experiment, and visible discrepancies for self-consistent changed measurements. JSON size/version, input/token, intervention, numerical, and saved-metric consistency checks are covered. See `docs/experiment-format.md`.
 
 Cold WebGL model loading is allowed 30 seconds in the replay browser assertions; this is a test startup allowance, not a warm performance claim.

@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { comparePredictions } from '../../src/engine/comparison';
 import type { ExperimentDocument } from '../../src/engine/experiment';
+import type { HeadScaleIntervention } from '../../src/engine/contracts';
 
 test('export and replay restore completed settings, switch checkpoints and compare newly computed predictions', async ({ page }, testInfo) => {
   await page.goto('?model=verification');
@@ -22,7 +23,8 @@ test('export and replay restore completed settings, switch checkpoints and compa
   expect(document.input.text).toBe('A E I C G');
   expect(document.observation.predictionPosition).toBe(2);
   expect(document.observation.targetTokenId).toBe(14);
-  expect(document.observation.interventions[0].tokens).toEqual({ kind: 'indices', indices: [0] });
+  expect(document.schemaVersion).toBe(2);
+  expect((document.observation.interventions[0] as HeadScaleIntervention).tokens).toEqual({ kind: 'indices', indices: [0] });
   expect(document.results.baselineLogits).toHaveLength(16);
   expect(document.results.modifiedLogits).toHaveLength(16);
   expect(document.results.precision.dtype).toBe('float32');

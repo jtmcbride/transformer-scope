@@ -34,7 +34,11 @@ Browser tests use the production build served at `/transformer-scope/`. Engine t
 
 ## Validate on a device
 
-Open `validation.html` under the deployment (for example https://jtmcbride.github.io/transformer-scope/validation.html), describe the device, and press **Start validation**. It records the deployed commit, model revisions, actual backends, PyTorch reference checks, the prepared recipes, replay, cold readiness, and warm interaction timings, then exports raw JSON. It runs only when started and is not linked from the application. Follow `docs/physical-device-protocol.md` for the full physical-device procedure, and `docs/educational-evaluation.md` for participant sessions.
+Open `validation.html` under the deployment (for example https://jtmcbride.github.io/transformer-scope/validation.html), describe the device, and press **Start validation**. It records the deployed commit, model revisions, actual backends, PyTorch reference checks, the prepared recipes, replay, cold readiness, and warm interaction timings, then exports raw JSON. It runs only when started and is not linked from the application. Follow `docs/physical-device-protocol.md` for the full physical-device procedure.
+
+## Run an educational session
+
+Open `study.html` under the deployment (https://jtmcbride.github.io/transformer-scope/study.html) and follow `docs/educational-evaluation.md`. The page locks each prediction before showing the live result, then exports one JSON record per participant. Summarize coded sessions with `node scripts/summarize_study.mjs --codes codes.json sessions/*.json`.
 
 ## Regenerate reference fixtures
 
@@ -64,12 +68,12 @@ The exporter saves 411,648 weight bytes, a hash-checked manifest/tokenizer, eval
 - Implemented: scaffold and lockfiles, model contract, artifact validation, independent fixtures, full forward execution, gradients, selective baseline/modified inspection, worker probe, and an initial intervention screen.
 - Implemented in Milestone C: a 32 MiB baseline cache with LRU eviction and read leases, exact same-layer residual deltas, suffix execution, full fallback, reset/identity reuse, and cached inspection. The screen shows the actual execution strategy and reuses unchanged baseline inspector slices during slider edits.
 - Implemented in Milestone D: deterministic retrieval training, held-out and length evaluations, measured recipes, a trained default model, checkpoint switching, and responsive attention inspection.
-- Verified: 41 engine tests, five dataset/reference/artifact tests, 319 direct cached/reference cases, and 19 production tests per browser in CI Chromium and Firefox, including 1,000 comparisons on each supported CPU/WebGL combination. The earlier 14 production tests also passed in Playwright WebKit on the recorded Mac host.
+- Verified: 41 engine tests, five dataset/reference/artifact tests, 319 direct cached/reference cases, and 21 production tests per browser in CI Chromium and Firefox, including 1,000 comparisons on each supported CPU/WebGL combination. The earlier 14 production tests also passed in Playwright WebKit on the recorded Mac host.
 - Implemented in Milestone E: versioned experiment export/replay, exact numeric strength, attention-cell arithmetic, lazy projection/residual/MLP vectors, and CPU worker restart.
 - Implemented in Milestone F: named-host browser latency measurements, source/build artifact auditing, pinned-action CI, verified Pages deployment, and hosted asset/workflow checks.
 - [Live application](https://jtmcbride.github.io/transformer-scope/). CI passes Chromium CPU/WebGL, Firefox CPU (worker WebGL unavailable on that runner), and hosted release checks. Installed Safari passes manual CPU/WebGL reference checks and hosted CPU verification.
 - Implemented for release validation: an opt-in on-device harness (`validation.html`), a physical-device protocol, an educational evaluation protocol with a findings template, and WebGL context-loss detection with CPU recovery.
-- Remaining release validation: running the device protocol on a physical lower-powered mobile device, running educational sessions, and performance across more named hardware/browser combinations.
+- Remaining release validation: educational sessions (the session page is ready), and performance across more named hardware/browser combinations. The physical lower-powered phone run is deferred by project decision and not validated.
 
 See `PLAN.md`, `docs/model-contract.md`, `docs/validation.md`, and `docs/benchmarks.md` for scope, semantics, and measured evidence.
 

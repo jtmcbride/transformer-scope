@@ -15,7 +15,7 @@ This protocol tests the first release's educational gate with the three shipped 
 Set these before collecting data and do not change them afterward:
 
 - At least five participants complete all three tasks and the concept probes. Run at least two sessions on a phone if possible.
-- For questions 2–4, at least four of five participants (or the same proportion of a larger group) give a **correct** answer after using the tool. A **partial** answer does not count.
+- For questions 2–4 (probes C1–C3), at least four of five participants (or the same proportion of a larger group) give a **correct** answer after using the tool, without a facilitator hint. A **partial** answer, or a correct answer after a hint, does not count toward the gate; both are reported.
 - Any misconception seen in two or more participants becomes an issue. A change to the interface or wording must be retested with new participants before the gate is considered met.
 - Prediction accuracy (question 1) is reported but has no threshold. Wrong predictions that participants then explain correctly are a useful outcome.
 
@@ -27,8 +27,9 @@ Set these before collecting data and do not change them afterward:
 
 ## Materials
 
-- The deployed application <https://jtmcbride.github.io/transformer-scope/>. Record the deployed commit from `release.json` (or the validation page) and the device and browser for each session.
-- One printed or on-screen prediction card per task (below), shown **before** the participant sees that result. Selecting a prepared experiment immediately shows its result and interpretation, so the facilitator sets up each task on a separate screen, or covers the result panel until the prediction is recorded.
+- The session page <https://jtmcbride.github.io/transformer-scope/study.html>. It is not linked from the application. It follows this script and records the deployed commit. Each prediction card is shown and its answers locked before the real application is loaded with that recipe, so the participant cannot see the result first. The page reads the result the participant sees, and exports one JSON record per participant. An unfinished session is kept on the device and can be resumed after a reload.
+- Use one device per session and hand it to the participant for the tasks. The facilitator types think-aloud answers into the free-text fields. The page stores only the participant ID, experience band, device, consent, and answers. Do not type names or other identifying details into any field.
+- Without the session page, use printed prediction cards (below) and cover the result panel until each prediction is recorded. Selecting a prepared experiment shows its result immediately.
 - A copy of the findings template.
 
 ## Session script (about 35 minutes)
@@ -101,6 +102,15 @@ Two people should code answers independently where possible, then resolve disagr
 | C5 | Position 15: yes (same position, before the output). Position 14: no (final layer, earlier position). | One of the two is correct. | Both answered by "it's the final layer, so no" or "everything is connected, so yes". |
 
 Prediction answers (P1/P2) are scored separately against the observed live result: direction (up/down/same) and magnitude band. P4 is correct only if the participant says no.
+
+## Summarizing
+
+1. Keep exported session files outside the repository. Verbatim answers can contain identifying details.
+2. Two coders assign C/P/M/N to each probe in a codes file, for example `{ "P01": { "C1": "C", "C2": "P", "C3": "C", "C4": "M", "C5": "C" } }`, and resolve disagreements first.
+3. Run `node scripts/summarize_study.mjs --codes codes.json sessions/*.json > tables.md`. The script validates every record, then produces the participant, prediction, probe, and gate tables for the findings template. Without codes it reports the gate as not evaluated.
+4. Copy the tables into the findings document, remove anything identifying from the quotes, and commit only that document.
+
+Prediction scoring is mechanical and uses the result shown at reveal. "Same" and "no change" mean an exactly zero distribution change (JSD 0). Otherwise the direction is the sign of the displayed Δ log p, which keeps the sign of a rounded value such as `-0.0000`. "Tiny" means a non-zero change under 1 percentage point, and "large" means over 50 points. Under these rules, Task 2 is observed as down/tiny and Task 3 as same/none.
 
 ## Reporting
 

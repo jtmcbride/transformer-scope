@@ -13,7 +13,7 @@ npm run test:browser -- --project=chromium --project=webkit
 npm run preview -- --port 4174
 ```
 
-`dist/` is the deployment artifact. Serve its contents under `/transformer-scope/`, including `assets/`, `models/`, and the opt-in `validation.html` diagnostic page (not linked from the application). Serve worker JavaScript as JavaScript, JSON as JSON, and `weights.bin` as binary data. Use HTTPS (or localhost for development), so Web Crypto checksums and worker backends are available. Source files, Python environments, fixture generators, and `.cache/` are not deployment inputs.
+`dist/` is the deployment artifact. Serve its contents under `/transformer-scope/`, including `assets/`, `models/`, the opt-in `validation.html` diagnostic page, and the opt-in `study.html` session page. Neither page is linked from the application. Serve worker JavaScript as JavaScript, JSON as JSON, and `weights.bin` as binary data. Use HTTPS (or localhost for development), so Web Crypto checksums and worker backends are available. Source files, Python environments, fixture generators, and `.cache/` are not deployment inputs.
 
 The artifact checker independently verifies canonical manifest revisions, exact binary/tokenizer hashes, tensor byte layout, finite weights, tokenizer dimensions, and retrieval metadata revisions in both source and built assets. Production browser tests exercise the actual subpath and emitted worker rather than development imports.
 

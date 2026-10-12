@@ -143,6 +143,10 @@ The worker now listens for `webglcontextlost` and checks `isContextLost()` befor
 
 Two production tests inject a browser-initiated loss into the real worker bundle, once while idle and once just after a comparison starts. Both require the alert, no display of the requested post-loss result, and recovery of the experiment on CPU. With the previous worker, both fail by timing out. Firefox CI has no worker WebGL, so these tests annotate it as unsupported there. The harness adds a `webgl-context-loss` check that runs the same path on any device. In local Chromium, the session ended 10–14 ms after the loss, and the replacement CPU worker passed the PyTorch probe.
 
+## Touch emulation
+
+At 360 CSS px in Chromium with touch emulation, the strength slider's hit area was 16 px tall and the file input 17 px, below the 24 px WCAG 2.2 minimum target size. On coarse pointers, both are now 32 px; the mouse layout is unchanged. A production test checks every control except inline text links for at least 24 × 24 px, checks containment, and sets the strength with a touchscreen tap. It fails without the CSS change. If an engine does not report a coarse pointer under emulation, the test annotates that and asserts containment only. This is viewport/touch emulation, not physical-device evidence.
+
 ## Physical-device results
 
 None yet. No physical mobile device was available while implementing the harness and protocol. Run `docs/physical-device-protocol.md` and record the harness JSON and manual checklist in `docs/device-results/`. Do not substitute viewport emulation, Playwright WebKit, installed desktop Safari, or automated harness runs for this gate.

@@ -107,3 +107,5 @@ a { color: var(--green); }
 .cell-inspector summary { cursor: pointer; padding: 9px 0; }
 
 .restart-worker { margin-bottom: 12px; }
+/* Finger-sized hit areas; the visual layout for mouse users is unchanged. */
+@media (pointer: coarse) { input[type=range] { height: 32px; margin: 12px 0 3px; } input[type=file] { min-height: 32px; } }

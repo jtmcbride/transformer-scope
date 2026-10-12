@@ -149,7 +149,7 @@ At 360 CSS px in Chromium with touch emulation, the strength slider's hit area w
 
 ## Residual-stream read-out
 
-The logit-lens panel matches independent PyTorch read-outs for the large-effect recipe's baseline and ablated runs. The maximum logit error is 1.67e-6 under the unchanged forward bounds (2e-5 absolute, 1e-5 relative), and the norms also match. Details and limitations: `docs/computation-inspection.md`.
+The input-embedding panel matches independent PyTorch embedding rows, sums, and similarity rows at four positions; its sum is bit-identical to the model's captured embedding output. The logit-lens panel matches independent PyTorch read-outs for the large-effect recipe's baseline and ablated runs. The maximum logit error is 1.67e-6 under the unchanged forward bounds (2e-5 absolute, 1e-5 relative), and the norms also match. Details and limitations: `docs/computation-inspection.md`.
 
 ## Physical-device results
 

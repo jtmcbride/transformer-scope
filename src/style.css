@@ -111,3 +111,4 @@ a { color: var(--green); }
 @media (pointer: coarse) { input[type=range] { height: 32px; margin: 12px 0 3px; } input[type=file] { min-height: 32px; } }
 .lens-table td, .lens-table th { white-space: nowrap; }.lens-table .final-row th, .lens-table .final-row td { font-weight: 650; }
 .observation { min-width: 0; }
+.embedding-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; margin: 12px 0; font-size: 12px; }.embedding-summary dt { color: var(--muted); }.embedding-summary dd { margin: 2px 0 0; font-family: "SFMono-Regular", Consolas, monospace; }.embedding-inspector details { margin-top: 12px; font-size: 12px; }

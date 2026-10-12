@@ -18,7 +18,7 @@
     "check:artifacts": "python3 scripts/check_artifacts.py --models public/models && python3 scripts/check_artifacts.py --models dist/models",
     "test:hosted": "playwright test --config playwright.hosted.config.ts",
     "analysis:heads": "vitest run --config vitest.analysis.config.ts",
-    "fixtures:lens": ".venv/bin/python scripts/export_lens.py"
+    "fixtures:exploration": ".venv/bin/python scripts/export_exploration.py"
   },
   "dependencies": {
     "@tensorflow/tfjs-core": "4.22.0",

@@ -38,3 +38,30 @@ it('reads out baseline and modified residuals as the independent PyTorch logit l
   console.info('Maximum lens logit error', maximum);
   expect(tf.memory().numTensors).toBe(start);
 });
+
+it('returns embedding rows and token similarities as the independent PyTorch reference does', async () => {
+  const { default: reference } = await import('../fixtures/embedding.json');
+  expect(reference.modelRevision).toBe(manifest.modelRevision);
+  const start = tf.memory().numTensors;
+  const engine = new RunEngine(artifact);
+  try {
+    const baseline = await engine.runBaseline(reference.tokenIds);
+    const compared = await engine.compare({ baselineRunId: baseline.runId, interventions: [fixture.intervention as HeadScaleIntervention], predictionPosition: fixture.predictionPosition });
+    for (const expected of reference.positions) {
+      const slice = await engine.inspectEmbedding(baseline.runId, expected.position);
+      expect(slice.tokenId).toBe(expected.tokenId);
+      assertClose(slice.token, expected.token, `token ${expected.position}`);
+      assertClose(slice.positionEmbedding, expected.positionEmbedding, `position ${expected.position}`);
+      assertClose(slice.sum, expected.sum, `sum ${expected.position}`);
+      assertClose(slice.similarity, expected.similarity, `similarity ${expected.position}`);
+      expect(slice.similarity[expected.tokenId]).toBeCloseTo(1, 6);
+      // The model's own embedding output is the same sum, and head scaling cannot change it.
+      const captured = await engine.inspectActivation(compared.modifiedRunId, { stage: 'embedding.output' }, { position: expected.position });
+      expect(Array.from(captured.values)).toEqual(Array.from(slice.sum));
+      const modified = await engine.inspectEmbedding(compared.modifiedRunId, expected.position);
+      expect(Array.from(modified.sum)).toEqual(Array.from(slice.sum));
+    }
+    await expect(engine.inspectEmbedding(baseline.runId, -1)).rejects.toThrow('outside the input');
+  } finally { engine.dispose(); }
+  expect(tf.memory().numTensors).toBe(start);
+});

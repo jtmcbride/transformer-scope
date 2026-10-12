@@ -20,6 +20,8 @@ export interface ComparisonResult extends PredictionComparison {
 export interface ActivationSlice {
   shape: number[]; axes: string[]; values: Float32Array;
 }
+/** Embedding rows are weights: identical for a baseline and every modified run of the same input. */
+export interface EmbeddingSlice { position: number; tokenId: number; token: Float32Array; positionEmbedding: Float32Array; sum: Float32Array; similarity: Float32Array }
 /** Residual rows at one position read out through the final normalization and unembedding. Only the last row is a model prediction. */
 export interface ResidualLens {
   position: number; stages: { stage: 'embedding.output' | 'attention.residual' | 'block.output'; layer: number | null }[];
@@ -218,6 +220,19 @@ export class RunEngine {
         slice = tf.slice(tensor, begin, sizes);
         return { shape: sizes, axes, values: Float32Array.from(await slice.data()) };
       } finally { slice?.dispose(); owned?.dispose(); if (result) disposeForward(result); lease?.release(); }
+    });
+  }
+
+  async inspectEmbedding(runId: string, position: number): Promise<EmbeddingSlice> {
+    return this.operation(async () => {
+      const run = this.descriptor(runId);
+      requireInput(Number.isInteger(position) && position >= 0 && position < run.tokenIds.length, 'Embedding position is outside the input.');
+      const parts = this.model.embeddingParts(run.tokenIds[position], position);
+      try {
+        const [token, positionEmbedding, sum, similarity] = await Promise.all([parts.token.data(), parts.position.data(), parts.sum.data(), parts.similarity.data()]);
+        return { position, tokenId: run.tokenIds[position], token: Float32Array.from(token), positionEmbedding: Float32Array.from(positionEmbedding),
+          sum: Float32Array.from(sum), similarity: Float32Array.from(similarity) };
+      } finally { Object.values(parts).forEach(tensor => tensor.dispose()); }
     });
   }
 

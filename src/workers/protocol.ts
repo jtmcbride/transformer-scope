@@ -1,5 +1,5 @@
 import type { ActivationReference, EngineErrorCode, ModelManifest, SymbolTokenizer } from '../engine/contracts';
-import type { ActivationSlice, CompareRequest, ComparisonResult, ResidualLens, RunSummary } from '../engine/runs';
+import type { ActivationSlice, CompareRequest, ComparisonResult, EmbeddingSlice, ResidualLens, RunSummary } from '../engine/runs';
 import type { ProbeReport } from '../engine/probe';
 import type { RuntimePrecision } from '../engine/experiment';
 import type { CacheStats } from '../engine/cache';
@@ -11,6 +11,7 @@ export interface Commands {
   COMPARE: { request: CompareRequest; response: ComparisonResult };
   INSPECT: { request: { runId: string; reference: ActivationReference; selection?: Record<string, number> }; response: ActivationSlice };
   LENS: { request: { runId: string; position: number }; response: ResidualLens };
+  EMBEDDING: { request: { runId: string; position: number }; response: EmbeddingSlice };
   RELEASE: { request: { runId: string }; response: null };
   PROBE: { request: Record<string, never>; response: ProbeReport };
   RESOURCES: { request: Record<string, never>; response: { cache: CacheStats; tensorCount: number; logicalTensorBytes: number; memoryEstimateUnreliable: boolean } };

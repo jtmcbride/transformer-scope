@@ -46,3 +46,32 @@ test('the residual-stream read-out shows independent PyTorch lens values for bas
     expect([cells[1], cells[3], cells[5]]).toEqual([cells[0], cells[2], cells[4]]);
   }
 });
+
+const embedding = JSON.parse(readFileSync('tests/fixtures/embedding.json', 'utf8')) as {
+  positions: { position: number; tokenId: number; token: number[]; positionEmbedding: number[]; sum: number[]; similarity: number[] }[] };
+
+test('the input-embedding panel shows independent PyTorch rows and token similarities', async ({ page }) => {
+  await page.goto('');
+  await expect(page.locator('.status')).toHaveText('Showing 0.00×', { timeout: 30_000 });
+  await page.getByRole('button', { name: 'Inspect the input embedding' }).click();
+  for (const position of [15, 14]) {
+    const expected = embedding.positions.find(item => item.position === position)!;
+    await page.getByLabel('Embedding position').selectOption(String(position));
+    await expect(page.locator('.embedding-summary')).toContainText(`Position ${position}`);
+    await expect(page.locator('.embedding-summary .symbol')).toHaveText(symbols[expected.tokenId]);
+    const rows = await page.getByRole('table', { name: 'Token embedding similarity' }).locator('tbody tr').evaluateAll(elements =>
+      elements.map(row => [row.querySelector('th')!.textContent!, Number(row.querySelector('td')!.textContent)] as const));
+    const ranked = expected.similarity.map((value, token) => ({ token, value })).filter(item => item.token !== expected.tokenId).sort((a, b) => b.value - a.value);
+    expect(rows.map(row => row[0])).toEqual(ranked.map(item => symbols[item.token]));
+    rows.forEach(([, value], i) => expect(Math.abs(value - ranked[i].value)).toBeLessThanOrEqual(5.1e-5));
+    await page.locator('.embedding-inspector summary').click();
+    const vectors = await page.getByRole('table', { name: 'Token, position, and summed embedding vectors' }).locator('tbody tr').evaluateAll(elements =>
+      elements.map(row => Array.from(row.querySelectorAll('td'), cell => Number(cell.textContent))));
+    expect(vectors).toHaveLength(64);
+    vectors.forEach(([token, place, sum], i) => {
+      for (const [actual, reference] of [[token, expected.token[i]], [place, expected.positionEmbedding[i]], [sum, expected.sum[i]]])
+        expect(Math.abs(actual - reference), `dimension ${i}`).toBeLessThanOrEqual(2e-5 + 5e-7);
+    });
+    await page.locator('.embedding-inspector summary').click();
+  }
+});

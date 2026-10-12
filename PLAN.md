@@ -318,7 +318,7 @@ Maintain `docs/validation.md` with exact fixture definitions, coverage, provenan
 
 Proceed only after the first release passes both the correctness and educational gates.
 
-1. **Broader exploration:** embeddings, residual views, richer computation traces, and a validated text checkpoint with a fully specified subword tokenizer. *Started 2026-10-12 by project decision before the educational gate:* a residual-stream read-out (logit lens) at the prediction position, verified against independent PyTorch values (`docs/computation-inspection.md`). Embedding views and the subword text checkpoint remain.
+1. **Broader exploration:** embeddings, residual views, richer computation traces, and a validated text checkpoint with a fully specified subword tokenizer. *Started 2026-10-12 by project decision before the educational gate:* a residual-stream read-out (logit lens) at the prediction position and an input-embedding view, both verified against independent PyTorch values (`docs/computation-inspection.md`). The validated subword text checkpoint remains.
 2. **Additional interventions:** residual replacement, normalized causal attention overrides, and compatible-run activation patching, each with its own semantics and full-versus-optimized tests.
 3. **Ablation explorer:** measured layer/head effects for a selected prediction, with explicit caveats about prompt dependence and non-additive interactions.
 4. **Training engine and workspace:** datasets, bounded training steps, loss/gradient inspection, pause/resume, and checkpoint comparison.

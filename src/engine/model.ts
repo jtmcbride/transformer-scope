@@ -94,6 +94,19 @@ export class TransformerModel {
       this.weights.tokenEmbedding as tf.Tensor2D, false, true), [1, length, this.config.vocabularySize]) as tf.Tensor3D;
   }
 
+  /** The token and position embedding rows summed at one input position, and the token row's cosine similarity to every token embedding. */
+  embeddingParts(tokenId: number, position: number): { token: tf.Tensor1D; position: tf.Tensor1D; sum: tf.Tensor1D; similarity: tf.Tensor1D } {
+    requireInput(!this.disposed, 'Model has been disposed.');
+    return tf.tidy(() => {
+      const table = this.weights.tokenEmbedding as tf.Tensor2D;
+      const token = tf.reshape(tf.gather(table, [tokenId]), [-1]) as tf.Tensor1D;
+      const place = tf.reshape(tf.gather(this.weights.positionEmbedding, [position]), [-1]) as tf.Tensor1D;
+      const unit = tf.div(table, tf.norm(table, 'euclidean', -1, true));
+      const similarity = tf.reshape(tf.matMul(unit, tf.reshape(tf.div(token, tf.norm(token)), [-1, 1])), [-1]) as tf.Tensor1D;
+      return { token, position: place, sum: tf.add(token, place) as tf.Tensor1D, similarity };
+    });
+  }
+
   /** Final normalization and tied unembedding applied to arbitrary residual rows [1, rows, d]: the logit lens. */
   readOut(residuals: tf.Tensor3D): tf.Tensor3D {
     requireInput(!this.disposed, 'Model has been disposed.');

@@ -1,4 +1,4 @@
-"""Independent residual-stream read-out ("logit lens") values for the trained retrieval checkpoint.
+"""Independent residual-stream read-out ("logit lens") and embedding values for the trained retrieval checkpoint.
 
 Each residual is passed through the final LayerNorm and the tied unembedding. The model computes
 this only for the final residual; intermediate read-outs are an inspection, not model predictions.
@@ -48,3 +48,17 @@ result = dict(modelRevision=manifest['modelRevision'], torchVersion=torch.__vers
               finalLogits=dict(baseline=logits[0, position].tolist(), modified=modified_logits[0, position].tolist()))
 (root / 'tests/fixtures/lens.json').write_text(json.dumps(result, indent=2) + '\n')
 print(f'Exported read-outs for {len(stages)} residual stages, baseline and modified.')
+
+# Embedding rows at selected positions, and each token row's cosine similarity to every token embedding.
+with torch.no_grad():
+    table = model.token.weight
+    unit = table / table.norm(dim=-1, keepdim=True)
+    embedding = []
+    for position in (0, 13, 14, 15):
+        token_id = tokens[position]
+        token, place = table[token_id], model.position.weight[position]
+        embedding.append(dict(position=position, tokenId=token_id, token=token.tolist(), positionEmbedding=place.tolist(),
+                              sum=baseline['embedding.output'][0, position].tolist(), similarity=(unit @ unit[token_id]).tolist()))
+(root / 'tests/fixtures/embedding.json').write_text(json.dumps(dict(modelRevision=manifest['modelRevision'], torchVersion=torch.__version__,
+                                                                   tokenIds=tokens, positions=embedding), indent=2) + '\n')
+print(f'Exported embedding rows and similarities at {len(embedding)} positions.')

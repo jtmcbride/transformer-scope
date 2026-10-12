@@ -49,6 +49,14 @@ export default function App() {
   const [probing, setProbing] = useState(false);
   const [transferring, setTransferring] = useState(false);
   const [selectedCell, setSelectedCell] = useState<{ query: number; source: number } | null>(null);
+  const [sessionEnded, setSessionEnded] = useState(false);
+
+  function createClient(): ModelClient {
+    const next = new ModelClient();
+    // A crashed worker or lost GPU context can end the session while idle; say so before the next edit.
+    next.onEnded = failure => { if (alive.current && client.current === next) { setSessionEnded(true); setError(failure.message); } };
+    return next;
+  }
 
   async function drain() {
     const owner = client.current;
@@ -174,7 +182,7 @@ export default function App() {
 
   useEffect(() => {
     alive.current = true;
-    client.current = new ModelClient();
+    client.current = createClient();
     void load(initialBackend, initialChoice);
     return () => { alive.current = false; ++version.current; latest.current = null; client.current?.dispose(); };
   }, []);
@@ -194,7 +202,7 @@ export default function App() {
     const sequence = display && model ? display.tokens.slice(1).map(id => model.tokenizer.tokens[id]).join(' ') : undefined;
     const settings = display ? { ...controlsRef.current } : undefined;
     ++version.current; latest.current = null;
-    client.current?.dispose(); client.current = new ModelClient(); setProbing(false);
+    client.current?.dispose(); client.current = createClient(); setProbing(false); setSessionEnded(false);
     await load('cpu', choice, sequence, undefined, settings);
   }
 
@@ -334,7 +342,8 @@ export default function App() {
       <div className="observation">
         <div className="observation-header"><div><p className="eyebrow">Prediction comparison</p><h2>Observe the consequence</h2></div>
           <span className={`status ${pending || loading ? 'working' : ''}`} role="status">{loading ? 'Loading model…' : pending ? `Computing…${display ? ` previous ${display.controls.factor.toFixed(2)}×` : ''}` : display ? `Showing ${display.controls.factor.toFixed(2)}×` : 'Ready'}</span></div>
-        {error && <p className="error" role="alert">{error}</p>}
+        {error && <p className="error" role="alert">{error}
+          {sessionEnded && <button type="button" className="secondary recover" onClick={() => void restart()}>Restart on CPU</button>}</p>}
         {display && tokenizer ? <>
           {experiments && <div className="checkpoint-evidence">
             <p><strong>{(experiments.evaluation.heldOut.accuracy * 100).toFixed(1)}% held-out answer accuracy</strong> · {experiments.evaluation.heldOut.count} distinct three-binding inputs</p>

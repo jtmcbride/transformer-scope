@@ -135,6 +135,14 @@ Coverage: five engine tests check timing summaries, the logit bound, recipe expe
 
 At commit `29b6ade`, CI passed all 32 production cases (16 each in Chromium 156 and Firefox 157, including both harness tests): [run 38263433282](https://github.com/jtmcbride/transformer-scope/actions/runs/38263433282). The deployment job then published that commit, and all three hosted Chromium checks passed against https://jtmcbride.github.io/transformer-scope/, including a harness run that identified commit `29b6ade` and had no failed checks. In this development container, headless Chromium 141 on Linux also passed all 16 Chromium cases and the three hosted-suite tests against a local production preview. These are automation results, not device evidence. A full-default run (both checkpoints and backends, 5 warm-up and 40 measured edits per layer) against a clean local build of `29b6ade` passed every applicable check; its unedited export is `docs/device-results/2026-10-12-automation-container-headless-chromium141.json`, kept as a format reference and labeled as automation.
 
+## WebGL context loss
+
+Mobile browsers can reclaim a backgrounded page's GPU context. Before this change, a lost worker context left the application on "Computing…" indefinitely, with no error. The test reproduced this in production Chromium by dropping the worker's context through `WEBGL_lose_context`. TF.js keeps using the lost context, so readbacks stall; on other drivers they could return meaningless values.
+
+The worker now listens for `webglcontextlost` and checks `isContextLost()` before and after every request. On loss, it discards the request's result, replies with `STALE_SESSION`, and posts a notice that ends the client session. Pending and later requests then reject with the same reason. The application shows "The browser reclaimed the GPU (WebGL context lost)…" with **Restart on CPU**, including when the loss happens while idle. Results completed before the loss stay on screen. The worker never restores a lost context, and it never switches backend silently.
+
+Two production tests inject a browser-initiated loss into the real worker bundle, once while idle and once just after a comparison starts. Both require the alert, no display of the requested post-loss result, and recovery of the experiment on CPU. With the previous worker, both fail by timing out. Firefox CI has no worker WebGL, so these tests annotate it as unsupported there. The harness adds a `webgl-context-loss` check that runs the same path on any device. In local Chromium, the session ended 10–14 ms after the loss, and the replacement CPU worker passed the PyTorch probe.
+
 ## Physical-device results
 
 None yet. No physical mobile device was available while implementing the harness and protocol. Run `docs/physical-device-protocol.md` and record the harness JSON and manual checklist in `docs/device-results/`. Do not substitute viewport emulation, Playwright WebKit, installed desktop Safari, or automated harness runs for this gate.
@@ -146,7 +154,7 @@ None yet. No physical mobile device was available while implementing the harness
 ## Outstanding gates
 
 - Wider trained-model intervention/seed coverage beyond the three shipped recipes.
-- A physical lower-powered mobile device: run `docs/physical-device-protocol.md` (harness plus manual checklist). GPU memory/context-loss recovery beyond explicit worker restart is observed by step B12 but not otherwise tested.
+- A physical lower-powered mobile device: run `docs/physical-device-protocol.md` (harness plus manual checklist). Context-loss detection is tested with simulated loss in Chromium and by the harness; real backgrounding on mobile GPUs is covered only by step B12. GPU memory exhaustion is not tested.
 - Educational sessions under `docs/educational-evaluation.md` (at least five participants), then wider tasks if the gate is met.
 - Broader named-device end-to-end latency benchmarks, including native Safari and physical mobile; current measurements cover one desktop host.
 - Larger-model, wider-seed, ill-conditioned-input, and lower-precision backend coverage.

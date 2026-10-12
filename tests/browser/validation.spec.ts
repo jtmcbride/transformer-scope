@@ -54,10 +54,16 @@ test('the validation harness is opt-in and records identity, numerical checks, a
     }
     expect(combination.actualBackend).toBe(combination.requestedBackend);
     expect(combination.modelRevision).toBe((report.release.data as { models: Record<string, { modelRevision: string }> }).models[combination.model].modelRevision);
-    const expected = ['ui-cold-readiness', 'ui-warm-interaction', 'ui-baseline-reset', 'ui-cpu-recovery', 'worker-load', 'computation-rpc', 'reference-probe', 'prepared-recipes', 'replay-roundtrip', 'resource-cleanup'];
+    const expected = ['ui-cold-readiness', 'ui-warm-interaction', 'ui-baseline-reset', 'ui-cpu-recovery', 'worker-load', 'computation-rpc', 'reference-probe', 'prepared-recipes', 'replay-roundtrip', 'resource-cleanup', 'webgl-context-loss'];
     expect(combination.checks.map(item => item.name)).toEqual(expected);
+    const notApplicable = (name: string) => (combination.model === 'verification' && name === 'prepared-recipes') || (combination.requestedBackend === 'cpu' && name === 'webgl-context-loss');
     for (const item of combination.checks)
-      expect(item.status, `${combination.model}/${combination.requestedBackend}/${item.name}: ${item.detail}`).toBe(combination.model === 'verification' && item.name === 'prepared-recipes' ? 'skipped' : 'passed');
+      expect(item.status, `${combination.model}/${combination.requestedBackend}/${item.name}: ${item.detail}`).toBe(notApplicable(item.name) ? 'skipped' : 'passed');
+    if (combination.requestedBackend === 'webgl') {
+      const loss = check(report, combination.model, 'webgl', 'webgl-context-loss').data as { lossToSessionEndMs: number; afterLoss: string };
+      expect(loss.lossToSessionEndMs).toBeLessThan(10_000);
+      expect(loss.afterLoss).toContain('WebGL context lost');
+    }
     const ui = check(report, combination.model, combination.requestedBackend, 'ui-warm-interaction').data as { layers: { domCommit: { count: number; p95Ms: number }; frameOpportunity: { count: number; p95Ms: number } }[] };
     expect(ui.layers).toHaveLength(2);
     for (const layer of ui.layers) {
@@ -111,6 +117,7 @@ test('the validation harness reports numerical failures and unsupported WebGL ex
   expect(check(report, 'retrieval', 'webgl', 'worker-load')).toMatchObject({ status: 'unsupported' });
   expect(check(report, 'retrieval', 'webgl', 'ui-cold-readiness').status).toBe('unsupported');
   expect(check(report, 'retrieval', 'webgl', 'reference-probe').status).toBe('skipped');
+  expect(check(report, 'retrieval', 'webgl', 'webgl-context-loss').status).toBe('skipped');
   await expect(page.locator('tr.failed')).toHaveCount(1);
   await expect(page.locator('tr.unsupported')).toHaveCount(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);

@@ -1,20 +1,41 @@
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-cpu';
+import type { MathBackendWebGL } from '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-webgl';
 import { EngineError, type ModelArtifact } from '../engine/contracts';
 import { loadArtifact } from '../engine/weights';
 import { RunEngine } from '../engine/runs';
 import { runProbe, type ProbeFixture } from '../engine/probe';
-import type { WorkerRequest, WorkerResponse } from './protocol';
+import type { WorkerNotice, WorkerRequest, WorkerResponse } from './protocol';
 
 const scope = self as unknown as DedicatedWorkerGlobalScope;
 let engine: RunEngine | undefined;
 let artifact: ModelArtifact | undefined;
 let manifestUrl = '';
 let queue = Promise.resolve();
+let context: WebGLRenderingContext | null = null;
+let backendLost = false;
+const lostMessage = 'The browser reclaimed the GPU (WebGL context lost). Results after the loss were discarded. Restart the computation worker on CPU to continue.';
+
+// A lost context cannot be restored under the existing tensors: readbacks stall or return
+// meaningless values. End this worker so no displayed number comes from a lost context.
+function loseBackend() {
+  if (backendLost) return;
+  backendLost = true;
+  scope.postMessage({ notice: 'BACKEND_LOST', message: lostMessage } satisfies WorkerNotice);
+}
+function assertBackend() {
+  if (context?.isContextLost()) loseBackend();
+  if (backendLost) throw new EngineError('STALE_SESSION', lostMessage);
+}
+function watchContext(next: WebGLRenderingContext | null) {
+  (context?.canvas as EventTarget | undefined)?.removeEventListener('webglcontextlost', loseBackend);
+  context = next;
+  (context?.canvas as EventTarget | undefined)?.addEventListener('webglcontextlost', loseBackend);
+}
 
 async function load(request: Extract<WorkerRequest, { command: 'LOAD' }>) {
-  engine?.dispose(); engine = undefined; artifact = undefined;
+  engine?.dispose(); engine = undefined; artifact = undefined; watchContext(null);
   manifestUrl = request.payload.manifestUrl;
   const nextArtifact = await loadArtifact(manifestUrl);
   const parameterCount = nextArtifact.manifest.tensors.reduce((sum, tensor) => sum + tensor.byteLength / 4, 0);
@@ -41,6 +62,7 @@ async function load(request: Extract<WorkerRequest, { command: 'LOAD' }>) {
       await tf.setBackend('cpu'); await tf.ready();
     }
   } else { await tf.setBackend('cpu'); await tf.ready(); }
+  if (tf.getBackend() === 'webgl') watchContext((tf.backend() as MathBackendWebGL).gpgpu.gl);
   artifact = nextArtifact;
   engine = new RunEngine(artifact, { cacheBudgetBytes: request.payload.cacheBudgetBytes });
   return { manifest: artifact.manifest, tokenizer: artifact.tokenizer, backend: tf.getBackend(), fallbackReason,
@@ -50,6 +72,19 @@ async function load(request: Extract<WorkerRequest, { command: 'LOAD' }>) {
 }
 
 async function execute(request: WorkerRequest): Promise<unknown> {
+  assertBackend();
+  if (request.command === 'LOSE_CONTEXT') {
+    const extension = tf.getBackend() === 'webgl' ? context?.getExtension('WEBGL_lose_context') : null;
+    if (!extension) throw new EngineError('UNSUPPORTED_BACKEND', 'Context-loss simulation requires WebGL with WEBGL_lose_context.');
+    // Detection is left to the browser's webglcontextlost event, the same path as a real loss.
+    extension.loseContext(); return null;
+  }
+  const result = await run(request);
+  assertBackend();
+  return result;
+}
+
+async function run(request: Exclude<WorkerRequest, { command: 'LOSE_CONTEXT' }>): Promise<unknown> {
   if (request.command === 'LOAD') return load(request);
   if (!engine || !artifact) throw new EngineError('STALE_SESSION', 'Load a model before running an experiment.');
   switch (request.command) {

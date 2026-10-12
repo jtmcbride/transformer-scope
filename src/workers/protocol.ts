@@ -13,7 +13,11 @@ export interface Commands {
   RELEASE: { request: { runId: string }; response: null };
   PROBE: { request: Record<string, never>; response: ProbeReport };
   RESOURCES: { request: Record<string, never>; response: { cache: CacheStats; tensorCount: number; logicalTensorBytes: number; memoryEstimateUnreliable: boolean } };
+  /** Diagnostic for the validation harness: asks the browser to drop the worker's WebGL context. */
+  LOSE_CONTEXT: { request: Record<string, never>; response: null };
 }
 export type Command = keyof Commands;
 export type WorkerRequest = { [K in Command]: { id: number; command: K; payload: Commands[K]['request'] } }[Command];
 export type WorkerResponse = { id: number; ok: true; result: unknown } | { id: number; ok: false; error: { code: EngineErrorCode; message: string } };
+/** Unsolicited: the worker can no longer compute, so the client must end the session. */
+export interface WorkerNotice { notice: 'BACKEND_LOST'; message: string }

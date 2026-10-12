@@ -254,7 +254,7 @@ async function workerChecks(model: HarnessModel, backend: HarnessBackend, settin
       return { data: { loadMs: performance.now() - started, fallbackReason: result.fallbackReason ?? null, matchesReleaseStamp: stamped ? true : null,
         definition: 'Worker LOAD request: static asset fetch, hash validation, backend initialization, and weight upload.' } };
     }));
-    const pending = ['computation-rpc', 'reference-probe', 'prepared-recipes', 'replay-roundtrip', 'resource-cleanup'];
+    const pending = ['computation-rpc', 'reference-probe', 'prepared-recipes', 'replay-roundtrip', 'resource-cleanup', 'webgl-context-loss'];
     if (checks[0].status !== 'passed' || !loaded) {
       for (const name of pending) checks.push({ name, status: 'skipped', detail: checks[0].status === 'unsupported' ? 'Backend unsupported.' : 'The worker did not load.' });
       return checks;
@@ -370,8 +370,50 @@ async function workerChecks(model: HarnessModel, backend: HarnessBackend, settin
         throw new Error(`After releasing every run: ${resources.tensorCount} tensors (expected ${expected}), ${resources.cache.logicalBytes} cache bytes.`);
       return { data: resources };
     }));
+    client.dispose();
+    checks.push(await runCheck('webgl-context-loss', async () => {
+      if (backend !== 'webgl') return { status: 'skipped', detail: 'Applies to WebGL only.' };
+      progress(`${model}/${backend}: dropping the WebGL context and recovering on CPU`);
+      return contextLossCheck(manifestUrl, benchmarkInput(model, model0, catalog?.recipes[0]?.text));
+    }));
     return checks;
   } finally { client.dispose(); }
+}
+
+/** Uses WEBGL_lose_context, so detection follows the browser's own context-loss event, then recovers on a fresh CPU worker. */
+async function contextLossCheck(manifestUrl: string, tokens: number[]): Promise<{ status?: 'unsupported' | 'failed'; detail: string; data?: unknown }> {
+  const lost = new ModelClient();
+  let lossToEndMs: number | null = null, afterLoss: string;
+  try {
+    await lost.request('LOAD', { manifestUrl, backend: 'webgl' });
+    const baseline = await lost.request('BASELINE', { tokenIds: tokens });
+    const ended = new Promise<void>(resolve => { lost.onEnded = () => resolve(); });
+    const started = performance.now();
+    try { await lost.request('LOSE_CONTEXT', {}); }
+    catch (error) {
+      if (error instanceof EngineError && error.code === 'UNSUPPORTED_BACKEND') return { status: 'unsupported', detail: error.message };
+    }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const noticed = await Promise.race([ended.then(() => true), new Promise<boolean>(resolve => { timer = setTimeout(() => resolve(false), 10_000); })]);
+    clearTimeout(timer);
+    if (noticed) lossToEndMs = performance.now() - started;
+    afterLoss = await lost.request('COMPARE', { baselineRunId: baseline.runId, predictionPosition: tokens.length - 1,
+      interventions: [{ id: 'context-loss', kind: 'head.scale', layer: 0, head: benchmarkHead, factor: rpcFactor, tokens: { kind: 'all' } }] })
+      .then(() => 'returned a result', error => `rejected: ${message(error)}`);
+    if (afterLoss === 'returned a result') return { status: 'failed', detail: 'A comparison returned values after the context was lost.' };
+    if (!noticed) return { status: 'failed', detail: `No context-loss event ended the session within 10 s; the next comparison ${afterLoss}.` };
+  } finally { lost.dispose(); }
+  const recovery = new ModelClient();
+  try {
+    const started = performance.now();
+    const loaded = await recovery.request('LOAD', { manifestUrl, backend: 'cpu' });
+    const probe = await recovery.request('PROBE', {});
+    if (loaded.backend !== 'cpu' || probe.retainedTensorDelta !== 0) throw new Error('The replacement CPU worker did not pass its reference probe.');
+    const recoveryMs = performance.now() - started;
+    return { detail: `session ended ${lossToEndMs!.toFixed(1)} ms after the loss; CPU worker verified in ${recoveryMs.toFixed(1)} ms`,
+      data: { lossToSessionEndMs: lossToEndMs, afterLoss, recoveryMs, probe,
+        definition: 'WEBGL_lose_context request until the client ends the session from the worker notice; then a fresh CPU worker load and PyTorch probe.' } };
+  } finally { recovery.dispose(); }
 }
 
 export interface HarnessEvidence { evidenceClass: EvidenceClass; deviceDescription: string; notes: string }

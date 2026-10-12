@@ -61,6 +61,7 @@ What the harness checks for each checkpoint/backend:
 - `ui-baseline-reset` and `ui-cpu-recovery`: reset reuses the immutable baseline with no displayed change; restart creates a CPU worker and preserves the experiment.
 - `worker-load`, `reference-probe`, `prepared-recipes`, `replay-roundtrip`, `resource-cleanup`: model identity, PyTorch forward/gradient/Adam parity, all three recipes through cached and full execution, in-memory export/replay, and tensor/cache release. These use the existing tolerances.
 - `computation-rpc`: full and cached comparison round trips, with the worker-reported computation time recorded separately.
+- `webgl-context-loss` (WebGL only): asks the browser to drop the worker's GPU context through `WEBGL_lose_context`, then checks that the session ends from the browser's context-loss event within 10 s, that no comparison returns values afterward, and that a fresh CPU worker passes the PyTorch probe. A browser without the extension reports `unsupported`.
 
 Statuses: `passed`; `failed` (a requirement was not met, with the reason); `unsupported` (the backend could not start on this device, such as WebGL without float32 rendering); `skipped` (not applicable, or a prerequisite was unsupported). CPU must never be unsupported. No timing threshold is applied.
 
@@ -81,7 +82,7 @@ Use the application at <https://jtmcbride.github.io/transformer-scope/>. For eac
 | B9 | From an edited state, tap **Reset to baseline**. | "Showing 1.00×", every row shows +0.00 pp, and the strategy reads "Baseline reused". |
 | B10 | Tap **Export experiment**, then **Import experiment** and choose the saved file. | The file is saved (iOS: Files or Downloads; Android: Downloads). Import shows "Replay matches saved results". If the browser cannot save or pick the file, record **unsupported** with the exact behavior. Do not count it as a pass. |
 | B11 | Choose WebGL in **Backend**. Then tap **Restart computation worker on CPU**. | WebGL either loads or shows "WebGL worker unavailable…" (record which). Restart returns to "CPU worker" and keeps the same input and settings. |
-| B12 | Switch to another app or lock the screen for one minute, then return. | The last result is still shown, or the page shows an error that **Restart computation worker on CPU** recovers. Record which, especially on WebGL (possible GPU context loss). |
+| B12 | Switch to another app or lock the screen for one minute, then return. Repeat on WebGL if it loaded in B11. | Either the last result is still shown and edits keep working, or the alert "The browser reclaimed the GPU (WebGL context lost)…" appears with **Restart on CPU**, which restores the experiment on CPU. The page must never stay on "Computing…" indefinitely. Record which occurred. |
 | B13 | Rotate to landscape and back. | No horizontal page scroll; the experiment and result are preserved. |
 | B14 | Tap **Verify against PyTorch**. | "Reference checks passed" with forward, gradient, and Adam errors, and a retained tensor change of 0. |
 

@@ -159,7 +159,7 @@ Coverage: four engine tests check that the prediction cards match `recipes.json`
 
 ## Outstanding gates
 
-- Wider trained-model intervention/seed coverage beyond the three shipped recipes.
+- Wider trained-model coverage: single-head ablations across all 453 held-out inputs are recorded (`docs/retrieval.md`, "Head-ablation coverage"). Other factors, prediction positions, head interactions, additional training seeds, and independent PyTorch recomputation of those comparisons remain open.
 - A physical lower-powered mobile device: run `docs/physical-device-protocol.md` (harness plus manual checklist). Context-loss detection is tested with simulated loss in Chromium and by the harness; real backgrounding on mobile GPUs is covered only by step B12. GPU memory exhaustion is not tested.
 - Educational sessions under `docs/educational-evaluation.md` (at least five participants), then wider tasks if the gate is met.
 - Broader named-device end-to-end latency benchmarks, including native Safari and physical mobile; current measurements cover one desktop host.

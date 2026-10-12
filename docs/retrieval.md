@@ -36,6 +36,29 @@ Each recipe records its exact text/token IDs, zero-based layer/head/positions, t
 
 These recipes intentionally select examples and extremes. They do not estimate average head importance, prove semantic specialization, or establish that heads act independently. The no-path control is an architecture invariant; the reachable control illustrates why a path need not have a large measured effect.
 
+## Head-ablation coverage
+
+The three recipes are selected examples. To show how representative they are, `npm run analysis:heads` ablates one head at a time (factor 0) on all 453 held-out inputs and records the change at the final query position. It uses the verified engine on CPU. The TypeScript split generator reproduces the recorded split counts and SHA-256 digests exactly (engine test `split.test.ts`). Raw results: `docs/head-coverage-results.json` (Node 22.22, TF.js 4.22.0 CPU, Linux x86_64; recorded 2026-10-12).
+
+| Ablated head (all positions) | Answer changed (of 453) | Median Δ log p | 10th percentile | Most negative | Mean correct-answer probability after |
+| --- | --- | --- | --- | --- | --- |
+| Layer 1, Head 1 | 33 | -6.4e-06 | -0.155 | -10.2 | 92.1% |
+| Layer 1, Head 2 | 57 | -1.7e-05 | -1.63 | -7.7 | 87.8% |
+| Layer 1, Head 3 | 12 | -1.2e-05 | -0.00419 | -4.45 | 97.0% |
+| Layer 1, Head 4 | 218 | -0.28 | -10.7 | -12 | 52.0% |
+| Layer 2, Head 1 | 24 | -1.4e-05 | -0.0119 | -5.51 | 94.9% |
+| Layer 2, Head 2 | 209 | -0.4 | -10.2 | -13 | 52.7% |
+| Layer 2, Head 3 | 0 | -7.4e-06 | -5.16e-05 | -0.000333 | 100.0% |
+| Layer 2, Head 4 | 0 | -4.3e-06 | -0.000205 | -0.00293 | 100.0% |
+
+- Ablating Layer 1 Head 4 changes the answer on fewer than half of the inputs, and its median effect is small. The large-effect recipe (−11.78 nats) lies in the extreme tail of this distribution. It is not a typical outcome.
+- Layer 2 Head 2 is comparably decisive. Counting, for each input, which single all-position ablation lowers the correct answer most: Layer 2 Head 2 195, Layer 1 Head 4 192, Layer 1 Head 2 29, Layer 2 Head 1 28, Layer 1 Head 3 6, Layer 1 Head 1 3.
+- Ablating any layer-1 head at position 0 only never changed an answer. The largest change was below 6e-6 nats, which is below the established 2e-5 logit tolerance and not interpreted. The small-effect recipe is typical in this respect.
+- Ablating any final-layer head at position 0 left the prediction exactly unchanged on all 453 inputs (JSD 0, maximum logit change 0), as the architecture requires.
+- Changes smaller than about 1e-5 nats, including the small positive values, are within numerical error and are not interpreted.
+
+These measurements cover one checkpoint, one task, one prediction position, factor 0, and single heads; they do not measure interactions. They show that a head's measured importance varies widely across inputs. They do not establish a semantic role for any head. Intervention results here use the engine whose forward, cached, and intervention paths match PyTorch on the recorded fixtures and recipes; these 7,248 comparisons were not separately recomputed in PyTorch.
+
 ## Reproduce and inspect
 
 ```

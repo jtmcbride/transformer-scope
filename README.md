@@ -79,4 +79,6 @@ See `PLAN.md`, `docs/model-contract.md`, `docs/validation.md`, and `docs/benchma
 
 `npm run benchmark:browser` records isolated production cold-ready, warm UI, and full/cached RPC samples for both models/backends in Chromium and WebKit. See `docs/benchmarks.md` for scope, and `docs/deployment.md` for release checks.
 
+`npm run analysis:heads` ablates each head on all 453 held-out inputs with the engine on CPU (about a minute) and writes `.cache/head-coverage.json`. The recorded result and its limitations are in `docs/retrieval.md`.
+
 `npm run benchmark:cache` records an isolated Node CPU comparison for a three-layer fixture at early/middle/late edits. Its raw output goes to `.cache/cache-benchmark.json`. It measures forward computation and logit readback, not complete browser interaction latency.

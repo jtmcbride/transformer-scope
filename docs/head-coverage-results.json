@@ -1,0 +1,434 @@
+{
+  "format": "transformer-microscope-head-coverage",
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-12T15:31:06.041Z",
+  "modelId": "retrieval-seed-2026",
+  "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+  "split": "test (held-out three-binding inputs)",
+  "inputs": 453,
+  "intervention": "head.scale factor 0 (ablation), one head at a time",
+  "predictionPosition": "final query position",
+  "metric": "natural-log target probability change",
+  "environment": {
+    "node": "v22.22.0",
+    "platform": "linux 6.18.44-fc-v114",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "backend": "cpu",
+    "tfjs": "4.22.0"
+  },
+  "mostHarmfulAllPositionHeadPerInput": {
+    "L2H2": 195,
+    "L1H4": 192,
+    "L1H2": 29,
+    "L2H1": 28,
+    "L1H3": 6,
+    "L1H1": 3
+  },
+  "configurations": [
+    {
+      "layer": 0,
+      "head": 0,
+      "label": "Layer 1, Head 1",
+      "positions": "all",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 33,
+      "targetLogProbabilityDelta": {
+        "minimum": -10.216719790878098,
+        "p10": -0.15487118183085932,
+        "median": -0.000006422782335710497,
+        "p90": 0.000009692665839646522,
+        "maximum": 0.00004007006342897216
+      },
+      "meanModifiedTargetProbability": 0.9208129808308918,
+      "jsDivergence": {
+        "median": 0.0000014151675508808707,
+        "p90": 0.052370024013275014,
+        "maximum": 0.6927026695796675,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 10.685077428817749
+    },
+    {
+      "layer": 0,
+      "head": 0,
+      "label": "Layer 1, Head 1",
+      "positions": "position 0 only",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": -0.000005643193972898833,
+        "p10": -3.0045477321553947e-7,
+        "median": 2.0500040242139818e-9,
+        "p90": 2.2700768202792946e-7,
+        "maximum": 0.0000013437401300709772
+      },
+      "meanModifiedTargetProbability": 0.9999017342714388,
+      "jsDivergence": {
+        "median": 3.03082361003054e-10,
+        "p90": 1.8900145955227364e-9,
+        "maximum": 6.243550333591848e-8,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 0.10484635829925537
+    },
+    {
+      "layer": 0,
+      "head": 1,
+      "label": "Layer 1, Head 2",
+      "positions": "all",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 57,
+      "targetLogProbabilityDelta": {
+        "minimum": -7.7022287823508355,
+        "p10": -1.630729629506354,
+        "median": -0.000017216746486759965,
+        "p90": 0.00000394292844073198,
+        "maximum": 0.00002189211356912127
+      },
+      "meanModifiedTargetProbability": 0.8781960907689418,
+      "jsDivergence": {
+        "median": 0.0000020836731727533157,
+        "p90": 0.4264889484331215,
+        "maximum": 0.6910131615536825,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 10.172866582870483
+    },
+    {
+      "layer": 0,
+      "head": 1,
+      "label": "Layer 1, Head 2",
+      "positions": "position 0 only",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": -7.281640647406856e-7,
+        "p10": -9.707181869004252e-8,
+        "median": -4.84061930269104e-10,
+        "p90": 9.95779291966054e-8,
+        "maximum": 0.0000011304672141391602
+      },
+      "meanModifiedTargetProbability": 0.9999017699389675,
+      "jsDivergence": {
+        "median": 6.308881610480778e-11,
+        "p90": 6.147724120271378e-10,
+        "maximum": 4.486620910104462e-9,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 0.025357604026794434
+    },
+    {
+      "layer": 0,
+      "head": 2,
+      "label": "Layer 1, Head 3",
+      "positions": "all",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 12,
+      "targetLogProbabilityDelta": {
+        "minimum": -4.454523568449254,
+        "p10": -0.004191358027354448,
+        "median": -0.000011906720059026365,
+        "p90": 0.00000697961774423813,
+        "maximum": 0.000036158634533933496
+      },
+      "meanModifiedTargetProbability": 0.9695468298951253,
+      "jsDivergence": {
+        "median": 0.0000023559690445787318,
+        "p90": 0.0014124398255105852,
+        "maximum": 0.6611252482828118,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 8.512114763259888
+    },
+    {
+      "layer": 0,
+      "head": 2,
+      "label": "Layer 1, Head 3",
+      "positions": "position 0 only",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": -0.0000012696105514208267,
+        "p10": -2.1603984617429232e-7,
+        "median": 1.1949888123646867e-8,
+        "p90": 1.3347794319009093e-7,
+        "maximum": 0.000003595026254466356
+      },
+      "meanModifiedTargetProbability": 0.999901778994018,
+      "jsDivergence": {
+        "median": 1.7023994923156824e-10,
+        "p90": 1.4743944417506846e-9,
+        "maximum": 2.2982518849877446e-8,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 0.049643874168395996
+    },
+    {
+      "layer": 0,
+      "head": 3,
+      "label": "Layer 1, Head 4",
+      "positions": "all",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 218,
+      "targetLogProbabilityDelta": {
+        "minimum": -11.956391227690505,
+        "p10": -10.714280869108634,
+        "median": -0.2828278772798481,
+        "p90": -0.00008040542019003685,
+        "maximum": 0.000032420202098129455
+      },
+      "meanModifiedTargetProbability": 0.5203358469802436,
+      "jsDivergence": {
+        "median": 0.09384611213308157,
+        "p90": 0.6927114619160917,
+        "maximum": 0.6929358234481026,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 14.518821716308594
+    },
+    {
+      "layer": 0,
+      "head": 3,
+      "label": "Layer 1, Head 4",
+      "positions": "position 0 only",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": -0.000002338439285406096,
+        "p10": -3.312638841155755e-7,
+        "median": -6.625162712748235e-9,
+        "p90": 2.6891853262356953e-7,
+        "maximum": 0.000003860276687174291
+      },
+      "meanModifiedTargetProbability": 0.9999017745535177,
+      "jsDivergence": {
+        "median": 2.737162846142669e-10,
+        "p90": 6.742273582209292e-9,
+        "maximum": 6.736054725971127e-8,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 0.13622283935546875
+    },
+    {
+      "layer": 1,
+      "head": 0,
+      "label": "Layer 2, Head 1",
+      "positions": "all",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 24,
+      "targetLogProbabilityDelta": {
+        "minimum": -5.512571106000256,
+        "p10": -0.011941046100286746,
+        "median": -0.000014188850372447148,
+        "p90": 0.0000018331111965032661,
+        "maximum": 0.0000315119932637462
+      },
+      "meanModifiedTargetProbability": 0.9490304059117277,
+      "jsDivergence": {
+        "median": 0.000001945373373589124,
+        "p90": 0.0040409848787726545,
+        "maximum": 0.6796135721314349,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 9.60705304145813
+    },
+    {
+      "layer": 1,
+      "head": 0,
+      "label": "Layer 2, Head 1",
+      "positions": "position 0 only",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 0,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": 0,
+        "p10": 0,
+        "median": 0,
+        "p90": 0,
+        "maximum": 0
+      },
+      "meanModifiedTargetProbability": 0.9999017734698534,
+      "jsDivergence": {
+        "median": 0,
+        "p90": 0,
+        "maximum": 0,
+        "exactlyZeroCount": 453
+      },
+      "maximumAbsoluteLogitChange": 0
+    },
+    {
+      "layer": 1,
+      "head": 1,
+      "label": "Layer 2, Head 2",
+      "positions": "all",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 209,
+      "targetLogProbabilityDelta": {
+        "minimum": -13.025523759986312,
+        "p10": -10.185159865005245,
+        "median": -0.4038721439551592,
+        "p90": -0.0010343345861348321,
+        "maximum": -0.0001294082705340018
+      },
+      "meanModifiedTargetProbability": 0.5271221432100068,
+      "jsDivergence": {
+        "median": 0.13154362493247293,
+        "p90": 0.6926022329468058,
+        "maximum": 0.6929156280014268,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 14.786322593688965
+    },
+    {
+      "layer": 1,
+      "head": 1,
+      "label": "Layer 2, Head 2",
+      "positions": "position 0 only",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 0,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": 0,
+        "p10": 0,
+        "median": 0,
+        "p90": 0,
+        "maximum": 0
+      },
+      "meanModifiedTargetProbability": 0.9999017734698534,
+      "jsDivergence": {
+        "median": 0,
+        "p90": 0,
+        "maximum": 0,
+        "exactlyZeroCount": 453
+      },
+      "maximumAbsoluteLogitChange": 0
+    },
+    {
+      "layer": 1,
+      "head": 2,
+      "label": "Layer 2, Head 3",
+      "positions": "all",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": -0.0003330936308968169,
+        "p10": -0.00005160176847518774,
+        "median": -0.0000073722076683054,
+        "p90": 8.852346390554751e-7,
+        "maximum": 0.000013169275113310356
+      },
+      "meanModifiedTargetProbability": 0.999883161946827,
+      "jsDivergence": {
+        "median": 4.00315965350035e-7,
+        "p90": 0.000007776119946535422,
+        "maximum": 0.00007596554600943251,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 2.0083489418029785
+    },
+    {
+      "layer": 1,
+      "head": 2,
+      "label": "Layer 2, Head 3",
+      "positions": "position 0 only",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 0,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": 0,
+        "p10": 0,
+        "median": 0,
+        "p90": 0,
+        "maximum": 0
+      },
+      "meanModifiedTargetProbability": 0.9999017734698534,
+      "jsDivergence": {
+        "median": 0,
+        "p90": 0,
+        "maximum": 0,
+        "exactlyZeroCount": 453
+      },
+      "maximumAbsoluteLogitChange": 0
+    },
+    {
+      "layer": 1,
+      "head": 3,
+      "label": "Layer 2, Head 4",
+      "positions": "all",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 453,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": -0.0029259934780468616,
+        "p10": -0.00020456373653355637,
+        "median": -0.0000042967447774321376,
+        "p90": 4.793510995184703e-7,
+        "maximum": 0.000012870109946209611
+      },
+      "meanModifiedTargetProbability": 0.9998323764521161,
+      "jsDivergence": {
+        "median": 3.972054291815567e-7,
+        "p90": 0.000047623155193265006,
+        "maximum": 0.0008711130063787407,
+        "exactlyZeroCount": 0
+      },
+      "maximumAbsoluteLogitChange": 3.1940866708755493
+    },
+    {
+      "layer": 1,
+      "head": 3,
+      "label": "Layer 2, Head 4",
+      "positions": "position 0 only",
+      "factor": 0,
+      "count": 453,
+      "reachableCount": 0,
+      "answerChangedCount": 0,
+      "targetLogProbabilityDelta": {
+        "minimum": 0,
+        "p10": 0,
+        "median": 0,
+        "p90": 0,
+        "maximum": 0
+      },
+      "meanModifiedTargetProbability": 0.9999017734698534,
+      "jsDivergence": {
+        "median": 0,
+        "p90": 0,
+        "maximum": 0,
+        "exactlyZeroCount": 453
+      },
+      "maximumAbsoluteLogitChange": 0
+    }
+  ],
+  "limitations": [
+    "One checkpoint, one controlled task, one prediction position, factor 0 only.",
+    "Single-head ablations do not measure interactions between heads.",
+    "Effects measured on these inputs do not establish a semantic role for any head."
+  ]
+}

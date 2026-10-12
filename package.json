@@ -16,7 +16,8 @@
     "fixtures:inspection": ".venv/bin/python scripts/export_inspection.py",
     "benchmark:browser": "playwright test --config playwright.benchmark.config.ts && node scripts/collect_browser_benchmark.mjs",
     "check:artifacts": "python3 scripts/check_artifacts.py --models public/models && python3 scripts/check_artifacts.py --models dist/models",
-    "test:hosted": "playwright test --config playwright.hosted.config.ts"
+    "test:hosted": "playwright test --config playwright.hosted.config.ts",
+    "analysis:heads": "vitest run --config vitest.analysis.config.ts"
   },
   "dependencies": {
     "@tensorflow/tfjs-core": "4.22.0",

@@ -332,6 +332,8 @@ Complete the remaining Milestone F release gates. The trained checkpoint and thr
 
 On 2026-10-12 the project owner chose to skip the lower-powered phone run and proceed to educational evaluation. The physical-mobile gate is deferred, not passed; its harness and protocol remain ready. The opt-in session page `study.html` now runs the educational protocol. It locks each prediction before showing the live recipe result, records the displayed result, and exports per-participant JSON. `scripts/summarize_study.mjs` turns the records and human probe codes into the findings tables and gate tally.
 
+Single-head ablation coverage across all 453 held-out inputs is now recorded (`npm run analysis:heads`, `docs/retrieval.md`). Ablating Layer 1 Head 4 changes the answer on 218 inputs and ablating Layer 2 Head 2 on 209. The large-effect recipe is near the extreme of that range, layer-1 position-0 ablations never change an answer, and final-layer position-0 ablations are exactly zero. The facilitator uses this spread in the C4 debrief, without presenting a head role.
+
 Next actionable step: run five facilitated sessions with `study.html` (two on phones if possible). Code probes C1–C5 with two coders, summarize with `scripts/summarize_study.mjs`, and record the outcome in a findings document. Address any misconception seen twice and retest it with new participants. Wider trained-head/prompt coverage remains follow-up work; larger models, the training UI, new interventions, and the ablation explorer stay deferred until both gates pass.
 
 No latency, checkpoint quality, browser compatibility, or numerical parity claim is complete until its associated evidence is recorded.

@@ -89,6 +89,8 @@ Ask these after all three tasks, before the debrief. Record verbatim answers. Pa
 
 Explain the correct answers to any probes the participant missed and ask which part of the screen would have helped them. Record suggestions.
 
+For C4, show the measured spread after the participant has answered, never before. Across the 453 held-out inputs, ablating Layer 1 Head 4 changes the answer on 218 inputs, and ablating Layer 2 Head 2 changes it on 209. Each is the most harmful single head on about 190 inputs. Task 1's effect is near the extreme of that range (`docs/retrieval.md`, "Head-ablation coverage"). Describe this as evidence that importance varies across inputs, not as a head's role.
+
 ## Coding answers
 
 Two people should code answers independently where possible, then resolve disagreements; record the number of disagreements. Use these definitions:

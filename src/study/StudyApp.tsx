@@ -174,7 +174,7 @@ export default function StudyApp() {
       <button type="button" className="primary" onClick={() => update({ step: 'debrief' })}>Continue to debrief</button></section>}
 
     {draft.step === 'debrief' && <section className="panel" aria-label="Debrief"><h2>Debrief</h2>
-      <p>Explain the correct answers to any missed probes (see the coding table in the protocol), and ask which part of the screen would have helped.</p>
+      <p>Explain the correct answers to any missed probes (see the coding table in the protocol), and ask which part of the screen would have helped. For C4, share the head-ablation coverage in docs/retrieval.md only after the participant has answered.</p>
       <label>Debrief notes and suggestions<textarea aria-label="Debrief notes" rows={3} value={draft.debrief} onChange={event => update({ debrief: event.target.value })} /></label>
       <button type="button" className="primary" onClick={finish}>Finish and export</button></section>}
 

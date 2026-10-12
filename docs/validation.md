@@ -163,6 +163,10 @@ Engine results:
 
 Regenerating the existing head-scaling fixtures with and without the reference change produced byte-identical files on this host. Those regenerations used PyTorch 2.9.1+cu128 on Linux and differ from the committed macOS CPU-build fixtures, because seeded initialization differs across builds. The committed fixtures were left unchanged.
 
+**Patching on screen.** **Intervention type → Patch the residual from another input** takes a source input with the same number of symbols. For a well-formed retrieval input it suggests the same bindings queried for another key. You choose a patch point (a layer's input or its post-attention residual) and a position; positions that differ between the inputs are marked ←. The worker reads the source run's residual at that point and submits it as `residual.replace` on the current input. The prediction comparison, residual read-out, embedding, and computation panels then show the effect, and a patched-residual panel lists the replaced row.
+
+Source runs are released when the input, model, or worker changes. A CPU worker restart recreates the source run and keeps the patch settings. Changing the input returns to head scaling, and export stays disabled because version 1 files save head scaling only. A production test compares the displayed probabilities of `3` and `0` with the PyTorch sweep at six patch points, using the original two-decimal display bound. It also checks the no-path note for the final-layer earlier-position case, full execution, the 64-dimension patched row, restart, source-length validation, and reset.
+
 In the sweep, the source's query key moves the prediction from `3` to `0` (target probability 99.99% to about 0%) only through position 14 up to layer 2's input, and only through position 15 after layer 2's attention. This holds for one input pair; it is not a general claim about where the model stores information.
 
 ## Residual-stream read-out

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { tokenize, type HeadScaleIntervention, type SymbolTokenizer } from './engine/contracts';
+import { requireInput, tokenize, type Intervention, type SymbolTokenizer } from './engine/contracts';
+import { hookKeys, hookLabel, parseHook, swappedQuery } from './patching';
 import type { ComparisonResult, RunSummary } from './engine/runs';
 import type { Commands } from './workers/protocol';
 import type { ProbeReport } from './engine/probe';
@@ -14,13 +15,15 @@ import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
 
 type LoadedModel = Commands['LOAD']['response'];
-interface Controls { layer: number; head: number; factor: number; scope: string; position: number; target: number }
+/** mode 'head' scales a head's output; mode 'patch' copies a source input's residual row into this input (residual.replace). */
+interface Controls { layer: number; head: number; factor: number; scope: string; position: number; target: number; mode: 'head' | 'patch'; hook: string; patchPosition: number }
 interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport }
-interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument }
+interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument; source?: RunSummary }
 const initialChoice: ModelChoice = new URLSearchParams(window.location.search).get('model') === 'verification' ? 'verification' : 'retrieval';
 const backendParameter = new URLSearchParams(window.location.search).get('backend');
 const initialBackend = backendParameter === 'cpu' || backendParameter === 'webgl' ? backendParameter : 'auto';
-const defaults: Controls = { layer: 0, head: 0, factor: .5, scope: 'all', position: 5, target: 2 };
+const defaults: Controls = { layer: 0, head: 0, factor: .5, scope: 'all', position: 5, target: 2, mode: 'head', hook: '0:block.input', patchPosition: 0 };
+const shown = (c: Controls) => c.mode === 'patch' ? 'patched residual' : `${c.factor.toFixed(2)}×`;
 
 function SymbolLabel({ tokenizer, tokenId }: { tokenizer: SymbolTokenizer; tokenId: number }) {
   return <span className="symbol">{tokenizer.tokens[tokenId]}</span>;
@@ -36,6 +39,7 @@ export default function App() {
   const modifiedId = useRef<string | null>(null);
   const controlsRef = useRef<Controls>(defaults);
   const baselineInspector = useRef<{ key: string; attention: number[]; raw: number[] } | null>(null);
+  const source = useRef<{ owner: ModelClient; run: RunSummary } | null>(null);
   const [choice, setChoice] = useState<ModelChoice>(initialChoice);
   const [experiments, setExperiments] = useState<ExperimentMetadata | null>(null);
   const [activeRecipe, setActiveRecipe] = useState<ExperimentRecipe | null>(null);
@@ -52,6 +56,8 @@ export default function App() {
   const [transferring, setTransferring] = useState(false);
   const [selectedCell, setSelectedCell] = useState<{ query: number; source: number } | null>(null);
   const [sessionEnded, setSessionEnded] = useState(false);
+  const [sourceText, setSourceText] = useState('');
+  const [sourceTokens, setSourceTokens] = useState<number[] | null>(null);
 
   function createClient(): ModelClient {
     const next = new ModelClient();
@@ -72,13 +78,30 @@ export default function App() {
         const vectorPosition = c.scope === 'all' ? c.position : Number(c.scope);
         let created: string | undefined;
         try {
-          const intervention: HeadScaleIntervention = { id: 'head-strength', kind: 'head.scale', layer: c.layer, head: c.head, factor: c.factor,
+          let intervention: Intervention;
+          if (c.mode === 'patch') {
+            requireInput(job.source, 'Choose a source input to patch from.');
+            const hook = parseHook(c.hook);
+            const read = await owner.request('INSPECT', { runId: job.source.runId, reference: hook, selection: { position: c.patchPosition } });
+            if (job.version !== version.current) continue;
+            intervention = { id: 'residual-patch', kind: 'residual.replace', ...hook, position: c.patchPosition, values: Array.from(read.values) };
+          } else intervention = { id: 'head-strength', kind: 'head.scale', layer: c.layer, head: c.head, factor: c.factor,
             tokens: c.scope === 'all' ? { kind: 'all' } : { kind: 'indices', indices: [Number(c.scope)] } };
           const comparison = await owner.request('COMPARE', {
             baselineRunId: job.baseline.runId, interventions: [intervention], predictionPosition: c.position, targetTokenId: c.target, topK: 8,
           });
           created = comparison.modifiedRunId;
           if (job.version !== version.current) continue;
+          if (intervention.kind === 'residual.replace') {
+            // The patched row: this input's own residual at the patch point, and the source row that replaces it.
+            const own = await owner.request('INSPECT', { runId: job.baseline.runId, reference: parseHook(c.hook), selection: { position: c.patchPosition } });
+            if (job.version !== version.current) continue;
+            if (modifiedId.current) void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
+            modifiedId.current = created; created = undefined;
+            setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds, attention: [], raw: Array.from(own.values), modified: intervention.values });
+            setError(null);
+            continue;
+          }
           const inspectorKey = JSON.stringify([job.baseline.runId, c.layer, c.head, vectorPosition]);
           const savedInspector = baselineInspector.current;
           const readBaseline = async () => {
@@ -123,8 +146,41 @@ export default function App() {
     controlsRef.current = next; setControls(next);
     const current = ++version.current;
     if (!run) return;
-    latest.current = { version: current, baseline: run, controls: { ...next }, replay };
+    latest.current = { version: current, baseline: run, controls: { ...next }, replay, source: next.mode === 'patch' ? source.current?.run : undefined };
     setPending(true); void drain();
+  }
+
+  /** A source run belongs to one target input and worker; it is released whenever either changes. */
+  function releaseSource(owner = client.current) {
+    const old = source.current;
+    source.current = null; setSourceTokens(null);
+    if (old && old.owner === owner) void owner.request('RELEASE', { runId: old.run.runId }).catch(() => {});
+  }
+
+  async function applySource(text: string, restored?: Controls) {
+    const loaded = model, target = baseline.current, owner = client.current;
+    if (!loaded || !target || !owner) return;
+    setError(null); setSourceText(text);
+    try {
+      const tokens = tokenize(text, loaded.tokenizer, loaded.manifest.config.contextLength);
+      requireInput(tokens.length === target.tokenIds.length, `The source must have the same number of symbols as the input (${target.tokenIds.length - 1}).`);
+      const run = await owner.request('BASELINE', { tokenIds: tokens });
+      if (!alive.current || client.current !== owner || baseline.current !== target) { void owner.request('RELEASE', { runId: run.runId }).catch(() => {}); return; }
+      releaseSource(owner);
+      source.current = { owner, run }; setSourceTokens(tokens);
+      const differing = tokens.findIndex((token, i) => token !== target.tokenIds[i]);
+      schedule(restored ? { ...restored, mode: 'patch' }
+        : { ...controlsRef.current, mode: 'patch', patchPosition: differing >= 0 ? differing : Math.min(controlsRef.current.patchPosition, tokens.length - 1) });
+    } catch (failure) { if (alive.current && client.current === owner) setError(failure instanceof Error ? failure.message : String(failure)); }
+  }
+
+  function chooseMode(mode: Controls['mode']) {
+    if (mode === 'head') { schedule({ ...controlsRef.current, mode }); return; }
+    if (source.current && sourceTokens) { schedule({ ...controlsRef.current, mode }); return; }
+    const target = baseline.current, loaded = model;
+    if (!target || !loaded) return;
+    const own = target.tokenIds.slice(1).map(id => loaded.tokenizer.tokens[id]).join(' ');
+    void applySource(sourceText.trim() || (swappedQuery(target.tokenIds, loaded.tokenizer) ?? own));
   }
 
   async function establish(loaded: LoadedModel, input: string, generation: number, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument, settings?: Controls) {
@@ -141,15 +197,16 @@ export default function App() {
       void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {}); modifiedId.current = null;
     }
     const patch = replay?.observation.interventions[0] ?? recipe?.intervention;
-    schedule(settings ?? (patch ? { layer: patch.layer, head: patch.head, factor: patch.factor,
+    releaseSource(owner);
+    schedule(settings ?? (patch ? { ...controlsRef.current, mode: 'head', layer: patch.layer, head: patch.head, factor: patch.factor,
       scope: patch.tokens.kind === 'all' ? 'all' : String(patch.tokens.indices[0]), position: replay?.observation.predictionPosition ?? recipe!.predictionPosition, target: replay?.observation.targetTokenId ?? recipe!.targetTokenId }
-      : { ...controlsRef.current, position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target }), next, recipe, replay);
+      : { ...controlsRef.current, mode: 'head', position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target }), next, recipe, replay);
   }
 
   async function load(backend: 'auto' | 'cpu' | 'webgl', selected: ModelChoice, input?: string, restored?: ExperimentDocument, settings?: Controls) {
     const owner = client.current;
     const generation = ++version.current;
-    latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null;
+    latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null; source.current = null; setSourceTokens(null);
     setChoice(selected); setExperiments(null); setActiveRecipe(null);
     setLoading(true); setModel(null); setDisplay(null); setError(null); setProbe(null);
     try {
@@ -202,10 +259,13 @@ export default function App() {
 
   async function restart() {
     const sequence = display && model ? display.tokens.slice(1).map(id => model.tokenizer.tokens[id]).join(' ') : undefined;
-    const settings = display ? { ...controlsRef.current } : undefined;
+    // Source runs belong to the old worker; the patch is restored by re-running its source in the new one.
+    const patchSource = controlsRef.current.mode === 'patch' && source.current ? sourceText : null;
+    const settings = display ? { ...controlsRef.current, ...(patchSource !== null ? { mode: 'head' as const } : {}) } : undefined;
     ++version.current; latest.current = null;
     client.current?.dispose(); client.current = createClient(); setProbing(false); setSessionEnded(false);
     await load('cpu', choice, sequence, undefined, settings);
+    if (patchSource !== null && alive.current && baseline.current) await applySource(patchSource, settings);
   }
 
   async function verify() {
@@ -307,7 +367,19 @@ export default function App() {
             <small>{index}</small>{tokenizer.tokens[id]}</button>)}</div>
         </section>
         <section>
-          <p className="eyebrow">Intervention</p><h2>Change a head's contribution</h2>
+          <p className="eyebrow">Intervention</p><h2>{controls.mode === 'patch' ? 'Patch a residual vector' : "Change a head's contribution"}</h2>
+          <label>Intervention type<select aria-label="Intervention type" disabled={loading || probing || transferring || !model} value={controls.mode} onChange={event => chooseMode(event.target.value as Controls['mode'])}>
+            <option value="head">Scale a head's output</option><option value="patch">Patch the residual from another input</option></select></label>
+          {controls.mode === 'patch' ? <div className="patch-controls">
+            <label htmlFor="source">Source input (same number of symbols)</label>
+            <textarea id="source" rows={2} spellCheck={false} value={sourceText} disabled={loading || probing || transferring} onChange={event => setSourceText(event.target.value)} />
+            <button type="button" className="secondary" disabled={loading || probing || transferring || !model} onClick={() => void applySource(sourceText)}>Use source input</button>
+            <label>Patch point<select aria-label="Patch point" disabled={loading || probing || transferring || !c || !sourceTokens} value={controls.hook} onChange={event => schedule({ ...controlsRef.current, hook: event.target.value })}>
+              {c && hookKeys(c.layers).map(key => <option key={key} value={key}>{hookLabel(key)}</option>)}</select></label>
+            <label>Patch position<select aria-label="Patch position" disabled={loading || probing || transferring || !sourceTokens} value={controls.patchPosition} onChange={event => schedule({ ...controlsRef.current, patchPosition: Number(event.target.value) })}>
+              {tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}{sourceTokens && sourceTokens[i] !== id ? ` ← ${tokenizer.tokens[sourceTokens[i]]}` : ''}</option>)}</select></label>
+            <p className="hint">Copies the source input's residual vector at this point and position into this input's computation, then recomputes everything after it. Positions marked ← differ between the inputs. Changing the input returns to head scaling.</p>
+          </div> : <>
           <div className="paired"><label>Layer<select aria-label="Layer" disabled={loading || probing || transferring || !c} value={controls.layer} onChange={event => schedule({ ...controlsRef.current, layer: Number(event.target.value) })}>
             {c && Array.from({ length: c.layers }, (_, i) => <option value={i} key={i}>Layer {i + 1}</option>)}</select></label>
             <label>Head<select aria-label="Head" disabled={loading || probing || transferring || !c} value={controls.head} onChange={event => schedule({ ...controlsRef.current, head: Number(event.target.value) })}>
@@ -319,14 +391,15 @@ export default function App() {
             onChange={event => schedule({ ...controlsRef.current, factor: Number(event.target.value) })} />
           <StrengthNumber key={model?.runtimeGeneration} value={controls.factor} disabled={loading || probing || transferring || !model} onCommit={factor => schedule({ ...controlsRef.current, factor })} />
           <div className="scale-labels"><span>0 · ablated</span><span>1 · baseline</span><span>2 · doubled</span></div>
-          <button className="secondary" disabled={loading || probing || transferring || !model} onClick={() => schedule({ ...controlsRef.current, factor: 1 })}>Reset to baseline</button>
+          </>}
+          <button className="secondary" disabled={loading || probing || transferring || !model} onClick={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })}>Reset to baseline</button>
         </section>
         <section className="saved-experiments">
           <p className="eyebrow">Save and replay</p>
-          <button className="secondary" disabled={loading || probing || transferring || pending || !display} onClick={() => void exportExperiment()}>Export experiment</button>
+          <button className="secondary" disabled={loading || probing || transferring || pending || !display || display.controls.mode === 'patch'} onClick={() => void exportExperiment()}>Export experiment</button>
           <label className="file-label">Import experiment<input type="file" accept=".json,application/json" aria-label="Import experiment" disabled={loading || probing || transferring || pending || !model}
             onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void importExperiment(file); }} /></label>
-          <p className="hint">Save completed settings and predictions as JSON. Import recomputes them using the exact installed checkpoint.</p>
+          <p className="hint">Save completed settings and predictions as JSON. Import recomputes them using the exact installed checkpoint.{display?.controls.mode === 'patch' ? ' Files currently save head-scaling experiments only.' : ''}</p>
         </section>
         <section className="runtime">
           <p className="eyebrow">Computation runtime</p>
@@ -343,7 +416,7 @@ export default function App() {
       </aside>
       <div className="observation">
         <div className="observation-header"><div><p className="eyebrow">Prediction comparison</p><h2>Observe the consequence</h2></div>
-          <span className={`status ${pending || loading ? 'working' : ''}`} role="status">{loading ? 'Loading model…' : pending ? `Computing…${display ? ` previous ${display.controls.factor.toFixed(2)}×` : ''}` : display ? `Showing ${display.controls.factor.toFixed(2)}×` : 'Ready'}</span></div>
+          <span className={`status ${pending || loading ? 'working' : ''}`} role="status">{loading ? 'Loading model…' : pending ? `Computing…${display ? ` previous ${shown(display.controls)}` : ''}` : display ? `Showing ${shown(display.controls)}` : 'Ready'}</span></div>
         {error && <p className="error" role="alert">{error}
           {sessionEnded && <button type="button" className="secondary recover" onClick={() => void restart()}>Restart on CPU</button>}</p>}
         {display && tokenizer ? <>
@@ -359,8 +432,10 @@ export default function App() {
           </div>}
           {activeRecipe && <div className="recipe-note" data-testid="recipe-note"><strong>{activeRecipe.title}</strong><p>{activeRecipe.interpretation}</p>
             <span>Recorded PyTorch target probability: {(activeRecipe.metrics.baselineTargetProbability * 100).toFixed(2)}% → {(activeRecipe.metrics.modifiedTargetProbability * 100).toFixed(2)}%. Live browser results appear below.</span></div>}
-          <div className="trace" aria-label="Intervention computation"><span>Attention weights</span><span aria-hidden="true">→</span>
-            <strong>Head {display.controls.head + 1} · {display.controls.factor.toFixed(2)}×</strong><span aria-hidden="true">→</span><span>Projection + residual</span><span aria-hidden="true">→</span><span>New prediction</span></div>
+          {display.controls.mode === 'patch' ? <div className="trace" aria-label="Intervention computation"><span>Source residual</span><span aria-hidden="true">→</span>
+            <strong>{hookLabel(display.controls.hook)} · position {display.controls.patchPosition}</strong><span aria-hidden="true">→</span><span>Later layers</span><span aria-hidden="true">→</span><span>New prediction</span></div>
+          : <div className="trace" aria-label="Intervention computation"><span>Attention weights</span><span aria-hidden="true">→</span>
+            <strong>Head {display.controls.head + 1} · {display.controls.factor.toFixed(2)}×</strong><span aria-hidden="true">→</span><span>Projection + residual</span><span aria-hidden="true">→</span><span>New prediction</span></div>}
           <div className="prediction-title"><p>Next token after position <strong>{display.controls.position}</strong> · <SymbolLabel tokenizer={tokenizer} tokenId={display.tokens[display.controls.position]} /></p>
             <div className="legend"><span className="baseline-key">Baseline</span><span className="modified-key">Modified</span></div></div>
           <div className={pending ? 'probability-list stale' : 'probability-list'} aria-busy={pending}>
@@ -377,7 +452,10 @@ export default function App() {
                 ? `Cached suffix · layer ${display.comparison.execution.recomputedFromLayer! + 1}`
                 : display.comparison.execution.strategy === 'identity' ? 'Baseline reused' : 'Full forward pass'}</span></div></div>
           {!display.comparison.hasComputationalPath && <p className="path-note">This setting has no active computational path to the selected prediction. The baseline is preserved.</p>}
-          <div className="inspectors">
+          {display.controls.mode === 'patch' ? <section className="patched-row"><p className="eyebrow">Patched residual</p><h3>The vector that was replaced</h3>
+            <p className="hint">{hookLabel(display.controls.hook)}, position {display.controls.patchPosition}: this input's residual → the source input's residual. Everything after this point is recomputed.</p>
+            <div className="vector-list">{display.raw.map((value, i) => <div key={i}><span>Dimension {i}</span><code>{value.toFixed(5)}</code><span aria-hidden="true">→</span><code>{display.modified[i].toFixed(5)}</code></div>)}</div>
+          </section> : <div className="inspectors">
             <section><p className="eyebrow">Attention inspector</p><h3>Where this head attends</h3><p className="hint">Rows are query positions; columns are source positions. Head-output scaling leaves these weights unchanged.</p>
               <div className="attention-scroll" tabIndex={0} aria-label="Scrollable attention matrix"><div className="attention-grid" style={{ gridTemplateColumns: `24px repeat(${length}, minmax(28px, 1fr))` }}><span />{display.tokens.map((id, i) => <span className="axis" key={`col-${i}`}>{i}</span>)}
                 {display.tokens.map((_, query) => <div className="attention-row" key={query}><span className="axis">{query}</span>{display.tokens.map((id, key) => {
@@ -394,9 +472,10 @@ export default function App() {
               <div className="vector-list">{display.raw.map((value, i) => <div key={i}><span>Dimension {i}</span><code>{value.toFixed(5)}</code><span aria-hidden="true">→</span><code>{display.modified[i].toFixed(5)}</code></div>)}</div>
               <p className="hint">Changing this vector recomputes the residual, MLP, later layers, and output logits.</p>
             </section>
-          </div>
+          </div>}
           {client.current && c && <ComputationInspector client={client.current} baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId}
-            layer={display.controls.layer} position={display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)} layers={c.layers}
+            layer={display.controls.mode === 'patch' ? parseHook(display.controls.hook).layer : display.controls.layer}
+            position={display.controls.mode === 'patch' ? display.controls.patchPosition : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)} layers={c.layers}
             symbols={display.tokens.map(id => tokenizer.tokens[id])} />}
           {client.current && <EmbeddingInspector client={client.current} runId={display.comparison.baselineRunId} position={display.controls.position}
             symbols={tokenizer.tokens} inputSymbols={display.tokens.map(id => tokenizer.tokens[id])} />}

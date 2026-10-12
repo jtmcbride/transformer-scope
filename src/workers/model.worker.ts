@@ -18,8 +18,11 @@ async function load(request: Extract<WorkerRequest, { command: 'LOAD' }>) {
   manifestUrl = request.payload.manifestUrl;
   const nextArtifact = await loadArtifact(manifestUrl);
   const parameterCount = nextArtifact.manifest.tensors.reduce((sum, tensor) => sum + tensor.byteLength / 4, 0);
-  // Tiny verification graphs spend more time compiling GPU kernels than doing math.
-  const desired = request.payload.backend === 'auto' && parameterCount < 10_000 ? 'cpu' : request.payload.backend;
+  // Named-checkpoint measurements favor CPU startup and meet the warm interaction target.
+  // Recalibrate this preference when weights/configuration change; explicit WebGL remains available.
+  const measuredCpuRevision = 'd95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea';
+  const cpuPreferred = parameterCount < 10_000 || nextArtifact.manifest.modelRevision === measuredCpuRevision;
+  const desired = request.payload.backend === 'auto' && cpuPreferred ? 'cpu' : request.payload.backend;
   let fallbackReason: string | undefined;
   if (desired !== 'cpu') {
     try {

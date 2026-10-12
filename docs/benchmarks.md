@@ -46,3 +46,33 @@ Re-run `npm run build` followed by `npm run test:browser -- --project=chromium -
 These measurements cover forward computation and all-logit readback. They exclude worker transit, comparison metrics, subsequent inspection, rendering, and disposal time. They demonstrate reuse on this fixture and runtime; they do not establish browser interaction latency, GPU speedup, or performance of the proposed larger model. The benchmark records observations without imposing a latency/speedup threshold.
 
 Run `npm run benchmark:cache` to regenerate `.cache/cache-benchmark.json`. Review and copy a measurement into the permanent docs only when its scope and environment are recorded.
+
+## Named-host browser latency
+
+Recorded 2026-10-12 UTC on MacBookPro18,1, Apple M1 Pro, 10 logical CPU cores, 16 GiB RAM, macOS 27.0.1; Node 24.18.0, Playwright 1.64.0, TF.js 4.22.0. Raw samples, exact user agents, checkpoint revisions, shapes, and backend precision are in `browser-latency-results.json`. Benchmarks run sequentially in headless Chromium/WebKit, separate from regression workloads. They are observations, with no timing threshold in tests.
+
+Each browser/backend/model uses a fresh page context. Cold-ready time runs from navigation timing origin until the initial completed comparison and its default inspectors commit. HTTP/model caches belong to that fresh context; OS/filesystem/driver/shader caches are not forcibly reset. One cold-ready observation per combination is reported, not a cold-load distribution.
+
+Warm UI edits use head 0 at all positions, alternating .25/.5/.75/1.5 strength, independently at the first and final layers. Five warm-up edits precede 40 samples per layer. An in-page MutationObserver measures event dispatch to the completed result's DOM commit, including scheduling, worker RPC, comparison, default vector inspection/readback, and React updates. Two animation-frame callbacks then provide a frame-opportunity measurement; this includes an intervening paint opportunity, not instrumentation of physical display pixels. Additional stage/cell inspectors remain collapsed. These are sequential edits, not a claim about burst-update responsiveness.
+
+For the trained 102,912-parameter, 16-token checkpoint:
+
+- Chromium CPU: cold-ready 155 ms; DOM-commit median/p95 7.8/8.2 ms at layer 1 and 3.9/4.6 ms at layer 2. Frame-opportunity p95 34.0/33.6 ms.
+- Chromium unpacked WebGL: cold-ready 2,114 ms; DOM-commit median/p95 18.7/24.3 ms and 12.8/17.0 ms. Frame-opportunity p95 50.1/34.1 ms.
+- WebKit CPU: cold-ready 226 ms; DOM-commit median/p95 42/44 ms and 12/13 ms. Frame-opportunity p95 68/36 ms.
+- WebKit unpacked WebGL: cold-ready 324 ms; DOM-commit median/p95 23/25 ms and 16/18 ms. Frame-opportunity p95 52/50 ms.
+
+The smaller verification model's frame-opportunity p95 ranges from 33.4 to 52 ms; its cold-ready observations range from 204 to 2,186 ms. Both models/backends stay below the initial 200 ms warm target on this host in the measured settings. This does not establish physical-mobile or installed-Safari performance.
+
+A separate fresh worker measures its first baseline RPC, then five warm-up pairs and 40 alternating-order full/cached comparison RPC pairs per layer, at factor .5. RPC latency includes transit, forward/logit readback, metrics, and response. It excludes subsequent inspector reads and rendering; releasing each modified handle occurs after the timed response. For the trained model, full/cached RPC medians are:
+
+- Chromium CPU: 6.7/5.3 ms at layer 1; 6.5/2.1 ms at layer 2.
+- Chromium WebGL: 16.15/11.6 ms; 16.0/5.9 ms.
+- WebKit CPU: 31/25 ms; 29/10 ms.
+- WebKit WebGL: 11/9 ms; 11/8 ms.
+
+WebKit timer resolution yields integer-millisecond readings, including occasional 0 ms on the tiny late-layer fixture. These values do not imply instantaneous computation. Whole-pipeline CPU/WebGL differences depend on the browser and shape; do not infer a universal acceleration ratio.
+
+Automatic loading now chooses CPU for this exact trained revision and the tiny verification models. The measured trained checkpoint meets the warm target on CPU and avoids Chromium's GPU compilation startup cost. WebGL remains selectable and can be faster on the measured WebKit workload. A changed trained revision requires recalibration; other larger artifacts retain the prior WebGL-attempt/CPU-fallback policy.
+
+Run `npm run build`, then `npm run benchmark:browser`. Raw output is `.cache/browser-benchmark.json`. Review hardware/configuration and scope before promoting a result to documentation.

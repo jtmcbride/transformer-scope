@@ -97,7 +97,15 @@ Cold WebGL model loading is allowed 30 seconds in the replay browser assertions;
 
 Independent UI fixtures check two attention cells (one causally masked) and the projection, attention residual, MLP, and block-output vectors in both layers for the actual BOS-prefixed screen input at factor .37. Production assertions use the existing 2e-5 absolute bound on displayed six-decimal values. Numeric strength rejection, reset to identical vectors, mobile containment, new-worker ownership during edits, and cancellation of an explicitly blocked model load pass in Chromium and WebKit. The two initially failing blocked-load checks were corrected to wait until the first request was actually intercepted before restarting; otherwise the test inadvertently blocked the replacement worker. No numerical tolerance was changed.
 
-The full 24-test production suite passed except those two test-ordering cases; all eight inspector/restart checks then passed with corrected ordering, for 26 distinct passing production cases. Engine regressions remain 36 passing tests. See `docs/computation-inspection.md`; mobile vector-panel screenshots were inspected.
+The final production regression passed all 26 tests across Chromium and WebKit after correcting the blocked-load test ordering. Engine regressions remain 36 passing tests. See `docs/computation-inspection.md`; mobile vector-panel screenshots were inspected.
+
+## Local release verification
+
+The final local checks passed: TypeScript/production build, 36 engine tests, 26 production browser tests, five Python dataset/reference/artifact tests, and source/built artifact audits. Standard-library dataset and artifact-corruption checks also pass without PyTorch installed in the active Python environment, matching the prepared CI commands.
+
+`docs/browser-latency-results.json` records eight isolated named-host browser/backend/model benchmark runs, including cold-ready observations, 40 warm UI samples per layer, and 40 full/cached RPC pairs per layer. All measured frame-opportunity p95s are at most 68 ms on the recorded M1 Pro Mac. See `docs/benchmarks.md` for timer, paint, cache, capture, and device limitations.
+
+The trained checkpoint's automatic CPU preference is tied to its measured revision. `?backend=cpu` and `?backend=webgl` permit explicit startup selection. CI and deployment inputs are documented in `docs/deployment.md`; local success does not itself confirm a remote CI run or a deployed website.
 
 ## Outstanding gates
 

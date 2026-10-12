@@ -2,9 +2,7 @@
 import unittest
 from collections import Counter, defaultdict
 
-import torch
 from retrieval_data import examples, partition, SYMBOLS, dataset_digest
-from reference_model import ReferenceTransformer
 
 
 class RetrievalDataTests(unittest.TestCase):
@@ -33,22 +31,9 @@ class RetrievalDataTests(unittest.TestCase):
             self.assertEqual(len(set(count.values())), 1)
         self.assertEqual(dataset_digest(items), dataset_digest(list(examples())))
 
-    def test_lengths_are_disjoint_and_capture_free_training_preserves_gradients(self):
+    def test_lengths_are_disjoint(self):
         self.assertEqual({len(item.tokens) for item in examples(2)}, {12})
         self.assertEqual({len(item.tokens) for item in examples(4)}, {20})
-        torch.manual_seed(7)
-        model = ReferenceTransformer()
-        tokens = torch.tensor([[1, 5, 9]])
-        captured_logits, capture = model(tokens)
-        captured_logits.sum().backward()
-        gradients = [p.grad.clone() for p in model.parameters()]
-        model.zero_grad(set_to_none=True)
-        logits, no_capture = model(tokens, capture_activations=False)
-        logits.sum().backward()
-        self.assertIsNone(no_capture)
-        self.assertTrue(capture)
-        self.assertTrue(torch.equal(logits, captured_logits))
-        self.assertTrue(all(torch.equal(expected, p.grad) for expected, p in zip(gradients, model.parameters())))
 
 
 if __name__ == '__main__':

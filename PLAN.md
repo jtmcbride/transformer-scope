@@ -1,6 +1,6 @@
 # Transformer Microscope implementation plan
 
-Status: the verified forward engine, Milestone C caching, and Milestone D trained retrieval checkpoint are implemented. The default model passes held-out-sequence and measured-recipe checks on the recorded task; its length limits remain visible. Next is Milestone E: complete experiment replay/export and deeper computation inspection. See `docs/validation.md` and `docs/retrieval.md` for evidence and remaining release gates.
+Status: Milestones C/D and the core Milestone E experiment workspace are implemented and committed. Milestone F has local named-host latency measurements, artifact audits, and a prepared CI workflow; remote CI and hosted/physical-device release gates remain outstanding. See `docs/validation.md`, `docs/retrieval.md`, `docs/benchmarks.md`, and `docs/deployment.md`.
 
 This plan incorporates the product concept, intervention-engine specification, and design review. It prioritizes a verified head-scaling experiment before expanding into the full Explore, Experiment, and Train workspaces. Performance targets and numerical tolerances below are requirements to validate, not measured results.
 
@@ -328,6 +328,6 @@ For training, distinguish lightweight inspection snapshots from resumable checkp
 
 ## 14. Immediate next work
 
-Continue Milestone E. The trained checkpoint and three prepared recipes are now in the screen. Version 1 experiment export/import is implemented with checkpoint validation, complete logit snapshots, automatic installed-model selection, and live replay comparison. Attention-cell arithmetic, lazy projection/residual/MLP vectors, exact strength entry, and CPU worker restart are now implemented. Start Milestone F: record cold/warm end-to-end browser timings on this host, add reproducible CI checks, and prepare static deployment instructions. Keep physical Safari/mobile and real hosted-page verification as outstanding release gates.
+Continue Milestone E. The trained checkpoint and three prepared recipes are now in the screen. Version 1 experiment export/import is implemented with checkpoint validation, complete logit snapshots, automatic installed-model selection, and live replay comparison. Attention-cell arithmetic, lazy projection/residual/MLP vectors, exact strength entry, and CPU worker restart are now implemented. Local Milestone F work is implemented: named-host timing records, artifact audits, and CI/deployment preparation. Next, run the workflow on GitHub, verify a real static host, restore Firefox coverage on a working runtime, and test physical Safari/mobile. Broader educational validation and wider trained-head/prompt coverage remain useful follow-up work.
 
 No latency, checkpoint quality, browser compatibility, or numerical parity claim is complete until its associated evidence is recorded.

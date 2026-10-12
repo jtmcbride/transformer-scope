@@ -16,6 +16,8 @@ interface Controls { layer: number; head: number; factor: number; scope: string;
 interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport }
 interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument }
 const initialChoice: ModelChoice = new URLSearchParams(window.location.search).get('model') === 'verification' ? 'verification' : 'retrieval';
+const backendParameter = new URLSearchParams(window.location.search).get('backend');
+const initialBackend = backendParameter === 'cpu' || backendParameter === 'webgl' ? backendParameter : 'auto';
 const defaults: Controls = { layer: 0, head: 0, factor: .5, scope: 'all', position: 5, target: 2 };
 
 function SymbolLabel({ tokenizer, tokenId }: { tokenizer: SymbolTokenizer; tokenId: number }) {
@@ -171,7 +173,7 @@ export default function App() {
   useEffect(() => {
     alive.current = true;
     client.current = new ModelClient();
-    void load('auto', initialChoice);
+    void load(initialBackend, initialChoice);
     return () => { alive.current = false; ++version.current; latest.current = null; client.current?.dispose(); };
   }, []);
 

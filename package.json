@@ -13,7 +13,9 @@
     "fixtures": ".venv/bin/python scripts/export_fixtures.py",
     "train:retrieval": ".venv/bin/python scripts/train_retrieval.py",
     "test:data": ".venv/bin/python -m unittest discover -s scripts -p 'test_*.py'",
-    "fixtures:inspection": ".venv/bin/python scripts/export_inspection.py"
+    "fixtures:inspection": ".venv/bin/python scripts/export_inspection.py",
+    "benchmark:browser": "playwright test --config playwright.benchmark.config.ts && node scripts/collect_browser_benchmark.mjs",
+    "check:artifacts": "python3 scripts/check_artifacts.py --models public/models && python3 scripts/check_artifacts.py --models dist/models"
   },
   "dependencies": {
     "@tensorflow/tfjs-core": "4.22.0",

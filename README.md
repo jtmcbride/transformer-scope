@@ -15,7 +15,7 @@ npm run dev
 
 Open `http://127.0.0.1:5173/transformer-scope/`. The trained input format is `A = 0 ; B = 3 ; C = 1 ; ? A =` with spaces around every symbol. Keys A–D are distinct; values 0–3 may repeat. Choose a prepared experiment or write your own input. The selected verification checkpoint accepts A–O with at most seven symbols. Choose a prediction position, layer, head, token scope, and head strength. The baseline remains immutable; factor 1 restores it. Export a completed experiment as JSON, then import it to restore settings and compare recomputed predictions with saved values. See `docs/experiment-format.md` for the versioned format.
 
-The trained checkpoint attempts WebGL with CPU fallback. The tiny verification model defaults to CPU to avoid GPU shader compilation overhead. WebGL can be selected explicitly; larger models attempt WebGL with CPU fallback. The verification button checks actual browser forward values, gradients, and an Adam update against exported PyTorch results.
+Both shipped checkpoints default to CPU based on the recorded cold/warm browser measurements. WebGL remains selectable; other larger checkpoints attempt WebGL with CPU fallback. `?backend=cpu` or `?backend=webgl` chooses the initial backend explicitly. The verification button checks actual browser forward values, gradients, and an Adam update against exported PyTorch results.
 
 ## Check
 
@@ -60,11 +60,14 @@ The exporter saves 411,648 weight bytes, a hash-checked manifest/tokenizer, eval
 - Implemented: scaffold and lockfiles, model contract, artifact validation, independent fixtures, full forward execution, gradients, selective baseline/modified inspection, worker probe, and an initial intervention screen.
 - Implemented in Milestone C: a 32 MiB baseline cache with LRU eviction and read leases, exact same-layer residual deltas, suffix execution, full fallback, reset/identity reuse, and cached inspection. The screen shows the actual execution strategy and reuses unchanged baseline inspector slices during slider edits.
 - Implemented in Milestone D: deterministic retrieval training, held-out and length evaluations, measured recipes, a trained default model, checkpoint switching, and responsive attention inspection.
-- Verified: 36 engine tests, two dataset/reference tests, 319 direct cached/reference cases, and 26 production tests across Chromium and WebKit, including 1,000 comparisons on each CPU/WebGL combination.
+- Verified: 36 engine tests, five dataset/reference/artifact tests, 319 direct cached/reference cases, and 26 production tests across Chromium and WebKit, including 1,000 comparisons on each CPU/WebGL combination.
 - Implemented in Milestone E: versioned experiment export/replay, exact numeric strength, attention-cell arithmetic, lazy projection/residual/MLP vectors, and CPU worker restart.
-- Next: measured end-to-end browser performance, CI, and deployment verification (Milestone F).
+- Implemented in Milestone F: named-host browser latency measurements, source/build artifact auditing, pinned-action CI, and static deployment instructions.
+- Remaining: remote CI, a live hosted-site check, Firefox on a working runtime, and physical Safari/mobile verification.
 - Remaining release validation: actual Safari, physical mobile devices, wider educational evaluation, and end-to-end performance on named hardware.
 
 See `PLAN.md`, `docs/model-contract.md`, `docs/validation.md`, and `docs/benchmarks.md` for scope, semantics, and measured evidence.
+
+`npm run benchmark:browser` records isolated production cold-ready, warm UI, and full/cached RPC samples for both models/backends in Chromium and WebKit. See `docs/benchmarks.md` for scope, and `docs/deployment.md` for release checks.
 
 `npm run benchmark:cache` records an isolated Node CPU comparison for a three-layer fixture at early/middle/late edits. Its raw output goes to `.cache/cache-benchmark.json`. It measures forward computation and logit readback, not complete browser interaction latency.

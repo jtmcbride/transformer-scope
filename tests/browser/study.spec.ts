@@ -38,7 +38,12 @@ test('a facilitated session records predictions before revealing each live recip
   await setUp(page, 'p01');
   await expect(page.getByRole('blockquote')).toContainText('We are testing the tool, not you.');
   await page.getByRole('button', { name: 'Continue to orientation' }).click();
-  await expect(page.frameLocator('iframe').locator('.status')).toHaveText('Showing 0.00×', { timeout: 30_000 });
+  // Orientation shows a neutral baseline, never Task 1's recipe or its result.
+  const app = page.frameLocator('iframe');
+  await expect(page.locator('.frame-host:not(.hidden) iframe')).toBeVisible({ timeout: 30_000 });
+  await expect(app.locator('.status')).toHaveText('Showing 1.00×');
+  await expect(app.locator('#sequence')).toHaveValue('A = 1 ; B = 2 ; C = 3 ; ? C =');
+  await expect(app.getByTestId('recipe-note')).toHaveCount(0);
   await page.getByLabel('Orientation notes').fill('Found the slider quickly.');
   await page.getByRole('button', { name: 'Continue to Task 1' }).click();
 

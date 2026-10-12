@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { change, openFrame, select, settled, waitFor, type Frame } from '../embedded/frame';
+import { button, change, openFrame, select, settled, statusText, waitFor, type Frame } from '../embedded/frame';
 import {
   displayedNumber, experienceBands, observedDirection, observedMagnitude, participantPattern, probes, scoreTask, tasks, validateSession,
   type AttentionAnswer, type Direction, type ExperienceBand, type Magnitude, type Observation, type Prediction, type ProbeId, type SessionDocument, type TaskRecord,
@@ -19,6 +19,20 @@ function readDraft(): Draft | null {
   try { const text = localStorage.getItem(draftKey); return text ? JSON.parse(text) as Draft : null; } catch { return null; }
 }
 const base = new URL('./', window.location.href);
+export const orientationInput = 'A = 1 ; B = 2 ; C = 3 ; ? C =';
+
+/** The application opens on Task 1's recipe; orientation must show a neutral baseline instead, before the frame is revealed. */
+async function presetOrientation(frame: Frame) {
+  const textarea = frame.doc.getElementById('sequence') as HTMLTextAreaElement;
+  Object.getOwnPropertyDescriptor(frame.win.HTMLTextAreaElement.prototype, 'value')!.set!.call(textarea, orientationInput);
+  textarea.dispatchEvent(new frame.win.Event('input', { bubbles: true }));
+  const loading = waitFor(frame, () => statusText(frame.doc).startsWith('Loading'), 'the orientation input to start');
+  textarea.form!.requestSubmit();
+  await loading; await waitFor(frame, () => settled(frame.doc), 'the orientation input');
+  const computing = waitFor(frame, () => statusText(frame.doc).startsWith('Computing'), 'the baseline to start');
+  button(frame.doc, 'Reset to baseline')!.click();
+  await computing; await waitFor(frame, () => settled(frame.doc) && statusText(frame.doc) === 'Showing 1.00×', 'the orientation baseline');
+}
 
 function observe(frame: Frame, answer: string): Observation {
   const doc = frame.doc;
@@ -64,6 +78,7 @@ export default function StudyApp() {
     void (async () => {
       const frame = await openFrame(host.current!, base, 'Transformer Microscope', 'study-frame');
       await waitFor(frame, () => settled(frame.doc), 'the application to load');
+      if (draft.step === 'orientation') await presetOrientation(frame);
       if (reveal) {
         await change(frame, select(frame.doc, 'Prepared experiment'), task.recipeId, 'Loading');
         if (select(frame.doc, 'Prepared experiment').value !== task.recipeId) throw new Error('The prepared experiment did not load.');
@@ -136,7 +151,7 @@ export default function StudyApp() {
       <button type="button" className="primary" onClick={() => update({ step: 'orientation' })}>Continue to orientation</button></section>}
 
     {draft.step === 'orientation' && <section className="panel" aria-label="Orientation"><h2>Orientation</h2>
-      <p>Ask the participant to run <code>A = 1 ; B = 2 ; C = 3 ; ? C =</code> with <strong>Run input</strong>, find the predicted answer, select a token, and move the strength slider once.</p>
+      <p>The application below starts on <code>{orientationInput}</code> at the baseline. Ask the participant to find the predicted answer, select a token, and move the strength slider once.</p>
       <label>Interface difficulties observed<textarea aria-label="Orientation notes" rows={2} value={draft.orientationNotes} onChange={event => update({ orientationNotes: event.target.value })} /></label>
       <button type="button" className="primary" onClick={() => update({ step: 'task', taskIndex: 0 })}>Continue to Task 1</button></section>}
 

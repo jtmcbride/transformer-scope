@@ -62,8 +62,10 @@ test('residual patching from another input matches the independent PyTorch sweep
   await expect(page.getByLabel('Model', { exact: true })).toHaveValue('retrieval');
   await expect(status).toHaveText('Showing patched residual');
   await expect(page.getByLabel('Patch position')).toHaveValue('15');
-  // A CPU worker restart re-creates the source run and keeps the patch settings.
+  // A CPU worker restart re-creates the active source run and keeps the patch settings; unsubmitted source edits are not applied.
+  await page.getByLabel('Source input (same number of symbols)').fill('A = 0 ; B = 3 ; C = 0 ; ? C =');
   await page.getByRole('button', { name: 'Restart computation worker on CPU' }).click();
+  await expect(page.getByLabel('Source input (same number of symbols)')).toHaveValue(fixture.sourceText);
   await expect(page.getByLabel('Backend')).toHaveValue('cpu');
   await expect(status).toHaveText('Showing patched residual');
   await expect(page.getByLabel('Patch point')).toHaveValue('1:attention.residual');
@@ -78,4 +80,11 @@ test('residual patching from another input matches the independent PyTorch sweep
   await expect(status).toHaveText('Showing 1.00×');
   await expect(page.getByLabel('Intervention type')).toHaveValue('head');
   await expect(page.locator('#strength')).toBeVisible();
+  // Source text left from another checkpoint no longer fits; patch mode starts from a source that does.
+  await page.getByLabel('Model', { exact: true }).selectOption('verification');
+  await expect(status).toHaveText('Showing 0.50×', { timeout: 30_000 });
+  await page.getByLabel('Intervention type').selectOption('patch');
+  await expect(status).toHaveText('Showing patched residual');
+  await expect(page.getByLabel('Source input (same number of symbols)')).toHaveValue('A E I C G');
+  await expect(page.getByRole('alert')).toHaveCount(0);
 });

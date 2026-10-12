@@ -42,7 +42,7 @@ Do not explain residual streams, causal masking, or where scaling happens. Answe
 
 ### 2. Orientation (4 minutes)
 
-Have the participant run the input `A = 1 ; B = 2 ; C = 3 ; ? C =` with **Run input**, find the predicted answer, select a token, and move the strength slider once. Note any interface difficulty.
+The session page opens the application on `A = 1 ; B = 2 ; C = 3 ; ? C =` at the baseline, so nothing from Task 1 is visible. (Without the page, run that input and reset to the baseline before showing the screen.) Have the participant find the predicted answer, select a token, and move the strength slider once. Note any interface difficulty.
 
 ### 3. Tasks
 

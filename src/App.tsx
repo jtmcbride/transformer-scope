@@ -202,7 +202,10 @@ export default function App() {
     const target = baseline.current, loaded = model;
     if (!target || !loaded) return;
     const own = target.tokenIds.slice(1).map(id => loaded.tokenizer.tokens[id]).join(' ');
-    void applySource(sourceText.trim() || (swappedQuery(target.tokenIds, loaded.tokenizer) ?? own));
+    // Text left from another input or checkpoint may no longer fit; then start from a suggestion that does.
+    const fits = (text: string) => { try { return tokenize(text, loaded.tokenizer, loaded.manifest.config.contextLength).length === target.tokenIds.length; } catch { return false; } };
+    const typed = sourceText.trim();
+    void applySource(typed && fits(typed) ? typed : swappedQuery(target.tokenIds, loaded.tokenizer) ?? own);
   }
 
   async function establish(loaded: LoadedModel, input: string, generation: number, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument, settings?: Controls) {
@@ -287,8 +290,9 @@ export default function App() {
 
   async function restart() {
     const sequence = display && model ? display.tokens.slice(1).map(id => model.tokenizer.tokens[id]).join(' ') : undefined;
-    // Source runs belong to the old worker; the patch is restored by re-running its source in the new one.
-    const patchSource = controlsRef.current.mode === 'patch' && source.current ? sourceText : null;
+    // Source runs belong to the old worker; the patch is restored by re-running the active source (not unsubmitted edits) in the new one.
+    const active = source.current;
+    const patchSource = controlsRef.current.mode === 'patch' && active && model ? active.run.tokenIds.slice(1).map(id => model.tokenizer.tokens[id]).join(' ') : null;
     const settings = display ? { ...controlsRef.current, ...(patchSource !== null ? { mode: 'head' as const } : {}) } : undefined;
     ++version.current; latest.current = null;
     client.current?.dispose(); client.current = createClient(); setProbing(false); setSessionEnded(false);

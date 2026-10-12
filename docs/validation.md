@@ -147,6 +147,26 @@ Two production tests inject a browser-initiated loss into the real worker bundle
 
 At 360 CSS px in Chromium with touch emulation, the strength slider's hit area was 16 px tall and the file input 17 px, below the 24 px WCAG 2.2 minimum target size. On coarse pointers, both are now 32 px; the mouse layout is unchanged. A production test checks every control except inline text links for at least 24 × 24 px, checks containment, and sets the strength with a touchscreen tap. It fails without the CSS change. If an engine does not report a coarse pointer under emulation, the test annotates that and asserts containment only. This is viewport/touch emulation, not physical-device evidence.
 
+## Attention overrides
+
+`scripts/export_attention.py` (`npm run fixtures:attention`) loads the shipped weights into the independent PyTorch model and writes `tests/fixtures/attention-reference.json`. It exports five verification-model cases:
+
+- one-hot and uniform rows, including unnormalized weights;
+- a final-layer override at an earlier query, which cannot reach the prediction;
+- an override combined with head scaling and a `block.input` replacement in the same layer.
+
+It also exports a 64-case retrieval routing sweep: each final-layer head at query 15 of `A = 0 ; B = 3 ; C = 0 ; ? B =`, sent entirely to each source position. Engine results:
+
+- Logits and captured scores, weights, raw head outputs, attention residuals, and block outputs match within the unchanged forward bounds (maximum error 1.43e-6). Overridden rows equal both the engine's normalization and the PyTorch rows bit for bit.
+- Scores are unchanged unless an earlier edit changed the layer's input. The unreachable case leaves the prediction's logits bit-identical.
+- The run engine plans full execution, reports reachability, and inspects overridden weights without cached tensors.
+- The routing sweep matches within the bounds. Its largest absolute error is 1.85e-5, where redirected rows push logits to magnitudes around 15, so the relative term applies.
+- Invalid lengths, later-position weight, negative or non-finite values, a zero sum, out-of-range indices, and duplicate rows are rejected without retaining tensors.
+
+**Redirecting attention on screen.** **Intervention type → Redirect a head's attention** takes a layer, head, query position, and target: all weight on one allowed source, or evenly over every allowed position. The attention inspector shows the modified run's weights, with the replaced row identified. The head-output panel shows that head's output at the query before and after. Cell arithmetic is hidden in this mode, because the override bypasses the softmax it explains, and export stays disabled. A production test compares displayed probabilities with the PyTorch sweep for four targets, and checks the displayed row, focus clamping when the query moves, the no-path note, and reset.
+
+For this input, Layer 2 Head 2 at query 15 puts nearly all of its weight (1.000) on position 14, the queried key. Sending it to position 3 or 5 makes `0` the prediction (73% and 100%); the other final-layer heads change little when redirected. This is routing measured on one input, not a head role.
+
 ## Residual replacement
 
 `scripts/export_residual.py` loads the shipped weights into the independent PyTorch model; seeded re-initialization is not bit-reproducible across PyTorch builds. It exports seven verification-model cases and a 64-case retrieval patching sweep (`tests/fixtures/residual-reference.json`; `npm run fixtures:residual`). The cases cover both hooks in both layers, first, middle, and last positions, a final-layer replacement that cannot reach the prediction, a zero vector, and a combination with head scaling.

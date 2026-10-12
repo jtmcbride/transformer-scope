@@ -28,6 +28,23 @@ def replaced(x, layer, stage, patches):
     return x
 
 
+def normalized_attention(weights):
+    """Submitted weights are divided by their float64 sum, then rounded to float32."""
+    values = torch.tensor(weights, dtype=torch.float64)
+    return (values / values.sum()).float()
+
+
+def overridden(a, layer, patches):
+    """attention.override: replace one head's post-softmax row at one query position."""
+    selected = [p for p in patches if p.get("kind") == "attention.override" and p["layer"] == layer]
+    if not selected:
+        return a
+    a = a.clone()
+    for patch in selected:
+        a[0, patch["head"], patch["query"]] = normalized_attention(patch["weights"])
+    return a
+
+
 class Block(nn.Module):
     def __init__(self, c):
         super().__init__()
@@ -58,7 +75,7 @@ class Block(nn.Module):
         scores = save("attention.scores", (q.transpose(1, 2) @ k.transpose(1, 2).transpose(-1, -2)) / (d // c.heads) ** .5)
         mask = torch.triu(torch.ones(t, t, dtype=torch.bool), diagonal=1)
         masked = save("attention.maskedScores", scores.masked_fill(mask, -1e9))
-        a = save("attention.weights", masked.softmax(dim=-1))
+        a = save("attention.weights", overridden(masked.softmax(dim=-1), layer, patches))
         z = save("attention.head.raw", (a @ v.transpose(1, 2)).transpose(1, 2).contiguous())
         factors = torch.ones(1, t, c.heads, 1)
         for patch in patches:

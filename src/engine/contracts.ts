@@ -47,7 +47,16 @@ export interface ResidualReplaceIntervention {
 }
 export type ResidualHook = 'block.input' | 'attention.residual';
 export const residualHooks: readonly ResidualHook[] = ['block.input', 'attention.residual'];
-export type Intervention = HeadScaleIntervention | ResidualReplaceIntervention;
+/** Replaces one head's post-softmax attention row at one query position with a causal distribution over sources. */
+export interface AttentionOverrideIntervention {
+  id: string; kind: 'attention.override'; layer: number; head: number; query: number; weights: number[];
+}
+export type Intervention = HeadScaleIntervention | ResidualReplaceIntervention | AttentionOverrideIntervention;
+/** Submitted attention weights are divided by their float64 sum, then rounded to float32 (as in the PyTorch reference). */
+export function normalizedAttention(weights: readonly number[]): Float32Array {
+  const sum = weights.reduce((total, weight) => total + weight, 0);
+  return Float32Array.from(weights, weight => weight / sum);
+}
 /** Replacement entries are bounded so a submitted vector cannot overflow float32 normalization. */
 export const MAX_RESIDUAL_MAGNITUDE = 1e4;
 export type ActivationStage =
@@ -84,7 +93,20 @@ export function validateInterventions(patches: readonly Intervention[], config: 
   requireInput(Array.isArray(patches), 'Interventions must be an array.');
   const occupied = new Set<string>();
   for (const patch of patches) {
-    requireInput(patch && (patch.kind === 'head.scale' || patch.kind === 'residual.replace') && typeof patch.id === 'string', 'Unsupported intervention.');
+    requireInput(patch && ['head.scale', 'residual.replace', 'attention.override'].includes(patch.kind) && typeof patch.id === 'string', 'Unsupported intervention.');
+    if (patch.kind === 'attention.override') {
+      requireInput(Number.isInteger(patch.layer) && patch.layer >= 0 && patch.layer < config.layers, 'Layer is outside the model.');
+      requireInput(Number.isInteger(patch.head) && patch.head >= 0 && patch.head < config.heads, 'Head is outside the model.');
+      requireInput(Number.isInteger(patch.query) && patch.query >= 0 && patch.query < length, 'Query position is outside the input.');
+      requireInput(Array.isArray(patch.weights) && patch.weights.length === length, `Attention weights need one value per input position (${length}).`);
+      requireInput(patch.weights.every((weight: number) => Number.isFinite(weight) && weight >= 0 && weight <= MAX_RESIDUAL_MAGNITUDE), 'Attention weights must be finite, non-negative, and at most 10000.');
+      requireInput(patch.weights.every((weight: number, source: number) => source <= patch.query || weight === 0), 'Attention cannot assign weight to a later position.');
+      requireInput(patch.weights.reduce((sum: number, weight: number) => sum + weight, 0) > 0, 'Attention weights must have a positive sum.');
+      const key = `attention:${patch.layer}:${patch.head}:${patch.query}`;
+      requireInput(!occupied.has(key), 'An attention row can be overridden only once.');
+      occupied.add(key);
+      continue;
+    }
     if (patch.kind === 'residual.replace') {
       requireInput(Number.isInteger(patch.layer) && patch.layer >= 0 && patch.layer < config.layers, 'Layer is outside the model.');
       requireInput(residualHooks.includes(patch.stage), 'Residual replacement must target block.input or attention.residual.');
@@ -125,6 +147,8 @@ export function tokenize(text: string, tokenizer: SymbolTokenizer, contextLength
 }
 
 export function canReachPrediction(patch: Intervention, predictionPosition: number, config: ModelConfig, length: number): boolean {
+  if (patch.kind === 'attention.override')
+    return patch.query === predictionPosition || (patch.query < predictionPosition && patch.layer < config.layers - 1);
   if (patch.kind === 'residual.replace') {
     // block.input feeds this layer's attention; attention.residual reaches other positions only through a later layer.
     return patch.position === predictionPosition || (patch.position < predictionPosition && (patch.stage === 'block.input' || patch.layer < config.layers - 1));

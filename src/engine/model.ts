@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-core/dist/register_all_gradients';
 import { activationKey, requireInput, validateInterventions, validateTokens,
-  type ActivationReference, type HeadScaleIntervention, type Intervention, type ModelConfig, type ResidualHook, type TensorRecord } from './contracts';
+  normalizedAttention, type ActivationReference, type HeadScaleIntervention, type Intervention, type ModelConfig, type ResidualHook, type TensorRecord } from './contracts';
 import { validateWeightRecords } from './weights';
 
 export interface ForwardResult { logits: tf.Tensor3D; captured: Record<string, tf.Tensor> }
@@ -57,6 +57,19 @@ export class TransformerModel {
     return tf.where(tf.tensor3d(mask, [1, length, dimension], 'bool'), tf.tensor3d(values, [1, length, dimension]), x) as tf.Tensor3D;
   }
 
+  /** Rows selected by attention.override take the normalized submitted distribution; all other rows keep the softmax output. */
+  private overridden(a: tf.Tensor4D, layer: number, patches: readonly Intervention[]): tf.Tensor4D {
+    const selected = patches.filter(p => p.kind === 'attention.override' && p.layer === layer);
+    if (!selected.length) return a;
+    const [, heads, length] = a.shape;
+    const values = new Float32Array(heads * length * length), mask = new Uint8Array(heads * length * length);
+    for (const patch of selected) if (patch.kind === 'attention.override') {
+      const offset = (patch.head * length + patch.query) * length;
+      values.set(normalizedAttention(patch.weights), offset); mask.fill(1, offset, offset + length);
+    }
+    return tf.where(tf.tensor4d(mask, [1, heads, length, length], 'bool'), tf.tensor4d(values, [1, heads, length, length]), a) as tf.Tensor4D;
+  }
+
   private scaledHeads(raw: tf.Tensor4D, patches: readonly HeadScaleIntervention[]): tf.Tensor4D {
     const [, length, heads] = raw.shape;
     const factors = new Float32Array(length * heads).fill(1);
@@ -88,7 +101,7 @@ export class TransformerModel {
     const q = project('q', 'attention.query'), k = project('k', 'attention.key'), v = project('v', 'attention.value');
     const scores = at('attention.scores', tf.div(tf.matMul(tf.transpose(q, [0, 2, 1, 3]), tf.transpose(k, [0, 2, 1, 3]), false, true), Math.sqrt(dh)));
     const masked = at('attention.maskedScores', tf.add(scores, mask));
-    const a = at('attention.weights', tf.softmax(masked, -1));
+    const a = at('attention.weights', this.overridden(tf.softmax(masked, -1) as tf.Tensor4D, layer, patches));
     const raw = at('attention.head.raw', tf.transpose(tf.matMul(a, tf.transpose(v, [0, 2, 1, 3])), [0, 2, 1, 3]) as tf.Tensor4D);
     const modified = at('attention.head.modified', this.scaledHeads(raw, patches.filter((p): p is HeadScaleIntervention => p.kind === 'head.scale' && p.layer === layer)));
     const projected = at('attention.projected', this.linear(tf.reshape(modified, [1, t, d]) as tf.Tensor3D, prefix + 'output'));

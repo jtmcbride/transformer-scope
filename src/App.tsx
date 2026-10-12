@@ -15,15 +15,18 @@ import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
 
 type LoadedModel = Commands['LOAD']['response'];
-/** mode 'head' scales a head's output; mode 'patch' copies a source input's residual row into this input (residual.replace). */
-interface Controls { layer: number; head: number; factor: number; scope: string; position: number; target: number; mode: 'head' | 'patch'; hook: string; patchPosition: number }
+/** mode 'head' scales a head's output; 'patch' copies a source input's residual row (residual.replace); 'attention' replaces one attention row (attention.override). */
+interface Controls { layer: number; head: number; factor: number; scope: string; position: number; target: number; mode: 'head' | 'patch' | 'attention'; hook: string; patchPosition: number; query: number; focus: string }
 interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport }
 interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument; source?: RunSummary }
 const initialChoice: ModelChoice = new URLSearchParams(window.location.search).get('model') === 'verification' ? 'verification' : 'retrieval';
 const backendParameter = new URLSearchParams(window.location.search).get('backend');
 const initialBackend = backendParameter === 'cpu' || backendParameter === 'webgl' ? backendParameter : 'auto';
-const defaults: Controls = { layer: 0, head: 0, factor: .5, scope: 'all', position: 5, target: 2, mode: 'head', hook: '0:block.input', patchPosition: 0 };
-const shown = (c: Controls) => c.mode === 'patch' ? 'patched residual' : `${c.factor.toFixed(2)}×`;
+const defaults: Controls = { layer: 0, head: 0, factor: .5, scope: 'all', position: 5, target: 2, mode: 'head', hook: '0:block.input', patchPosition: 0, query: 0, focus: 'uniform' };
+const shown = (c: Controls) => c.mode === 'patch' ? 'patched residual' : c.mode === 'attention' ? 'redirected attention' : `${c.factor.toFixed(2)}×`;
+/** The submitted row: one-hot on a source position, or uniform over every position the query may attend to. */
+const focusWeights = (c: Controls, length: number) => Array.from({ length }, (_, i) => c.focus === 'uniform' ? (i <= c.query ? 1 : 0) : (i === Number(c.focus) ? 1 : 0));
+const focusLabel = (c: Controls) => c.focus === 'uniform' ? `evenly over positions 0–${c.query}` : `all on position ${c.focus}`;
 
 function SymbolLabel({ tokenizer, tokenId }: { tokenizer: SymbolTokenizer; tokenId: number }) {
   return <span className="symbol">{tokenizer.tokens[tokenId]}</span>;
@@ -85,6 +88,8 @@ export default function App() {
             const read = await owner.request('INSPECT', { runId: job.source.runId, reference: hook, selection: { position: c.patchPosition } });
             if (job.version !== version.current) continue;
             intervention = { id: 'residual-patch', kind: 'residual.replace', ...hook, position: c.patchPosition, values: Array.from(read.values) };
+          } else if (c.mode === 'attention') {
+            intervention = { id: 'attention-override', kind: 'attention.override', layer: c.layer, head: c.head, query: c.query, weights: focusWeights(c, job.baseline.tokenIds.length) };
           } else intervention = { id: 'head-strength', kind: 'head.scale', layer: c.layer, head: c.head, factor: c.factor,
             tokens: c.scope === 'all' ? { kind: 'all' } : { kind: 'indices', indices: [Number(c.scope)] } };
           const comparison = await owner.request('COMPARE', {
@@ -92,6 +97,21 @@ export default function App() {
           });
           created = comparison.modifiedRunId;
           if (job.version !== version.current) continue;
+          if (intervention.kind === 'attention.override') {
+            // Overrides change the weights themselves, so this mode shows the modified run's attention.
+            const at = { head: c.head, position: c.query };
+            const [weights, raw, changed] = await Promise.all([
+              owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
+              owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: at }),
+              owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: at }),
+            ]);
+            if (job.version !== version.current) continue;
+            if (modifiedId.current) void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
+            modifiedId.current = created; created = undefined;
+            setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds, attention: Array.from(weights.values), raw: Array.from(raw.values), modified: Array.from(changed.values) });
+            setError(null);
+            continue;
+          }
           if (intervention.kind === 'residual.replace') {
             // The patched row: this input's own residual at the patch point, and the source row that replaces it.
             const own = await owner.request('INSPECT', { runId: job.baseline.runId, reference: parseHook(c.hook), selection: { position: c.patchPosition } });
@@ -176,6 +196,7 @@ export default function App() {
 
   function chooseMode(mode: Controls['mode']) {
     if (mode === 'head') { schedule({ ...controlsRef.current, mode }); return; }
+    if (mode === 'attention') { schedule({ ...controlsRef.current, mode, query: controlsRef.current.position, focus: 'uniform' }); return; }
     if (source.current && sourceTokens) { schedule({ ...controlsRef.current, mode }); return; }
     const target = baseline.current, loaded = model;
     if (!target || !loaded) return;
@@ -367,9 +388,9 @@ export default function App() {
             <small>{index}</small>{tokenizer.tokens[id]}</button>)}</div>
         </section>
         <section>
-          <p className="eyebrow">Intervention</p><h2>{controls.mode === 'patch' ? 'Patch a residual vector' : "Change a head's contribution"}</h2>
+          <p className="eyebrow">Intervention</p><h2>{controls.mode === 'patch' ? 'Patch a residual vector' : controls.mode === 'attention' ? "Redirect a head's attention" : "Change a head's contribution"}</h2>
           <label>Intervention type<select aria-label="Intervention type" disabled={loading || probing || transferring || !model} value={controls.mode} onChange={event => chooseMode(event.target.value as Controls['mode'])}>
-            <option value="head">Scale a head's output</option><option value="patch">Patch the residual from another input</option></select></label>
+            <option value="head">Scale a head's output</option><option value="attention">Redirect a head's attention</option><option value="patch">Patch the residual from another input</option></select></label>
           {controls.mode === 'patch' ? <div className="patch-controls">
             <label htmlFor="source">Source input (same number of symbols)</label>
             <textarea id="source" rows={2} spellCheck={false} value={sourceText} disabled={loading || probing || transferring} onChange={event => setSourceText(event.target.value)} />
@@ -384,6 +405,16 @@ export default function App() {
             {c && Array.from({ length: c.layers }, (_, i) => <option value={i} key={i}>Layer {i + 1}</option>)}</select></label>
             <label>Head<select aria-label="Head" disabled={loading || probing || transferring || !c} value={controls.head} onChange={event => schedule({ ...controlsRef.current, head: Number(event.target.value) })}>
               {c && Array.from({ length: c.heads }, (_, i) => <option value={i} key={i}>Head {i + 1}</option>)}</select></label></div>
+          {controls.mode === 'attention' ? <div className="attention-controls">
+            <label>Query position<select aria-label="Query position" disabled={loading || probing || transferring || !model} value={controls.query} onChange={event => {
+              const query = Number(event.target.value), focus = controlsRef.current.focus;
+              schedule({ ...controlsRef.current, query, focus: focus !== 'uniform' && Number(focus) > query ? String(query) : focus });
+            }}>{tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
+            <label>Attend to<select aria-label="Attend to" disabled={loading || probing || transferring || !model} value={controls.focus} onChange={event => schedule({ ...controlsRef.current, focus: event.target.value })}>
+              <option value="uniform">Evenly over positions 0–{controls.query}</option>
+              {tokenizer && tokenIds.slice(0, controls.query + 1).map((id, i) => <option key={i} value={i}>All weight on position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
+            <p className="hint">Replaces this head's attention probabilities for one query position after the softmax, then recomputes the head's output and everything downstream. The scores are unchanged; only later positions are excluded.</p>
+          </div> : <>
           <label>Apply at<select aria-label="Apply at" disabled={loading || probing || transferring || !model} value={controls.scope} onChange={event => schedule({ ...controlsRef.current, scope: event.target.value })}>
             <option value="all">All positions</option>{tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
           <div className="strength-label"><label htmlFor="strength">Head strength</label><output htmlFor="strength">{controls.factor.toFixed(2)}×</output></div>
@@ -392,14 +423,15 @@ export default function App() {
           <StrengthNumber key={model?.runtimeGeneration} value={controls.factor} disabled={loading || probing || transferring || !model} onCommit={factor => schedule({ ...controlsRef.current, factor })} />
           <div className="scale-labels"><span>0 · ablated</span><span>1 · baseline</span><span>2 · doubled</span></div>
           </>}
+          </>}
           <button className="secondary" disabled={loading || probing || transferring || !model} onClick={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })}>Reset to baseline</button>
         </section>
         <section className="saved-experiments">
           <p className="eyebrow">Save and replay</p>
-          <button className="secondary" disabled={loading || probing || transferring || pending || !display || display.controls.mode === 'patch'} onClick={() => void exportExperiment()}>Export experiment</button>
+          <button className="secondary" disabled={loading || probing || transferring || pending || !display || display.controls.mode !== 'head'} onClick={() => void exportExperiment()}>Export experiment</button>
           <label className="file-label">Import experiment<input type="file" accept=".json,application/json" aria-label="Import experiment" disabled={loading || probing || transferring || pending || !model}
             onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void importExperiment(file); }} /></label>
-          <p className="hint">Save completed settings and predictions as JSON. Import recomputes them using the exact installed checkpoint.{display?.controls.mode === 'patch' ? ' Files currently save head-scaling experiments only.' : ''}</p>
+          <p className="hint">Save completed settings and predictions as JSON. Import recomputes them using the exact installed checkpoint.{display && display.controls.mode !== 'head' ? ' Files currently save head-scaling experiments only.' : ''}</p>
         </section>
         <section className="runtime">
           <p className="eyebrow">Computation runtime</p>
@@ -434,6 +466,8 @@ export default function App() {
             <span>Recorded PyTorch target probability: {(activeRecipe.metrics.baselineTargetProbability * 100).toFixed(2)}% → {(activeRecipe.metrics.modifiedTargetProbability * 100).toFixed(2)}%. Live browser results appear below.</span></div>}
           {display.controls.mode === 'patch' ? <div className="trace" aria-label="Intervention computation"><span>Source residual</span><span aria-hidden="true">→</span>
             <strong>{hookLabel(display.controls.hook)} · position {display.controls.patchPosition}</strong><span aria-hidden="true">→</span><span>Later layers</span><span aria-hidden="true">→</span><span>New prediction</span></div>
+          : display.controls.mode === 'attention' ? <div className="trace" aria-label="Intervention computation"><strong>Layer {display.controls.layer + 1}, head {display.controls.head + 1} · query {display.controls.query} · {focusLabel(display.controls)}</strong>
+            <span aria-hidden="true">→</span><span>Head output</span><span aria-hidden="true">→</span><span>Projection + residual</span><span aria-hidden="true">→</span><span>New prediction</span></div>
           : <div className="trace" aria-label="Intervention computation"><span>Attention weights</span><span aria-hidden="true">→</span>
             <strong>Head {display.controls.head + 1} · {display.controls.factor.toFixed(2)}×</strong><span aria-hidden="true">→</span><span>Projection + residual</span><span aria-hidden="true">→</span><span>New prediction</span></div>}
           <div className="prediction-title"><p>Next token after position <strong>{display.controls.position}</strong> · <SymbolLabel tokenizer={tokenizer} tokenId={display.tokens[display.controls.position]} /></p>
@@ -456,7 +490,8 @@ export default function App() {
             <p className="hint">{hookLabel(display.controls.hook)}, position {display.controls.patchPosition}: this input's residual → the source input's residual. Everything after this point is recomputed.</p>
             <div className="vector-list">{display.raw.map((value, i) => <div key={i}><span>Dimension {i}</span><code>{value.toFixed(5)}</code><span aria-hidden="true">→</span><code>{display.modified[i].toFixed(5)}</code></div>)}</div>
           </section> : <div className="inspectors">
-            <section><p className="eyebrow">Attention inspector</p><h3>Where this head attends</h3><p className="hint">Rows are query positions; columns are source positions. Head-output scaling leaves these weights unchanged.</p>
+            <section><p className="eyebrow">Attention inspector</p><h3>{display.controls.mode === 'attention' ? 'Modified attention' : 'Where this head attends'}</h3><p className="hint">Rows are query positions; columns are source positions. {display.controls.mode === 'attention'
+              ? `Row ${display.controls.query} is the replaced distribution; other rows are unchanged unless an earlier edit changed their inputs.` : 'Head-output scaling leaves these weights unchanged.'}</p>
               <div className="attention-scroll" tabIndex={0} aria-label="Scrollable attention matrix"><div className="attention-grid" style={{ gridTemplateColumns: `24px repeat(${length}, minmax(28px, 1fr))` }}><span />{display.tokens.map((id, i) => <span className="axis" key={`col-${i}`}>{i}</span>)}
                 {display.tokens.map((_, query) => <div className="attention-row" key={query}><span className="axis">{query}</span>{display.tokens.map((id, key) => {
                   const value = display.attention[query * length + key];
@@ -464,18 +499,19 @@ export default function App() {
                     title={`Query ${query} → source ${key}: ${value.toFixed(6)}${key > query ? ' (causally masked)' : ''}`}
                     aria-label={`Query ${query}, source ${key}, weight ${value.toFixed(6)}${key > query ? ', masked' : ''}`}>{key > query ? '·' : value.toFixed(2)}</button>;
                 })}</div>)}</div></div>
+              {display.controls.mode === 'attention' ? <p className="hint">Cell arithmetic shows the softmax of the scores, which an override bypasses; switch to head scaling to inspect it.</p> : <>
               <p className="hint">Select a cell to inspect its Q/K dot product, causal mask, and softmax.</p>
               {selectedCell && client.current && <AttentionCellInspector client={client.current} runId={display.comparison.baselineRunId} layer={display.controls.layer} head={display.controls.head}
-                query={selectedCell.query} source={selectedCell.source} weight={display.attention[selectedCell.query * length + selectedCell.source]} />}
+                query={selectedCell.query} source={selectedCell.source} weight={display.attention[selectedCell.query * length + selectedCell.source]} />}</>}
             </section>
-            <section><p className="eyebrow">Head-output inspector</p><h3>The actual edited vector</h3><p className="hint">At position {display.controls.scope === 'all' ? display.controls.position : display.controls.scope}, before output projection. Raw output → modified output.</p>
+            <section><p className="eyebrow">Head-output inspector</p><h3>The actual edited vector</h3><p className="hint">At position {display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : display.controls.scope}, before output projection. Raw output → modified output.</p>
               <div className="vector-list">{display.raw.map((value, i) => <div key={i}><span>Dimension {i}</span><code>{value.toFixed(5)}</code><span aria-hidden="true">→</span><code>{display.modified[i].toFixed(5)}</code></div>)}</div>
               <p className="hint">Changing this vector recomputes the residual, MLP, later layers, and output logits.</p>
             </section>
           </div>}
           {client.current && c && <ComputationInspector client={client.current} baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId}
             layer={display.controls.mode === 'patch' ? parseHook(display.controls.hook).layer : display.controls.layer}
-            position={display.controls.mode === 'patch' ? display.controls.patchPosition : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)} layers={c.layers}
+            position={display.controls.mode === 'patch' ? display.controls.patchPosition : display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)} layers={c.layers}
             symbols={display.tokens.map(id => tokenizer.tokens[id])} />}
           {client.current && <EmbeddingInspector client={client.current} runId={display.comparison.baselineRunId} position={display.controls.position}
             symbols={tokenizer.tokens} inputSymbols={display.tokens.map(id => tokenizer.tokens[id])} />}

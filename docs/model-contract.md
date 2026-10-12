@@ -33,6 +33,14 @@ The captured stage reports exactly the submitted row, and all other rows are unc
 
 A replacement at the prediction position reaches the prediction. A replacement at an earlier position reaches it if attention runs afterward: always for `block.input`, and only before the final layer for `attention.residual`. Runs containing a replacement use full execution. The cached suffix and cached inspections stay limited to same-layer head scaling, because cached tensors describe unreplaced residuals. Version 1 experiment files save head-scaling experiments only and refuse other kinds explicitly.
 
+`attention.override` replaces one head's post-softmax attention row at one query position. Its fields are a zero-based `layer`, `head`, `query`, and `weights`, with one weight per input position.
+
+- **Weights.** Each weight must be finite, non-negative, and at most 10,000. Every weight after `query` must be exactly 0, so the override stays causal, and the sum must be positive. The weights are divided by their sum in float64, then rounded to float32; the PyTorch reference does the same, so overridden rows are bit-identical.
+- **What changes.** Scores and masked scores are unchanged. `attention.weights` reports the override, and `A × V` uses it, so the head's raw output changes at the query position only. Everything downstream follows.
+- **Order within a layer.** A `block.input` replacement precedes the attention calculation. Head scaling applies to the head output computed from the overridden row. A row may be overridden once.
+- **Reachability.** This follows the single-position head rule: the override reaches the prediction at the same position, or at a later one when a later layer exists.
+- **Execution.** Overrides are always treated as effective, use full execution, and are inspected without cached tensors.
+
 ## Tokenizer and metrics
 
 The verification vocabulary is `<BOS>` followed by A–O. Input is split on whitespace without case or Unicode normalization; `<BOS>` is prepended automatically. Unknown symbols and excess context are errors. Empty input contains only `<BOS>`.

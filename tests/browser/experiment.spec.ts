@@ -6,7 +6,7 @@ import type { ExperimentDocument } from '../../src/engine/experiment';
 test('export and replay restore completed settings, switch checkpoints and compare newly computed predictions', async ({ page }) => {
   await page.goto('?model=verification');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
-  await page.getByLabel('Head strength').fill('0.35');
+  await page.getByRole('slider', { name: 'Head strength', exact: true }).fill('0.35');
   await page.getByRole('button', { name: 'Predict after position 2: E' }).click();
   await page.getByLabel('Target symbol').selectOption('14');
   await page.getByLabel('Apply at').selectOption('0');
@@ -32,7 +32,7 @@ test('export and replay restore completed settings, switch checkpoints and compa
   await expect(page.getByTestId('replay-report')).toContainText('Replay matches saved results');
   await expect(page.getByLabel('Model', { exact: true })).toHaveValue('verification');
   await expect(page.getByLabel('Space-separated symbols')).toHaveValue('A E I C G');
-  await expect(page.getByLabel('Head strength')).toHaveValue('0.35');
+  await expect(page.getByRole('slider', { name: 'Head strength', exact: true })).toHaveValue('0.35');
   await expect(page.getByLabel('Target symbol')).toHaveValue('14');
   await expect(page.getByLabel('Apply at')).toHaveValue('0');
   await expect(page.getByText('Next token after position', { exact: false })).toContainText('2');

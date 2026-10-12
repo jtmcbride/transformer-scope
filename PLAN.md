@@ -328,6 +328,6 @@ For training, distinguish lightweight inspection snapshots from resumable checkp
 
 ## 14. Immediate next work
 
-Continue Milestone E. The trained checkpoint and three prepared recipes are now in the screen. Version 1 experiment export/import is implemented with checkpoint validation, complete logit snapshots, automatic installed-model selection, and live replay comparison. Next, deepen the computation trace with projection/residual/MLP inspection and distinguish effective settings from pending edits. Keep the measured recipes, controls, and original verification model accessible.
+Continue Milestone E. The trained checkpoint and three prepared recipes are now in the screen. Version 1 experiment export/import is implemented with checkpoint validation, complete logit snapshots, automatic installed-model selection, and live replay comparison. Attention-cell arithmetic, lazy projection/residual/MLP vectors, exact strength entry, and CPU worker restart are now implemented. Start Milestone F: record cold/warm end-to-end browser timings on this host, add reproducible CI checks, and prepare static deployment instructions. Keep physical Safari/mobile and real hosted-page verification as outstanding release gates.
 
 No latency, checkpoint quality, browser compatibility, or numerical parity claim is complete until its associated evidence is recorded.

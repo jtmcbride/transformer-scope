@@ -58,7 +58,7 @@ test('head scaling, rapid edits, reset, and causal controls use computed results
   await expect(page.getByText('Random weights, real computations.', { exact: false })).toBeVisible();
   await expect(page.getByTestId('execution-strategy')).toHaveText('Cached suffix · layer 1');
   await page.screenshot({ path: testInfo.outputPath('desktop.png'), fullPage: true });
-  const slider = page.getByLabel('Head strength');
+  const slider = page.getByRole('slider', { name: 'Head strength', exact: true });
   await slider.fill('0'); await slider.fill('1.5'); await slider.fill('0.25');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.25×' })).toBeVisible();
   const vector = await page.locator('.vector-list > div').evaluateAll(rows => rows.map(row => {

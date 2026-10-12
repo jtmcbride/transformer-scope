@@ -12,7 +12,8 @@
     "benchmark:cache": "vitest run --config vitest.benchmark.config.ts",
     "fixtures": ".venv/bin/python scripts/export_fixtures.py",
     "train:retrieval": ".venv/bin/python scripts/train_retrieval.py",
-    "test:data": ".venv/bin/python -m unittest discover -s scripts -p 'test_*.py'"
+    "test:data": ".venv/bin/python -m unittest discover -s scripts -p 'test_*.py'",
+    "fixtures:inspection": ".venv/bin/python scripts/export_inspection.py"
   },
   "dependencies": {
     "@tensorflow/tfjs-core": "4.22.0",

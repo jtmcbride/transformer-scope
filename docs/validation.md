@@ -66,7 +66,7 @@ The browser suite checks:
 - Invalid input recovery and a 390-pixel viewport without horizontal overflow.
 - Corrupted weight checksum rejection before computation.
 
-The current production suite passed 14 tests across Chromium and WebKit. CPU and unpacked WebGL pass the original forward/gradient probe and the new cached/full suite in both engines. Each browser/backend tests 14 cached combinations, cross-layer fallback, independent PyTorch parity, 640-byte LRU eviction, modified-run replay, zero budget, and reload invalidation.
+The current production suite passed 26 tests across Chromium and WebKit. CPU and unpacked WebGL pass the original forward/gradient probe and the new cached/full suite in both engines. Each browser/backend tests 14 cached combinations, cross-layer fallback, independent PyTorch parity, 640-byte LRU eviction, modified-run replay, zero budget, and reload invalidation.
 
 Each of the four browser/backend combinations also runs 1,000 sequential comparisons. Retained tensors remain at 40 (36 weights plus four cached tensors); releasing the baseline restores 36 tensors and zero logical cache bytes. The cache's 640-byte logical payload remains constant through the edits. Raw records are in `docs/cache-verification-results.json`; original probe records remain in `docs/browser-probe-results.json`. See `docs/benchmarks.md` for timing scope and the Firefox runtime launch limitation.
 
@@ -92,6 +92,12 @@ These finite-task checks demonstrate held-out sequence behavior and the selected
 Version 1 export/replay passes three engine contract tests and four targeted production tests across Chromium and WebKit. They verify complete-vocabulary snapshots, non-final positions, target/scope restoration, checkpoint switching, CPU-to-WebGL replay, stale-checkpoint rejection before replacing the experiment, and visible discrepancies for self-consistent changed measurements. JSON size/version, input/token, intervention, numerical, and saved-metric consistency checks are covered. See `docs/experiment-format.md`.
 
 Cold WebGL model loading is allowed 30 seconds in the replay browser assertions; this is a test startup allowance, not a warm performance claim.
+
+## Computation-inspector validation
+
+Independent UI fixtures check two attention cells (one causally masked) and the projection, attention residual, MLP, and block-output vectors in both layers for the actual BOS-prefixed screen input at factor .37. Production assertions use the existing 2e-5 absolute bound on displayed six-decimal values. Numeric strength rejection, reset to identical vectors, mobile containment, new-worker ownership during edits, and cancellation of an explicitly blocked model load pass in Chromium and WebKit. The two initially failing blocked-load checks were corrected to wait until the first request was actually intercepted before restarting; otherwise the test inadvertently blocked the replacement worker. No numerical tolerance was changed.
+
+The full 24-test production suite passed except those two test-ordering cases; all eight inspector/restart checks then passed with corrected ordering, for 26 distinct passing production cases. Engine regressions remain 36 passing tests. See `docs/computation-inspection.md`; mobile vector-panel screenshots were inspected.
 
 ## Outstanding gates
 

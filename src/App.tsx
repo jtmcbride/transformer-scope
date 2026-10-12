@@ -5,6 +5,9 @@ import type { Commands } from './workers/protocol';
 import type { ProbeReport } from './engine/probe';
 import { createExperiment, parseExperiment, validateExperiment, checkReplay, MAX_EXPERIMENT_BYTES, type ExperimentDocument, type ReplayReport } from './engine/experiment';
 import { validateManifest, validateTokenizer } from './engine/weights';
+import { StrengthNumber } from './components/StrengthNumber';
+import { ComputationInspector } from './components/ComputationInspector';
+import { AttentionCellInspector } from './components/AttentionCellInspector';
 import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
 
@@ -25,7 +28,7 @@ export default function App() {
   const version = useRef(0);
   const baseline = useRef<RunSummary | null>(null);
   const latest = useRef<Job | null>(null);
-  const running = useRef(false);
+  const running = useRef<ModelClient | null>(null);
   const modifiedId = useRef<string | null>(null);
   const controlsRef = useRef<Controls>(defaults);
   const baselineInspector = useRef<{ key: string; attention: number[]; raw: number[] } | null>(null);
@@ -43,12 +46,14 @@ export default function App() {
   const [probe, setProbe] = useState<ProbeReport | null>(null);
   const [probing, setProbing] = useState(false);
   const [transferring, setTransferring] = useState(false);
+  const [selectedCell, setSelectedCell] = useState<{ query: number; source: number } | null>(null);
 
   async function drain() {
-    if (running.current || !client.current) return;
-    running.current = true;
+    const owner = client.current;
+    if (!owner || running.current === owner) return;
+    running.current = owner;
     try {
-      while (latest.current && alive.current) {
+      while (latest.current && alive.current && client.current === owner) {
         const job: Job = latest.current;
         latest.current = null;
         const c = job.controls;
@@ -57,7 +62,7 @@ export default function App() {
         try {
           const intervention: HeadScaleIntervention = { id: 'head-strength', kind: 'head.scale', layer: c.layer, head: c.head, factor: c.factor,
             tokens: c.scope === 'all' ? { kind: 'all' } : { kind: 'indices', indices: [Number(c.scope)] } };
-          const comparison = await client.current.request('COMPARE', {
+          const comparison = await owner.request('COMPARE', {
             baselineRunId: job.baseline.runId, interventions: [intervention], predictionPosition: c.position, targetTokenId: c.target, topK: 8,
           });
           created = comparison.modifiedRunId;
@@ -67,27 +72,27 @@ export default function App() {
           const readBaseline = async () => {
             if (savedInspector?.key === inspectorKey) return savedInspector;
             const [attention, raw] = await Promise.all([
-              client.current!.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
-              client.current!.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
+              owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
+              owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
             ]);
             return { key: inspectorKey, attention: Array.from(attention.values), raw: Array.from(raw.values) };
           };
           const [inspector, modified] = await Promise.all([
             readBaseline(),
-            client.current.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.modified', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
+            owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.modified', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
           ]);
           if (job.version !== version.current) continue;
           let replay: ReplayReport | undefined;
           if (job.replay) {
             const [baseLogits, modifiedLogits] = await Promise.all([
-              client.current.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'logits' }, selection: { position: c.position } }),
-              client.current.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'logits' }, selection: { position: c.position } }),
+              owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'logits' }, selection: { position: c.position } }),
+              owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'logits' }, selection: { position: c.position } }),
             ]);
             if (job.version !== version.current) continue;
             replay = checkReplay(job.replay, baseLogits.values, modifiedLogits.values, comparison.execution.backend);
           }
           baselineInspector.current = inspector;
-          if (modifiedId.current) void client.current.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
+          if (modifiedId.current) void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
           modifiedId.current = created; created = undefined;
           setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds,
             attention: inspector.attention, raw: inspector.raw, modified: Array.from(modified.values), replay });
@@ -95,10 +100,10 @@ export default function App() {
         } catch (failure) {
           if (alive.current && job.version === version.current) setError(failure instanceof Error ? failure.message : String(failure));
         } finally {
-          if (created) void client.current.request('RELEASE', { runId: created }).catch(() => {});
+          if (created) void owner.request('RELEASE', { runId: created }).catch(() => {});
         }
       }
-    } finally { running.current = false; if (alive.current) setPending(false); }
+    } finally { if (running.current === owner) { running.current = null; if (alive.current) setPending(false); } }
   }
 
   function schedule(next: Controls, run = baseline.current, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument) {
@@ -110,25 +115,26 @@ export default function App() {
     setPending(true); void drain();
   }
 
-  async function establish(loaded: LoadedModel, input: string, generation: number, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument) {
+  async function establish(loaded: LoadedModel, input: string, generation: number, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument, settings?: Controls) {
     const tokens = tokenize(input, loaded.tokenizer, loaded.manifest.config.contextLength);
     const next = await client.current!.request('BASELINE', { tokenIds: tokens });
     if (!alive.current || generation !== version.current) {
       void client.current?.request('RELEASE', { runId: next.runId }).catch(() => {}); return;
     }
     const old = baseline.current;
-    baseline.current = next; setTokenIds(tokens);
+    baseline.current = next; setTokenIds(tokens); setSelectedCell(null);
     if (old) void client.current!.request('RELEASE', { runId: old.runId }).catch(() => {});
     if (modifiedId.current) {
       void client.current!.request('RELEASE', { runId: modifiedId.current }).catch(() => {}); modifiedId.current = null;
     }
     const patch = replay?.observation.interventions[0] ?? recipe?.intervention;
-    schedule(patch ? { layer: patch.layer, head: patch.head, factor: patch.factor,
+    schedule(settings ?? (patch ? { layer: patch.layer, head: patch.head, factor: patch.factor,
       scope: patch.tokens.kind === 'all' ? 'all' : String(patch.tokens.indices[0]), position: replay?.observation.predictionPosition ?? recipe!.predictionPosition, target: replay?.observation.targetTokenId ?? recipe!.targetTokenId }
-      : { ...controlsRef.current, position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target }, next, recipe, replay);
+      : { ...controlsRef.current, position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target }), next, recipe, replay);
   }
 
-  async function load(backend: 'auto' | 'cpu' | 'webgl', selected: ModelChoice, input?: string, restored?: ExperimentDocument) {
+  async function load(backend: 'auto' | 'cpu' | 'webgl', selected: ModelChoice, input?: string, restored?: ExperimentDocument, settings?: Controls) {
+    const owner = client.current;
     const generation = ++version.current;
     latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null;
     setChoice(selected); setExperiments(null); setActiveRecipe(null);
@@ -136,7 +142,7 @@ export default function App() {
     try {
       const manifestUrl = new URL(`${import.meta.env.BASE_URL}models/${selected}/manifest.json`, window.location.origin).href;
       const [loaded, data] = await Promise.all([
-        client.current!.request('LOAD', { manifestUrl, backend }),
+        owner!.request('LOAD', { manifestUrl, backend }),
         selected === 'retrieval' ? fetchExperiments(manifestUrl) : Promise.resolve(null),
       ]);
       if (!alive.current || generation !== version.current) return;
@@ -146,10 +152,10 @@ export default function App() {
       const sequence = input ?? recipe?.text ?? 'A E I C G';
       if (input === undefined) controlsRef.current = defaults;
       setExperiments(metadata); setModel(loaded); setText(sequence);
-      await establish(loaded, sequence, generation, recipe, restored);
+      await establish(loaded, sequence, generation, recipe, restored, settings);
     } catch (failure) {
       if (alive.current && generation === version.current) setError(failure instanceof Error ? failure.message : String(failure));
-    } finally { if (alive.current) setLoading(false); }
+    } finally { if (alive.current && client.current === owner) setLoading(false); }
   }
 
   async function selectRecipe(id: string) {
@@ -179,11 +185,21 @@ export default function App() {
     finally { setLoading(false); }
   }
 
+  async function restart() {
+    const sequence = display && model ? display.tokens.slice(1).map(id => model.tokenizer.tokens[id]).join(' ') : undefined;
+    const settings = display ? { ...controlsRef.current } : undefined;
+    ++version.current; latest.current = null;
+    client.current?.dispose(); client.current = new ModelClient(); setProbing(false);
+    await load('cpu', choice, sequence, undefined, settings);
+  }
+
   async function verify() {
+    const owner = client.current;
+    if (!owner) return;
     setProbing(true); setError(null); setProbe(null);
-    try { setProbe(await client.current!.request('PROBE', {})); }
-    catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); }
-    finally { setProbing(false); }
+    try { const report = await owner.request('PROBE', {}); if (alive.current && client.current === owner) setProbe(report); }
+    catch (failure) { if (alive.current && client.current === owner) setError(failure instanceof Error ? failure.message : String(failure)); }
+    finally { if (alive.current && client.current === owner) setProbing(false); }
   }
 
   async function exportExperiment() {
@@ -284,8 +300,9 @@ export default function App() {
           <label>Apply at<select aria-label="Apply at" disabled={loading || probing || transferring || !model} value={controls.scope} onChange={event => schedule({ ...controlsRef.current, scope: event.target.value })}>
             <option value="all">All positions</option>{tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
           <div className="strength-label"><label htmlFor="strength">Head strength</label><output htmlFor="strength">{controls.factor.toFixed(2)}×</output></div>
-          <input id="strength" type="range" min="0" max="2" step="0.05" value={controls.factor} disabled={loading || probing || transferring || !model}
+          <input id="strength" type="range" min="0" max="2" step="any" value={controls.factor} disabled={loading || probing || transferring || !model}
             onChange={event => schedule({ ...controlsRef.current, factor: Number(event.target.value) })} />
+          <StrengthNumber key={model?.runtimeGeneration} value={controls.factor} disabled={loading || probing || transferring || !model} onCommit={factor => schedule({ ...controlsRef.current, factor })} />
           <div className="scale-labels"><span>0 · ablated</span><span>1 · baseline</span><span>2 · doubled</span></div>
           <button className="secondary" disabled={loading || probing || transferring || !model} onClick={() => schedule({ ...controlsRef.current, factor: 1 })}>Reset to baseline</button>
         </section>
@@ -302,6 +319,7 @@ export default function App() {
             <option value="auto">Initializing…</option><option value="cpu">CPU worker</option><option value="webgl">WebGL worker</option></select></label>
           <p className="hint">{model?.fallbackReason ?? (c ? `${c.layers} layers · ${c.heads} heads · ${c.modelDim} dimensions` : 'Loading static model assets…')}</p>
           {!model && !loading && <button className="secondary" onClick={() => void load('cpu', choice, text)}>Load with CPU</button>}
+          <button className="secondary restart-worker" disabled={transferring} onClick={() => void restart()}>Restart computation worker on CPU</button>
           <button className="secondary" disabled={loading || probing || transferring || !model} onClick={() => void verify()}>{probing ? 'Checking computations…' : 'Verify against PyTorch'}</button>
           {probe && <div className="probe-result" role="status"><strong>Reference checks passed</strong><span>Forward error {probe.forwardMaximumError.toExponential(2)}</span>
             <span>Gradient error {probe.gradientMaximumError.toExponential(2)}</span><span>Adam error {probe.optimizerMaximumError.toExponential(2)}</span>
@@ -348,16 +366,22 @@ export default function App() {
               <div className="attention-scroll" tabIndex={0} aria-label="Scrollable attention matrix"><div className="attention-grid" style={{ gridTemplateColumns: `24px repeat(${length}, minmax(28px, 1fr))` }}><span />{display.tokens.map((id, i) => <span className="axis" key={`col-${i}`}>{i}</span>)}
                 {display.tokens.map((_, query) => <div className="attention-row" key={query}><span className="axis">{query}</span>{display.tokens.map((id, key) => {
                   const value = display.attention[query * length + key];
-                  return <button type="button" className="cell" key={key} style={{ backgroundColor: `rgba(28, 116, 105, ${key > query ? 0 : .06 + value * .9})` }}
+                  return <button type="button" className={selectedCell?.query === query && selectedCell.source === key ? 'cell selected-cell' : 'cell'} key={key} disabled={loading || transferring} onClick={() => setSelectedCell({ query, source: key })} aria-pressed={selectedCell?.query === query && selectedCell.source === key} style={{ backgroundColor: `rgba(28, 116, 105, ${key > query ? 0 : .06 + value * .9})` }}
                     title={`Query ${query} → source ${key}: ${value.toFixed(6)}${key > query ? ' (causally masked)' : ''}`}
                     aria-label={`Query ${query}, source ${key}, weight ${value.toFixed(6)}${key > query ? ', masked' : ''}`}>{key > query ? '·' : value.toFixed(2)}</button>;
                 })}</div>)}</div></div>
+              <p className="hint">Select a cell to inspect its Q/K dot product, causal mask, and softmax.</p>
+              {selectedCell && client.current && <AttentionCellInspector client={client.current} runId={display.comparison.baselineRunId} layer={display.controls.layer} head={display.controls.head}
+                query={selectedCell.query} source={selectedCell.source} weight={display.attention[selectedCell.query * length + selectedCell.source]} />}
             </section>
             <section><p className="eyebrow">Head-output inspector</p><h3>The actual edited vector</h3><p className="hint">At position {display.controls.scope === 'all' ? display.controls.position : display.controls.scope}, before output projection. Raw output → modified output.</p>
               <div className="vector-list">{display.raw.map((value, i) => <div key={i}><span>Dimension {i}</span><code>{value.toFixed(5)}</code><span aria-hidden="true">→</span><code>{display.modified[i].toFixed(5)}</code></div>)}</div>
               <p className="hint">Changing this vector recomputes the residual, MLP, later layers, and output logits.</p>
             </section>
           </div>
+          {client.current && c && <ComputationInspector client={client.current} baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId}
+            layer={display.controls.layer} position={display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)} layers={c.layers}
+            symbols={display.tokens.map(id => tokenizer.tokens[id])} />}
         </> : <div className="empty-observation">The model's computed predictions will appear here.</div>}
       </div>
     </div>

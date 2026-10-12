@@ -1,24 +1,15 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { cpus, platform, release } from 'node:os';
 import { expect, test } from 'vitest';
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-cpu';
 import { RunEngine } from '../../src/engine/runs';
-import { validateManifest, validateTokenizer } from '../../src/engine/weights';
-import type { HeadScaleIntervention, ModelArtifact, TensorRecord } from '../../src/engine/contracts';
+import type { HeadScaleIntervention } from '../../src/engine/contracts';
 import { partition, retrievalExamples } from './retrieval-split';
+import { artifact, manifest } from '../engine/retrieval-artifact';
 
 // Explicitly invoked analysis (npm run analysis:heads). It measures single-head ablations on the
 // held-out split with the verified engine; it does not assign heads semantic roles.
-const directory = new URL('../../public/models/retrieval/', import.meta.url);
-const json = (file: string) => JSON.parse(readFileSync(new URL(file, directory), 'utf8'));
-const manifest = validateManifest(json('manifest.json'));
-const tokenizer = validateTokenizer(json('tokenizer.json'), manifest.config.vocabularySize);
-const payload = readFileSync(new URL('weights.bin', directory));
-const weights: Record<string, TensorRecord> = {};
-for (const entry of manifest.tensors) weights[entry.name] = { shape: entry.shape,
-  values: Array.from({ length: entry.byteLength / 4 }, (_, i) => payload.readFloatLE(entry.byteOffset + i * 4)) };
-const artifact: ModelArtifact = { manifest, tokenizer, weights };
 
 const quantile = (sorted: number[], q: number) => sorted[Math.min(sorted.length - 1, Math.max(0, Math.ceil(sorted.length * q) - 1))];
 

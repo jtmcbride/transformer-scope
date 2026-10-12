@@ -147,6 +147,10 @@ Two production tests inject a browser-initiated loss into the real worker bundle
 
 At 360 CSS px in Chromium with touch emulation, the strength slider's hit area was 16 px tall and the file input 17 px, below the 24 px WCAG 2.2 minimum target size. On coarse pointers, both are now 32 px; the mouse layout is unchanged. A production test checks every control except inline text links for at least 24 × 24 px, checks containment, and sets the strength with a touchscreen tap. It fails without the CSS change. If an engine does not report a coarse pointer under emulation, the test annotates that and asserts containment only. This is viewport/touch emulation, not physical-device evidence.
 
+## Residual-stream read-out
+
+The logit-lens panel matches independent PyTorch read-outs for the large-effect recipe's baseline and ablated runs. The maximum logit error is 1.67e-6 under the unchanged forward bounds (2e-5 absolute, 1e-5 relative), and the norms also match. Details and limitations: `docs/computation-inspection.md`.
+
 ## Physical-device results
 
 None. On 2026-10-12, the project owner chose to skip the lower-powered phone run and proceed to educational sessions. The physical-mobile gate is deferred, not passed. No physical device has run the harness or the checklist, and there is no physical-mobile performance or compatibility claim. To close the gate later, run `docs/physical-device-protocol.md`. Run `docs/physical-device-protocol.md` and record the harness JSON and manual checklist in `docs/device-results/`. Do not substitute viewport emulation, Playwright WebKit, installed desktop Safari, or automated harness runs for this gate.

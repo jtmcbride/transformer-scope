@@ -91,6 +91,7 @@ async function run(request: Exclude<WorkerRequest, { command: 'LOSE_CONTEXT' }>)
     case 'BASELINE': return engine.runBaseline(request.payload.tokenIds);
     case 'COMPARE': return engine.compare(request.payload);
     case 'INSPECT': return engine.inspectActivation(request.payload.runId, request.payload.reference, request.payload.selection);
+    case 'LENS': return engine.inspectResidualLens(request.payload.runId, request.payload.position);
     case 'RELEASE': engine.releaseRun(request.payload.runId); return null;
     case 'RESOURCES': {
       const memory = tf.memory();
@@ -114,8 +115,9 @@ scope.onmessage = (event: MessageEvent<WorkerRequest>) => {
       code: error instanceof EngineError ? error.code : 'NUMERICAL_FAILURE',
       message: error instanceof Error ? error.message : String(error),
     } }; }
-    const transfers: Transferable[] = response.ok && request.command === 'INSPECT'
-      ? [(response.result as { values: Float32Array }).values.buffer] : [];
+    const transfers: Transferable[] = !response.ok ? []
+      : request.command === 'INSPECT' ? [(response.result as { values: Float32Array }).values.buffer]
+      : request.command === 'LENS' ? [(response.result as { norms: Float32Array }).norms.buffer, (response.result as { logits: Float32Array }).logits.buffer] : [];
     scope.postMessage(response, transfers);
   });
 };

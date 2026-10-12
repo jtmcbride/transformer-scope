@@ -4,20 +4,10 @@ import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-cpu';
 import { RunEngine } from '../../src/engine/runs';
 import { runProbe, type ProbeFixture } from '../../src/engine/probe';
-import { validateManifest, validateTokenizer } from '../../src/engine/weights';
-import type { ModelArtifact, TensorRecord } from '../../src/engine/contracts';
 import { validateExperiments, retrievalAnswer } from '../../src/experiments';
 import { assertClose } from './numerical';
+import { artifact, json, manifest, tokenizer } from './retrieval-artifact';
 
-const directory = new URL('../../public/models/retrieval/', import.meta.url);
-const json = (file: string) => JSON.parse(readFileSync(new URL(file, directory), 'utf8'));
-const manifest = validateManifest(json('manifest.json'));
-const tokenizer = validateTokenizer(json('tokenizer.json'), manifest.config.vocabularySize);
-const payload = readFileSync(new URL('weights.bin', directory));
-const weights: Record<string, TensorRecord> = {};
-for (const entry of manifest.tensors) weights[entry.name] = { shape: entry.shape,
-  values: Array.from({ length: entry.byteLength / 4 }, (_, i) => payload.readFloatLE(entry.byteOffset + i * 4)) };
-const artifact: ModelArtifact = { manifest, tokenizer, weights };
 const data = [json('recipes.json'), json('evaluation.json')];
 const metadata = validateExperiments(data, manifest, tokenizer);
 

@@ -47,6 +47,7 @@ Use Python 3.12 and uv:
 ```sh
 uv sync --locked
 npm run fixtures
+npm run fixtures:lens   # residual read-out values for the trained checkpoint
 ```
 
 Fixture regeneration is deliberate and must be reviewed when the numerical contract changes. The exporter records its seeds and PyTorch version, produces 84 original forward/intervention cases and 261 additional three-layer cases at seeds 1, 7, and 42, and saves loss, all gradients, and one Adam update. Weights and expected values come from the independent implementation in `scripts/reference_model.py`.
@@ -68,10 +69,11 @@ The exporter saves 411,648 weight bytes, a hash-checked manifest/tokenizer, eval
 - Implemented: scaffold and lockfiles, model contract, artifact validation, independent fixtures, full forward execution, gradients, selective baseline/modified inspection, worker probe, and an initial intervention screen.
 - Implemented in Milestone C: a 32 MiB baseline cache with LRU eviction and read leases, exact same-layer residual deltas, suffix execution, full fallback, reset/identity reuse, and cached inspection. The screen shows the actual execution strategy and reuses unchanged baseline inspector slices during slider edits.
 - Implemented in Milestone D: deterministic retrieval training, held-out and length evaluations, measured recipes, a trained default model, checkpoint switching, and responsive attention inspection.
-- Verified: 41 engine tests, five dataset/reference/artifact tests, 319 direct cached/reference cases, and 21 production tests per browser in CI Chromium and Firefox, including 1,000 comparisons on each supported CPU/WebGL combination. The earlier 14 production tests also passed in Playwright WebKit on the recorded Mac host.
+- Verified: 41 engine tests, five dataset/reference/artifact tests, 319 direct cached/reference cases, and 22 production tests per browser in CI Chromium and Firefox, including 1,000 comparisons on each supported CPU/WebGL combination. The earlier 14 production tests also passed in Playwright WebKit on the recorded Mac host.
 - Implemented in Milestone E: versioned experiment export/replay, exact numeric strength, attention-cell arithmetic, lazy projection/residual/MLP vectors, and CPU worker restart.
 - Implemented in Milestone F: named-host browser latency measurements, source/build artifact auditing, pinned-action CI, verified Pages deployment, and hosted asset/workflow checks.
 - [Live application](https://jtmcbride.github.io/transformer-scope/). CI passes Chromium CPU/WebGL, Firefox CPU (worker WebGL unavailable on that runner), and hosted release checks. Installed Safari passes manual CPU/WebGL reference checks and hosted CPU verification.
+- Implemented in expansion (started before the educational gate by project decision): a residual-stream read-out (logit lens) verified against PyTorch.
 - Implemented for release validation: an opt-in on-device harness (`validation.html`), a physical-device protocol, an educational evaluation protocol with a findings template, and WebGL context-loss detection with CPU recovery.
 - Remaining release validation: educational sessions (the session page is ready), and performance across more named hardware/browser combinations. The physical lower-powered phone run is deferred by project decision and not validated.
 

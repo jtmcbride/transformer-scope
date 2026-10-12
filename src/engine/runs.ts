@@ -20,6 +20,11 @@ export interface ComparisonResult extends PredictionComparison {
 export interface ActivationSlice {
   shape: number[]; axes: string[]; values: Float32Array;
 }
+/** Residual rows at one position read out through the final normalization and unembedding. Only the last row is a model prediction. */
+export interface ResidualLens {
+  position: number; stages: { stage: 'embedding.output' | 'attention.residual' | 'block.output'; layer: number | null }[];
+  norms: Float32Array; logits: Float32Array;
+}
 
 function axesFor(stage: ActivationReference['stage']): string[] {
   if (['attention.scores', 'attention.maskedScores', 'attention.weights'].includes(stage)) return ['batch', 'head', 'queryPosition', 'keyPosition'];
@@ -213,6 +218,27 @@ export class RunEngine {
         slice = tf.slice(tensor, begin, sizes);
         return { shape: sizes, axes, values: Float32Array.from(await slice.data()) };
       } finally { slice?.dispose(); owned?.dispose(); if (result) disposeForward(result); lease?.release(); }
+    });
+  }
+
+  async inspectResidualLens(runId: string, position: number): Promise<ResidualLens> {
+    return this.operation(async () => {
+      const run = this.descriptor(runId);
+      requireInput(Number.isInteger(position) && position >= 0 && position < run.tokenIds.length, 'Lens position is outside the input.');
+      const stagesRead: ResidualLens['stages'] = [{ stage: 'embedding.output', layer: null }];
+      for (let layer = 0; layer < this.model.config.layers; layer++) stagesRead.push({ stage: 'attention.residual', layer }, { stage: 'block.output', layer });
+      const references = stagesRead.map(item => item.layer === null ? { stage: item.stage } : { stage: item.stage, layer: item.layer }) as ActivationReference[];
+      // A full forward pass keeps this read-out independent of cache state.
+      const result = this.model.forward(run.tokenIds, run.interventions, references);
+      let rows: tf.Tensor3D | undefined, read: tf.Tensor3D | undefined, norms: tf.Tensor | undefined;
+      try {
+        rows = tf.tidy(() => tf.concat(references.map(reference => tf.slice(result.captured[activationKey(reference)], [0, position, 0], [1, 1, this.model.config.modelDim])), 1) as tf.Tensor3D);
+        read = this.model.readOut(rows);
+        norms = tf.tidy(() => tf.sqrt(tf.sum(tf.square(rows!), -1)));
+        const [logits, magnitude] = await Promise.all([read.data(), norms.data()]);
+        if (!logits.every(Number.isFinite) || !magnitude.every(Number.isFinite)) throw new EngineError('NUMERICAL_FAILURE', 'The residual read-out produced non-finite values.');
+        return { position, stages: stagesRead, norms: Float32Array.from(magnitude), logits: Float32Array.from(logits) };
+      } finally { rows?.dispose(); read?.dispose(); norms?.dispose(); disposeForward(result); }
     });
   }
 

@@ -8,6 +8,7 @@ import { validateManifest, validateTokenizer } from './engine/weights';
 import { StrengthNumber } from './components/StrengthNumber';
 import { ComputationInspector } from './components/ComputationInspector';
 import { AttentionCellInspector } from './components/AttentionCellInspector';
+import { ResidualLens } from './components/ResidualLens';
 import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
 
@@ -396,6 +397,8 @@ export default function App() {
           {client.current && c && <ComputationInspector client={client.current} baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId}
             layer={display.controls.layer} position={display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)} layers={c.layers}
             symbols={display.tokens.map(id => tokenizer.tokens[id])} />}
+          {client.current && <ResidualLens client={client.current} baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId}
+            position={display.controls.position} target={display.controls.target} symbols={tokenizer.tokens} />}
         </> : <div className="empty-observation">The model's computed predictions will appear here.</div>}
       </div>
     </div>

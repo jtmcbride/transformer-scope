@@ -84,10 +84,20 @@ export class TransformerModel {
   }
 
   private logits(hidden: tf.Tensor3D, save: Save): tf.Tensor3D {
-    const [, length, dimension] = hidden.shape;
     const final = save('final.normalized', this.norm(hidden, 'finalNorm'));
-    return save('logits', tf.reshape(tf.matMul(tf.reshape(final, [length, dimension]) as tf.Tensor2D,
-      this.weights.tokenEmbedding as tf.Tensor2D, false, true), [1, length, this.config.vocabularySize]) as tf.Tensor3D);
+    return save('logits', this.unembed(final));
+  }
+
+  private unembed(normalized: tf.Tensor3D): tf.Tensor3D {
+    const [, length, dimension] = normalized.shape;
+    return tf.reshape(tf.matMul(tf.reshape(normalized, [length, dimension]) as tf.Tensor2D,
+      this.weights.tokenEmbedding as tf.Tensor2D, false, true), [1, length, this.config.vocabularySize]) as tf.Tensor3D;
+  }
+
+  /** Final normalization and tied unembedding applied to arbitrary residual rows [1, rows, d]: the logit lens. */
+  readOut(residuals: tf.Tensor3D): tf.Tensor3D {
+    requireInput(!this.disposed, 'Model has been disposed.');
+    return tf.tidy(() => this.unembed(this.norm(residuals, 'finalNorm')));
   }
 
   private validateCached(cache: LayerBaseline, layer: number, patches: readonly HeadScaleIntervention[]): void {

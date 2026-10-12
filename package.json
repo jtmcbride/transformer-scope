@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/write_release.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:browser": "playwright test",
@@ -15,7 +15,8 @@
     "test:data": ".venv/bin/python -m unittest discover -s scripts -p 'test_*.py'",
     "fixtures:inspection": ".venv/bin/python scripts/export_inspection.py",
     "benchmark:browser": "playwright test --config playwright.benchmark.config.ts && node scripts/collect_browser_benchmark.mjs",
-    "check:artifacts": "python3 scripts/check_artifacts.py --models public/models && python3 scripts/check_artifacts.py --models dist/models"
+    "check:artifacts": "python3 scripts/check_artifacts.py --models public/models && python3 scripts/check_artifacts.py --models dist/models",
+    "test:hosted": "playwright test --config playwright.hosted.config.ts"
   },
   "dependencies": {
     "@tensorflow/tfjs-core": "4.22.0",

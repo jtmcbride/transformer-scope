@@ -118,16 +118,17 @@ export default function App() {
   }
 
   async function establish(loaded: LoadedModel, input: string, generation: number, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument, settings?: Controls) {
+    const owner = client.current!;
     const tokens = tokenize(input, loaded.tokenizer, loaded.manifest.config.contextLength);
-    const next = await client.current!.request('BASELINE', { tokenIds: tokens });
-    if (!alive.current || generation !== version.current) {
-      void client.current?.request('RELEASE', { runId: next.runId }).catch(() => {}); return;
+    const next = await owner.request('BASELINE', { tokenIds: tokens });
+    if (!alive.current || generation !== version.current || client.current !== owner) {
+      void owner.request('RELEASE', { runId: next.runId }).catch(() => {}); return;
     }
     const old = baseline.current;
     baseline.current = next; setTokenIds(tokens); setSelectedCell(null);
-    if (old) void client.current!.request('RELEASE', { runId: old.runId }).catch(() => {});
+    if (old) void owner.request('RELEASE', { runId: old.runId }).catch(() => {});
     if (modifiedId.current) {
-      void client.current!.request('RELEASE', { runId: modifiedId.current }).catch(() => {}); modifiedId.current = null;
+      void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {}); modifiedId.current = null;
     }
     const patch = replay?.observation.interventions[0] ?? recipe?.intervention;
     schedule(settings ?? (patch ? { layer: patch.layer, head: patch.head, factor: patch.factor,
@@ -163,11 +164,12 @@ export default function App() {
   async function selectRecipe(id: string) {
     const recipe = experiments?.recipes.find(item => item.id === id);
     if (!recipe || !model) return;
+    const owner = client.current;
     const generation = ++version.current;
     latest.current = null; setLoading(true); setError(null); setText(recipe.text);
     try { await establish(model, recipe.text, generation, recipe); }
-    catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); }
-    finally { setLoading(false); }
+    catch (failure) { if (alive.current && client.current === owner) setError(failure instanceof Error ? failure.message : String(failure)); }
+    finally { if (alive.current && client.current === owner) setLoading(false); }
   }
 
   useEffect(() => {
@@ -180,11 +182,12 @@ export default function App() {
   async function runInput(event: FormEvent) {
     event.preventDefault();
     if (!model) return;
+    const owner = client.current;
     const generation = ++version.current;
     latest.current = null; setLoading(true); setError(null);
     try { await establish(model, text, generation); }
-    catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); }
-    finally { setLoading(false); }
+    catch (failure) { if (alive.current && client.current === owner) setError(failure instanceof Error ? failure.message : String(failure)); }
+    finally { if (alive.current && client.current === owner) setLoading(false); }
   }
 
   async function restart() {

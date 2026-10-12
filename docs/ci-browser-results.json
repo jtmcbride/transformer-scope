@@ -1,0 +1,675 @@
+{
+  "commit": "6a41a0999a67baf64ace57c6a80e69828e92226e",
+  "runUrl": "https://github.com/jtmcbride/transformer-scope/actions/runs/38254919942",
+  "environment": "GitHub-hosted Ubuntu 24.04, Node 24.18.0",
+  "stats": {
+    "startTime": "2026-10-12T13:21:01.610Z",
+    "duration": 34437.462,
+    "expected": 28,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "browser": "chromium",
+      "title": "production CPU/WebGL suffix equivalence, eviction, reload, and 1,000-edit resource stress",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "production CPU/WebGL suffix equivalence, eviction, reload, and 1,000-edit resource stress",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "an unavailable worker WebGL context produces a clear error and CPU recovery",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "an unavailable worker WebGL context produces a clear error and CPU recovery",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "export and replay restore completed settings, switch checkpoints and compare newly computed predictions",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "invalid imports preserve the current experiment; self-consistent changed measurements are exposed on replay",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "export and replay restore completed settings, switch checkpoints and compare newly computed predictions",
+      "status": "expected",
+      "annotations": [
+        {
+          "type": "unsupported-webgl",
+          "description": "WebGL worker unavailable: Error: No worker WebGL context is available."
+        }
+      ]
+    },
+    {
+      "browser": "firefox",
+      "title": "invalid imports preserve the current experiment; self-consistent changed measurements are exposed on replay",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "exact strength entry and attention-cell arithmetic match independent PyTorch values",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "projection/residual/MLP selectors show independent completed values, reset, and mobile containment",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "worker restart during edits creates a fresh CPU session and preserves the requested experiment",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "CPU restart can cancel an unfinished model load",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "exact strength entry and attention-cell arithmetic match independent PyTorch values",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "projection/residual/MLP selectors show independent completed values, reset, and mobile containment",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "worker restart during edits creates a fresh CPU session and preserves the requested experiment",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "CPU restart can cancel an unfinished model load",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "trained checkpoint reproduces reference probes and prepared recipes on CPU and WebGL",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "prepared experiments, custom inputs, checkpoint switching, and mobile matrix stay coherent",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "trained checkpoint reproduces reference probes and prepared recipes on CPU and WebGL",
+      "status": "expected",
+      "annotations": [
+        {
+          "type": "unsupported-webgl",
+          "description": "UNSUPPORTED_BACKEND: WebGL worker unavailable: Error: No worker WebGL context is available."
+        }
+      ]
+    },
+    {
+      "browser": "firefox",
+      "title": "prepared experiments, custom inputs, checkpoint switching, and mobile matrix stay coherent",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "production worker matches PyTorch on CPU and WebGL, including gradients and Adam",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "head scaling, rapid edits, reset, and causal controls use computed results",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "input errors preserve the current experiment and a mobile layout remains usable",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "chromium",
+      "title": "corrupt static weights are rejected before model execution",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "production worker matches PyTorch on CPU and WebGL, including gradients and Adam",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "head scaling, rapid edits, reset, and causal controls use computed results",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "input errors preserve the current experiment and a mobile layout remains usable",
+      "status": "expected",
+      "annotations": []
+    },
+    {
+      "browser": "firefox",
+      "title": "corrupt static weights are rejected before model execution",
+      "status": "expected",
+      "annotations": []
+    }
+  ],
+  "records": [
+    {
+      "browser": "chromium",
+      "name": "cache-verification-results",
+      "data": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "reports": [
+          {
+            "backend": "cpu",
+            "status": "passed",
+            "cachedCases": 14,
+            "logitError": 1.430511474609375e-06,
+            "residualError": 2.384185791015625e-07,
+            "independentError": 1.1920928955078125e-06,
+            "beforeStress": {
+              "cache": {
+                "logicalBytes": 640,
+                "budgetBytes": 33554432,
+                "baselines": 1,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 40,
+              "logicalTensorBytes": 6272,
+              "memoryEstimateUnreliable": true
+            },
+            "afterStress": {
+              "cache": {
+                "logicalBytes": 640,
+                "budgetBytes": 33554432,
+                "baselines": 1,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 40,
+              "logicalTensorBytes": 6272,
+              "memoryEstimateUnreliable": true
+            },
+            "afterRelease": {
+              "cache": {
+                "logicalBytes": 0,
+                "budgetBytes": 33554432,
+                "baselines": 0,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 36,
+              "logicalTensorBytes": 5632,
+              "memoryEstimateUnreliable": true
+            },
+            "stressComparisons": 1000
+          },
+          {
+            "backend": "webgl",
+            "status": "passed",
+            "cachedCases": 14,
+            "logitError": 1.1920928955078125e-06,
+            "residualError": 2.384185791015625e-07,
+            "independentError": 1.430511474609375e-06,
+            "beforeStress": {
+              "cache": {
+                "logicalBytes": 640,
+                "budgetBytes": 33554432,
+                "baselines": 1,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 40,
+              "logicalTensorBytes": 6272,
+              "memoryEstimateUnreliable": false
+            },
+            "afterStress": {
+              "cache": {
+                "logicalBytes": 640,
+                "budgetBytes": 33554432,
+                "baselines": 1,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 40,
+              "logicalTensorBytes": 6272,
+              "memoryEstimateUnreliable": false
+            },
+            "afterRelease": {
+              "cache": {
+                "logicalBytes": 0,
+                "budgetBytes": 33554432,
+                "baselines": 0,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 36,
+              "logicalTensorBytes": 5632,
+              "memoryEstimateUnreliable": false
+            },
+            "stressComparisons": 1000
+          }
+        ]
+      }
+    },
+    {
+      "browser": "firefox",
+      "name": "cache-verification-results",
+      "data": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+        "reports": [
+          {
+            "backend": "cpu",
+            "status": "passed",
+            "cachedCases": 14,
+            "logitError": 1.430511474609375e-06,
+            "residualError": 2.384185791015625e-07,
+            "independentError": 1.1920928955078125e-06,
+            "beforeStress": {
+              "cache": {
+                "logicalBytes": 640,
+                "budgetBytes": 33554432,
+                "baselines": 1,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 40,
+              "logicalTensorBytes": 6272,
+              "memoryEstimateUnreliable": true
+            },
+            "afterStress": {
+              "cache": {
+                "logicalBytes": 640,
+                "budgetBytes": 33554432,
+                "baselines": 1,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 40,
+              "logicalTensorBytes": 6272,
+              "memoryEstimateUnreliable": true
+            },
+            "afterRelease": {
+              "cache": {
+                "logicalBytes": 0,
+                "budgetBytes": 33554432,
+                "baselines": 0,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 36,
+              "logicalTensorBytes": 5632,
+              "memoryEstimateUnreliable": true
+            },
+            "stressComparisons": 1000
+          },
+          {
+            "backend": "webgl",
+            "status": "unsupported",
+            "reason": "UNSUPPORTED_BACKEND: WebGL worker unavailable: Error: No worker WebGL context is available."
+          }
+        ]
+      }
+    },
+    {
+      "browser": "chromium",
+      "name": "trained-worker-results",
+      "data": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "reports": [
+          {
+            "backend": "cpu",
+            "status": "passed",
+            "probe": {
+              "backend": "cpu",
+              "elapsedMs": 337,
+              "forwardMaximumError": 6.67572021484375e-06,
+              "gradientMaximumError": 3.5762786865234375e-07,
+              "optimizerMaximumError": 1.2516975402832031e-06,
+              "loss": 7.585389137268066,
+              "retainedTensorDelta": 0,
+              "float32Textures": null,
+              "webglPacking": null
+            },
+            "cases": [
+              {
+                "id": "effect",
+                "maximumLogitError": 1.430511474609375e-06,
+                "cachedMetrics": {
+                  "jsDivergence": 0.6928083975935154,
+                  "maxAbsoluteLogitChange": 13.500075101852417,
+                  "targetLogProbabilityDelta": -11.776984405040094
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0.6928083975934277,
+                  "maxAbsoluteLogitChange": 13.500075101852417,
+                  "targetLogProbabilityDelta": -11.776984399250596
+                },
+                "hasComputationalPath": true,
+                "strategy": "cached-suffix"
+              },
+              {
+                "id": "small",
+                "maximumLogitError": 9.5367431640625e-07,
+                "cachedMetrics": {
+                  "jsDivergence": 8.754318861759108e-12,
+                  "maxAbsoluteLogitChange": 0.0022563934326171875,
+                  "targetLogProbabilityDelta": -2.664892942048306e-08
+                },
+                "fullMetrics": {
+                  "jsDivergence": 8.754713927868199e-12,
+                  "maxAbsoluteLogitChange": 0.0022563934326171875,
+                  "targetLogProbabilityDelta": -2.6647547552338842e-08
+                },
+                "hasComputationalPath": true,
+                "strategy": "cached-suffix"
+              },
+              {
+                "id": "unreachable",
+                "maximumLogitError": 9.5367431640625e-07,
+                "cachedMetrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "hasComputationalPath": false,
+                "strategy": "cached-suffix"
+              }
+            ],
+            "resources": {
+              "cache": {
+                "logicalBytes": 0,
+                "budgetBytes": 33554432,
+                "baselines": 0,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 36,
+              "logicalTensorBytes": 411648,
+              "memoryEstimateUnreliable": true
+            }
+          },
+          {
+            "backend": "webgl",
+            "status": "passed",
+            "probe": {
+              "backend": "webgl",
+              "elapsedMs": 3942.4000000000087,
+              "forwardMaximumError": 5.7220458984375e-06,
+              "gradientMaximumError": 4.76837158203125e-07,
+              "optimizerMaximumError": 2.037733793258667e-06,
+              "loss": 7.585389137268066,
+              "retainedTensorDelta": 0,
+              "float32Textures": true,
+              "webglPacking": false
+            },
+            "cases": [
+              {
+                "id": "effect",
+                "maximumLogitError": 1.1920928955078125e-06,
+                "cachedMetrics": {
+                  "jsDivergence": 0.6928083977186129,
+                  "maxAbsoluteLogitChange": 13.500075817108154,
+                  "targetLogProbabilityDelta": -11.776986064089622
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0.6928083977186155,
+                  "maxAbsoluteLogitChange": 13.500075817108154,
+                  "targetLogProbabilityDelta": -11.776986064050101
+                },
+                "hasComputationalPath": true,
+                "strategy": "cached-suffix"
+              },
+              {
+                "id": "small",
+                "maximumLogitError": 1.1920928955078125e-06,
+                "cachedMetrics": {
+                  "jsDivergence": 8.75479264512286e-12,
+                  "maxAbsoluteLogitChange": 0.002256631851196289,
+                  "targetLogProbabilityDelta": -2.664844185919777e-08
+                },
+                "fullMetrics": {
+                  "jsDivergence": 8.756501382664511e-12,
+                  "maxAbsoluteLogitChange": 0.0022568702697753906,
+                  "targetLogProbabilityDelta": -2.6661325825837103e-08
+                },
+                "hasComputationalPath": true,
+                "strategy": "cached-suffix"
+              },
+              {
+                "id": "unreachable",
+                "maximumLogitError": 9.5367431640625e-07,
+                "cachedMetrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "hasComputationalPath": false,
+                "strategy": "cached-suffix"
+              }
+            ],
+            "resources": {
+              "cache": {
+                "logicalBytes": 0,
+                "budgetBytes": 33554432,
+                "baselines": 0,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 36,
+              "logicalTensorBytes": 411648,
+              "memoryEstimateUnreliable": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "browser": "firefox",
+      "name": "trained-worker-results",
+      "data": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+        "reports": [
+          {
+            "backend": "cpu",
+            "status": "passed",
+            "probe": {
+              "backend": "cpu",
+              "elapsedMs": 247,
+              "forwardMaximumError": 6.67572021484375e-06,
+              "gradientMaximumError": 3.5762786865234375e-07,
+              "optimizerMaximumError": 1.2516975402832031e-06,
+              "loss": 7.585389137268066,
+              "retainedTensorDelta": 0,
+              "float32Textures": null,
+              "webglPacking": null
+            },
+            "cases": [
+              {
+                "id": "effect",
+                "maximumLogitError": 1.430511474609375e-06,
+                "cachedMetrics": {
+                  "jsDivergence": 0.6928083975935154,
+                  "maxAbsoluteLogitChange": 13.500075101852417,
+                  "targetLogProbabilityDelta": -11.776984405040094
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0.6928083975934277,
+                  "maxAbsoluteLogitChange": 13.500075101852417,
+                  "targetLogProbabilityDelta": -11.776984399250596
+                },
+                "hasComputationalPath": true,
+                "strategy": "cached-suffix"
+              },
+              {
+                "id": "small",
+                "maximumLogitError": 9.5367431640625e-07,
+                "cachedMetrics": {
+                  "jsDivergence": 8.754318861759535e-12,
+                  "maxAbsoluteLogitChange": 0.0022563934326171875,
+                  "targetLogProbabilityDelta": -2.664892942048306e-08
+                },
+                "fullMetrics": {
+                  "jsDivergence": 8.754713927868625e-12,
+                  "maxAbsoluteLogitChange": 0.0022563934326171875,
+                  "targetLogProbabilityDelta": -2.6647547552338842e-08
+                },
+                "hasComputationalPath": true,
+                "strategy": "cached-suffix"
+              },
+              {
+                "id": "unreachable",
+                "maximumLogitError": 9.5367431640625e-07,
+                "cachedMetrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "fullMetrics": {
+                  "jsDivergence": 0,
+                  "maxAbsoluteLogitChange": 0,
+                  "targetLogProbabilityDelta": 0
+                },
+                "hasComputationalPath": false,
+                "strategy": "cached-suffix"
+              }
+            ],
+            "resources": {
+              "cache": {
+                "logicalBytes": 0,
+                "budgetBytes": 33554432,
+                "baselines": 0,
+                "pinnedEntries": 0,
+                "retiredEntries": 0
+              },
+              "tensorCount": 36,
+              "logicalTensorBytes": 411648,
+              "memoryEstimateUnreliable": true
+            }
+          },
+          {
+            "backend": "webgl",
+            "status": "unsupported",
+            "reason": "UNSUPPORTED_BACKEND: WebGL worker unavailable: Error: No worker WebGL context is available."
+          }
+        ]
+      }
+    },
+    {
+      "browser": "chromium",
+      "name": "worker-probe-results",
+      "data": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "reports": [
+          {
+            "backend": "cpu",
+            "status": "passed",
+            "report": {
+              "backend": "cpu",
+              "elapsedMs": 59.30000000000291,
+              "forwardMaximumError": 1.1920928955078125e-06,
+              "gradientMaximumError": 3.5762786865234375e-07,
+              "optimizerMaximumError": 5.587935447692871e-07,
+              "loss": 4.600515842437744,
+              "retainedTensorDelta": 0,
+              "float32Textures": null,
+              "webglPacking": null
+            }
+          },
+          {
+            "backend": "webgl",
+            "status": "passed",
+            "report": {
+              "backend": "webgl",
+              "elapsedMs": 3376.800000000003,
+              "forwardMaximumError": 1.430511474609375e-06,
+              "gradientMaximumError": 2.086162567138672e-07,
+              "optimizerMaximumError": 1.2069940567016602e-06,
+              "loss": 4.600516319274902,
+              "retainedTensorDelta": 0,
+              "float32Textures": true,
+              "webglPacking": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "browser": "firefox",
+      "name": "worker-probe-results",
+      "data": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+        "reports": [
+          {
+            "backend": "cpu",
+            "status": "passed",
+            "report": {
+              "backend": "cpu",
+              "elapsedMs": 86,
+              "forwardMaximumError": 1.1920928955078125e-06,
+              "gradientMaximumError": 3.5762786865234375e-07,
+              "optimizerMaximumError": 5.587935447692871e-07,
+              "loss": 4.600515842437744,
+              "retainedTensorDelta": 0,
+              "float32Textures": null,
+              "webglPacking": null
+            }
+          },
+          {
+            "backend": "webgl",
+            "status": "unsupported",
+            "reason": "UNSUPPORTED_BACKEND: WebGL worker unavailable: Error: No worker WebGL context is available."
+          }
+        ]
+      }
+    }
+  ]
+}

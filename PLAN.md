@@ -1,6 +1,6 @@
 # Transformer Microscope implementation plan
 
-Status: Milestones C/D and the core Milestone E experiment workspace are implemented and committed. Milestone F has local named-host latency measurements, artifact audits, and a prepared CI workflow; remote CI and hosted/physical-device release gates remain outstanding. See `docs/validation.md`, `docs/retrieval.md`, `docs/benchmarks.md`, and `docs/deployment.md`.
+Status: Milestones C/D and the core Milestone E experiment workspace are implemented and committed. Milestone F has local named-host latency measurements, artifact audits, and a passing remote CI workflow for Chromium CPU/WebGL and Firefox CPU. Hosted-site and physical-device release gates remain outstanding. See `docs/validation.md`, `docs/retrieval.md`, `docs/benchmarks.md`, and `docs/deployment.md`.
 
 This plan incorporates the product concept, intervention-engine specification, and design review. It prioritizes a verified head-scaling experiment before expanding into the full Explore, Experiment, and Train workspaces. Performance targets and numerical tolerances below are requirements to validate, not measured results.
 
@@ -90,7 +90,7 @@ The engine client exposes `loadModel`, `runBaseline`, `compare`, `inspectActivat
 - `runBaseline` returns an immutable run ID, execution identity, input token IDs, and prediction summary.
 - `compare` takes a baseline run ID, interventions, prediction position, optional target token, and display limit. It returns a modified run ID, comparison metrics, result provenance, and execution metadata.
 - `inspectActivation` accepts either baseline or modified run IDs and a typed activation reference. It returns the realized shape, axes, and copied values for a bounded selection.
-- `releaseRun` is idempotent. Releasing a baseline cannot silently break an existing modified run; dependencies retain the immutable descriptor until dependents are released.
+- `releaseRun` is idempotent. Releasing a baseline cannot silently break an existing modified run; modified runs retain their own immutable input/intervention descriptors and can replay after the source baseline is released.
 - `dispose` releases the runtime's owned resources and rejects pending requests with a typed error.
 
 Keep immutable run descriptors separate from cached tensor materializations. A descriptor records the exact model revision, tokens, intervention list, and execution settings needed for recomputation. Cache eviction may remove tensors while a run remains inspectable through selective recomputation. Explicit release ends that guarantee. Model reload or worker restart invalidates the current session's handles with a clear error.
@@ -328,6 +328,6 @@ For training, distinguish lightweight inspection snapshots from resumable checkp
 
 ## 14. Immediate next work
 
-Continue Milestone E. The trained checkpoint and three prepared recipes are now in the screen. Version 1 experiment export/import is implemented with checkpoint validation, complete logit snapshots, automatic installed-model selection, and live replay comparison. Attention-cell arithmetic, lazy projection/residual/MLP vectors, exact strength entry, and CPU worker restart are now implemented. Local Milestone F work is implemented: named-host timing records, artifact audits, and CI/deployment preparation. Next, run the workflow on GitHub, verify a real static host, restore Firefox coverage on a working runtime, and test physical Safari/mobile. Broader educational validation and wider trained-head/prompt coverage remain useful follow-up work.
+Complete the remaining Milestone F release gates. The trained checkpoint and three prepared recipes are now in the screen. Version 1 experiment export/import is implemented with checkpoint validation, complete logit snapshots, automatic installed-model selection, and live replay comparison. Attention-cell arithmetic, lazy projection/residual/MLP vectors, exact strength entry, and CPU worker restart are now implemented. Local Milestone F work is implemented: named-host timing records, artifact audits, and CI/deployment preparation. Remote CI now passes, including Firefox CPU on Linux; its worker WebGL context is unavailable and recorded explicitly. Next, verify a real static host and test physical Safari/mobile. Broader educational validation and wider trained-head/prompt coverage remain useful follow-up work.
 
 No latency, checkpoint quality, browser compatibility, or numerical parity claim is complete until its associated evidence is recorded.

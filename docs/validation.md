@@ -76,7 +76,7 @@ Playwright WebKit is not the installed Safari application, and viewport emulatio
 
 The independent trainer, dataset semantics, failed initial candidate, accepted checkpoint, split rule, and learning limitations are recorded in `docs/retrieval.md`. The manifest revision is `d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea`.
 
-- Two Python tests check binding/target rules, all 3,072 inputs, disjoint splits, balanced targets for identical local contexts, length separation, and capture-free/reference gradient identity.
+- Two dataset tests and one reference test check binding/target rules, all 3,072 inputs, disjoint splits, balanced targets for identical local contexts, length separation, and capture-free/reference gradient identity.
 - Two training runs reproduced identical weights, tokenizer, and manifest hashes on the pinned CPU environment. Raw identity record: `docs/retrieval-reproduction-results.json`.
 - The Node CPU engine reproduces all 453 independent held-out final-position logit fixtures and answers 453/453 correctly. Maximum absolute logit error: `8.203089237213135e-6`.
 - Node trained forward-stage maximum error: `6.67572021484375e-6`; all-parameter gradient error: `3.5762786865234375e-7`; Adam update error: `1.2516975402832031e-6`. The probe uses full-sequence mean loss, while offline training supervises the final answer only.
@@ -111,14 +111,14 @@ The trained checkpoint's automatic CPU preference is tied to its measured revisi
 
 The first GitHub Actions run passed all configured checks on Ubuntu 24.04: locked dependency install, four standard-library dataset/artifact tests, 36 engine tests, production build, source/built audits, and 13 Chromium production tests. Commit: `00e814e`; [workflow run](https://github.com/jtmcbride/transformer-scope/actions/runs/38254063282). The static build and browser diagnostics were uploaded successfully. This verifies CI, not hosted-site publication.
 
-The next workflow also requests Firefox. Browser checks record an explicitly unsupported WebGL load separately and continue validating CPU behavior. Numerical failures after a supported load are still failures. Worker WebGL now requires float32 rendering support; lower-precision contexts are rejected with `UNSUPPORTED_BACKEND` and can recover on CPU. A capability test emulates missing worker WebGL context support while running real CPU inference and recovery.
+The extended Chromium/Firefox run passed all 28 production tests at `6a41a09`: [run 38254919942](https://github.com/jtmcbride/transformer-scope/actions/runs/38254919942). On Ubuntu 24.04, Chromium 156 passed CPU/unpacked WebGL, and Firefox 157 passed CPU; Firefox worker WebGL was explicitly unsupported. No test was skipped or flaky. Exact user agents, numerical probes, resource results, and test annotations are in `docs/ci-browser-results.json`. Browser checks record an explicitly unsupported WebGL load separately and continue validating CPU behavior. Numerical failures after a supported load are still failures. Worker WebGL now requires float32 rendering support; lower-precision contexts are rejected with `UNSUPPORTED_BACKEND` and can recover on CPU. A capability test emulates missing worker WebGL context support while running real CPU inference and recovery.
 
 ## Outstanding gates
 
 - Wider trained-model intervention/seed coverage beyond the three shipped recipes.
-- Physical Safari and mobile execution; GPU memory/context-loss recovery.
+- Physical Safari and mobile execution; GPU memory/context-loss recovery beyond explicit worker restart.
 - Broader educational testing with users and additional controlled tasks.
-- Named-device end-to-end latency benchmarks and actual hosted GitHub Pages verification.
+- Named-device end-to-end latency benchmarks and actual hosted-site verification.
 - Larger-model, wider-seed, ill-conditioned-input, and lower-precision backend coverage.
 
 Do not regenerate expected arrays or widen tolerances automatically after a failure. Inspect the earliest divergent tensor, artifact identity, matrix orientation, and backend precision first.

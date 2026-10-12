@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "symbols",
+  "bosTokenId": 0,
+  "tokens": [
+    "<BOS>",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O"
+  ]
+}

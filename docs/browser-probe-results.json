@@ -1,0 +1,78 @@
+{
+  "clientDate": "2026-10-11",
+  "scope": "production worker, two length-5 forward fixtures and all gradients/one Adam update",
+  "records": [
+    {
+      "project": "chromium",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "reports": [
+        {
+          "backend": "cpu",
+          "status": "passed",
+          "report": {
+            "backend": "cpu",
+            "elapsedMs": 19.69999998807907,
+            "forwardMaximumError": 0.0000011920928955078125,
+            "gradientMaximumError": 3.5762786865234375e-7,
+            "optimizerMaximumError": 5.587935447692871e-7,
+            "loss": 4.600515842437744,
+            "retainedTensorDelta": 0,
+            "float32Textures": null,
+            "webglPacking": null
+          }
+        },
+        {
+          "backend": "webgl",
+          "status": "passed",
+          "report": {
+            "backend": "webgl",
+            "elapsedMs": 4874.299999982119,
+            "forwardMaximumError": 0.000001430511474609375,
+            "gradientMaximumError": 1.7881393432617188e-7,
+            "optimizerMaximumError": 6.48200511932373e-7,
+            "loss": 4.600516319274902,
+            "retainedTensorDelta": 0,
+            "float32Textures": true,
+            "webglPacking": false
+          }
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15",
+      "reports": [
+        {
+          "backend": "cpu",
+          "status": "passed",
+          "report": {
+            "backend": "cpu",
+            "elapsedMs": 23,
+            "forwardMaximumError": 0.0000011920928955078125,
+            "gradientMaximumError": 3.5762786865234375e-7,
+            "optimizerMaximumError": 5.587935447692871e-7,
+            "loss": 4.600515842437744,
+            "retainedTensorDelta": 0,
+            "float32Textures": null,
+            "webglPacking": null
+          }
+        },
+        {
+          "backend": "webgl",
+          "status": "passed",
+          "report": {
+            "backend": "webgl",
+            "elapsedMs": 1101,
+            "forwardMaximumError": 0.0000019073486328125,
+            "gradientMaximumError": 2.384185791015625e-7,
+            "optimizerMaximumError": 8.344650268554688e-7,
+            "loss": 4.600516319274902,
+            "retainedTensorDelta": 0,
+            "float32Textures": true,
+            "webglPacking": false
+          }
+        }
+      ]
+    }
+  ]
+}

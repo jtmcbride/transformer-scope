@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { cpus, platform, release, totalmem } from 'node:os';
 import { expect, test } from '@playwright/test';
 import type { Command, Commands, WorkerResponse } from '../../src/workers/protocol';
+import { summarize } from '../../src/validation/report';
 
 const hardware = { machineModel: platform() === 'darwin' ? execFileSync('sysctl', ['-n', 'hw.model'], { encoding: 'utf8' }).trim() : null,
   cpuModel: cpus()[0]?.model ?? 'unknown', logicalCpuCount: cpus().length, memoryGiB: totalmem() / 1024 ** 3,
@@ -94,11 +95,6 @@ for (const model of ['verification', 'retrieval'] as const) for (const backend o
         return { modelRevision: loaded.manifest.modelRevision, config: loaded.manifest.config, precision: loaded.precision, baselineFirstMs, sequenceLength: tokens.length, layers };
       } finally { worker.terminate(); }
     }, { workerUrl, model, backend });
-    function summarize(values: number[]) {
-      const sorted = [...values].sort((a, b) => a - b);
-      return { count: sorted.length, medianMs: (sorted[(sorted.length - 1) >> 1] + sorted[sorted.length >> 1]) / 2,
-        p95Ms: sorted[Math.ceil(sorted.length * .95) - 1] };
-    }
     const result = { model, backend, browser: testInfo.project.name, userAgent: await page.evaluate(() => navigator.userAgent),
       hardware, coldReadyMs,
       ui: ui.map(item => ({ ...item, domCommit: summarize(item.samples.map(sample => sample.domCommitMs)), frameOpportunity: summarize(item.samples.map(sample => sample.frameOpportunityMs)) })),

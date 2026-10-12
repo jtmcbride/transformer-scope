@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
+import type { ValidationReport } from '../../src/validation/report';
 
 interface Release {
   format: string; schemaVersion: number; commit: string; sourceTreeDirty: boolean; basePath: string;
@@ -48,6 +49,7 @@ test('hosted release identity, asset bytes, MIME types, and model revisions agre
     records.push({ path: asset.path, contentType: type, byteLength: bytes.length, sha256: asset.sha256 });
   }
   expect(paths.has('index.html')).toBe(true);
+  expect(paths.has('validation.html')).toBe(true);
   expect([...paths].some(path => /assets\/model\.worker-.*\.js/u.test(path))).toBe(true);
   for (const name of ['verification', 'retrieval']) {
     for (const file of ['manifest.json', 'weights.bin', 'tokenizer.json', 'probe.json']) expect(paths.has(`models/${name}/${file}`)).toBe(true);
@@ -92,4 +94,25 @@ test('hosted worker runs recipes, inspection, reference verification, reset, exp
   expect(errors).toEqual([]); expect(failed).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('hosted-workspace.png'), fullPage: true });
   await testInfo.attach('hosted-workflow-check', { body: JSON.stringify({ url: page.url(), userAgent: await page.evaluate(() => navigator.userAgent), reference, errors, failed }, null, 2), contentType: 'application/json' });
+});
+
+test('hosted opt-in validation harness identifies the release and passes every supported check', async ({ page }, testInfo) => {
+  test.setTimeout(180_000);
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('validation.html');
+  await page.getByLabel('Evidence class').selectOption('automation');
+  await page.getByLabel('Device description').fill('CI hosted check; not a physical device');
+  await page.getByLabel('Verification checkpoint').setChecked(false);
+  await page.getByLabel('Warm-up edits').fill('1');
+  await page.getByLabel('Measured edits').fill('5');
+  await page.getByRole('button', { name: 'Start validation' }).click();
+  await expect(page.getByTestId('validation-outcome')).toBeVisible({ timeout: 150_000 });
+  const report = JSON.parse(await page.getByTestId('validation-json').textContent() ?? '') as ValidationReport;
+  await testInfo.attach('hosted-device-validation', { body: JSON.stringify(report, null, 2), contentType: 'application/json' });
+  if (process.env.EXPECTED_COMMIT) expect((report.release.data as { commit: string }).commit).toBe(process.env.EXPECTED_COMMIT);
+  const failures = report.combinations.flatMap(item => item.checks.filter(check => check.status === 'failed').map(check => `${item.requestedBackend}/${check.name}: ${check.detail}`));
+  expect(failures).toEqual([]);
+  expect(report.summary.outcome).toBe('passed');
+  expect(errors).toEqual([]);
 });

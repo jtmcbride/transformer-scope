@@ -1,0 +1,416 @@
+{
+  "commit": "71a5694ee86e70820f9bb5519e72fe484047e504",
+  "runUrl": "https://github.com/jtmcbride/transformer-scope/actions/runs/38258414801",
+  "environment": "Local Chromium against the actual HTTPS Pages deployment",
+  "stats": {
+    "startTime": "2026-10-12T13:51:58.726Z",
+    "duration": 4875.58,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "records": [
+    {
+      "kind": "hosted-asset-audit",
+      "status": "passed",
+      "data": {
+        "url": "https://jtmcbride.github.io/transformer-scope/",
+        "release": {
+          "format": "transformer-microscope-release",
+          "schemaVersion": 1,
+          "commit": "71a5694ee86e70820f9bb5519e72fe484047e504",
+          "sourceTreeDirty": false,
+          "builtAt": "2026-10-12T13:50:04.906Z",
+          "basePath": "/transformer-scope/",
+          "models": {
+            "verification": {
+              "modelId": "verification-seed-1729",
+              "modelRevision": "a9881b79044de83a160c571312e09d041f66c44a2351f8144de9b479fbb1a5c6"
+            },
+            "retrieval": {
+              "modelId": "retrieval-seed-2026",
+              "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea"
+            }
+          },
+          "assets": [
+            {
+              "path": "assets/index-BV4Oav1o.css",
+              "byteLength": 10082,
+              "sha256": "e3a201f25ebf46b70315329a091a0d4fe9a23c1452651c8ac720310a0bf34202"
+            },
+            {
+              "path": "assets/index-N-H3jJMB.js",
+              "byteLength": 265570,
+              "sha256": "987b1f774faba7f1263573d1cf390f0b143880ff17a866ccbf5c446d66f4ed41"
+            },
+            {
+              "path": "assets/model.worker-Chz4xw7U.js",
+              "byteLength": 1144274,
+              "sha256": "e41bd2a58d40187464d4d1aed3b94aedb62795bd13d3dc68edd61adc23e36a3f"
+            },
+            {
+              "path": "index.html",
+              "byteLength": 485,
+              "sha256": "dc69ac9863d11dc23f09a2a28895b9739c44ca8f69b58fd10ae56bea80a756dc"
+            },
+            {
+              "path": "models/retrieval/evaluation.json",
+              "byteLength": 10292,
+              "sha256": "822325722eac0db30220001638d9639a746092cb44df8533e4f48232567e7c6b"
+            },
+            {
+              "path": "models/retrieval/manifest.json",
+              "byteLength": 6306,
+              "sha256": "cb43edbbd755abad5ee8a76c61d06aae23c96646f99aaf867934f8925e889001"
+            },
+            {
+              "path": "models/retrieval/probe.json",
+              "byteLength": 5531846,
+              "sha256": "eeeebf1cd80342b9bedb6eacdd81be4d79761894d86e72097aa0b14a00902d7a"
+            },
+            {
+              "path": "models/retrieval/recipes.json",
+              "byteLength": 6641,
+              "sha256": "e0fddf2ee91ada2fef18f007dddaab8af97f1597b39efa15f8cc8cc2ac290b8d"
+            },
+            {
+              "path": "models/retrieval/tokenizer.json",
+              "byteLength": 195,
+              "sha256": "966ff20dce4b91115c00dd00042a757f40684958916245b149cd504b91f14034"
+            },
+            {
+              "path": "models/retrieval/weights.bin",
+              "byteLength": 411648,
+              "sha256": "235f69dbe2f70b76a4d5639c61f5486dfdf1d1df2fa86ac3bc4eecf6436b4362"
+            },
+            {
+              "path": "models/verification/manifest.json",
+              "byteLength": 6022,
+              "sha256": "834aa5e2f8b0058f3c49d954f968a8b8ef34f529c8bea8744819bf3961f9b4b9"
+            },
+            {
+              "path": "models/verification/probe.json",
+              "byteLength": 115383,
+              "sha256": "8c6b46c5a01525fd8937c30a2f277662bb71abba857273f76f6d0c2c46615fe2"
+            },
+            {
+              "path": "models/verification/tokenizer.json",
+              "byteLength": 231,
+              "sha256": "f0a4c63d2be57ec3b0dd82d475d102fa2ab10fc43e7b816d1e95aa08e889277a"
+            },
+            {
+              "path": "models/verification/weights.bin",
+              "byteLength": 5632,
+              "sha256": "a4af7abb83e2a9012cad169afa94c6c33496b43b0954cae979ba9179db1cd8e2"
+            }
+          ]
+        },
+        "records": [
+          {
+            "path": "assets/index-BV4Oav1o.css",
+            "contentType": "text/css; charset=utf-8",
+            "byteLength": 10082,
+            "sha256": "e3a201f25ebf46b70315329a091a0d4fe9a23c1452651c8ac720310a0bf34202"
+          },
+          {
+            "path": "assets/index-N-H3jJMB.js",
+            "contentType": "application/javascript; charset=utf-8",
+            "byteLength": 265570,
+            "sha256": "987b1f774faba7f1263573d1cf390f0b143880ff17a866ccbf5c446d66f4ed41"
+          },
+          {
+            "path": "assets/model.worker-Chz4xw7U.js",
+            "contentType": "application/javascript; charset=utf-8",
+            "byteLength": 1144274,
+            "sha256": "e41bd2a58d40187464d4d1aed3b94aedb62795bd13d3dc68edd61adc23e36a3f"
+          },
+          {
+            "path": "index.html",
+            "contentType": "text/html; charset=utf-8",
+            "byteLength": 485,
+            "sha256": "dc69ac9863d11dc23f09a2a28895b9739c44ca8f69b58fd10ae56bea80a756dc"
+          },
+          {
+            "path": "models/retrieval/evaluation.json",
+            "contentType": "application/json; charset=utf-8",
+            "byteLength": 10292,
+            "sha256": "822325722eac0db30220001638d9639a746092cb44df8533e4f48232567e7c6b"
+          },
+          {
+            "path": "models/retrieval/manifest.json",
+            "contentType": "application/json; charset=utf-8",
+            "byteLength": 6306,
+            "sha256": "cb43edbbd755abad5ee8a76c61d06aae23c96646f99aaf867934f8925e889001"
+          },
+          {
+            "path": "models/retrieval/probe.json",
+            "contentType": "application/json; charset=utf-8",
+            "byteLength": 5531846,
+            "sha256": "eeeebf1cd80342b9bedb6eacdd81be4d79761894d86e72097aa0b14a00902d7a"
+          },
+          {
+            "path": "models/retrieval/recipes.json",
+            "contentType": "application/json; charset=utf-8",
+            "byteLength": 6641,
+            "sha256": "e0fddf2ee91ada2fef18f007dddaab8af97f1597b39efa15f8cc8cc2ac290b8d"
+          },
+          {
+            "path": "models/retrieval/tokenizer.json",
+            "contentType": "application/json; charset=utf-8",
+            "byteLength": 195,
+            "sha256": "966ff20dce4b91115c00dd00042a757f40684958916245b149cd504b91f14034"
+          },
+          {
+            "path": "models/retrieval/weights.bin",
+            "contentType": "application/octet-stream",
+            "byteLength": 411648,
+            "sha256": "235f69dbe2f70b76a4d5639c61f5486dfdf1d1df2fa86ac3bc4eecf6436b4362"
+          },
+          {
+            "path": "models/verification/manifest.json",
+            "contentType": "application/json; charset=utf-8",
+            "byteLength": 6022,
+            "sha256": "834aa5e2f8b0058f3c49d954f968a8b8ef34f529c8bea8744819bf3961f9b4b9"
+          },
+          {
+            "path": "models/verification/probe.json",
+            "contentType": "application/json; charset=utf-8",
+            "byteLength": 115383,
+            "sha256": "8c6b46c5a01525fd8937c30a2f277662bb71abba857273f76f6d0c2c46615fe2"
+          },
+          {
+            "path": "models/verification/tokenizer.json",
+            "contentType": "application/json; charset=utf-8",
+            "byteLength": 231,
+            "sha256": "f0a4c63d2be57ec3b0dd82d475d102fa2ab10fc43e7b816d1e95aa08e889277a"
+          },
+          {
+            "path": "models/verification/weights.bin",
+            "contentType": "application/octet-stream",
+            "byteLength": 5632,
+            "sha256": "a4af7abb83e2a9012cad169afa94c6c33496b43b0954cae979ba9179db1cd8e2"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "hosted-workflow-check",
+      "status": "passed",
+      "data": {
+        "url": "https://jtmcbride.github.io/transformer-scope/",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "reference": "Reference checks passed\nForward error 6.68e-6\nGradient error 3.58e-7\nAdam error 1.25e-6\nRetained tensor change: 0",
+        "errors": [],
+        "failed": []
+      }
+    }
+  ],
+  "ci": {
+    "environment": "GitHub-hosted Ubuntu 24.04, Chromium",
+    "stats": {
+      "startTime": "2026-10-12T13:52:08.536Z",
+      "duration": 4676.905,
+      "expected": 2,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "records": [
+      {
+        "kind": "hosted-asset-audit",
+        "status": "passed",
+        "data": {
+          "url": "https://jtmcbride.github.io/transformer-scope/",
+          "release": {
+            "format": "transformer-microscope-release",
+            "schemaVersion": 1,
+            "commit": "71a5694ee86e70820f9bb5519e72fe484047e504",
+            "sourceTreeDirty": false,
+            "builtAt": "2026-10-12T13:50:04.906Z",
+            "basePath": "/transformer-scope/",
+            "models": {
+              "verification": {
+                "modelId": "verification-seed-1729",
+                "modelRevision": "a9881b79044de83a160c571312e09d041f66c44a2351f8144de9b479fbb1a5c6"
+              },
+              "retrieval": {
+                "modelId": "retrieval-seed-2026",
+                "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea"
+              }
+            },
+            "assets": [
+              {
+                "path": "assets/index-BV4Oav1o.css",
+                "byteLength": 10082,
+                "sha256": "e3a201f25ebf46b70315329a091a0d4fe9a23c1452651c8ac720310a0bf34202"
+              },
+              {
+                "path": "assets/index-N-H3jJMB.js",
+                "byteLength": 265570,
+                "sha256": "987b1f774faba7f1263573d1cf390f0b143880ff17a866ccbf5c446d66f4ed41"
+              },
+              {
+                "path": "assets/model.worker-Chz4xw7U.js",
+                "byteLength": 1144274,
+                "sha256": "e41bd2a58d40187464d4d1aed3b94aedb62795bd13d3dc68edd61adc23e36a3f"
+              },
+              {
+                "path": "index.html",
+                "byteLength": 485,
+                "sha256": "dc69ac9863d11dc23f09a2a28895b9739c44ca8f69b58fd10ae56bea80a756dc"
+              },
+              {
+                "path": "models/retrieval/evaluation.json",
+                "byteLength": 10292,
+                "sha256": "822325722eac0db30220001638d9639a746092cb44df8533e4f48232567e7c6b"
+              },
+              {
+                "path": "models/retrieval/manifest.json",
+                "byteLength": 6306,
+                "sha256": "cb43edbbd755abad5ee8a76c61d06aae23c96646f99aaf867934f8925e889001"
+              },
+              {
+                "path": "models/retrieval/probe.json",
+                "byteLength": 5531846,
+                "sha256": "eeeebf1cd80342b9bedb6eacdd81be4d79761894d86e72097aa0b14a00902d7a"
+              },
+              {
+                "path": "models/retrieval/recipes.json",
+                "byteLength": 6641,
+                "sha256": "e0fddf2ee91ada2fef18f007dddaab8af97f1597b39efa15f8cc8cc2ac290b8d"
+              },
+              {
+                "path": "models/retrieval/tokenizer.json",
+                "byteLength": 195,
+                "sha256": "966ff20dce4b91115c00dd00042a757f40684958916245b149cd504b91f14034"
+              },
+              {
+                "path": "models/retrieval/weights.bin",
+                "byteLength": 411648,
+                "sha256": "235f69dbe2f70b76a4d5639c61f5486dfdf1d1df2fa86ac3bc4eecf6436b4362"
+              },
+              {
+                "path": "models/verification/manifest.json",
+                "byteLength": 6022,
+                "sha256": "834aa5e2f8b0058f3c49d954f968a8b8ef34f529c8bea8744819bf3961f9b4b9"
+              },
+              {
+                "path": "models/verification/probe.json",
+                "byteLength": 115383,
+                "sha256": "8c6b46c5a01525fd8937c30a2f277662bb71abba857273f76f6d0c2c46615fe2"
+              },
+              {
+                "path": "models/verification/tokenizer.json",
+                "byteLength": 231,
+                "sha256": "f0a4c63d2be57ec3b0dd82d475d102fa2ab10fc43e7b816d1e95aa08e889277a"
+              },
+              {
+                "path": "models/verification/weights.bin",
+                "byteLength": 5632,
+                "sha256": "a4af7abb83e2a9012cad169afa94c6c33496b43b0954cae979ba9179db1cd8e2"
+              }
+            ]
+          },
+          "records": [
+            {
+              "path": "assets/index-BV4Oav1o.css",
+              "contentType": "text/css; charset=utf-8",
+              "byteLength": 10082,
+              "sha256": "e3a201f25ebf46b70315329a091a0d4fe9a23c1452651c8ac720310a0bf34202"
+            },
+            {
+              "path": "assets/index-N-H3jJMB.js",
+              "contentType": "application/javascript; charset=utf-8",
+              "byteLength": 265570,
+              "sha256": "987b1f774faba7f1263573d1cf390f0b143880ff17a866ccbf5c446d66f4ed41"
+            },
+            {
+              "path": "assets/model.worker-Chz4xw7U.js",
+              "contentType": "application/javascript; charset=utf-8",
+              "byteLength": 1144274,
+              "sha256": "e41bd2a58d40187464d4d1aed3b94aedb62795bd13d3dc68edd61adc23e36a3f"
+            },
+            {
+              "path": "index.html",
+              "contentType": "text/html; charset=utf-8",
+              "byteLength": 485,
+              "sha256": "dc69ac9863d11dc23f09a2a28895b9739c44ca8f69b58fd10ae56bea80a756dc"
+            },
+            {
+              "path": "models/retrieval/evaluation.json",
+              "contentType": "application/json; charset=utf-8",
+              "byteLength": 10292,
+              "sha256": "822325722eac0db30220001638d9639a746092cb44df8533e4f48232567e7c6b"
+            },
+            {
+              "path": "models/retrieval/manifest.json",
+              "contentType": "application/json; charset=utf-8",
+              "byteLength": 6306,
+              "sha256": "cb43edbbd755abad5ee8a76c61d06aae23c96646f99aaf867934f8925e889001"
+            },
+            {
+              "path": "models/retrieval/probe.json",
+              "contentType": "application/json; charset=utf-8",
+              "byteLength": 5531846,
+              "sha256": "eeeebf1cd80342b9bedb6eacdd81be4d79761894d86e72097aa0b14a00902d7a"
+            },
+            {
+              "path": "models/retrieval/recipes.json",
+              "contentType": "application/json; charset=utf-8",
+              "byteLength": 6641,
+              "sha256": "e0fddf2ee91ada2fef18f007dddaab8af97f1597b39efa15f8cc8cc2ac290b8d"
+            },
+            {
+              "path": "models/retrieval/tokenizer.json",
+              "contentType": "application/json; charset=utf-8",
+              "byteLength": 195,
+              "sha256": "966ff20dce4b91115c00dd00042a757f40684958916245b149cd504b91f14034"
+            },
+            {
+              "path": "models/retrieval/weights.bin",
+              "contentType": "application/octet-stream",
+              "byteLength": 411648,
+              "sha256": "235f69dbe2f70b76a4d5639c61f5486dfdf1d1df2fa86ac3bc4eecf6436b4362"
+            },
+            {
+              "path": "models/verification/manifest.json",
+              "contentType": "application/json; charset=utf-8",
+              "byteLength": 6022,
+              "sha256": "834aa5e2f8b0058f3c49d954f968a8b8ef34f529c8bea8744819bf3961f9b4b9"
+            },
+            {
+              "path": "models/verification/probe.json",
+              "contentType": "application/json; charset=utf-8",
+              "byteLength": 115383,
+              "sha256": "8c6b46c5a01525fd8937c30a2f277662bb71abba857273f76f6d0c2c46615fe2"
+            },
+            {
+              "path": "models/verification/tokenizer.json",
+              "contentType": "application/json; charset=utf-8",
+              "byteLength": 231,
+              "sha256": "f0a4c63d2be57ec3b0dd82d475d102fa2ab10fc43e7b816d1e95aa08e889277a"
+            },
+            {
+              "path": "models/verification/weights.bin",
+              "contentType": "application/octet-stream",
+              "byteLength": 5632,
+              "sha256": "a4af7abb83e2a9012cad169afa94c6c33496b43b0954cae979ba9179db1cd8e2"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "hosted-workflow-check",
+        "status": "passed",
+        "data": {
+          "url": "https://jtmcbride.github.io/transformer-scope/",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+          "reference": "Reference checks passed\nForward error 6.68e-6\nGradient error 3.58e-7\nAdam error 1.25e-6\nRetained tensor change: 0",
+          "errors": [],
+          "failed": []
+        }
+      }
+    ]
+  }
+}

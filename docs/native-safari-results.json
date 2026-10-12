@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-12",
+  "method": "Manual native Safari UI verification through accessibility controls; not Playwright WebKit",
+  "host": {
+    "model": "MacBookPro18,1",
+    "cpu": "Apple M1 Pro",
+    "memoryGiB": 16,
+    "os": "macOS 27.0.1"
+  },
+  "browser": {
+    "name": "Safari",
+    "version": "27.0.1",
+    "build": "22625.1.29.11.28"
+  },
+  "sourceCommit": "71a5694ee86e70820f9bb5519e72fe484047e504",
+  "localUrl": "http://127.0.0.1:4174/transformer-scope/",
+  "model": "retrieval",
+  "checks": {
+    "cpuPreparedAblation": "passed; target log-probability change -11.7770 nats",
+    "webglPreparedAblation": "passed",
+    "baselineReset": "passed; strength 1 and target delta 0",
+    "lazyVectors": "passed; baseline and modified computation table loaded",
+    "webglToCpuRestart": "passed; retained strength 1, completed CPU result"
+  },
+  "reference": {
+    "cpu": {
+      "forwardMaxAbs": 6.68e-06,
+      "gradientMaxAbs": 3.58e-07,
+      "adamMaxAbs": 1.25e-06,
+      "retainedTensorChange": 0
+    },
+    "webgl": {
+      "forwardMaxAbs": 6.68e-06,
+      "gradientMaxAbs": 3.58e-07,
+      "adamMaxAbs": 2.08e-06,
+      "retainedTensorChange": 0
+    }
+  },
+  "limitations": [
+    "Probe errors transcribed from displayed rounded values.",
+    "Manual smoke coverage does not imply all regression cases ran in installed Safari.",
+    "No physical mobile device or native Safari latency benchmark was measured."
+  ],
+  "localBuild": {
+    "commit": "c0a446de4545d1693d4e2dcc17c93711b7e2962e",
+    "sourceTreeDirty": true,
+    "note": "Local production build includes the release implementation before its commit; engine and UI are unchanged from c0a446d."
+  },
+  "hosted": {
+    "url": "https://jtmcbride.github.io/transformer-scope/",
+    "commit": "71a5694ee86e70820f9bb5519e72fe484047e504",
+    "checks": [
+      "HTTPS page loaded with CPU worker",
+      "Prepared ablation completed at factor 0",
+      "PyTorch reference probe passed; same CPU displayed errors and retained tensor change as local check"
+    ]
+  }
+}

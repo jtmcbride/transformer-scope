@@ -113,12 +113,20 @@ The first GitHub Actions run passed all configured checks on Ubuntu 24.04: locke
 
 The extended Chromium/Firefox run passed all 28 production tests at `6a41a09`: [run 38254919942](https://github.com/jtmcbride/transformer-scope/actions/runs/38254919942). On Ubuntu 24.04, Chromium 156 passed CPU/unpacked WebGL, and Firefox 157 passed CPU; Firefox worker WebGL was explicitly unsupported. No test was skipped or flaky. Exact user agents, numerical probes, resource results, and test annotations are in `docs/ci-browser-results.json`. Browser checks record an explicitly unsupported WebGL load separately and continue validating CPU behavior. Numerical failures after a supported load are still failures. Worker WebGL now requires float32 rendering support; lower-precision contexts are rejected with `UNSUPPORTED_BACKEND` and can recover on CPU. A capability test emulates missing worker WebGL context support while running real CPU inference and recovery.
 
+## Hosted release and native Safari
+
+Commit `71a5694` passed the full verification/deployment pipeline on Ubuntu 24.04: four standard-library dataset/artifact checks, 36 engine tests, 28 Chromium/Firefox production cases, Pages deployment, and two hosted Chromium cases. [Run 38258414801](https://github.com/jtmcbride/transformer-scope/actions/runs/38258414801). The live URL is https://jtmcbride.github.io/transformer-scope/.
+
+Hosted checks verify the exact clean source commit and all 14 deployment asset hashes, byte lengths, MIME types, and model revisions. The live worker also passes prepared recipes, reference verification, reset, export/import replay, lazy vector inspection, CPU restart, and checkpoint switching without page errors or failed requests. The same two tests passed from the local Mac against the actual HTTPS host. `docs/hosted-release-results.json` preserves evidence.
+
+Installed Safari 27.0.1 (22625.1.29.11.28) on the recorded M1 Pro / macOS 27.0.1 host was exercised through native UI controls. Local production CPU and unpacked WebGL both passed the PyTorch probe: maximum displayed forward error 6.68e-6, gradient error 3.58e-7, Adam error 1.25e-6 CPU / 2.08e-6 WebGL, retained tensor change zero. Baseline reset, lazy computation vectors, and explicit GPU-to-CPU restart passed. The hosted HTTPS site loaded the prepared ablation and passed the CPU reference probe. `docs/native-safari-results.json` records build provenance and the scope of these manual checks; this is not a full installed-Safari automated regression or a Safari timing benchmark.
+
 ## Outstanding gates
 
 - Wider trained-model intervention/seed coverage beyond the three shipped recipes.
-- Physical Safari and mobile execution; GPU memory/context-loss recovery beyond explicit worker restart.
+- A physical lower-powered mobile device and GPU memory/context-loss recovery beyond explicit worker restart.
 - Broader educational testing with users and additional controlled tasks.
-- Named-device end-to-end latency benchmarks and actual hosted-site verification.
+- Broader named-device end-to-end latency benchmarks, including native Safari and physical mobile; current measurements cover one desktop host.
 - Larger-model, wider-seed, ill-conditioned-input, and lower-precision backend coverage.
 
 Do not regenerate expected arrays or widen tolerances automatically after a failure. Inspect the earliest divergent tensor, artifact identity, matrix orientation, and backend precision first.

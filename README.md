@@ -62,9 +62,9 @@ The exporter saves 411,648 weight bytes, a hash-checked manifest/tokenizer, eval
 - Implemented in Milestone D: deterministic retrieval training, held-out and length evaluations, measured recipes, a trained default model, checkpoint switching, and responsive attention inspection.
 - Verified: 36 engine tests, five dataset/reference/artifact tests, 319 direct cached/reference cases, and 28 production tests across Chromium and WebKit, including 1,000 comparisons on each CPU/WebGL combination.
 - Implemented in Milestone E: versioned experiment export/replay, exact numeric strength, attention-cell arithmetic, lazy projection/residual/MLP vectors, and CPU worker restart.
-- Implemented in Milestone F: named-host browser latency measurements, source/build artifact auditing, pinned-action CI, and static deployment instructions.
-- CI passes on GitHub with Chromium (CPU/WebGL) and Firefox (CPU; worker WebGL unavailable on that runner). Remaining: a live hosted-site check and physical Safari/mobile verification.
-- Remaining release validation: actual Safari, physical mobile devices, wider educational evaluation, and end-to-end performance on named hardware.
+- Implemented in Milestone F: named-host browser latency measurements, source/build artifact auditing, pinned-action CI, verified Pages deployment, and hosted asset/workflow checks.
+- [Live application](https://jtmcbride.github.io/transformer-scope/). CI passes Chromium CPU/WebGL, Firefox CPU (worker WebGL unavailable on that runner), and hosted release checks. Installed Safari passes manual CPU/WebGL reference checks and hosted CPU verification.
+- Remaining release validation: a physical lower-powered mobile device, wider educational evaluation, and performance across more named hardware/browser combinations.
 
 See `PLAN.md`, `docs/model-contract.md`, `docs/validation.md`, and `docs/benchmarks.md` for scope, semantics, and measured evidence.
 

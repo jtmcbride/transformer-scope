@@ -328,6 +328,6 @@ For training, distinguish lightweight inspection snapshots from resumable checkp
 
 ## 14. Immediate next work
 
-Continue Milestone E. The trained checkpoint and three prepared recipes are now in the screen. Add a versioned export/import format for custom experiments that preserves checkpoint identity, token IDs, prediction/target positions, interventions, and computed results; show clear replay errors for incompatible checkpoints. Then deepen the computation trace with projection/residual/MLP inspection and distinguish effective settings from pending edits. Keep the measured recipes, controls, and original verification model accessible.
+Continue Milestone E. The trained checkpoint and three prepared recipes are now in the screen. Version 1 experiment export/import is implemented with checkpoint validation, complete logit snapshots, automatic installed-model selection, and live replay comparison. Next, deepen the computation trace with projection/residual/MLP inspection and distinguish effective settings from pending edits. Keep the measured recipes, controls, and original verification model accessible.
 
 No latency, checkpoint quality, browser compatibility, or numerical parity claim is complete until its associated evidence is recorded.

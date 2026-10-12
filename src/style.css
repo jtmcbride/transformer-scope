@@ -85,3 +85,8 @@ a { color: var(--green); }
 .recipe-note { border-left: 3px solid var(--green); background: #f2f6f5; padding: 14px 16px; margin-top: 18px; font-size: 12px; line-height: 1.6; }
 .recipe-note p { margin: 6px 0; }.recipe-note span { font-size: 11px; color: var(--muted); }
 .inspectors > section { min-width: 0; }.attention-scroll { overflow-x: auto; max-width: 100%; padding-bottom: 8px; }
+
+.saved-experiments .secondary { margin-bottom: 14px; }.file-label { font-size: 12px; }
+.file-label input { width: 100%; display: block; font-size: 10px; margin-top: 10px; color: var(--muted); }
+.replay-note { padding: 14px 16px; margin-top: 18px; font-size: 12px; line-height: 1.6; background: #e1f0ea; border-radius: 6px; }
+.replay-note p { margin: 6px 0; }.replay-note span { font-size: 11px; color: var(--muted); }

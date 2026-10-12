@@ -3,13 +3,15 @@ import { tokenize, type HeadScaleIntervention, type SymbolTokenizer } from './en
 import type { ComparisonResult, RunSummary } from './engine/runs';
 import type { Commands } from './workers/protocol';
 import type { ProbeReport } from './engine/probe';
+import { createExperiment, parseExperiment, validateExperiment, checkReplay, MAX_EXPERIMENT_BYTES, type ExperimentDocument, type ReplayReport } from './engine/experiment';
+import { validateManifest, validateTokenizer } from './engine/weights';
 import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
 
 type LoadedModel = Commands['LOAD']['response'];
 interface Controls { layer: number; head: number; factor: number; scope: string; position: number; target: number }
-interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[] }
-interface Job { version: number; baseline: RunSummary; controls: Controls }
+interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport }
+interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument }
 const initialChoice: ModelChoice = new URLSearchParams(window.location.search).get('model') === 'verification' ? 'verification' : 'retrieval';
 const defaults: Controls = { layer: 0, head: 0, factor: .5, scope: 'all', position: 5, target: 2 };
 
@@ -40,6 +42,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [probe, setProbe] = useState<ProbeReport | null>(null);
   const [probing, setProbing] = useState(false);
+  const [transferring, setTransferring] = useState(false);
 
   async function drain() {
     if (running.current || !client.current) return;
@@ -74,11 +77,20 @@ export default function App() {
             client.current.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.modified', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
           ]);
           if (job.version !== version.current) continue;
+          let replay: ReplayReport | undefined;
+          if (job.replay) {
+            const [baseLogits, modifiedLogits] = await Promise.all([
+              client.current.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'logits' }, selection: { position: c.position } }),
+              client.current.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'logits' }, selection: { position: c.position } }),
+            ]);
+            if (job.version !== version.current) continue;
+            replay = checkReplay(job.replay, baseLogits.values, modifiedLogits.values, comparison.execution.backend);
+          }
           baselineInspector.current = inspector;
           if (modifiedId.current) void client.current.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
           modifiedId.current = created; created = undefined;
           setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds,
-            attention: inspector.attention, raw: inspector.raw, modified: Array.from(modified.values) });
+            attention: inspector.attention, raw: inspector.raw, modified: Array.from(modified.values), replay });
           setError(null);
         } catch (failure) {
           if (alive.current && job.version === version.current) setError(failure instanceof Error ? failure.message : String(failure));
@@ -89,16 +101,16 @@ export default function App() {
     } finally { running.current = false; if (alive.current) setPending(false); }
   }
 
-  function schedule(next: Controls, run = baseline.current, recipe: ExperimentRecipe | null = null) {
+  function schedule(next: Controls, run = baseline.current, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument) {
     setActiveRecipe(recipe);
     controlsRef.current = next; setControls(next);
     const current = ++version.current;
     if (!run) return;
-    latest.current = { version: current, baseline: run, controls: { ...next } };
+    latest.current = { version: current, baseline: run, controls: { ...next }, replay };
     setPending(true); void drain();
   }
 
-  async function establish(loaded: LoadedModel, input: string, generation: number, recipe: ExperimentRecipe | null = null) {
+  async function establish(loaded: LoadedModel, input: string, generation: number, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument) {
     const tokens = tokenize(input, loaded.tokenizer, loaded.manifest.config.contextLength);
     const next = await client.current!.request('BASELINE', { tokenIds: tokens });
     if (!alive.current || generation !== version.current) {
@@ -110,13 +122,13 @@ export default function App() {
     if (modifiedId.current) {
       void client.current!.request('RELEASE', { runId: modifiedId.current }).catch(() => {}); modifiedId.current = null;
     }
-    const patch = recipe?.intervention;
-    schedule(recipe && patch ? { layer: patch.layer, head: patch.head, factor: patch.factor,
-      scope: patch.tokens.kind === 'all' ? 'all' : String(patch.tokens.indices[0]), position: recipe.predictionPosition, target: recipe.targetTokenId }
-      : { ...controlsRef.current, position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target }, next, recipe);
+    const patch = replay?.observation.interventions[0] ?? recipe?.intervention;
+    schedule(patch ? { layer: patch.layer, head: patch.head, factor: patch.factor,
+      scope: patch.tokens.kind === 'all' ? 'all' : String(patch.tokens.indices[0]), position: replay?.observation.predictionPosition ?? recipe!.predictionPosition, target: replay?.observation.targetTokenId ?? recipe!.targetTokenId }
+      : { ...controlsRef.current, position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target }, next, recipe, replay);
   }
 
-  async function load(backend: 'auto' | 'cpu' | 'webgl', selected: ModelChoice, input?: string) {
+  async function load(backend: 'auto' | 'cpu' | 'webgl', selected: ModelChoice, input?: string, restored?: ExperimentDocument) {
     const generation = ++version.current;
     latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null;
     setChoice(selected); setExperiments(null); setActiveRecipe(null);
@@ -128,12 +140,13 @@ export default function App() {
         selected === 'retrieval' ? fetchExperiments(manifestUrl) : Promise.resolve(null),
       ]);
       if (!alive.current || generation !== version.current) return;
+      if (restored) validateExperiment(restored, loaded.manifest, loaded.tokenizer);
       const metadata = data ? validateExperiments(data, loaded.manifest, loaded.tokenizer) : null;
       const recipe = input === undefined ? metadata?.recipes[0] ?? null : null;
       const sequence = input ?? recipe?.text ?? 'A E I C G';
       if (input === undefined) controlsRef.current = defaults;
       setExperiments(metadata); setModel(loaded); setText(sequence);
-      await establish(loaded, sequence, generation, recipe);
+      await establish(loaded, sequence, generation, recipe, restored);
     } catch (failure) {
       if (alive.current && generation === version.current) setError(failure instanceof Error ? failure.message : String(failure));
     } finally { if (alive.current) setLoading(false); }
@@ -173,6 +186,59 @@ export default function App() {
     finally { setProbing(false); }
   }
 
+  async function exportExperiment() {
+    const completed = display, loaded = model, owner = client.current;
+    if (!completed || !loaded || !owner) return;
+    setTransferring(true); setError(null);
+    try {
+      const [original, modified] = await Promise.all([
+        owner.request('INSPECT', { runId: completed.comparison.baselineRunId, reference: { stage: 'logits' }, selection: { position: completed.controls.position } }),
+        owner.request('INSPECT', { runId: completed.comparison.modifiedRunId, reference: { stage: 'logits' }, selection: { position: completed.controls.position } }),
+      ]);
+      const document = createExperiment(loaded.manifest, loaded.tokenizer, completed.tokens, {
+        predictionPosition: completed.controls.position, targetTokenId: completed.controls.target, interventions: completed.comparison.interventions,
+      }, original.values, modified.values, { backend: loaded.backend, precision: loaded.precision });
+      const url = URL.createObjectURL(new Blob([JSON.stringify(document, null, 2) + '\n'], { type: 'application/json' }));
+      const link = window.document.createElement('a');
+      link.href = url; link.download = `${loaded.manifest.modelId}-experiment.json`; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (failure) { if (alive.current) setError(failure instanceof Error ? failure.message : String(failure)); }
+    finally { if (alive.current) setTransferring(false); }
+  }
+
+  async function importExperiment(file: File) {
+    if (!model) return;
+    setTransferring(true); setError(null);
+    try {
+      if (file.size > MAX_EXPERIMENT_BYTES) throw new Error('Experiment files must be at most 1 MiB.');
+      const document = parseExperiment(await file.text());
+      const selected: ModelChoice | undefined = document.checkpoint.modelId === 'retrieval-seed-2026' ? 'retrieval'
+        : document.checkpoint.modelId === 'verification-seed-1729' ? 'verification' : undefined;
+      if (!selected) throw new Error('This saved model is not installed. Choose an experiment exported by an available checkpoint.');
+      // Validate before replacing the visible experiment or loading another GPU model.
+      if (selected === choice) validateExperiment(document, model.manifest, model.tokenizer);
+      else {
+        const directory = new URL(`${import.meta.env.BASE_URL}models/${selected}/`, window.location.origin);
+        const [rawManifest, rawTokenizer] = await Promise.all(['manifest.json', 'tokenizer.json'].map(async name => {
+          const response = await fetch(new URL(name, directory));
+          if (!response.ok) throw new Error('Could not load the saved checkpoint. Try again.');
+          return response.json();
+        }));
+        const manifest = validateManifest(rawManifest);
+        validateExperiment(document, manifest, validateTokenizer(rawTokenizer, manifest.config.vocabularySize));
+      }
+      if (!alive.current) return;
+      if (selected !== choice) await load('auto', selected, document.input.text, document);
+      else {
+        const generation = ++version.current;
+        latest.current = null; setLoading(true); setText(document.input.text);
+        try { await establish(model, document.input.text, generation, null, document); }
+        finally { if (alive.current) setLoading(false); }
+      }
+    } catch (failure) { if (alive.current) setError(failure instanceof Error ? failure.message : String(failure)); }
+    finally { if (alive.current) setTransferring(false); }
+  }
+
   const tokenizer = model?.tokenizer;
   const c = model?.manifest.config;
   const rows = display ? display.comparison.displayTokens : [];
@@ -189,10 +255,10 @@ export default function App() {
       <aside className="controls-panel">
         <section>
           <p className="eyebrow">Checkpoint</p>
-          <label>Model<select aria-label="Model" disabled={loading || probing} value={choice} onChange={event => void load('auto', event.target.value as ModelChoice)}>
+          <label>Model<select aria-label="Model" disabled={loading || probing || transferring} value={choice} onChange={event => void load('auto', event.target.value as ModelChoice)}>
             <option value="retrieval">Trained retrieval model</option><option value="verification">Untrained verification model</option></select></label>
           {experiments && <>
-            <label>Prepared experiment<select aria-label="Prepared experiment" disabled={loading || probing} value={activeRecipe?.id ?? ''} onChange={event => void selectRecipe(event.target.value)}>
+            <label>Prepared experiment<select aria-label="Prepared experiment" disabled={loading || probing || transferring} value={activeRecipe?.id ?? ''} onChange={event => void selectRecipe(event.target.value)}>
               <option value="" disabled>Custom experiment</option>{experiments.recipes.map(recipe => <option key={recipe.id} value={recipe.id}>{recipe.title}</option>)}</select></label>
             <p className="hint">Each example was measured on this checkpoint. Adjust a control to explore further.</p>
           </>}
@@ -200,36 +266,43 @@ export default function App() {
         <section>
           <p className="eyebrow">Input sequence</p><h2>Set the observation</h2>
           <form onSubmit={runInput}><label htmlFor="sequence">Space-separated symbols</label>
-            <textarea id="sequence" value={text} onChange={event => setText(event.target.value)} rows={2} spellCheck={false} />
+            <textarea id="sequence" value={text} onChange={event => setText(event.target.value)} rows={2} spellCheck={false} disabled={transferring} />
             <p className="hint">{choice === 'verification' ? 'Use A–O. Up to 7 symbols, plus the beginning token.' : 'Use keys A–D, values 0–3, and separate = ; ? with spaces. Train format: three distinct bindings, then ? KEY =. Up to 31 symbols plus the beginning token.'}</p>
-            <button type="submit" className="primary" disabled={loading || probing || !model}>Run input <span aria-hidden="true">→</span></button>
+            <button type="submit" className="primary" disabled={loading || probing || transferring || !model}>Run input <span aria-hidden="true">→</span></button>
           </form>
-          <div className="tokens" aria-label="Input tokens">{tokenizer && tokenIds.map((id, index) => <button key={index} disabled={loading || probing}
+          <div className="tokens" aria-label="Input tokens">{tokenizer && tokenIds.map((id, index) => <button key={index} disabled={loading || probing || transferring}
             className={controls.position === index ? 'token selected' : 'token'} onClick={() => schedule({ ...controlsRef.current, position: index })}
             aria-label={`Predict after position ${index}: ${tokenizer.tokens[id]}`} aria-pressed={controls.position === index}>
             <small>{index}</small>{tokenizer.tokens[id]}</button>)}</div>
         </section>
         <section>
           <p className="eyebrow">Intervention</p><h2>Change a head's contribution</h2>
-          <div className="paired"><label>Layer<select aria-label="Layer" disabled={loading || probing || !c} value={controls.layer} onChange={event => schedule({ ...controlsRef.current, layer: Number(event.target.value) })}>
+          <div className="paired"><label>Layer<select aria-label="Layer" disabled={loading || probing || transferring || !c} value={controls.layer} onChange={event => schedule({ ...controlsRef.current, layer: Number(event.target.value) })}>
             {c && Array.from({ length: c.layers }, (_, i) => <option value={i} key={i}>Layer {i + 1}</option>)}</select></label>
-            <label>Head<select aria-label="Head" disabled={loading || probing || !c} value={controls.head} onChange={event => schedule({ ...controlsRef.current, head: Number(event.target.value) })}>
+            <label>Head<select aria-label="Head" disabled={loading || probing || transferring || !c} value={controls.head} onChange={event => schedule({ ...controlsRef.current, head: Number(event.target.value) })}>
               {c && Array.from({ length: c.heads }, (_, i) => <option value={i} key={i}>Head {i + 1}</option>)}</select></label></div>
-          <label>Apply at<select aria-label="Apply at" disabled={loading || probing || !model} value={controls.scope} onChange={event => schedule({ ...controlsRef.current, scope: event.target.value })}>
+          <label>Apply at<select aria-label="Apply at" disabled={loading || probing || transferring || !model} value={controls.scope} onChange={event => schedule({ ...controlsRef.current, scope: event.target.value })}>
             <option value="all">All positions</option>{tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
           <div className="strength-label"><label htmlFor="strength">Head strength</label><output htmlFor="strength">{controls.factor.toFixed(2)}×</output></div>
-          <input id="strength" type="range" min="0" max="2" step="0.05" value={controls.factor} disabled={loading || probing || !model}
+          <input id="strength" type="range" min="0" max="2" step="0.05" value={controls.factor} disabled={loading || probing || transferring || !model}
             onChange={event => schedule({ ...controlsRef.current, factor: Number(event.target.value) })} />
           <div className="scale-labels"><span>0 · ablated</span><span>1 · baseline</span><span>2 · doubled</span></div>
-          <button className="secondary" disabled={loading || probing || !model} onClick={() => schedule({ ...controlsRef.current, factor: 1 })}>Reset to baseline</button>
+          <button className="secondary" disabled={loading || probing || transferring || !model} onClick={() => schedule({ ...controlsRef.current, factor: 1 })}>Reset to baseline</button>
+        </section>
+        <section className="saved-experiments">
+          <p className="eyebrow">Save and replay</p>
+          <button className="secondary" disabled={loading || probing || transferring || pending || !display} onClick={() => void exportExperiment()}>Export experiment</button>
+          <label className="file-label">Import experiment<input type="file" accept=".json,application/json" aria-label="Import experiment" disabled={loading || probing || transferring || pending || !model}
+            onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) void importExperiment(file); }} /></label>
+          <p className="hint">Save completed settings and predictions as JSON. Import recomputes them using the exact installed checkpoint.</p>
         </section>
         <section className="runtime">
           <p className="eyebrow">Computation runtime</p>
-          <label>Backend<select aria-label="Backend" disabled={loading || probing} value={model?.backend ?? 'auto'} onChange={event => void load(event.target.value as 'cpu' | 'webgl', choice, text)}>
+          <label>Backend<select aria-label="Backend" disabled={loading || probing || transferring} value={model?.backend ?? 'auto'} onChange={event => void load(event.target.value as 'cpu' | 'webgl', choice, text)}>
             <option value="auto">Initializing…</option><option value="cpu">CPU worker</option><option value="webgl">WebGL worker</option></select></label>
           <p className="hint">{model?.fallbackReason ?? (c ? `${c.layers} layers · ${c.heads} heads · ${c.modelDim} dimensions` : 'Loading static model assets…')}</p>
           {!model && !loading && <button className="secondary" onClick={() => void load('cpu', choice, text)}>Load with CPU</button>}
-          <button className="secondary" disabled={loading || probing || !model} onClick={() => void verify()}>{probing ? 'Checking computations…' : 'Verify against PyTorch'}</button>
+          <button className="secondary" disabled={loading || probing || transferring || !model} onClick={() => void verify()}>{probing ? 'Checking computations…' : 'Verify against PyTorch'}</button>
           {probe && <div className="probe-result" role="status"><strong>Reference checks passed</strong><span>Forward error {probe.forwardMaximumError.toExponential(2)}</span>
             <span>Gradient error {probe.gradientMaximumError.toExponential(2)}</span><span>Adam error {probe.optimizerMaximumError.toExponential(2)}</span>
             <span>Retained tensor change: {probe.retainedTensorDelta}</span></div>}
@@ -245,6 +318,11 @@ export default function App() {
             <p>Chance: 25% · local-context lookup: {(experiments.evaluation.localContext.accuracy * 100).toFixed(1)}%. Length tests: two bindings {(experiments.evaluation.lengthGeneralization['2'].accuracy * 100).toFixed(1)}%; four bindings {(experiments.evaluation.lengthGeneralization['4'].accuracy * 100).toFixed(1)}%.</p>
             <a href={`${import.meta.env.BASE_URL}models/retrieval/evaluation.json`} target="_blank" rel="noreferrer">Evaluation and limitations ↗</a>
           </div>}
+          {display.replay && <div className={display.replay.matches ? 'replay-note' : 'error'} role="status" data-testid="replay-report">
+            <strong>{display.replay.matches ? 'Replay matches saved results' : 'Replay differs from saved results'}</strong>
+            <p>Saved {display.replay.savedBackend} → current {display.replay.currentBackend}. Maximum logit difference: baseline {display.replay.baselineMaximumError.toExponential(2)}, modified {display.replay.modifiedMaximumError.toExponential(2)}.</p>
+            <span>Showing newly computed predictions. Comparison tolerance: 2e-5 absolute + 1e-5 relative.</span>
+          </div>}
           {activeRecipe && <div className="recipe-note" data-testid="recipe-note"><strong>{activeRecipe.title}</strong><p>{activeRecipe.interpretation}</p>
             <span>Recorded PyTorch target probability: {(activeRecipe.metrics.baselineTargetProbability * 100).toFixed(2)}% → {(activeRecipe.metrics.modifiedTargetProbability * 100).toFixed(2)}%. Live browser results appear below.</span></div>}
           <div className="trace" aria-label="Intervention computation"><span>Attention weights</span><span aria-hidden="true">→</span>
@@ -258,7 +336,7 @@ export default function App() {
               <span className={`delta ${row.probabilityDelta < 0 ? 'negative' : ''}`}>{row.probabilityDelta >= 0 ? '+' : ''}{(row.probabilityDelta * 100).toFixed(2)} pp</span></div>)}
           </div>
           <div className="metrics"><div><span>Distribution change</span><strong>{display.comparison.metrics.jsDivergence.toExponential(3)} <small>nats</small></strong></div>
-            <div><label>Target symbol<select aria-label="Target symbol" value={controls.target} onChange={event => schedule({ ...controlsRef.current, target: Number(event.target.value) })} disabled={loading || probing}>
+            <div><label>Target symbol<select aria-label="Target symbol" value={controls.target} onChange={event => schedule({ ...controlsRef.current, target: Number(event.target.value) })} disabled={loading || probing || transferring}>
               {tokenizer.tokens.map((symbol, i) => <option key={i} value={i}>{symbol}</option>)}</select></label><strong>{display.comparison.metrics.targetLogProbabilityDelta?.toFixed(4)} <small>Δ log p · {tokenizer.tokens[display.controls.target]}</small></strong></div>
             <div><span>Model computation</span><strong>{display.comparison.execution.elapsedMs.toFixed(1)} <small>ms</small></strong>
               <span data-testid="execution-strategy">{display.comparison.execution.strategy === 'cached-suffix'

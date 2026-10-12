@@ -15,7 +15,7 @@ These results describe the first implementation, not a completed product release
 
 ## CPU numerical results
 
-The current engine suite passed 33 tests. Original forward/gradient results remain unchanged, measured using Node.js 24.18.0, TensorFlow.js Core/CPU 4.22.0, and the checked-in fixture:
+The current engine suite passed 36 tests. Original forward/gradient results remain unchanged, measured using Node.js 24.18.0, TensorFlow.js Core/CPU 4.22.0, and the checked-in fixture:
 
 - Maximum absolute forward-stage error across all 84 cases: `1.9073486328125e-6`.
 - Maximum absolute gradient error across every parameter: `3.5762786865234375e-7`.
@@ -86,6 +86,12 @@ The independent trainer, dataset semantics, failed initial candidate, accepted c
 - The shipped large-effect recipe ablates first-layer head 4 across all positions (indices are zero-based in JSON). Its correct-answer log-probability change is about -11.777 nats. The reachable control edits first-layer head 2 at position 0; its tiny effect is not treated as resolved beyond numerical error. The unreachable control edits the final layer at position 0 and leaves final-position logits exactly unchanged.
 
 These finite-task checks demonstrate held-out sequence behavior and the selected experiments. They do not validate general language ability, average head importance, physical-device performance, or an untouched final audit dataset.
+
+## Portable experiment validation
+
+Version 1 export/replay passes three engine contract tests and four targeted production tests across Chromium and WebKit. They verify complete-vocabulary snapshots, non-final positions, target/scope restoration, checkpoint switching, CPU-to-WebGL replay, stale-checkpoint rejection before replacing the experiment, and visible discrepancies for self-consistent changed measurements. JSON size/version, input/token, intervention, numerical, and saved-metric consistency checks are covered. See `docs/experiment-format.md`.
+
+Cold WebGL model loading is allowed 30 seconds in the replay browser assertions; this is a test startup allowance, not a warm performance claim.
 
 ## Outstanding gates
 

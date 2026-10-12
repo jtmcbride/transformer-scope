@@ -13,7 +13,7 @@ npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173/transformer-scope/`. The trained input format is `A = 0 ; B = 3 ; C = 1 ; ? A =` with spaces around every symbol. Keys A–D are distinct; values 0–3 may repeat. Choose a prepared experiment or write your own input. The selected verification checkpoint accepts A–O with at most seven symbols. Choose a prediction position, layer, head, token scope, and head strength. The baseline remains immutable; factor 1 restores it.
+Open `http://127.0.0.1:5173/transformer-scope/`. The trained input format is `A = 0 ; B = 3 ; C = 1 ; ? A =` with spaces around every symbol. Keys A–D are distinct; values 0–3 may repeat. Choose a prepared experiment or write your own input. The selected verification checkpoint accepts A–O with at most seven symbols. Choose a prediction position, layer, head, token scope, and head strength. The baseline remains immutable; factor 1 restores it. Export a completed experiment as JSON, then import it to restore settings and compare recomputed predictions with saved values. See `docs/experiment-format.md` for the versioned format.
 
 The trained checkpoint attempts WebGL with CPU fallback. The tiny verification model defaults to CPU to avoid GPU shader compilation overhead. WebGL can be selected explicitly; larger models attempt WebGL with CPU fallback. The verification button checks actual browser forward values, gradients, and an Adam update against exported PyTorch results.
 

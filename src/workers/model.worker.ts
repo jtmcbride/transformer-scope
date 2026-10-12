@@ -40,7 +40,9 @@ async function load(request: Extract<WorkerRequest, { command: 'LOAD' }>) {
   artifact = nextArtifact;
   engine = new RunEngine(artifact, { cacheBudgetBytes: request.payload.cacheBudgetBytes });
   return { manifest: artifact.manifest, tokenizer: artifact.tokenizer, backend: tf.getBackend(), fallbackReason,
-    runtimeGeneration: engine.runtimeGeneration };
+    runtimeGeneration: engine.runtimeGeneration, precision: { dtype: 'float32',
+      float32Textures: tf.getBackend() === 'webgl' ? tf.env().getBool('WEBGL_RENDER_FLOAT32_ENABLED') : null,
+      webglPacking: tf.getBackend() === 'webgl' ? tf.env().getBool('WEBGL_PACK') : null } };
 }
 
 async function execute(request: WorkerRequest): Promise<unknown> {

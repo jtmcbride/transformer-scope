@@ -4,16 +4,16 @@ import { BaselineCache, type CacheLease, type CacheStats } from './cache';
 import { effectiveInterventions, planExecution, type ExecutionPreference } from './execution';
 import { comparePredictions, type PredictionComparison } from './comparison';
 import { activationKey, canReachPrediction, EngineError, requireInput, stages, validateInterventions, validateTokens,
-  type ActivationReference, type HeadScaleIntervention, type ModelArtifact } from './contracts';
+  type ActivationReference, type HeadScaleIntervention, type Intervention, type ModelArtifact } from './contracts';
 
-interface RunDescriptor { tokenIds: number[]; interventions: HeadScaleIntervention[]; baselineRunId?: string; logits?: Float32Array; executionPreference?: ExecutionPreference }
+interface RunDescriptor { tokenIds: number[]; interventions: Intervention[]; baselineRunId?: string; logits?: Float32Array; executionPreference?: ExecutionPreference }
 export interface RunSummary { runId: string; tokenIds: number[]; modelRevision: string; backend: string; runtimeGeneration: string }
 export interface CompareRequest {
-  baselineRunId: string; interventions: HeadScaleIntervention[]; predictionPosition?: number; targetTokenId?: number; topK?: number;
+  baselineRunId: string; interventions: Intervention[]; predictionPosition?: number; targetTokenId?: number; topK?: number;
   executionPreference?: ExecutionPreference;
 }
 export interface ComparisonResult extends PredictionComparison {
-  baselineRunId: string; modifiedRunId: string; interventions: HeadScaleIntervention[]; predictionPosition: number;
+  baselineRunId: string; modifiedRunId: string; interventions: Intervention[]; predictionPosition: number;
   execution: { strategy: 'identity' | 'full' | 'cached-suffix'; recomputedFromLayer: number | null; elapsedMs: number; backend: string; runtimeGeneration: string };
   hasComputationalPath: boolean;
 }
@@ -189,8 +189,10 @@ export class RunEngine {
       const axes = axesFor(reference.stage);
       requireInput(Object.keys(selection).every(key => axes.includes(key)), 'Selection contains an unknown tensor axis.');
       const source = run.baselineRunId ?? runId;
-      const lease = run.executionPreference === 'full' ? undefined : this.cache.acquire(source, this.cacheIdentity(run.tokenIds));
       const effective = effectiveInterventions(run.interventions);
+      // Cached baseline tensors describe unreplaced residuals, so residual replacement always recomputes.
+      const heads = effective.filter((p): p is HeadScaleIntervention => p.kind === 'head.scale');
+      const lease = run.executionPreference === 'full' || heads.length !== effective.length ? undefined : this.cache.acquire(source, this.cacheIdentity(run.tokenIds));
       const firstAffected = effective.reduce((first, patch) => Math.min(first, patch.layer), Infinity);
       let result: ForwardResult | undefined;
       let owned: tf.Tensor | undefined;
@@ -198,7 +200,7 @@ export class RunEngine {
       try {
         if (lease && reference.layer !== undefined && reference.layer <= firstAffected) {
           owned = this.model.inspectCached(lease.layers[reference.layer], reference.layer,
-            effective.filter(p => p.layer === reference.layer), reference.stage);
+            heads.filter(p => p.layer === reference.layer), reference.stage);
         }
         if (!owned) {
           const plan = planExecution(run.interventions, lease !== undefined);

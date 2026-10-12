@@ -3,28 +3,14 @@
 Each residual is passed through the final LayerNorm and the tied unembedding. The model computes
 this only for the final residual; intermediate read-outs are an inspection, not model predictions.
 """
-import hashlib
 import json
-from pathlib import Path
 
 import numpy as np
 import torch
-from reference_model import Config, ReferenceTransformer
+from artifact_model import load_artifact_model, root
 
-root = Path(__file__).resolve().parents[1]
 directory = root / 'public/models/retrieval'
-manifest = json.loads((directory / 'manifest.json').read_text())
-payload = (directory / 'weights.bin').read_bytes()
-assert hashlib.sha256(payload).hexdigest() == manifest['weightsSha256'], 'Weights do not match the manifest.'
-config = {key: manifest['config'][key] for key in Config.__dataclass_fields__}
-model = ReferenceTransformer(Config(**config))
-parameters = model.exported_parameters()
-with torch.no_grad():
-    for entry in manifest['tensors']:
-        values = np.frombuffer(payload, dtype='<f4', count=entry['byteLength'] // 4, offset=entry['byteOffset']).reshape(entry['shape'])
-        parameter, transpose = parameters[entry['name']]
-        parameter.copy_(torch.from_numpy(values.T.copy() if transpose else values.copy()))
-assert set(parameters) == {entry['name'] for entry in manifest['tensors']}
+model, manifest = load_artifact_model('retrieval')
 recipes = json.loads((directory / 'recipes.json').read_text())['recipes']
 recipe = next(item for item in recipes if item['id'] == 'effect')
 tokens, position = recipe['tokenIds'], recipe['predictionPosition']

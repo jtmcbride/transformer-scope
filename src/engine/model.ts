@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-core/dist/register_all_gradients';
 import { activationKey, requireInput, validateInterventions, validateTokens,
-  type ActivationReference, type HeadScaleIntervention, type ModelConfig, type TensorRecord } from './contracts';
+  type ActivationReference, type HeadScaleIntervention, type Intervention, type ModelConfig, type ResidualHook, type TensorRecord } from './contracts';
 import { validateWeightRecords } from './weights';
 
 export interface ForwardResult { logits: tf.Tensor3D; captured: Record<string, tf.Tensor> }
@@ -44,6 +44,19 @@ export class TransformerModel {
     return tf.tensor2d(values, [length, length]);
   }
 
+  /** Rows selected by residual.replace take the submitted values exactly; every other row is returned unchanged. */
+  private replaced(x: tf.Tensor3D, layer: number, stage: ResidualHook, patches: readonly Intervention[]): tf.Tensor3D {
+    const selected = patches.filter(p => p.kind === 'residual.replace' && p.layer === layer && p.stage === stage);
+    if (!selected.length) return x;
+    const [, length, dimension] = x.shape;
+    const values = new Float32Array(length * dimension), mask = new Uint8Array(length * dimension);
+    for (const patch of selected) if (patch.kind === 'residual.replace') {
+      values.set(patch.values, patch.position * dimension);
+      mask.fill(1, patch.position * dimension, (patch.position + 1) * dimension);
+    }
+    return tf.where(tf.tensor3d(mask, [1, length, dimension], 'bool'), tf.tensor3d(values, [1, length, dimension]), x) as tf.Tensor3D;
+  }
+
   private scaledHeads(raw: tf.Tensor4D, patches: readonly HeadScaleIntervention[]): tf.Tensor4D {
     const [, length, heads] = raw.shape;
     const factors = new Float32Array(length * heads).fill(1);
@@ -64,12 +77,12 @@ export class TransformerModel {
     return save(`${layer}:block.output`, tf.add(residual, mlp) as tf.Tensor3D);
   }
 
-  private block(x: tf.Tensor3D, layer: number, patches: readonly HeadScaleIntervention[], mask: tf.Tensor2D, save: Save): tf.Tensor3D {
+  private block(input: tf.Tensor3D, layer: number, patches: readonly Intervention[], mask: tf.Tensor2D, save: Save): tf.Tensor3D {
     const c = this.config;
-    const [, t, d] = x.shape, h = c.heads, dh = d / h;
+    const [, t, d] = input.shape, h = c.heads, dh = d / h;
     const prefix = `blocks.${layer}.`;
     const at = <T extends tf.Tensor>(stage: string, value: T): T => save(`${layer}:${stage}`, value);
-    at('block.input', x);
+    const x = at('block.input', this.replaced(input, layer, 'block.input', patches));
     const u = at('attention.normalized', this.norm(x, prefix + 'ln1'));
     const project = (name: string, stage: string) => at(stage, tf.reshape(this.linear(u, prefix + name), [1, t, h, dh]) as tf.Tensor4D);
     const q = project('q', 'attention.query'), k = project('k', 'attention.key'), v = project('v', 'attention.value');
@@ -77,9 +90,9 @@ export class TransformerModel {
     const masked = at('attention.maskedScores', tf.add(scores, mask));
     const a = at('attention.weights', tf.softmax(masked, -1));
     const raw = at('attention.head.raw', tf.transpose(tf.matMul(a, tf.transpose(v, [0, 2, 1, 3])), [0, 2, 1, 3]) as tf.Tensor4D);
-    const modified = at('attention.head.modified', this.scaledHeads(raw, patches.filter(p => p.layer === layer)));
+    const modified = at('attention.head.modified', this.scaledHeads(raw, patches.filter((p): p is HeadScaleIntervention => p.kind === 'head.scale' && p.layer === layer)));
     const projected = at('attention.projected', this.linear(tf.reshape(modified, [1, t, d]) as tf.Tensor3D, prefix + 'output'));
-    const residual = at('attention.residual', tf.add(x, projected) as tf.Tensor3D);
+    const residual = at('attention.residual', this.replaced(tf.add(x, projected) as tf.Tensor3D, layer, 'attention.residual', patches));
     return this.finishBlock(residual, layer, save);
   }
 
@@ -122,7 +135,7 @@ export class TransformerModel {
       JSON.stringify(cache.rawHeadOutputs.shape) === JSON.stringify([1, length, c.heads, c.modelDim / c.heads]) &&
       JSON.stringify(cache.attentionResidual.shape) === JSON.stringify([1, length, c.modelDim]), 'Invalid cached tensor shapes.');
     validateInterventions(patches, c, length);
-    requireInput(patches.every(patch => patch.layer === layer), 'A cached residual accepts interventions in one layer only.');
+    requireInput(patches.every(patch => patch.kind === 'head.scale' && patch.layer === layer), 'A cached residual accepts head scaling in one layer only.');
   }
 
   private scaledResidual(cache: LayerBaseline, layer: number, patches: readonly HeadScaleIntervention[]): tf.Tensor3D {
@@ -174,7 +187,7 @@ export class TransformerModel {
     });
   }
 
-  forward(tokenIds: readonly number[], patches: readonly HeadScaleIntervention[] = [], capture: readonly ActivationReference[] = []): ForwardResult {
+  forward(tokenIds: readonly number[], patches: readonly Intervention[] = [], capture: readonly ActivationReference[] = []): ForwardResult {
     requireInput(!this.disposed, 'Model has been disposed.');
     validateTokens(tokenIds, this.config);
     validateInterventions(patches, this.config, tokenIds.length);

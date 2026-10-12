@@ -3,7 +3,7 @@ import { tokenize, type HeadScaleIntervention, type SymbolTokenizer } from './en
 import type { ComparisonResult, RunSummary } from './engine/runs';
 import type { Commands } from './workers/protocol';
 import type { ProbeReport } from './engine/probe';
-import { createExperiment, parseExperiment, validateExperiment, checkReplay, MAX_EXPERIMENT_BYTES, type ExperimentDocument, type ReplayReport } from './engine/experiment';
+import { createExperiment, headScalingOnly, parseExperiment, validateExperiment, checkReplay, MAX_EXPERIMENT_BYTES, type ExperimentDocument, type ReplayReport } from './engine/experiment';
 import { validateManifest, validateTokenizer } from './engine/weights';
 import { StrengthNumber } from './components/StrengthNumber';
 import { ComputationInspector } from './components/ComputationInspector';
@@ -227,7 +227,7 @@ export default function App() {
         owner.request('INSPECT', { runId: completed.comparison.modifiedRunId, reference: { stage: 'logits' }, selection: { position: completed.controls.position } }),
       ]);
       const document = createExperiment(loaded.manifest, loaded.tokenizer, completed.tokens, {
-        predictionPosition: completed.controls.position, targetTokenId: completed.controls.target, interventions: completed.comparison.interventions,
+        predictionPosition: completed.controls.position, targetTokenId: completed.controls.target, interventions: headScalingOnly(completed.comparison.interventions),
       }, original.values, modified.values, { backend: loaded.backend, precision: loaded.precision });
       const url = URL.createObjectURL(new Blob([JSON.stringify(document, null, 2) + '\n'], { type: 'application/json' }));
       const link = window.document.createElement('a');

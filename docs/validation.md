@@ -147,6 +147,24 @@ Two production tests inject a browser-initiated loss into the real worker bundle
 
 At 360 CSS px in Chromium with touch emulation, the strength slider's hit area was 16 px tall and the file input 17 px, below the 24 px WCAG 2.2 minimum target size. On coarse pointers, both are now 32 px; the mouse layout is unchanged. A production test checks every control except inline text links for at least 24 × 24 px, checks containment, and sets the strength with a touchscreen tap. It fails without the CSS change. If an engine does not report a coarse pointer under emulation, the test annotates that and asserts containment only. This is viewport/touch emulation, not physical-device evidence.
 
+## Residual replacement
+
+`scripts/export_residual.py` loads the shipped weights into the independent PyTorch model; seeded re-initialization is not bit-reproducible across PyTorch builds. It exports seven verification-model cases and a 64-case retrieval patching sweep (`tests/fixtures/residual-reference.json`; `npm run fixtures:residual`). The cases cover both hooks in both layers, first, middle, and last positions, a final-layer replacement that cannot reach the prediction, a zero vector, and a combination with head scaling.
+
+The sweep uses `A = 0 ; B = 3 ; C = 0 ; ? B =` as the target and the same input with the query key `A` as the source; the two differ only at position 14. It replaces each position's target residual with the source residual at each hook in each layer.
+
+Engine results:
+
+- Full execution matches every logit and every captured `block.input`, `attention.residual`, and `block.output` within the unchanged forward bounds (maximum error 1.91e-6). Each hook reports exactly the submitted row.
+- Replacing a row with the engine's own value reproduces the baseline logits bit for bit. The final-layer replacement at an earlier position leaves the prediction's logits bit-identical.
+- The run engine plans full execution, reports reachability, inspects replaced runs without cached tensors, and replays them after the baseline is released.
+- The sweep, with source residuals read through `inspectActivation`, matches PyTorch within 2.44e-6.
+- Invalid lengths, non-finite or out-of-range values, unknown stages, out-of-range positions or layers, and duplicate targets are rejected without retaining tensors.
+
+Regenerating the existing head-scaling fixtures with and without the reference change produced byte-identical files on this host. Those regenerations used PyTorch 2.9.1+cu128 on Linux and differ from the committed macOS CPU-build fixtures, because seeded initialization differs across builds. The committed fixtures were left unchanged.
+
+In the sweep, the source's query key moves the prediction from `3` to `0` (target probability 99.99% to about 0%) only through position 14 up to layer 2's input, and only through position 15 after layer 2's attention. This holds for one input pair; it is not a general claim about where the model stores information.
+
 ## Residual-stream read-out
 
 The input-embedding panel matches independent PyTorch embedding rows, sums, and similarity rows at four positions; its sum is bit-identical to the model's captured embedding output. The logit-lens panel matches independent PyTorch read-outs for the large-effect recipe's baseline and ablated runs. The maximum logit error is 1.67e-6 under the unchanged forward bounds (2e-5 absolute, 1e-5 relative), and the norms also match. Details and limitations: `docs/computation-inspection.md`.

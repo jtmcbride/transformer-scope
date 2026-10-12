@@ -17,6 +17,17 @@ class Config:
     layerNormEpsilon: float = 1e-5
 
 
+def replaced(x, layer, stage, patches):
+    """residual.replace: overwrite whole residual rows at one hook; other rows are untouched."""
+    selected = [p for p in patches if p.get("kind") == "residual.replace" and p["layer"] == layer and p["stage"] == stage]
+    if not selected:
+        return x
+    x = x.clone()
+    for patch in selected:
+        x[0, patch["position"]] = torch.tensor(patch["values"], dtype=x.dtype)
+    return x
+
+
 class Block(nn.Module):
     def __init__(self, c):
         super().__init__()
@@ -37,7 +48,7 @@ class Block(nn.Module):
             if capture is not None:
                 capture[f"{layer}:{stage}"] = value.detach().clone()
             return value
-        save("block.input", x)
+        x = save("block.input", replaced(x, layer, "block.input", patches))
         u = save("attention.normalized", self.ln1(x))
         def project(linear, stage):
             return save(stage, linear(u).reshape(b, t, c.heads, d // c.heads))
@@ -51,14 +62,14 @@ class Block(nn.Module):
         z = save("attention.head.raw", (a @ v.transpose(1, 2)).transpose(1, 2).contiguous())
         factors = torch.ones(1, t, c.heads, 1)
         for patch in patches:
-            if patch["layer"] != layer:
+            if patch.get("kind", "head.scale") != "head.scale" or patch["layer"] != layer:
                 continue
             positions = range(t) if patch["tokens"]["kind"] == "all" else patch["tokens"]["indices"]
             for position in positions:
                 factors[0, position, patch["head"], 0] = patch["factor"]
         modified = save("attention.head.modified", z * factors)
         projected = save("attention.projected", self.output(modified.reshape(b, t, d)))
-        residual = save("attention.residual", x + projected)
+        residual = save("attention.residual", replaced(x + projected, layer, "attention.residual", patches))
         mlp = save("mlp.output", self.mlpOut(F.gelu(self.mlpIn(self.ln2(residual)), approximate="tanh")))
         return save("block.output", residual + mlp)
 

@@ -29,7 +29,7 @@ it('inspects immutable modified runs even after releasing their baseline', async
     const modified = await engine.inspectActivation(comparison.modifiedRunId, { layer: 0, stage: 'attention.head.modified' }, { head: 0, position: 4 });
     expect(modified.shape).toEqual([1, 1, 1, 4]);
     modified.values.forEach((value, i) => expect(value).toBeCloseTo(raw.values[i] * .5, 6));
-    expect(comparison.interventions[0].factor).toBe(.5);
+    expect((comparison.interventions[0] as HeadScaleIntervention).factor).toBe(.5);
     await expect(engine.inspectActivation(baseline.runId, { stage: 'logits' })).rejects.toThrow(/unavailable/);
     engine.releaseRun(comparison.modifiedRunId);
     await expect(engine.inspectActivation(comparison.modifiedRunId, { stage: 'logits' })).rejects.toThrow(/unavailable/);
@@ -217,7 +217,7 @@ it('snapshots inputs and request identity before asynchronous readback', async (
     request.baselineRunId = 'changed'; request.interventions[0].factor = 2;
     const result = await comparison;
     expect(result.baselineRunId).toBe(baseline.runId);
-    expect(result.interventions[0].factor).toBe(.5);
+    expect((result.interventions[0] as HeadScaleIntervention).factor).toBe(.5);
   } finally { engine.dispose(); }
 });
 

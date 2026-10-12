@@ -1,5 +1,5 @@
 import { comparePredictions, type PredictionComparison } from './comparison';
-import { requireInput, tokenize, validateInterventions, validateTokens, type HeadScaleIntervention, type ModelManifest, type SymbolTokenizer } from './contracts';
+import { requireInput, tokenize, validateInterventions, validateTokens, type HeadScaleIntervention, type Intervention, type ModelManifest, type SymbolTokenizer } from './contracts';
 
 export interface RuntimePrecision { dtype: 'float32'; float32Textures: boolean | null; webglPacking: boolean | null }
 export interface ExperimentDocument {
@@ -57,6 +57,12 @@ export function validateExperiment(document: ExperimentDocument, manifest: Model
   const computed = comparePredictions(results.baselineLogits, results.modifiedLogits, tokenizer, results.topK, observation.targetTokenId);
   for (const key of ['jsDivergence', 'maxAbsoluteLogitChange', 'targetLogProbabilityDelta'] as const)
     requireInput(Math.abs(computed.metrics[key]! - results.metrics[key]!) <= 1e-12 * Math.max(1, Math.abs(computed.metrics[key]!)), 'Saved metrics do not agree with the complete logit arrays.');
+}
+
+/** Version 1 files record one head-scaling intervention; other kinds are refused rather than dropped. */
+export function headScalingOnly(interventions: readonly Intervention[]): HeadScaleIntervention[] {
+  requireInput(interventions.every(patch => patch.kind === 'head.scale'), 'Experiment files currently save head-scaling experiments only.');
+  return interventions as HeadScaleIntervention[];
 }
 
 export function createExperiment(manifest: ModelManifest, tokenizer: SymbolTokenizer, tokenIds: number[], observation: ExperimentDocument['observation'],

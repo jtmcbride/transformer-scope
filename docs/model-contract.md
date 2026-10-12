@@ -24,6 +24,15 @@ Scores are `Q K^T / sqrt(D/H)`. Future positions receive an additive `-1e9` mask
 
 Factors must be finite and within `[0,2]`. Layer, head, and token indices are zero-based. Overlapping patches and duplicate positions are rejected. Empty patch lists, empty selections, and factor 1 are identity operations. Forced full execution with factor 1 remains part of the parity tests.
 
+`residual.replace` overwrites one whole residual row with submitted values. Its fields are a zero-based `layer`, a `stage`, a `position`, and `values` of length `D`. Each value must be finite with magnitude at most 10,000.
+
+- `block.input`: the row is replaced before block `layer`'s first LayerNorm, so that block's attention reads the replaced row. For layer 0 this happens after the token-plus-position embedding, and `embedding.output` itself is unchanged.
+- `attention.residual`: the row is replaced after the projected attention output is added and before the MLP.
+
+The captured stage reports exactly the submitted row, and all other rows are unchanged. Interaction with `head.scale` in the same layer follows execution order: a `block.input` replacement precedes that layer's attention, while an `attention.residual` replacement overwrites the head-scaled row at its position only. Two replacements at the same layer, stage, and position are rejected. A replacement is never treated as an identity, even when its values equal the run's own, because the planner cannot know that without computing.
+
+A replacement at the prediction position reaches the prediction. A replacement at an earlier position reaches it if attention runs afterward: always for `block.input`, and only before the final layer for `attention.residual`. Runs containing a replacement use full execution. The cached suffix and cached inspections stay limited to same-layer head scaling, because cached tensors describe unreplaced residuals. Version 1 experiment files save head-scaling experiments only and refuse other kinds explicitly.
+
 ## Tokenizer and metrics
 
 The verification vocabulary is `<BOS>` followed by A–O. Input is split on whitespace without case or Unicode normalization; `<BOS>` is prepended automatically. Unknown symbols and excess context are errors. Empty input contains only `<BOS>`.

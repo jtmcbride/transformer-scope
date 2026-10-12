@@ -78,3 +78,10 @@ footer { display: flex; justify-content: space-between; font-size: 10px; color: 
 @media (max-width: 1050px) { main { padding: 24px; }.workspace { grid-template-columns: 270px minmax(0, 1fr); }.observation { padding: 25px; }.trace { flex-wrap: wrap; justify-content: flex-start; }.inspectors { grid-template-columns: 1fr; }.probability-row { grid-template-columns: 35px minmax(0, 1fr) 95px 60px; gap: 8px; }.prediction-title { flex-wrap: wrap; } }
 @media (max-width: 730px) { main { padding: 18px 12px; }.build-label { display: none; }h1 { font-size: 23px; }.notice { flex-direction: column; gap: 3px; }.workspace { grid-template-columns: 1fr; }.controls-panel { border-right: 0; border-bottom: 1px solid var(--line); }.controls-panel section { padding: 22px; }.observation { padding: 22px 16px; }.observation-header { align-items: flex-start; flex-direction: column; gap: 12px; }.metrics { gap: 12px; }.metrics strong { font-size: 12px; }.metrics label { flex-direction: column; align-items: flex-start; gap: 3px; }.probability-row { grid-template-columns: 32px minmax(0, 1fr) 89px 60px; gap: 5px; }footer { flex-direction: column; gap: 7px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.checkpoint-evidence { font-size: 11px; line-height: 1.6; color: var(--muted); margin-top: 22px; }
+.checkpoint-evidence p { margin: 6px 0; }.checkpoint-evidence strong { color: #183a35; }
+a { color: var(--green); }
+.recipe-note { border-left: 3px solid var(--green); background: #f2f6f5; padding: 14px 16px; margin-top: 18px; font-size: 12px; line-height: 1.6; }
+.recipe-note p { margin: 6px 0; }.recipe-note span { font-size: 11px; color: var(--muted); }
+.inspectors > section { min-width: 0; }.attention-scroll { overflow-x: auto; max-width: 100%; padding-bottom: 8px; }

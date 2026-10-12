@@ -7,7 +7,7 @@ test('production CPU/WebGL suffix equivalence, eviction, reload, and 1,000-edit 
   test.setTimeout(120_000);
   let workerUrl = '';
   page.on('request', request => { if (/model\.worker-.*\.js/u.test(request.url())) workerUrl = request.url(); });
-  await page.goto('');
+  await page.goto('?model=verification');
   await expect(page.getByTestId('execution-strategy')).toHaveText('Cached suffix · layer 1');
   const report = await page.evaluate(async url => {
     const worker = new Worker(url, { type: 'module' });

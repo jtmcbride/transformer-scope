@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "architectureVersion": "preln-absolute-tied-v1",
+  "modelId": "retrieval-seed-2026",
+  "config": {
+    "layers": 2,
+    "heads": 4,
+    "modelDim": 64,
+    "mlpDim": 256,
+    "vocabularySize": 12,
+    "contextLength": 32,
+    "layerNormEpsilon": 1e-05
+  },
+  "dtype": "float32-le",
+  "matrixOrientation": "input-output",
+  "conventions": {
+    "gelu": "tanh",
+    "layerNormVariance": "population",
+    "position": "learned-absolute",
+    "tiedEmbeddings": true,
+    "dropout": 0,
+    "maskValue": -1000000000.0
+  },
+  "weightsFile": "weights.bin",
+  "tokenizerFile": "tokenizer.json",
+  "tensors": [
+    {
+      "name": "tokenEmbedding",
+      "shape": [
+        12,
+        64
+      ],
+      "byteOffset": 0,
+      "byteLength": 3072
+    },
+    {
+      "name": "positionEmbedding",
+      "shape": [
+        32,
+        64
+      ],
+      "byteOffset": 3072,
+      "byteLength": 8192
+    },
+    {
+      "name": "finalNorm.scale",
+      "shape": [
+        64
+      ],
+      "byteOffset": 11264,
+      "byteLength": 256
+    },
+    {
+      "name": "finalNorm.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 11520,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.ln1.scale",
+      "shape": [
+        64
+      ],
+      "byteOffset": 11776,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.ln1.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 12032,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.ln2.scale",
+      "shape": [
+        64
+      ],
+      "byteOffset": 12288,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.ln2.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 12544,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.q.weight",
+      "shape": [
+        64,
+        64
+      ],
+      "byteOffset": 12800,
+      "byteLength": 16384
+    },
+    {
+      "name": "blocks.0.q.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 29184,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.k.weight",
+      "shape": [
+        64,
+        64
+      ],
+      "byteOffset": 29440,
+      "byteLength": 16384
+    },
+    {
+      "name": "blocks.0.k.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 45824,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.v.weight",
+      "shape": [
+        64,
+        64
+      ],
+      "byteOffset": 46080,
+      "byteLength": 16384
+    },
+    {
+      "name": "blocks.0.v.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 62464,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.output.weight",
+      "shape": [
+        64,
+        64
+      ],
+      "byteOffset": 62720,
+      "byteLength": 16384
+    },
+    {
+      "name": "blocks.0.output.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 79104,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.0.mlpIn.weight",
+      "shape": [
+        64,
+        256
+      ],
+      "byteOffset": 79360,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.0.mlpIn.bias",
+      "shape": [
+        256
+      ],
+      "byteOffset": 144896,
+      "byteLength": 1024
+    },
+    {
+      "name": "blocks.0.mlpOut.weight",
+      "shape": [
+        256,
+        64
+      ],
+      "byteOffset": 145920,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.0.mlpOut.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 211456,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.ln1.scale",
+      "shape": [
+        64
+      ],
+      "byteOffset": 211712,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.ln1.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 211968,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.ln2.scale",
+      "shape": [
+        64
+      ],
+      "byteOffset": 212224,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.ln2.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 212480,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.q.weight",
+      "shape": [
+        64,
+        64
+      ],
+      "byteOffset": 212736,
+      "byteLength": 16384
+    },
+    {
+      "name": "blocks.1.q.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 229120,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.k.weight",
+      "shape": [
+        64,
+        64
+      ],
+      "byteOffset": 229376,
+      "byteLength": 16384
+    },
+    {
+      "name": "blocks.1.k.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 245760,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.v.weight",
+      "shape": [
+        64,
+        64
+      ],
+      "byteOffset": 246016,
+      "byteLength": 16384
+    },
+    {
+      "name": "blocks.1.v.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 262400,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.output.weight",
+      "shape": [
+        64,
+        64
+      ],
+      "byteOffset": 262656,
+      "byteLength": 16384
+    },
+    {
+      "name": "blocks.1.output.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 279040,
+      "byteLength": 256
+    },
+    {
+      "name": "blocks.1.mlpIn.weight",
+      "shape": [
+        64,
+        256
+      ],
+      "byteOffset": 279296,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.1.mlpIn.bias",
+      "shape": [
+        256
+      ],
+      "byteOffset": 344832,
+      "byteLength": 1024
+    },
+    {
+      "name": "blocks.1.mlpOut.weight",
+      "shape": [
+        256,
+        64
+      ],
+      "byteOffset": 345856,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.1.mlpOut.bias",
+      "shape": [
+        64
+      ],
+      "byteOffset": 411392,
+      "byteLength": 256
+    }
+  ],
+  "weightsSha256": "235f69dbe2f70b76a4d5639c61f5486dfdf1d1df2fa86ac3bc4eecf6436b4362",
+  "tokenizerSha256": "966ff20dce4b91115c00dd00042a757f40684958916245b149cd504b91f14034",
+  "provenance": {
+    "purpose": "trained controlled associative retrieval",
+    "seed": 2026,
+    "torchVersion": "2.9.1",
+    "generatorVersion": 1,
+    "selectedStep": 3000,
+    "objective": "final-answer cross entropy",
+    "splitSalt": "retrieval-v1-seed-2026"
+  },
+  "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea"
+}

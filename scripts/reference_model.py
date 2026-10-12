@@ -34,7 +34,8 @@ class Block(nn.Module):
         c = self.c
         b, t, d = x.shape
         def save(stage, value):
-            capture[f"{layer}:{stage}"] = value.detach().clone()
+            if capture is not None:
+                capture[f"{layer}:{stage}"] = value.detach().clone()
             return value
         save("block.input", x)
         u = save("attention.normalized", self.ln1(x))
@@ -71,16 +72,19 @@ class ReferenceTransformer(nn.Module):
         self.blocks = nn.ModuleList([Block(c) for _ in range(c.layers)])
         self.finalNorm = nn.LayerNorm(c.modelDim, eps=c.layerNormEpsilon)
 
-    def forward(self, tokens, patches=()):
-        capture = {}
+    def forward(self, tokens, patches=(), capture_activations=True):
+        capture = {} if capture_activations else None
         x = self.token(tokens) + self.position(torch.arange(tokens.shape[1]))
-        capture["embedding.output"] = x.detach().clone()
+        if capture is not None:
+            capture["embedding.output"] = x.detach().clone()
         for layer, block in enumerate(self.blocks):
             x = block(x, layer, patches, capture)
         normalized = self.finalNorm(x)
-        capture["final.normalized"] = normalized.detach().clone()
+        if capture is not None:
+            capture["final.normalized"] = normalized.detach().clone()
         logits = F.linear(normalized, self.token.weight)
-        capture["logits"] = logits.detach().clone()
+        if capture is not None:
+            capture["logits"] = logits.detach().clone()
         return logits, capture
 
     def exported_parameters(self):

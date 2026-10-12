@@ -1,0 +1,20 @@
+{
+  "environment": {
+    "python": "3.12.14",
+    "torch": "2.9.1",
+    "numpy": "2.3.3",
+    "device": "CPU",
+    "threads": 2,
+    "seed": 2026
+  },
+  "runs": 2,
+  "identicalArtifacts": [
+    "weights.bin",
+    "tokenizer.json",
+    "manifest.json"
+  ],
+  "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+  "weightsSha256": "235f69dbe2f70b76a4d5639c61f5486dfdf1d1df2fa86ac3bc4eecf6436b4362",
+  "tokenizerSha256": "966ff20dce4b91115c00dd00042a757f40684958916245b149cd504b91f14034",
+  "scope": "Same pinned environment and host. Evaluation elapsedSeconds is intentionally not deterministic; recipe discovery was expanded to all four heads before the second export."
+}

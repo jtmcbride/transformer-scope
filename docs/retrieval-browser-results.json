@@ -1,0 +1,318 @@
+[
+  {
+    "browser": "chromium",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+    "reports": [
+      {
+        "backend": "cpu",
+        "probe": {
+          "backend": "cpu",
+          "elapsedMs": 131.60000002384186,
+          "forwardMaximumError": 6.67572021484375e-06,
+          "gradientMaximumError": 3.5762786865234375e-07,
+          "optimizerMaximumError": 1.2516975402832031e-06,
+          "loss": 7.585389137268066,
+          "retainedTensorDelta": 0,
+          "float32Textures": null,
+          "webglPacking": null
+        },
+        "cases": [
+          {
+            "id": "effect",
+            "maximumLogitError": 1.430511474609375e-06,
+            "cachedMetrics": {
+              "jsDivergence": 0.6928083975935154,
+              "maxAbsoluteLogitChange": 13.500075101852417,
+              "targetLogProbabilityDelta": -11.776984405040094
+            },
+            "fullMetrics": {
+              "jsDivergence": 0.6928083975934277,
+              "maxAbsoluteLogitChange": 13.500075101852417,
+              "targetLogProbabilityDelta": -11.776984399250596
+            },
+            "hasComputationalPath": true,
+            "strategy": "cached-suffix"
+          },
+          {
+            "id": "small",
+            "maximumLogitError": 9.5367431640625e-07,
+            "cachedMetrics": {
+              "jsDivergence": 8.754318861759108e-12,
+              "maxAbsoluteLogitChange": 0.0022563934326171875,
+              "targetLogProbabilityDelta": -2.664892942048306e-08
+            },
+            "fullMetrics": {
+              "jsDivergence": 8.754713927868199e-12,
+              "maxAbsoluteLogitChange": 0.0022563934326171875,
+              "targetLogProbabilityDelta": -2.6647547552338842e-08
+            },
+            "hasComputationalPath": true,
+            "strategy": "cached-suffix"
+          },
+          {
+            "id": "unreachable",
+            "maximumLogitError": 9.5367431640625e-07,
+            "cachedMetrics": {
+              "jsDivergence": 0,
+              "maxAbsoluteLogitChange": 0,
+              "targetLogProbabilityDelta": 0
+            },
+            "fullMetrics": {
+              "jsDivergence": 0,
+              "maxAbsoluteLogitChange": 0,
+              "targetLogProbabilityDelta": 0
+            },
+            "hasComputationalPath": false,
+            "strategy": "cached-suffix"
+          }
+        ],
+        "resources": {
+          "cache": {
+            "logicalBytes": 0,
+            "budgetBytes": 33554432,
+            "baselines": 0,
+            "pinnedEntries": 0,
+            "retiredEntries": 0
+          },
+          "tensorCount": 36,
+          "logicalTensorBytes": 411648,
+          "memoryEstimateUnreliable": true
+        }
+      },
+      {
+        "backend": "webgl",
+        "probe": {
+          "backend": "webgl",
+          "elapsedMs": 6236.300000011921,
+          "forwardMaximumError": 5.7220458984375e-06,
+          "gradientMaximumError": 4.76837158203125e-07,
+          "optimizerMaximumError": 2.037733793258667e-06,
+          "loss": 7.585388660430908,
+          "retainedTensorDelta": 0,
+          "float32Textures": true,
+          "webglPacking": false
+        },
+        "cases": [
+          {
+            "id": "effect",
+            "maximumLogitError": 1.1920928955078125e-06,
+            "cachedMetrics": {
+              "jsDivergence": 0.6928083977186129,
+              "maxAbsoluteLogitChange": 13.500075817108154,
+              "targetLogProbabilityDelta": -11.776986064089622
+            },
+            "fullMetrics": {
+              "jsDivergence": 0.6928083977186155,
+              "maxAbsoluteLogitChange": 13.500075817108154,
+              "targetLogProbabilityDelta": -11.776986064050101
+            },
+            "hasComputationalPath": true,
+            "strategy": "cached-suffix"
+          },
+          {
+            "id": "small",
+            "maximumLogitError": 1.1920928955078125e-06,
+            "cachedMetrics": {
+              "jsDivergence": 8.75479264512286e-12,
+              "maxAbsoluteLogitChange": 0.002256631851196289,
+              "targetLogProbabilityDelta": -2.664844185919777e-08
+            },
+            "fullMetrics": {
+              "jsDivergence": 8.756501382664511e-12,
+              "maxAbsoluteLogitChange": 0.0022568702697753906,
+              "targetLogProbabilityDelta": -2.6661325825837103e-08
+            },
+            "hasComputationalPath": true,
+            "strategy": "cached-suffix"
+          },
+          {
+            "id": "unreachable",
+            "maximumLogitError": 9.5367431640625e-07,
+            "cachedMetrics": {
+              "jsDivergence": 0,
+              "maxAbsoluteLogitChange": 0,
+              "targetLogProbabilityDelta": 0
+            },
+            "fullMetrics": {
+              "jsDivergence": 0,
+              "maxAbsoluteLogitChange": 0,
+              "targetLogProbabilityDelta": 0
+            },
+            "hasComputationalPath": false,
+            "strategy": "cached-suffix"
+          }
+        ],
+        "resources": {
+          "cache": {
+            "logicalBytes": 0,
+            "budgetBytes": 33554432,
+            "baselines": 0,
+            "pinnedEntries": 0,
+            "retiredEntries": 0
+          },
+          "tensorCount": 36,
+          "logicalTensorBytes": 411648,
+          "memoryEstimateUnreliable": false
+        }
+      }
+    ]
+  },
+  {
+    "browser": "webkit",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15",
+    "reports": [
+      {
+        "backend": "cpu",
+        "probe": {
+          "backend": "cpu",
+          "elapsedMs": 225,
+          "forwardMaximumError": 6.67572021484375e-06,
+          "gradientMaximumError": 3.5762786865234375e-07,
+          "optimizerMaximumError": 1.2516975402832031e-06,
+          "loss": 7.585389137268066,
+          "retainedTensorDelta": 0,
+          "float32Textures": null,
+          "webglPacking": null
+        },
+        "cases": [
+          {
+            "id": "effect",
+            "maximumLogitError": 1.430511474609375e-06,
+            "cachedMetrics": {
+              "jsDivergence": 0.6928083975935155,
+              "maxAbsoluteLogitChange": 13.500075101852417,
+              "targetLogProbabilityDelta": -11.776984405040094
+            },
+            "fullMetrics": {
+              "jsDivergence": 0.6928083975934278,
+              "maxAbsoluteLogitChange": 13.500075101852417,
+              "targetLogProbabilityDelta": -11.776984399250596
+            },
+            "hasComputationalPath": true,
+            "strategy": "cached-suffix"
+          },
+          {
+            "id": "small",
+            "maximumLogitError": 9.5367431640625e-07,
+            "cachedMetrics": {
+              "jsDivergence": 8.754318861759108e-12,
+              "maxAbsoluteLogitChange": 0.0022563934326171875,
+              "targetLogProbabilityDelta": -2.664892942048306e-08
+            },
+            "fullMetrics": {
+              "jsDivergence": 8.754713927868199e-12,
+              "maxAbsoluteLogitChange": 0.0022563934326171875,
+              "targetLogProbabilityDelta": -2.6647547552338842e-08
+            },
+            "hasComputationalPath": true,
+            "strategy": "cached-suffix"
+          },
+          {
+            "id": "unreachable",
+            "maximumLogitError": 9.5367431640625e-07,
+            "cachedMetrics": {
+              "jsDivergence": 0,
+              "maxAbsoluteLogitChange": 0,
+              "targetLogProbabilityDelta": 0
+            },
+            "fullMetrics": {
+              "jsDivergence": 0,
+              "maxAbsoluteLogitChange": 0,
+              "targetLogProbabilityDelta": 0
+            },
+            "hasComputationalPath": false,
+            "strategy": "cached-suffix"
+          }
+        ],
+        "resources": {
+          "cache": {
+            "logicalBytes": 0,
+            "budgetBytes": 33554432,
+            "baselines": 0,
+            "pinnedEntries": 0,
+            "retiredEntries": 0
+          },
+          "tensorCount": 36,
+          "logicalTensorBytes": 411648,
+          "memoryEstimateUnreliable": true
+        }
+      },
+      {
+        "backend": "webgl",
+        "probe": {
+          "backend": "webgl",
+          "elapsedMs": 1348,
+          "forwardMaximumError": 6.67572021484375e-06,
+          "gradientMaximumError": 3.5762786865234375e-07,
+          "optimizerMaximumError": 2.078711986541748e-06,
+          "loss": 7.585388660430908,
+          "retainedTensorDelta": 0,
+          "float32Textures": true,
+          "webglPacking": false
+        },
+        "cases": [
+          {
+            "id": "effect",
+            "maximumLogitError": 1.6689300537109375e-06,
+            "cachedMetrics": {
+              "jsDivergence": 0.6928083972261969,
+              "maxAbsoluteLogitChange": 13.500073432922363,
+              "targetLogProbabilityDelta": -11.776985587013117
+            },
+            "fullMetrics": {
+              "jsDivergence": 0.6928083971776131,
+              "maxAbsoluteLogitChange": 13.5000741481781,
+              "targetLogProbabilityDelta": -11.776985358601868
+            },
+            "hasComputationalPath": true,
+            "strategy": "cached-suffix"
+          },
+          {
+            "id": "small",
+            "maximumLogitError": 2.86102294921875e-06,
+            "cachedMetrics": {
+              "jsDivergence": 8.731854405684194e-12,
+              "maxAbsoluteLogitChange": 0.0022562742233276367,
+              "targetLogProbabilityDelta": -2.6359910272133816e-08
+            },
+            "fullMetrics": {
+              "jsDivergence": 8.732130199032716e-12,
+              "maxAbsoluteLogitChange": 0.0022562742233276367,
+              "targetLogProbabilityDelta": -2.6352921225327786e-08
+            },
+            "hasComputationalPath": true,
+            "strategy": "cached-suffix"
+          },
+          {
+            "id": "unreachable",
+            "maximumLogitError": 9.5367431640625e-07,
+            "cachedMetrics": {
+              "jsDivergence": 0,
+              "maxAbsoluteLogitChange": 0,
+              "targetLogProbabilityDelta": 0
+            },
+            "fullMetrics": {
+              "jsDivergence": 0,
+              "maxAbsoluteLogitChange": 0,
+              "targetLogProbabilityDelta": 0
+            },
+            "hasComputationalPath": false,
+            "strategy": "cached-suffix"
+          }
+        ],
+        "resources": {
+          "cache": {
+            "logicalBytes": 0,
+            "budgetBytes": 33554432,
+            "baselines": 0,
+            "pinnedEntries": 0,
+            "retiredEntries": 0
+          },
+          "tensorCount": 36,
+          "logicalTensorBytes": 411648,
+          "memoryEstimateUnreliable": false
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+  "seed": 2026,
+  "training": {
+    "steps": 3000,
+    "selectedStep": 3000,
+    "batchSize": 64,
+    "learningRate": 0.001,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "epsilon": 1e-05,
+    "gradientClipNorm": 1.0,
+    "threads": 2,
+    "elapsedSeconds": 39.095794042019406,
+    "objective": "Cross entropy over all vocabulary tokens, supervised at final query position only.",
+    "embeddingInitializationStd": 0.1,
+    "deterministicAlgorithms": true
+  },
+  "split": {
+    "salt": "retrieval-v1-seed-2026",
+    "rule": "SHA256(salt + colon + comma-separated input token IDs), first 8 bytes big-endian modulo 100: train <70; validation <85; otherwise test.",
+    "digests": {
+      "train": "6cf9d19407278ebe87d1b6e73ff62f2b534a241cb9bdceec3ed025d37e2adc4f",
+      "validation": "7dec94f8e455b0267de32cad20f9a5558fac8b0990ca4b56d69c728be0b94d8d",
+      "test": "f23d706b8a51be36cbe406117774fa608542b024e4bb82c69837089f829c16bd"
+    },
+    "counts": {
+      "train": 2130,
+      "validation": 489,
+      "test": 453
+    }
+  },
+  "heldOut": {
+    "count": 453,
+    "accuracy": 1.0,
+    "lossNats": 9.822762513067573e-05,
+    "meanTargetProbability": 0.9999017715454102
+  },
+  "validation": {
+    "count": 489,
+    "accuracy": 1.0,
+    "lossNats": 9.826067980611697e-05,
+    "meanTargetProbability": 0.9999017119407654
+  },
+  "chance": {
+    "accuracy": 0.25,
+    "lossNats": 1.3862943611198906,
+    "description": "Uniform over the four answer values; probability zero on grammar symbols."
+  },
+  "localContext": {
+    "accuracy": 0.152317880794702,
+    "description": "Train-set majority lookup of final seven tokens (last binding and query); unseen contexts choose value 0. Queried binding is never last; its value is independent."
+  },
+  "lengthGeneralization": {
+    "2": {
+      "count": 192,
+      "accuracy": 0.796875,
+      "lossNats": 1.8887072801589966,
+      "meanTargetProbability": 0.7927518486976624
+    },
+    "4": {
+      "count": 18432,
+      "accuracy": 0.6292317509651184,
+      "lossNats": 2.937087297439575,
+      "meanTargetProbability": 0.626234769821167
+    }
+  },
+  "history": [
+    {
+      "step": 100,
+      "trainingBatchLoss": 0.5379540920257568,
+      "validation": {
+        "count": 489,
+        "accuracy": 0.6298568248748779,
+        "lossNats": 0.5697574615478516,
+        "meanTargetProbability": 0.6114916205406189
+      }
+    },
+    {
+      "step": 200,
+      "trainingBatchLoss": 0.6359119415283203,
+      "validation": {
+        "count": 489,
+        "accuracy": 0.6216768622398376,
+        "lossNats": 0.5540232062339783,
+        "meanTargetProbability": 0.6174190044403076
+      }
+    },
+    {
+      "step": 300,
+      "trainingBatchLoss": 0.5651553273200989,
+      "validation": {
+        "count": 489,
+        "accuracy": 0.5787321329116821,
+        "lossNats": 0.557768702507019,
+        "meanTargetProbability": 0.616943895816803
+      }
+    },
+    {
+      "step": 400,
+      "trainingBatchLoss": 0.6050032377243042,
+      "validation": {
+        "count": 489,
+        "accuracy": 0.7300613522529602,
+        "lossNats": 0.4893954396247864,
+        "meanTargetProbability": 0.6647598743438721
+      }
+    },
+    {
+      "step": 500,
+      "trainingBatchLoss": 0.2913046181201935,
+      "validation": {
+        "count": 489,
+        "accuracy": 0.9202454090118408,
+        "lossNats": 0.211490198969841,
+        "meanTargetProbability": 0.8621621131896973
+      }
+    },
+    {
+      "step": 600,
+      "trainingBatchLoss": 0.01408449374139309,
+      "validation": {
+        "count": 489,
+        "accuracy": 0.9959100484848022,
+        "lossNats": 0.018034636974334717,
+        "meanTargetProbability": 0.9870796799659729
+      }
+    },
+    {
+      "step": 700,
+      "trainingBatchLoss": 0.0013853175332769752,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0016869886312633753,
+        "meanTargetProbability": 0.9983149766921997
+      }
+    },
+    {
+      "step": 800,
+      "trainingBatchLoss": 0.0010787887731567025,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0011634997790679336,
+        "meanTargetProbability": 0.9988373517990112
+      }
+    },
+    {
+      "step": 900,
+      "trainingBatchLoss": 0.0009353157365694642,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0009048861684277654,
+        "meanTargetProbability": 0.999095618724823
+      }
+    },
+    {
+      "step": 1000,
+      "trainingBatchLoss": 0.0006726917345076799,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0007395459688268602,
+        "meanTargetProbability": 0.9992607235908508
+      }
+    },
+    {
+      "step": 1100,
+      "trainingBatchLoss": 0.0005968116456642747,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.000626330089289695,
+        "meanTargetProbability": 0.9993739128112793
+      }
+    },
+    {
+      "step": 1200,
+      "trainingBatchLoss": 0.000528002972714603,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0005378994392231107,
+        "meanTargetProbability": 0.9994623064994812
+      }
+    },
+    {
+      "step": 1300,
+      "trainingBatchLoss": 0.00048674133722670376,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0004687670152634382,
+        "meanTargetProbability": 0.9995313286781311
+      }
+    },
+    {
+      "step": 1400,
+      "trainingBatchLoss": 0.0004165485152043402,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00041339898598380387,
+        "meanTargetProbability": 0.9995866417884827
+      }
+    },
+    {
+      "step": 1500,
+      "trainingBatchLoss": 0.00036965523031540215,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00036745675606653094,
+        "meanTargetProbability": 0.9996325969696045
+      }
+    },
+    {
+      "step": 1600,
+      "trainingBatchLoss": 0.00031245488207787275,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00032872744486667216,
+        "meanTargetProbability": 0.9996712803840637
+      }
+    },
+    {
+      "step": 1700,
+      "trainingBatchLoss": 0.00027551682433113456,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00029552431078627706,
+        "meanTargetProbability": 0.9997044801712036
+      }
+    },
+    {
+      "step": 1800,
+      "trainingBatchLoss": 0.00025876425206661224,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0002666519139893353,
+        "meanTargetProbability": 0.9997333884239197
+      }
+    },
+    {
+      "step": 1900,
+      "trainingBatchLoss": 0.00023526691074948758,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0002415573544567451,
+        "meanTargetProbability": 0.9997584819793701
+      }
+    },
+    {
+      "step": 2000,
+      "trainingBatchLoss": 0.00021645589731633663,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0002200338785769418,
+        "meanTargetProbability": 0.999779999256134
+      }
+    },
+    {
+      "step": 2100,
+      "trainingBatchLoss": 0.00019581089145503938,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00020125226001255214,
+        "meanTargetProbability": 0.9997987151145935
+      }
+    },
+    {
+      "step": 2200,
+      "trainingBatchLoss": 0.00017600918363314122,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00018422277935314924,
+        "meanTargetProbability": 0.9998157620429993
+      }
+    },
+    {
+      "step": 2300,
+      "trainingBatchLoss": 0.00017107563326135278,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00016909943951759487,
+        "meanTargetProbability": 0.999830961227417
+      }
+    },
+    {
+      "step": 2400,
+      "trainingBatchLoss": 0.00014382820518221706,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00015576787700410932,
+        "meanTargetProbability": 0.9998443126678467
+      }
+    },
+    {
+      "step": 2500,
+      "trainingBatchLoss": 0.00014431998715735972,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.0001437257742509246,
+        "meanTargetProbability": 0.9998562335968018
+      }
+    },
+    {
+      "step": 2600,
+      "trainingBatchLoss": 0.00013055503950454295,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00013272426440380514,
+        "meanTargetProbability": 0.99986732006073
+      }
+    },
+    {
+      "step": 2700,
+      "trainingBatchLoss": 0.00012252802844159305,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00012278590293135494,
+        "meanTargetProbability": 0.9998771548271179
+      }
+    },
+    {
+      "step": 2800,
+      "trainingBatchLoss": 0.00010858604218810797,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00011383999662939459,
+        "meanTargetProbability": 0.999886155128479
+      }
+    },
+    {
+      "step": 2900,
+      "trainingBatchLoss": 0.00010495426249690354,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 0.00010570204904070124,
+        "meanTargetProbability": 0.9998943209648132
+      }
+    },
+    {
+      "step": 3000,
+      "trainingBatchLoss": 9.496224083704874e-05,
+      "validation": {
+        "count": 489,
+        "accuracy": 1.0,
+        "lossNats": 9.826067980611697e-05,
+        "meanTargetProbability": 0.9999017119407654
+      }
+    }
+  ],
+  "limitations": [
+    "Exhaustive finite symbol task; held-out sequences, not unseen keys or values.",
+    "Training uses exactly three bindings. Length tests use two and four bindings and are reported separately.",
+    "Recipe discovery uses up to 96 validation inputs and selects extremes; recipes are illustrations, not population effect estimates."
+  ]
+}

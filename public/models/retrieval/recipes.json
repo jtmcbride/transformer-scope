@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+  "recipes": [
+    {
+      "id": "effect",
+      "title": "Ablation changes the answer",
+      "interpretation": "This ablation reduces the correct answer probability on this example. It does not establish a general semantic role for the head.",
+      "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+      "discoverySplit": "validation",
+      "text": "A = 0 ; B = 3 ; C = 0 ; ? B =",
+      "tokenIds": [
+        0,
+        1,
+        9,
+        5,
+        10,
+        2,
+        9,
+        8,
+        10,
+        3,
+        9,
+        5,
+        10,
+        11,
+        2,
+        9
+      ],
+      "predictionPosition": 15,
+      "targetTokenId": 8,
+      "intervention": {
+        "id": "head-strength",
+        "kind": "head.scale",
+        "layer": 0,
+        "head": 3,
+        "factor": 0,
+        "tokens": {
+          "kind": "all"
+        }
+      },
+      "metrics": {
+        "baselineLogits": [
+          -2.021915912628174,
+          -2.247653007507324,
+          -2.3006703853607178,
+          -1.643168330192566,
+          -2.3588297367095947,
+          -0.5566213726997375,
+          -1.155019760131836,
+          -1.1546034812927246,
+          9.958681106567383,
+          -1.4114441871643066,
+          -2.1740076541900635,
+          -3.061615467071533
+        ],
+        "modifiedLogits": [
+          -2.209144353866577,
+          -2.9029674530029297,
+          -1.9298027753829956,
+          -2.726191520690918,
+          -1.5423592329025269,
+          8.227221488952637,
+          3.42598557472229,
+          -1.5556716918945312,
+          -3.541393280029297,
+          -1.8005794286727905,
+          -2.550236463546753,
+          -3.748270034790039
+        ],
+        "baselineTargetProbability": 0.9998943169412421,
+        "modifiedTargetProbability": 7.678462193743122e-06,
+        "baselineTargetLogProbability": -0.00010568864360586207,
+        "modifiedTargetLogProbability": -11.777091266044133,
+        "targetLogProbabilityDelta": -11.776985577400527,
+        "jsDivergence": 0.6928083973757051,
+        "maxAbsoluteLogitChange": 13.50007438659668
+      }
+    },
+    {
+      "id": "small",
+      "title": "A reachable edit has little effect",
+      "interpretation": "An earlier first-layer edit has a path through the next attention layer, but this example shows little distribution change. Reachability does not guarantee a large effect.",
+      "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+      "discoverySplit": "validation",
+      "text": "A = 2 ; C = 0 ; B = 3 ; ? A =",
+      "tokenIds": [
+        0,
+        1,
+        9,
+        7,
+        10,
+        3,
+        9,
+        5,
+        10,
+        2,
+        9,
+        8,
+        10,
+        11,
+        1,
+        9
+      ],
+      "predictionPosition": 15,
+      "targetTokenId": 7,
+      "intervention": {
+        "id": "head-strength",
+        "kind": "head.scale",
+        "layer": 0,
+        "head": 1,
+        "factor": 0,
+        "tokens": {
+          "kind": "indices",
+          "indices": [
+            0
+          ]
+        }
+      },
+      "metrics": {
+        "baselineLogits": [
+          -2.2973971366882324,
+          -1.4592888355255127,
+          -1.920795202255249,
+          -1.6884613037109375,
+          -1.1587082147598267,
+          0.37378859519958496,
+          -1.6370024681091309,
+          10.479145050048828,
+          -1.9455935955047607,
+          -1.283424735069275,
+          -1.0386556386947632,
+          -1.9836286306381226
+        ],
+        "modifiedLogits": [
+          -2.297698497772217,
+          -1.4594125747680664,
+          -1.9192395210266113,
+          -1.6883199214935303,
+          -1.1574102640151978,
+          0.3736577033996582,
+          -1.6392583847045898,
+          10.478946685791016,
+          -1.9464852809906006,
+          -1.282866358757019,
+          -1.0382788181304932,
+          -1.9828263521194458
+        ],
+        "baselineTargetProbability": 0.9999005500402238,
+        "modifiedTargetProbability": 0.9999005234127339,
+        "baselineTargetLogProbability": -9.94549052513682e-05,
+        "modifiedTargetLogProbability": -9.948153538991486e-05,
+        "targetLogProbabilityDelta": -2.6630138546664627e-08,
+        "jsDivergence": 8.750090563238222e-12,
+        "maxAbsoluteLogitChange": 0.0022559165954589844
+      }
+    },
+    {
+      "id": "unreachable",
+      "title": "An earlier final-layer edit cannot reach the answer",
+      "interpretation": "The final layer has no subsequent attention mixing. Editing its head output at position 0 cannot change the later query prediction.",
+      "modelRevision": "d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea",
+      "discoverySplit": "validation",
+      "text": "A = 0 ; B = 3 ; C = 0 ; ? B =",
+      "tokenIds": [
+        0,
+        1,
+        9,
+        5,
+        10,
+        2,
+        9,
+        8,
+        10,
+        3,
+        9,
+        5,
+        10,
+        11,
+        2,
+        9
+      ],
+      "predictionPosition": 15,
+      "targetTokenId": 8,
+      "intervention": {
+        "id": "head-strength",
+        "kind": "head.scale",
+        "layer": 1,
+        "head": 0,
+        "factor": 0,
+        "tokens": {
+          "kind": "indices",
+          "indices": [
+            0
+          ]
+        }
+      },
+      "metrics": {
+        "baselineLogits": [
+          -2.021915912628174,
+          -2.247653007507324,
+          -2.3006703853607178,
+          -1.643168330192566,
+          -2.3588297367095947,
+          -0.5566213726997375,
+          -1.155019760131836,
+          -1.1546034812927246,
+          9.958681106567383,
+          -1.4114441871643066,
+          -2.1740076541900635,
+          -3.061615467071533
+        ],
+        "modifiedLogits": [
+          -2.021915912628174,
+          -2.247653007507324,
+          -2.3006703853607178,
+          -1.643168330192566,
+          -2.3588297367095947,
+          -0.5566213726997375,
+          -1.155019760131836,
+          -1.1546034812927246,
+          9.958681106567383,
+          -1.4114441871643066,
+          -2.1740076541900635,
+          -3.061615467071533
+        ],
+        "baselineTargetProbability": 0.9998943169412421,
+        "modifiedTargetProbability": 0.9998943169412421,
+        "baselineTargetLogProbability": -0.00010568864360586207,
+        "modifiedTargetLogProbability": -0.00010568864360586207,
+        "targetLogProbabilityDelta": 0.0,
+        "jsDivergence": 0.0,
+        "maxAbsoluteLogitChange": 0.0
+      }
+    }
+  ]
+}

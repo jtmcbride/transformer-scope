@@ -15,7 +15,7 @@ These results describe the first implementation, not a completed product release
 
 ## CPU numerical results
 
-The current engine suite passed 29 tests. Original forward/gradient results remain unchanged, measured using Node.js 24.18.0, TensorFlow.js Core/CPU 4.22.0, and the checked-in fixture:
+The current engine suite passed 33 tests. Original forward/gradient results remain unchanged, measured using Node.js 24.18.0, TensorFlow.js Core/CPU 4.22.0, and the checked-in fixture:
 
 - Maximum absolute forward-stage error across all 84 cases: `1.9073486328125e-6`.
 - Maximum absolute gradient error across every parameter: `3.5762786865234375e-7`.
@@ -66,17 +66,32 @@ The browser suite checks:
 - Invalid input recovery and a 390-pixel viewport without horizontal overflow.
 - Corrupted weight checksum rejection before computation.
 
-The current production suite passed 10 tests across Chromium and WebKit. CPU and unpacked WebGL pass the original forward/gradient probe and the new cached/full suite in both engines. Each browser/backend tests 14 cached combinations, cross-layer fallback, independent PyTorch parity, 640-byte LRU eviction, modified-run replay, zero budget, and reload invalidation.
+The current production suite passed 14 tests across Chromium and WebKit. CPU and unpacked WebGL pass the original forward/gradient probe and the new cached/full suite in both engines. Each browser/backend tests 14 cached combinations, cross-layer fallback, independent PyTorch parity, 640-byte LRU eviction, modified-run replay, zero budget, and reload invalidation.
 
 Each of the four browser/backend combinations also runs 1,000 sequential comparisons. Retained tensors remain at 40 (36 weights plus four cached tensors); releasing the baseline restores 36 tensors and zero logical cache bytes. The cache's 640-byte logical payload remains constant through the edits. Raw records are in `docs/cache-verification-results.json`; original probe records remain in `docs/browser-probe-results.json`. See `docs/benchmarks.md` for timing scope and the Firefox runtime launch limitation.
 
 Playwright WebKit is not the installed Safari application, and viewport emulation is not physical mobile testing.
 
+## Trained retrieval checkpoint
+
+The independent trainer, dataset semantics, failed initial candidate, accepted checkpoint, split rule, and learning limitations are recorded in `docs/retrieval.md`. The manifest revision is `d95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea`.
+
+- Two Python tests check binding/target rules, all 3,072 inputs, disjoint splits, balanced targets for identical local contexts, length separation, and capture-free/reference gradient identity.
+- Two training runs reproduced identical weights, tokenizer, and manifest hashes on the pinned CPU environment. Raw identity record: `docs/retrieval-reproduction-results.json`.
+- The Node CPU engine reproduces all 453 independent held-out final-position logit fixtures and answers 453/453 correctly. Maximum absolute logit error: `8.203089237213135e-6`.
+- Node trained forward-stage maximum error: `6.67572021484375e-6`; all-parameter gradient error: `3.5762786865234375e-7`; Adam update error: `1.2516975402832031e-6`. The probe uses full-sequence mean loss, while offline training supervises the final answer only.
+- The three prepared recipes pass forced full and cached execution, all-vocabulary logit parity, target log-probability/JSD comparisons, reachability checks, and post-disposal tensor counts. Node maximum recipe logit error: `1.430511474609375e-6`.
+- Browser CPU and unpacked WebGL pass the trained forward/gradient/Adam probe, all three recipes through full/cached paths, and resource cleanup in Chromium and WebKit. Raw numerical records: `docs/retrieval-browser-results.json`. Original tolerances remain unchanged.
+- UI tests exercise recipe settings, removal of recipe claims after manual edits, target inference on custom valid bindings, checkpoint switching, mobile matrix scrolling, and page-width containment. Desktop/mobile screenshots were inspected.
+- The shipped large-effect recipe ablates first-layer head 4 across all positions (indices are zero-based in JSON). Its correct-answer log-probability change is about -11.777 nats. The reachable control edits first-layer head 2 at position 0; its tiny effect is not treated as resolved beyond numerical error. The unreachable control edits the final layer at position 0 and leaves final-position logits exactly unchanged.
+
+These finite-task checks demonstrate held-out sequence behavior and the selected experiments. They do not validate general language ability, average head importance, physical-device performance, or an untouched final audit dataset.
+
 ## Outstanding gates
 
-- Larger trained-checkpoint cache coverage and wider numerical/seed coverage.
+- Wider trained-model intervention/seed coverage beyond the three shipped recipes.
 - Physical Safari and mobile execution; GPU memory/context-loss recovery.
-- Controlled-task learning, held-out behavior, and measured educational recipes.
+- Broader educational testing with users and additional controlled tasks.
 - Named-device end-to-end latency benchmarks and actual hosted GitHub Pages verification.
 - Larger-model, wider-seed, ill-conditioned-input, and lower-precision backend coverage.
 

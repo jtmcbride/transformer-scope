@@ -1,6 +1,6 @@
 # Transformer Microscope implementation plan
 
-Status: the verified forward engine and Milestone C are implemented. Baseline caching, exact residual deltas, suffix execution, bounded ownership, and browser stress checks are complete on the recorded fixtures. The next implementation milestone is D: a trained controlled-task checkpoint and validated educational experiments. See `docs/validation.md` for completed checks and outstanding release validation.
+Status: the verified forward engine, Milestone C caching, and Milestone D trained retrieval checkpoint are implemented. The default model passes held-out-sequence and measured-recipe checks on the recorded task; its length limits remain visible. Next is Milestone E: complete experiment replay/export and deeper computation inspection. See `docs/validation.md` and `docs/retrieval.md` for evidence and remaining release gates.
 
 This plan incorporates the product concept, intervention-engine specification, and design review. It prioritizes a verified head-scaling experiment before expanding into the full Explore, Experiment, and Train workspaces. Performance targets and numerical tolerances below are requirements to validate, not measured results.
 
@@ -240,7 +240,7 @@ This can begin after the architecture contract is stable; it does not require th
 1. Create a controlled associative-retrieval dataset: earlier symbol/value bindings followed by a query for one binding.
 2. Randomize assignments so the final local token context alone cannot determine the answer. Define unambiguous binding and query rules.
 3. Separate training and held-out generated sequences, recording generator seeds and split rules. Include length or combination generalization separately from ordinary held-out accuracy.
-4. Train an initial candidate with 2 layers, 2 heads, model dimension 32, MLP dimension 128, and context up to 32. Adjust capacity only in response to recorded evaluation results.
+4. Train an initial candidate with 2 layers, 2 heads, model dimension 32, MLP dimension 128, and context up to 32. Adjust capacity only in response to recorded evaluation results. The initial candidate plateaued near 61%; the accepted model uses 2 layers, 4 heads, dimension 64, MLP 256, and a lower learning rate (see `docs/retrieval.md`).
 5. Compare held-out target accuracy/loss against explicit chance and local-context baselines.
 6. Measure head interventions and select at least three prepared experiments: a measurable effect, a reachable small-effect control, and a structurally unreachable control.
 7. Export the checkpoint, tokenizer, evaluation results, and experiment recipes.
@@ -255,6 +255,8 @@ This can begin after the architecture contract is stable; it does not require th
 - The browser reproduces the selected examples within its documented tolerance.
 
 If the checkpoint fails this gate, revisit data, objective, or capacity before broadening the UI. Correct arithmetic alone does not satisfy this milestone.
+
+Milestone D is implemented: the accepted checkpoint answers 453/453 held-out three-binding sequences correctly, with separately reported length generalization. Three validation-selected recipes reproduce on browser CPU/WebGL. Training reproduced identical weight, tokenizer, and manifest hashes. `docs/retrieval.md` and `docs/validation.md` record limitations and evidence.
 
 ## 10. Milestone E — Interactive experiment screen
 
@@ -326,6 +328,6 @@ For training, distinguish lightweight inspection snapshots from resumable checkp
 
 ## 14. Immediate next work
 
-Start Milestone D. Define the associative-retrieval sequence format and held-out generator splits, implement the offline trainer and reusable artifact exporter, and evaluate a small candidate checkpoint against chance and local-context baselines. Select measured effect, small-effect, and unreachable-control recipes before replacing the untrained verification checkpoint in the initial screen.
+Continue Milestone E. The trained checkpoint and three prepared recipes are now in the screen. Add a versioned export/import format for custom experiments that preserves checkpoint identity, token IDs, prediction/target positions, interventions, and computed results; show clear replay errors for incompatible checkpoints. Then deepen the computation trace with projection/residual/MLP inspection and distinguish effective settings from pending edits. Keep the measured recipes, controls, and original verification model accessible.
 
 No latency, checkpoint quality, browser compatibility, or numerical parity claim is complete until its associated evidence is recorded.

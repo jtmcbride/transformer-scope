@@ -4,7 +4,7 @@ test('production worker matches PyTorch on CPU and WebGL, including gradients an
   test.setTimeout(90_000);
   let workerUrl = '';
   page.on('request', request => { if (/model\.worker-.*\.js/u.test(request.url())) workerUrl = request.url(); });
-  await page.goto('');
+  await page.goto('?model=verification');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   expect(workerUrl).not.toBe('');
   const reports = await page.evaluate(async url => {
@@ -53,7 +53,7 @@ test('production worker matches PyTorch on CPU and WebGL, including gradients an
 
 test('head scaling, rapid edits, reset, and causal controls use computed results', async ({ page }, testInfo) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
-  await page.goto('');
+  await page.goto('?model=verification');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await expect(page.getByText('Random weights, real computations.', { exact: false })).toBeVisible();
   await expect(page.getByTestId('execution-strategy')).toHaveText('Cached suffix · layer 1');
@@ -83,7 +83,7 @@ test('head scaling, rapid edits, reset, and causal controls use computed results
 
 test('input errors preserve the current experiment and a mobile layout remains usable', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('');
+  await page.goto('?model=verification');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await page.getByLabel('Space-separated symbols').fill('unknown');
   await page.getByRole('button', { name: 'Run input' }).click();
@@ -102,7 +102,7 @@ test('corrupt static weights are rejected before model execution', async ({ page
     const data = await response.body(); data[0] ^= 1;
     await route.fulfill({ response, body: data });
   });
-  await page.goto('');
+  await page.goto('?model=verification');
   await expect(page.getByRole('alert')).toContainText('checksum mismatch');
   await expect(page.locator('.probability-row')).toHaveCount(0);
 });

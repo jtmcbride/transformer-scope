@@ -56,6 +56,7 @@ test('head scaling, rapid edits, reset, and causal controls use computed results
   await page.goto('');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await expect(page.getByText('Random weights, real computations.', { exact: false })).toBeVisible();
+  await expect(page.getByTestId('execution-strategy')).toHaveText('Cached suffix · layer 1');
   await page.screenshot({ path: testInfo.outputPath('desktop.png'), fullPage: true });
   const slider = page.getByLabel('Head strength');
   await slider.fill('0'); await slider.fill('1.5'); await slider.fill('0.25');
@@ -66,11 +67,13 @@ test('head scaling, rapid edits, reset, and causal controls use computed results
   vector.forEach(([raw, modified]) => expect(Math.abs(raw * .25 - modified)).toBeLessThan(1e-5));
   await page.getByRole('button', { name: 'Reset to baseline' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Showing 1.00×' })).toBeVisible();
+  await expect(page.getByTestId('execution-strategy')).toHaveText('Baseline reused');
   await expect(page.locator('.delta').first()).toHaveText('+0.00 pp');
   await page.getByLabel('Layer', { exact: true }).selectOption('1');
   await page.getByLabel('Apply at').selectOption('0');
   await slider.fill('0');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.00×' })).toBeVisible();
+  await expect(page.getByTestId('execution-strategy')).toHaveText('Cached suffix · layer 2');
   await expect(page.getByText('This setting has no active computational path', { exact: false })).toBeVisible();
   await expect(page.locator('.delta').first()).toHaveText('+0.00 pp');
   await page.getByRole('button', { name: 'Verify against PyTorch' }).click();

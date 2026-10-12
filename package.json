@@ -9,6 +9,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:browser": "playwright test",
+    "benchmark:cache": "vitest run --config vitest.benchmark.config.ts",
     "fixtures": ".venv/bin/python scripts/export_fixtures.py"
   },
   "dependencies": {

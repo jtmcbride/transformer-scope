@@ -7,7 +7,7 @@ import torch
 import numpy as np
 from torch.nn import functional as F
 
-from reference_model import ReferenceTransformer, configuration, serialized_tensor
+from reference_model import Config, ReferenceTransformer, configuration, serialized_tensor
 
 ROOT = Path(__file__).resolve().parents[1]
 SEED = 1729
@@ -79,3 +79,26 @@ output.mkdir(parents=True, exist_ok=True)
 (output / "probe.json").write_text(json.dumps({"cases": [case for case in cases if case["name"] in
     ("length-5-case-0", "length-5-case-2")], "training": fixture["training"]}, separators=(",", ":")) + "\n")
 print(f"Exported {len(cases)} cases, {len(weights)} tensors, {len(binary)} weight bytes to {output}")
+
+# Wider suffix coverage with independent weights: early/middle/late layers and three seeds.
+suffix_models = []
+for seed in (1, 7, 42):
+    torch.manual_seed(seed)
+    suffix_model = ReferenceTransformer(Config(layers=3))
+    suffix_cases = []
+    for length in (1, 5, 8):
+        tokens = [1, 5, 9, 3, 7, 2, 11, 4][:length]
+        selections = [[], *[[patch(layer, head, factor)] for layer in range(3) for head in range(2) for factor in (0, .5, 1, 2)],
+                      *[[patch(layer, 0, .5, sorted(set((0, length - 1)))), patch(layer, 1, 2)] for layer in range(3)],
+                      [patch(0, 0, .5), patch(2, 1, 0)]]
+        for number, patches in enumerate(selections):
+            with torch.no_grad():
+                logits, captured = suffix_model(torch.tensor([tokens]), patches)
+            suffix_cases.append({"name": f"seed-{seed}-length-{length}-case-{number}", "tokenIds": tokens, "interventions": patches,
+                                 "logits": serialized_tensor(logits), "residuals": {
+                                     str(layer): serialized_tensor(captured[f"{layer}:attention.residual"]) for layer in range(3)}})
+    suffix_models.append({"seed": seed, "config": configuration(suffix_model), "weights": {
+        name: serialized_tensor(parameter, transpose) for name, (parameter, transpose) in suffix_model.exported_parameters().items()}, "cases": suffix_cases})
+(ROOT / "tests/fixtures/suffix-reference.json").write_text(json.dumps({"metadata": {
+    "torchVersion": torch.__version__, "generatorVersion": 1, "seeds": [1, 7, 42]}, "models": suffix_models}, separators=(",", ":")) + "\n")
+print(f"Exported {sum(len(item['cases']) for item in suffix_models)} additional independent suffix cases")

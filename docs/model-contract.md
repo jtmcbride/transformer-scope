@@ -44,9 +44,15 @@ Current loader limits: 16 layers, model dimension 512, MLP dimension 2048, vocab
 
 The worker owns weights and serializes model loading, execution, and release. Every runtime gets a distinct generation ID. Loading another model clears prior run handles.
 
-Baselines retain immutable descriptors and copied CPU logits. Modified descriptors copy the input and submitted interventions; they remain inspectable after the baseline is released. Intermediate activations are recomputed selectively and disposed after readback. Inspection returns axis names, shape, and a copied float32 slice, with a 65,536-value limit. Live runs are capped at 64; explicit release is idempotent.
+Baselines retain immutable descriptors and copied CPU logits. Modified descriptors copy the input and submitted interventions; they remain inspectable after the baseline is released. Inputs and request identity are copied before asynchronous work. Inspection returns axis names, shape, and a copied float32 slice, with a 65,536-value limit. Live runs are capped at 64; explicit release is idempotent.
 
-There is no suffix cache yet. Effective interventions use full execution. Identity comparisons reuse retained baseline predictions. Cached suffix execution is the next optimization milestone.
+The baseline cache retains raw head outputs `[1,T,H,D/H]` and attention residuals `[1,T,D]` for every layer, within a default 32 MiB logical float32 payload budget. Weights, temporary tensors, descriptor arrays, and driver allocations are outside that budget. LRU eviction skips pinned entries. A released entry with an active read lease is retired and disposed only after the last lease ends; if pinned entries consume all capacity, a new candidate is disposed and its run remains usable through full recomputation.
+
+For effective edits in one layer, compute `Y' = Y + sum((factor - 1) * selected_Z * selected_W_output)`, with token masks, then execute that layer's MLP, subsequent blocks, final normalization, and unembedding. Output-projection bias cancels from the delta. Cross-layer edits and cache misses use full execution. Factor 1 and empty selections reuse baseline predictions. `executionPreference: "full"` forces the independent full path and remains in effect for that modified run's inspection.
+
+Cache identity includes exact input tokens, model revision, architecture version, runtime generation, backend identity, dtype/precision settings, evaluation mode, and position/mask policy. Backend instance or precision-setting changes end the current session and dispose its caches. Weights are private to the engine; checkpoint loading creates a new session. Cached states cannot survive training updates or worker restart.
+
+Inspection can read cached head/residual values, run a cached suffix for downstream values, or replay the full graph when the requested stage is not retained. Cache eviction does not erase run descriptors. Every returned temporary tensor is owned; helpers never return borrowed cache handles. Model disposal waits for active operations to finish, and all readback paths release tensors and leases in `finally` blocks. Non-finite baseline or intervened logits reject the request without committing a new run/cache entry.
 
 ## Training probe
 

@@ -1,0 +1,198 @@
+{
+  "clientDate": "2026-10-11",
+  "scope": "production worker; cached/full and independent parity; 1000 sequential edits per browser/backend",
+  "records": [
+    {
+      "project": "chromium",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "reports": [
+        {
+          "backend": "cpu",
+          "status": "passed",
+          "cachedCases": 14,
+          "logitError": 0.000001430511474609375,
+          "residualError": 2.384185791015625e-7,
+          "independentError": 0.0000011920928955078125,
+          "beforeStress": {
+            "cache": {
+              "logicalBytes": 640,
+              "budgetBytes": 33554432,
+              "baselines": 1,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 40,
+            "logicalTensorBytes": 6272,
+            "memoryEstimateUnreliable": true
+          },
+          "afterStress": {
+            "cache": {
+              "logicalBytes": 640,
+              "budgetBytes": 33554432,
+              "baselines": 1,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 40,
+            "logicalTensorBytes": 6272,
+            "memoryEstimateUnreliable": true
+          },
+          "afterRelease": {
+            "cache": {
+              "logicalBytes": 0,
+              "budgetBytes": 33554432,
+              "baselines": 0,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 36,
+            "logicalTensorBytes": 5632,
+            "memoryEstimateUnreliable": true
+          },
+          "stressComparisons": 1000
+        },
+        {
+          "backend": "webgl",
+          "status": "passed",
+          "cachedCases": 14,
+          "logitError": 0.0000011920928955078125,
+          "residualError": 2.384185791015625e-7,
+          "independentError": 0.000001430511474609375,
+          "beforeStress": {
+            "cache": {
+              "logicalBytes": 640,
+              "budgetBytes": 33554432,
+              "baselines": 1,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 40,
+            "logicalTensorBytes": 6272,
+            "memoryEstimateUnreliable": false
+          },
+          "afterStress": {
+            "cache": {
+              "logicalBytes": 640,
+              "budgetBytes": 33554432,
+              "baselines": 1,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 40,
+            "logicalTensorBytes": 6272,
+            "memoryEstimateUnreliable": false
+          },
+          "afterRelease": {
+            "cache": {
+              "logicalBytes": 0,
+              "budgetBytes": 33554432,
+              "baselines": 0,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 36,
+            "logicalTensorBytes": 5632,
+            "memoryEstimateUnreliable": false
+          },
+          "stressComparisons": 1000
+        }
+      ]
+    },
+    {
+      "project": "webkit",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15",
+      "reports": [
+        {
+          "backend": "cpu",
+          "status": "passed",
+          "cachedCases": 14,
+          "logitError": 0.000001430511474609375,
+          "residualError": 2.384185791015625e-7,
+          "independentError": 0.0000011920928955078125,
+          "beforeStress": {
+            "cache": {
+              "logicalBytes": 640,
+              "budgetBytes": 33554432,
+              "baselines": 1,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 40,
+            "logicalTensorBytes": 6272,
+            "memoryEstimateUnreliable": true
+          },
+          "afterStress": {
+            "cache": {
+              "logicalBytes": 640,
+              "budgetBytes": 33554432,
+              "baselines": 1,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 40,
+            "logicalTensorBytes": 6272,
+            "memoryEstimateUnreliable": true
+          },
+          "afterRelease": {
+            "cache": {
+              "logicalBytes": 0,
+              "budgetBytes": 33554432,
+              "baselines": 0,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 36,
+            "logicalTensorBytes": 5632,
+            "memoryEstimateUnreliable": true
+          },
+          "stressComparisons": 1000
+        },
+        {
+          "backend": "webgl",
+          "status": "passed",
+          "cachedCases": 14,
+          "logitError": 0.000001430511474609375,
+          "residualError": 2.384185791015625e-7,
+          "independentError": 0.0000013709068298339844,
+          "beforeStress": {
+            "cache": {
+              "logicalBytes": 640,
+              "budgetBytes": 33554432,
+              "baselines": 1,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 40,
+            "logicalTensorBytes": 6272,
+            "memoryEstimateUnreliable": false
+          },
+          "afterStress": {
+            "cache": {
+              "logicalBytes": 640,
+              "budgetBytes": 33554432,
+              "baselines": 1,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 40,
+            "logicalTensorBytes": 6272,
+            "memoryEstimateUnreliable": false
+          },
+          "afterRelease": {
+            "cache": {
+              "logicalBytes": 0,
+              "budgetBytes": 33554432,
+              "baselines": 0,
+              "pinnedEntries": 0,
+              "retiredEntries": 0
+            },
+            "tensorCount": 36,
+            "logicalTensorBytes": 5632,
+            "memoryEstimateUnreliable": false
+          },
+          "stressComparisons": 1000
+        }
+      ]
+    }
+  ]
+}

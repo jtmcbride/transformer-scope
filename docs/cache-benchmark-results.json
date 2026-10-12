@@ -1,0 +1,68 @@
+{
+  "timestampUTC": "2026-10-12T06:05:19.125Z",
+  "nodeVersion": "v24.18.0",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "backend": "cpu",
+  "seed": 1,
+  "config": {
+    "layers": 3,
+    "heads": 2,
+    "modelDim": 8,
+    "mlpDim": 16,
+    "vocabularySize": 16,
+    "contextLength": 8,
+    "layerNormEpsilon": 0.00001
+  },
+  "tokenIds": [
+    1,
+    5,
+    9,
+    3,
+    7,
+    2,
+    11,
+    4
+  ],
+  "warmupPairs": 10,
+  "samplePairs": 80,
+  "scope": "model forward plus all-logit readback; excludes worker, comparison metrics, inspection, rendering, and disposal time",
+  "results": [
+    {
+      "layer": 0,
+      "full": {
+        "medianMs": 0.8448329999999942,
+        "p95Ms": 1.1709999999998217
+      },
+      "cached": {
+        "medianMs": 0.7044164999999794,
+        "p95Ms": 0.9288340000000517
+      },
+      "medianSpeedup": 1.1993373238702087
+    },
+    {
+      "layer": 1,
+      "full": {
+        "medianMs": 0.7793120000000044,
+        "p95Ms": 0.8958340000001499
+      },
+      "cached": {
+        "medianMs": 0.39058299999999235,
+        "p95Ms": 0.6105830000001333
+      },
+      "medianSpeedup": 1.9952532496294506
+    },
+    {
+      "layer": 2,
+      "full": {
+        "medianMs": 0.7608955000000606,
+        "p95Ms": 0.9642499999999927
+      },
+      "cached": {
+        "medianMs": 0.1589165000000321,
+        "p95Ms": 0.21454100000005383
+      },
+      "medianSpeedup": 4.7880207530363865
+    }
+  ]
+}

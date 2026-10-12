@@ -38,7 +38,7 @@ async function load(request: Extract<WorkerRequest, { command: 'LOAD' }>) {
     }
   } else { await tf.setBackend('cpu'); await tf.ready(); }
   artifact = nextArtifact;
-  engine = new RunEngine(artifact);
+  engine = new RunEngine(artifact, { cacheBudgetBytes: request.payload.cacheBudgetBytes });
   return { manifest: artifact.manifest, tokenizer: artifact.tokenizer, backend: tf.getBackend(), fallbackReason,
     runtimeGeneration: engine.runtimeGeneration };
 }
@@ -51,6 +51,10 @@ async function execute(request: WorkerRequest): Promise<unknown> {
     case 'COMPARE': return engine.compare(request.payload);
     case 'INSPECT': return engine.inspectActivation(request.payload.runId, request.payload.reference, request.payload.selection);
     case 'RELEASE': engine.releaseRun(request.payload.runId); return null;
+    case 'RESOURCES': {
+      const memory = tf.memory();
+      return { cache: engine.cacheStats(), tensorCount: memory.numTensors, logicalTensorBytes: memory.numBytes, memoryEstimateUnreliable: memory.unreliable };
+    }
     case 'PROBE': {
       const response = await fetch(new URL('probe.json', manifestUrl));
       if (!response.ok) throw new EngineError('INCOMPATIBLE_MODEL', 'The verification probe could not be loaded.');

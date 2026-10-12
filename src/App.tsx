@@ -24,6 +24,7 @@ export default function App() {
   const running = useRef(false);
   const modifiedId = useRef<string | null>(null);
   const controlsRef = useRef<Controls>(defaults);
+  const baselineInspector = useRef<{ key: string; attention: number[]; raw: number[] } | null>(null);
   const [controls, setControls] = useState(defaults);
   const [model, setModel] = useState<LoadedModel | null>(null);
   const [display, setDisplay] = useState<Display | null>(null);
@@ -53,16 +54,26 @@ export default function App() {
           });
           created = comparison.modifiedRunId;
           if (job.version !== version.current) continue;
-          const [attention, raw, modified] = await Promise.all([
-            client.current.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
-            client.current.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
+          const inspectorKey = JSON.stringify([job.baseline.runId, c.layer, c.head, vectorPosition]);
+          const savedInspector = baselineInspector.current;
+          const readBaseline = async () => {
+            if (savedInspector?.key === inspectorKey) return savedInspector;
+            const [attention, raw] = await Promise.all([
+              client.current!.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
+              client.current!.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
+            ]);
+            return { key: inspectorKey, attention: Array.from(attention.values), raw: Array.from(raw.values) };
+          };
+          const [inspector, modified] = await Promise.all([
+            readBaseline(),
             client.current.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.modified', layer: c.layer }, selection: { head: c.head, position: vectorPosition } }),
           ]);
           if (job.version !== version.current) continue;
+          baselineInspector.current = inspector;
           if (modifiedId.current) void client.current.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
           modifiedId.current = created; created = undefined;
           setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds,
-            attention: Array.from(attention.values), raw: Array.from(raw.values), modified: Array.from(modified.values) });
+            attention: inspector.attention, raw: inspector.raw, modified: Array.from(modified.values) });
           setError(null);
         } catch (failure) {
           if (alive.current && job.version === version.current) setError(failure instanceof Error ? failure.message : String(failure));
@@ -98,7 +109,7 @@ export default function App() {
 
   async function load(backend: 'auto' | 'cpu' | 'webgl', input: string) {
     const generation = ++version.current;
-    latest.current = null; baseline.current = null; modifiedId.current = null;
+    latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null;
     setLoading(true); setModel(null); setDisplay(null); setError(null); setProbe(null);
     try {
       const loaded = await client.current!.request('LOAD', {
@@ -204,7 +215,10 @@ export default function App() {
           <div className="metrics"><div><span>Distribution change</span><strong>{display.comparison.metrics.jsDivergence.toExponential(3)} <small>nats</small></strong></div>
             <div><label>Target symbol<select aria-label="Target symbol" value={controls.target} onChange={event => schedule({ ...controlsRef.current, target: Number(event.target.value) })} disabled={loading}>
               {tokenizer.tokens.map((symbol, i) => <option key={i} value={i}>{symbol}</option>)}</select></label><strong>{display.comparison.metrics.targetLogProbabilityDelta?.toFixed(4)} <small>Δ log p · {tokenizer.tokens[display.controls.target]}</small></strong></div>
-            <div><span>Model computation</span><strong>{display.comparison.execution.elapsedMs.toFixed(1)} <small>ms · {display.comparison.execution.strategy}</small></strong></div></div>
+            <div><span>Model computation</span><strong>{display.comparison.execution.elapsedMs.toFixed(1)} <small>ms</small></strong>
+              <span data-testid="execution-strategy">{display.comparison.execution.strategy === 'cached-suffix'
+                ? `Cached suffix · layer ${display.comparison.execution.recomputedFromLayer! + 1}`
+                : display.comparison.execution.strategy === 'identity' ? 'Baseline reused' : 'Full forward pass'}</span></div></div>
           {!display.comparison.hasComputationalPath && <p className="path-note">This setting has no active computational path to the selected prediction. The baseline is preserved.</p>}
           <div className="inspectors">
             <section><p className="eyebrow">Attention inspector</p><h3>Where this head attends</h3><p className="hint">Rows are query positions; columns are source positions. Head-output scaling leaves these weights unchanged.</p>

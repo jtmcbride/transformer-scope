@@ -1,6 +1,6 @@
 # Transformer Microscope implementation plan
 
-Status: implementation started. The application scaffold, independent fixtures, full forward math, gradient/optimizer probe, and initial worker-driven intervention screen are implemented. Cached suffix execution and the trained demo checkpoint remain next. See `docs/validation.md` for completed checks and outstanding release validation.
+Status: the verified forward engine and Milestone C are implemented. Baseline caching, exact residual deltas, suffix execution, bounded ownership, and browser stress checks are complete on the recorded fixtures. The next implementation milestone is D: a trained controlled-task checkpoint and validated educational experiments. See `docs/validation.md` for completed checks and outstanding release validation.
 
 This plan incorporates the product concept, intervention-engine specification, and design review. It prioritizes a verified head-scaling experiment before expanding into the full Explore, Experiment, and Train workspaces. Performance targets and numerical tolerances below are requirements to validate, not measured results.
 
@@ -207,6 +207,8 @@ For reachability, distinguish an absent computational path from a reachable outp
 
 ## 8. Milestone C — Cache and suffix execution
 
+Implemented and validated: 319 direct cached/reference cases, 29 engine tests, and 10 production browser tests. CPU and unpacked WebGL in Chromium and WebKit each pass cached/full equivalence and 1,000 sequential comparisons with bounded retained tensors. Detailed coverage and measurements are in `docs/validation.md` and `docs/benchmarks.md`.
+
 ### Work
 
 1. Retain raw head outputs and attention residuals at eligible layers. Add other retained tensors only for a demonstrated use.
@@ -324,6 +326,6 @@ For training, distinguish lightweight inspection snapshots from resumable checkp
 
 ## 14. Immediate next work
 
-Start with Milestone A. Its reviewable deliverables are the scaffold, model contract, versioned artifact schema, independent fixture exporter, tiny fixture files, and browser operation probe. Then implement and verify the full forward path before adding the cached shortcut or polished UI.
+Start Milestone D. Define the associative-retrieval sequence format and held-out generator splits, implement the offline trainer and reusable artifact exporter, and evaluate a small candidate checkpoint against chance and local-context baselines. Select measured effect, small-effect, and unreachable-control recipes before replacing the untrained verification checkpoint in the initial screen.
 
 No latency, checkpoint quality, browser compatibility, or numerical parity claim is complete until its associated evidence is recorded.

@@ -24,6 +24,7 @@ npm test
 npm run build
 npx playwright install chromium firefox webkit
 npm run test:browser
+npm run benchmark:cache
 ```
 
 To run a particular installed browser, use `npm run test:browser -- --project=chromium` (or `webkit`/`firefox`). The local Firefox runtime currently fails to launch its profile on this host; that is recorded as an environment limitation, not a passing browser check.
@@ -39,13 +40,16 @@ uv sync --locked
 npm run fixtures
 ```
 
-Fixture regeneration is deliberate and must be reviewed when the numerical contract changes. The exporter records its seed and PyTorch version, produces 84 forward/intervention cases, and saves loss, all gradients, and one Adam update. Weights and expected values come from the independent implementation in `scripts/reference_model.py`.
+Fixture regeneration is deliberate and must be reviewed when the numerical contract changes. The exporter records its seeds and PyTorch version, produces 84 original forward/intervention cases and 261 additional three-layer cases at seeds 1, 7, and 42, and saves loss, all gradients, and one Adam update. Weights and expected values come from the independent implementation in `scripts/reference_model.py`.
 
 ## Project status
 
 - Implemented: scaffold and lockfiles, model contract, artifact validation, independent fixtures, full forward execution, gradients, selective baseline/modified inspection, worker probe, and an initial intervention screen.
-- Next: cached suffix execution with full-versus-cached equivalence and stress tests (Milestone C).
-- Then: train and evaluate the controlled-task checkpoint (Milestone D), finish the experiment UI, and verify deployment.
+- Implemented in Milestone C: a 32 MiB baseline cache with LRU eviction and read leases, exact same-layer residual deltas, suffix execution, full fallback, reset/identity reuse, and cached inspection. The screen shows the actual execution strategy and reuses unchanged baseline inspector slices during slider edits.
+- Verified: 29 engine tests, 319 direct cached/reference cases, and 10 production tests across Chromium and WebKit, including 1,000 comparisons on each CPU/WebGL combination.
+- Next: train and evaluate the controlled-task checkpoint (Milestone D), finish the experiment UI, and verify deployment.
 - Remaining release validation: actual Safari, physical mobile devices, checkpoint educational quality, and end-to-end performance on named hardware.
 
 See `PLAN.md`, `docs/model-contract.md`, `docs/validation.md`, and `docs/benchmarks.md` for scope, semantics, and measured evidence.
+
+`npm run benchmark:cache` records an isolated Node CPU comparison for a three-layer fixture at early/middle/late edits. Its raw output goes to `.cache/cache-benchmark.json`. It measures forward computation and logit readback, not complete browser interaction latency.

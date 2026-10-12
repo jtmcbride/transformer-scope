@@ -1,6 +1,7 @@
 import { EngineError, tokenize, type HeadScaleIntervention } from '../engine/contracts';
 import { checkReplay, createExperiment, parseExperiment, validateExperiment } from '../engine/experiment';
 import { fetchExperiments, validateExperiments } from '../experiments';
+import { button, change, openFrame, select, settled, statusText, waitFor, type Frame } from '../embedded/frame';
 import { ModelClient } from '../workers/client';
 import type { Commands } from '../workers/protocol';
 import {
@@ -76,60 +77,6 @@ export async function captureEnvironment(): Promise<Record<string, unknown>> {
   };
 }
 
-// ---- Real application interface, embedded from the same deployment ----
-
-interface Frame { frame: HTMLIFrameElement; win: Window & typeof globalThis; doc: Document; errors: string[] }
-function statusText(doc: Document) { return doc.querySelector('.status')?.textContent ?? ''; }
-function button(doc: Document, text: string) {
-  return [...doc.querySelectorAll('button')].find(element => element.textContent?.trim() === text) ?? null;
-}
-function settled(doc: Document) {
-  const exported = button(doc, 'Export experiment');
-  return statusText(doc).startsWith('Showing') && !!exported && !exported.disabled;
-}
-/** Resolves when the predicate holds, timed in the frame's own clock (its navigation-start time origin). */
-function waitFor(target: Frame, predicate: () => boolean, label: string, timeoutMs = 60_000): Promise<{ at: number; alreadyTrue: boolean }> {
-  if (predicate()) return Promise.resolve({ at: target.win.performance.now(), alreadyTrue: true });
-  return new Promise((resolve, reject) => {
-    const observer = new target.win.MutationObserver(() => {
-      if (!predicate()) return;
-      observer.disconnect(); clearTimeout(timer); resolve({ at: target.win.performance.now(), alreadyTrue: false });
-    });
-    const timer = setTimeout(() => { observer.disconnect(); reject(new Error(`Timed out waiting for ${label}. Status: "${statusText(target.doc)}".`)); }, timeoutMs);
-    observer.observe(target.doc, { childList: true, subtree: true, characterData: true, attributes: true });
-  });
-}
-async function change(target: Frame, select: HTMLSelectElement, value: string) {
-  if (select.value === value) return;
-  const computing = waitFor(target, () => statusText(target.doc).startsWith('Computing'), 'computation to start');
-  const setter = Object.getOwnPropertyDescriptor(target.win.HTMLSelectElement.prototype, 'value')!.set!;
-  setter.call(select, value); select.dispatchEvent(new target.win.Event('change', { bubbles: true }));
-  await computing; await waitFor(target, () => settled(target.doc), 'the computed result');
-}
-function select(doc: Document, label: string) {
-  const element = doc.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`);
-  if (!element) throw new Error(`The ${label} control is missing.`);
-  return element;
-}
-
-async function openFrame(host: HTMLElement, model: HarnessModel, backend: HarnessBackend, base: URL): Promise<Frame> {
-  const frame = document.createElement('iframe');
-  frame.title = `Transformer Microscope under measurement (${model}, ${backend})`;
-  frame.className = 'measured-frame';
-  const loaded = new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('The application page did not load within 60 s.')), 60_000);
-    frame.addEventListener('load', () => { clearTimeout(timer); resolve(); }, { once: true });
-  });
-  frame.src = new URL(`./?model=${model}&backend=${backend}`, base).href;
-  host.replaceChildren(frame);
-  await loaded;
-  const win = frame.contentWindow as Window & typeof globalThis, doc = frame.contentDocument!;
-  const errors: string[] = [];
-  win.addEventListener('error', event => errors.push(event.message));
-  win.addEventListener('unhandledrejection', event => errors.push(message(event.reason)));
-  return { frame, win, doc, errors };
-}
-
 async function interfaceChecks(host: HTMLElement, model: HarnessModel, backend: HarnessBackend, settings: HarnessSettings, base: URL, progress: Progress): Promise<CheckRecord[]> {
   const names = ['ui-cold-readiness', 'ui-warm-interaction', 'ui-baseline-reset', 'ui-cpu-recovery'];
   let target: Frame | null = null;
@@ -138,7 +85,7 @@ async function interfaceChecks(host: HTMLElement, model: HarnessModel, backend: 
   try {
     progress(`${model}/${backend}: loading the application page`);
     checks.push(await runCheck('ui-cold-readiness', async () => {
-      target = await openFrame(host, model, backend, base);
+      target = await openFrame(host, new URL(`./?model=${model}&backend=${backend}`, base), `Transformer Microscope under measurement (${model}, ${backend})`);
       const frame = target;
       const ready = await waitFor(frame, () => statusText(frame.doc).startsWith('Showing') || !!frame.doc.querySelector('[role="alert"]'), 'the first result or an error');
       const alert = frame.doc.querySelector('[role="alert"]')?.textContent ?? '';

@@ -50,6 +50,7 @@ test('hosted release identity, asset bytes, MIME types, and model revisions agre
   }
   expect(paths.has('index.html')).toBe(true);
   expect(paths.has('validation.html')).toBe(true);
+  expect(paths.has('study.html')).toBe(true);
   expect([...paths].some(path => /assets\/model\.worker-.*\.js/u.test(path))).toBe(true);
   for (const name of ['verification', 'retrieval']) {
     for (const file of ['manifest.json', 'weights.bin', 'tokenizer.json', 'probe.json']) expect(paths.has(`models/${name}/${file}`)).toBe(true);

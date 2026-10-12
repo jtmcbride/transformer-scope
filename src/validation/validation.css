@@ -7,7 +7,7 @@ button, input, select, textarea { font: inherit; }
 .eyebrow { font-size: 10px; font-weight: 650; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0; }
 fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 14px; padding: 12px; background: white; }
 label { display: block; margin: 6px 0; font-size: 13px; }
-label > input:not([type=checkbox]), label > select, label > textarea { display: block; width: 100%; margin-top: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; }
+label > input:not([type=checkbox]):not([type=radio]), label > select, label > textarea { display: block; width: 100%; margin-top: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; }
 .choices { display: flex; flex-wrap: wrap; gap: 6px 18px; } .choices label, .inline { display: flex; gap: 6px; align-items: center; }
 .choices label > input[type=number] { width: 80px; }
 .primary { width: 100%; padding: 12px; background: #123f3a; color: white; border: 0; border-radius: 6px; font-weight: 600; }

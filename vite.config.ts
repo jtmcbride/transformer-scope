@@ -5,6 +5,6 @@ export default defineConfig({
   plugins: [react()],
   base: '/transformer-scope/',
   worker: { format: 'es' },
-  // The validation harness is a separate opt-in page; the application entry does not import it.
-  build: { rollupOptions: { input: { main: 'index.html', validation: 'validation.html' } } },
+  // The validation harness and study session are separate opt-in pages; the application entry imports neither.
+  build: { rollupOptions: { input: { main: 'index.html', validation: 'validation.html', study: 'study.html' } } },
 });

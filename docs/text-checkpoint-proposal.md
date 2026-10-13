@@ -1,6 +1,6 @@
 # Proposal: first text checkpoint (for review)
 
-Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. A first full run failed the probe gate; one retry is approved (see "Retry"). No text checkpoint is shipped.
+Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. Both permitted runs failed the probe gate on name copying (see "First run findings" and "Retry findings"). The gate is not met, and no text checkpoint is accepted or shipped.
 
 ## Goal
 
@@ -118,6 +118,16 @@ Decided 2026-10-12, after the first run failed and before the retry was trained:
 # determinism check (optional second run, compare weightsSha256 in training.json):
 .venv/bin/python scripts/train_text.py --steps 48000 --output .cache/text/export-48k-repeat
 ```
+
+## Retry findings
+
+From the retry (48,000 steps, otherwise as the first run; same host and environment, 3,966 s). Weights SHA-256 `0011a5f8e314f63325a7231dfa60664e5bab37dbd8a27c1e5c03fab45996f294`; 98.3M tokens seen. The determinism re-run has not been made yet.
+
+- **Criterion 2:** met. Selected step 48,000, the last evaluation. Mean validation loss 1.772 nats/token (openings 1.406, random offsets 2.139), against the first run's 1.838 and the unchanged bigram (3.410) and unigram (5.815) baselines. It was still falling slowly at the end: 1.777 at step 44,500, 1.772 at 48,000.
+- **Pronoun agreement:** 200 of 200. Passed.
+- **Name copying (`nameRepeat`):** 112 of 200 top-1 (56.0%), down from 77.5% in the first run. Not passed. Per template: 64/67, 16/67, 32/66 (first run 55, 57, 43). The name still outranks every other listed name in 91.5% of prompts; mean probability 0.357, against 0.002 for an absent name. The wrong top-1 predictions are pronouns: " her" 32, " she" 28, " his" 16, " he" 6. The second template ends in `"Look!" said`, where " her" (as in "said her mom") is a plausible continuation.
+- **`twoNameChoice`:** 48 of 200 (24.0%). Not passed.
+- **Gate:** not met. Lower validation loss did not bring higher name-copying accuracy; on two templates it fell. Under the retry rule above, there is no further tuning, and the templates and threshold stay unchanged.
 
 ## Decisions requested
 

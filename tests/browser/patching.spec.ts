@@ -28,6 +28,9 @@ test('residual patching from another input matches the independent PyTorch sweep
   await page.getByLabel('Intervention type').selectOption('patch');
   // The suggested source asks for another key in the same bindings; it differs only at position 14.
   await expect(page.getByLabel('Source input (same number of symbols)')).toHaveValue(fixture.sourceText);
+  await expect(status).toHaveText('Showing 0.00×');
+  await page.getByText('Choose copy position by number', { exact: true }).click();
+  await page.getByRole('button', { name: 'Copy from source', exact: true }).click();
   await expect(status).toHaveText('Showing patched residual');
   await expect(page.getByLabel('Patch position')).toHaveValue('14');
   await expect(page.getByLabel('Patch position').locator('option:checked')).toHaveText('Position 14: B ← A');
@@ -36,6 +39,7 @@ test('residual patching from another input matches the independent PyTorch sweep
   for (const [hook, position] of [['0:block.input', 14], ['0:attention.residual', 13], ['1:block.input', 14], ['1:block.input', 15], ['1:attention.residual', 14], ['1:attention.residual', 15]] as const) {
     await page.getByLabel('Patch point').selectOption(hook);
     await page.getByLabel('Patch position').selectOption(String(position));
+    await page.getByRole('button', { name: 'Copy from source', exact: true }).click();
     await expect(page.locator('.trace strong')).toContainText(`position ${position}`);
     await expect(status).toHaveText('Showing patched residual');
     const [layer, stage] = hook.split(':');
@@ -73,8 +77,8 @@ test('residual patching from another input matches the independent PyTorch sweep
   expect(await modifiedPercent(page, '0')).toBeGreaterThan(99);
   await expect(page.getByRole('alert')).toHaveCount(0);
   await page.getByLabel('Source input (same number of symbols)').fill('A = 0 ; ? A =');
-  await page.getByRole('button', { name: 'Use source input' }).click();
-  await expect(page.getByRole('alert')).toContainText('same number of symbols as the input (15)');
+  await expect(page.locator('.copy-validation')).toContainText('same number of symbols as the input (15)');
+  await expect(page.getByRole('button', { name: 'Copy from source', exact: true })).toBeDisabled();
   await expect(status).toHaveText('Showing patched residual');
   await page.getByRole('button', { name: 'Reset to baseline' }).click();
   await expect(status).toHaveText('Showing 1.00×');
@@ -84,6 +88,7 @@ test('residual patching from another input matches the independent PyTorch sweep
   await page.getByLabel('Model', { exact: true }).selectOption('verification');
   await expect(status).toHaveText('Showing 0.50×', { timeout: 30_000 });
   await page.getByLabel('Intervention type').selectOption('patch');
+  await page.getByRole('button', { name: 'Copy from source', exact: true }).click();
   await expect(status).toHaveText('Showing patched residual');
   await expect(page.getByLabel('Source input (same number of symbols)')).toHaveValue('A E I C G');
   await expect(page.getByRole('alert')).toHaveCount(0);

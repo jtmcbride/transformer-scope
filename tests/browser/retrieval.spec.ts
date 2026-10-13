@@ -106,6 +106,7 @@ test('prepared experiments, custom inputs, checkpoint switching, and mobile matr
   await page.getByRole('button', { name: 'Reset to baseline' }).click();
   await expect(page.getByTestId('recipe-note')).toHaveCount(0);
   await expect(page.getByLabel('Prepared experiment')).toHaveValue('');
+  await page.getByRole('button', { name: 'Edit tokens', exact: true }).click();
   await page.getByLabel('Space-separated symbols').fill('B = 3 ; D = 0 ; C = 1 ; ? B =');
   await page.getByRole('button', { name: 'Run input' }).click();
   await expect(page.getByLabel('Target symbol')).toHaveValue('8');

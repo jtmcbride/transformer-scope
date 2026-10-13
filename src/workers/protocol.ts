@@ -3,6 +3,7 @@ import type { ActivationSlice, CompareRequest, ComparisonResult, EmbeddingSlice,
 import type { ProbeReport } from '../engine/probe';
 import type { RuntimePrecision } from '../engine/experiment';
 import type { CacheStats } from '../engine/cache';
+import type { EffectTraceReport } from '../engine/trace';
 
 export interface Commands {
   LOAD: { request: { manifestUrl: string; backend: 'cpu' | 'webgl' | 'auto'; cacheBudgetBytes?: number }; response: {
@@ -11,6 +12,7 @@ export interface Commands {
   COMPARE: { request: CompareRequest; response: ComparisonResult };
   INSPECT: { request: { runId: string; reference: ActivationReference; selection?: Record<string, number> }; response: ActivationSlice };
   LENS: { request: { runId: string; position: number }; response: ResidualLens };
+  TRACE: { request: { baselineRunId: string; modifiedRunId: string; predictionPosition: number }; response: EffectTraceReport };
   EMBEDDING: { request: { runId: string; position: number }; response: EmbeddingSlice };
   ABLATION_SCAN: { request: { baselineRunId: string; predictionPosition: number; targetTokenId: number }; response: HeadAblationScan };
   RELEASE: { request: { runId: string }; response: null };

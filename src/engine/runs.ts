@@ -3,10 +3,13 @@ import { TransformerModel, disposeForward, type ForwardResult } from './model';
 import { BaselineCache, type CacheLease, type CacheStats } from './cache';
 import { effectiveInterventions, planExecution, type ExecutionPreference } from './execution';
 import { comparePredictions, type PredictionComparison } from './comparison';
+import { captureTracePass, checkTracePrediction, summarizeAttentionRow, summarizeResidualRow, summarizeTrace, traceBudget, TRACE_CAPTURE_BUDGET, TRACE_NODE_BUDGET, type EffectTraceReport } from './trace';
+import type { TraceIntervention } from './trace-topology';
 import { activationKey, canReachPrediction, EngineError, requireInput, stages, validateInterventions, validateTokens,
   type ActivationReference, type HeadScaleIntervention, type Intervention, type ModelArtifact } from './contracts';
 
-interface RunDescriptor { tokenIds: number[]; interventions: Intervention[]; baselineRunId?: string; logits?: Float32Array; executionPreference?: ExecutionPreference }
+interface RunDescriptor { tokenIds: number[]; interventions: Intervention[]; baselineRunId?: string; logits?: Float32Array; executionPreference?: ExecutionPreference;
+  observedPrediction?: { position: number; logits: Float32Array } }
 export interface RunSummary { runId: string; tokenIds: number[]; modelRevision: string; backend: string; runtimeGeneration: string }
 export interface CompareRequest {
   baselineRunId: string; interventions: Intervention[]; predictionPosition?: number; targetTokenId?: number; topK?: number;
@@ -164,7 +167,8 @@ export class RunEngine {
           changed = await this.prediction(result, position);
         }
         const comparison = comparePredictions(original, changed, this.artifact.tokenizer, topK, targetTokenId);
-        const modifiedRunId = this.store({ tokenIds: baseline.tokenIds, interventions: patches, baselineRunId, executionPreference: preference });
+        const modifiedRunId = this.store({ tokenIds: baseline.tokenIds, interventions: patches, baselineRunId, executionPreference: preference,
+          observedPrediction: { position, logits: changed } });
         return { ...comparison, baselineRunId, modifiedRunId, interventions: patches, predictionPosition: position,
           hasComputationalPath: effective.some(patch => canReachPrediction(patch, position, this.model.config, baseline.tokenIds.length)),
           execution: { strategy: plan.strategy, recomputedFromLayer: plan.fromLayer, elapsedMs: performance.now() - start,
@@ -227,6 +231,37 @@ export class RunEngine {
         slice = tf.slice(tensor, begin, sizes);
         return { shape: sizes, axes, values: Float32Array.from(await slice.data()) };
       } finally { slice?.dispose(); owned?.dispose(); if (result) disposeForward(result); lease?.release(); }
+    });
+  }
+
+  async inspectEffectTrace(baselineRunId: string, modifiedRunId: string, predictionPosition: number): Promise<EffectTraceReport> {
+    return this.operation(async () => {
+      const baseline = this.descriptor(baselineRunId), modified = this.descriptor(modifiedRunId);
+      requireInput(!baseline.baselineRunId && !baseline.interventions.length && modified.baselineRunId === baselineRunId &&
+        JSON.stringify(baseline.tokenIds) === JSON.stringify(modified.tokenIds), 'Trace requires a comparison and its own baseline.');
+      requireInput(modified.interventions.length === 1, 'Tracing supports one intervention.');
+      requireInput(Number.isInteger(predictionPosition) && predictionPosition === modified.observedPrediction?.position, 'Trace position must match the completed comparison.');
+      const patch = modified.interventions[0] as TraceIntervention, config = this.model.config, length = baseline.tokenIds.length;
+      const scoreLayer = patch.kind === 'attention.override' ? patch.layer : undefined;
+      const budget = traceBudget(config, length, scoreLayer !== undefined);
+      if (budget.captureBytes > TRACE_CAPTURE_BUDGET || budget.nodes > TRACE_NODE_BUDGET) throw new EngineError('RESOURCE_EXHAUSTION', 'This model/input exceeds the trace measurement budget.');
+      const start = performance.now();
+      const original = await captureTracePass(this.model, baseline.tokenIds, [], predictionPosition, scoreLayer);
+      const changed = await captureTracePass(this.model, modified.tokenIds, [patch], predictionPosition, scoreLayer);
+      const size = config.vocabularySize, offset = predictionPosition * size;
+      const baseLogits = baseline.logits!.slice(offset, offset + size), changedLogits = modified.observedPrediction!.logits;
+      checkTracePrediction(original.values.logits.subarray(offset, offset + size), baseLogits);
+      checkTracePrediction(changed.values.logits.subarray(offset, offset + size), changedLogits);
+      const residuals: ActivationReference[] = [{ stage: 'embedding.output' }, ...Array.from({ length: config.layers }, (_, layer) =>
+        [{ stage: 'attention.residual' as const, layer }, { stage: 'block.output' as const, layer }]).flat()];
+      return { baselineRunId, modifiedRunId, predictionPosition, tokenIds: [...baseline.tokenIds], config: { ...config },
+        modelRevision: this.artifact.manifest.modelRevision, runtimeGeneration: this.runtimeGeneration, backend: tf.getBackend(), intervention: structuredClone(patch),
+        hasComputationalPath: canReachPrediction(patch, predictionPosition, config, length),
+        nodes: summarizeTrace(config, length, predictionPosition, patch, original, changed),
+        attentionRow: summarizeAttentionRow(length, patch, original, changed),
+        residualRow: summarizeResidualRow(config, patch, original, changed),
+        readouts: [...residuals.map((reference, i) => ({ ...reference, prediction: false, baselineLogits: original.lens[i], modifiedLogits: changed.lens[i] })),
+          { stage: 'logits', prediction: true, baselineLogits: Array.from(baseLogits), modifiedLogits: Array.from(changedLogits) }], elapsedMs: performance.now() - start };
     });
   }
 

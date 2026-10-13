@@ -92,7 +92,9 @@ From the first local run (default settings; the weight hash and full `training.j
   - The right name beats the other mentioned name in only 41% of prompts (mean 0.134 against 0.118). It does not pick the correct one.
   - Top-1 predictions are mostly function words: " the" 45, " his" 39, " her" 21.
   - Per template: 9%, 6%, and 41%.
-- **Response:** the result stays recorded as a failure, under its own name (`twoNameChoice` in `probes.json`). The proposal's single-name probe (`nameRepeat`) was added afterwards, with templates written before seeing any result for them, and with the same 80% top-1 threshold over 200 prompts. Its control is the probability of a name absent from the prompt, and it also reports how often the name outranks every other listed name.
+- **Name copying, as specified (`nameRepeat`):** 155 of 200 top-1 (77.5%). Not passed. It is just under the 80% threshold, and the threshold stays at 80%.
+- **Gate:** not met. Criterion 3 fails on name copying, so this run is not an accepted checkpoint.
+- **How the two name probes came about:** the two-name result stays recorded as a failure, under its own name (`twoNameChoice` in `probes.json`). The proposal's single-name probe (`nameRepeat`) was added afterwards, with templates written before seeing any result for them, and with the same 80% top-1 threshold over 200 prompts. Its control is the probability of a name absent from the prompt, and it also reports how often the name outranks every other listed name.
 
 ## Decisions requested
 

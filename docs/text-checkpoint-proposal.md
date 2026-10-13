@@ -1,6 +1,6 @@
 # Proposal: first text checkpoint (for review)
 
-Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. A first full run was made locally; see "First run findings". No text checkpoint is shipped.
+Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. A first full run failed the probe gate; one retry is approved (see "Retry"). No text checkpoint is shipped.
 
 ## Goal
 
@@ -103,6 +103,21 @@ From the first local run (default settings, seed 2026, 24,000 steps; macOS arm64
 - **Name copying, as specified (`nameRepeat`):** 155 of 200 top-1 (77.5%). Not passed. It is just under the 80% threshold, and the threshold stays at 80%. Per template: 55/67, 57/67, 43/66. The name outranks every other listed name in 97% of prompts; mean probability 0.453, against 0.003 for an absent name (the control).
 - **Gate:** not met. Criterion 3 fails on name copying, so this run is not an accepted checkpoint.
 - **How the two name probes came about:** the two-name result stays recorded as a failure, under its own name (`twoNameChoice` in `probes.json`). The proposal's single-name probe (`nameRepeat`) was added afterwards, with templates written before seeing any result for them, and with the same 80% top-1 threshold over 200 prompts. Its control is the probability of a name absent from the prompt, and it also reports how often the name outranks every other listed name.
+
+## Retry
+
+Decided 2026-10-12, after the first run failed and before the retry was trained: one retry at 48,000 steps (about 98M tokens, nearly two passes over the training subset). Nothing else changes: seed 2026, data, tokenizer, learning-rate schedule shape, the selection rule, probes, prompt seed, templates, and thresholds are as in the first run. The cosine decay stretches over the longer run. The reason is that the first run's validation loss was still falling when the schedule ended.
+
+- This is the only retry. If it also fails, the gate stays failed, and there is no further tuning of steps, schedule, seed, templates, or thresholds to clear 80%.
+- Both runs are reported here, whatever the outcome. The first run's export stays in `.cache/text/export/`; the retry writes to `.cache/text/export-48k/`.
+- The determinism check (a second identical run with the same weight hash) applies to the retry.
+
+```sh
+.venv/bin/python scripts/train_text.py --steps 48000 --output .cache/text/export-48k
+.venv/bin/python scripts/text_probes.py --model .cache/text/export-48k
+# determinism check (optional second run, compare weightsSha256 in training.json):
+.venv/bin/python scripts/train_text.py --steps 48000 --output .cache/text/export-48k-repeat
+```
 
 ## Decisions requested
 

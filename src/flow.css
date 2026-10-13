@@ -16,6 +16,37 @@
 .setup-row > label { width: 230px; }
 .setup-row > label:last-child { width: 280px; }
 .setup-row select { margin: 5px 0 0; }
+.guided-experiments { margin: 4px 0 18px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.examples-heading { display: flex; gap: 16px; align-items: baseline; margin-bottom: 12px; }
+.examples-heading h3 { font-size: 15px; margin: 0; }
+.examples-heading p { font-size: 12px; margin: 0; color: var(--muted); line-height: 1.5; }
+.example-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.example-card { display: flex; flex-direction: column; text-align: left; justify-content: start; gap: 8px; padding: 14px; min-width: 0; background: #f8fbf9; }
+.example-card.example-completed { border-color: var(--green); background: #edf5f0; }
+.example-order { display: flex; gap: 12px; justify-content: space-between; align-items: center; font: 11px monospace; color: var(--green); }
+.example-order > span { font: 10px sans-serif; }
+.example-card strong { font-size: 14px; line-height: 1.4; }
+.example-card > span:not(.example-order) { font-size: 12px; line-height: 1.5; color: #47645b; }
+.example-card small { font-size: 10px; line-height: 1.6; color: var(--muted); margin-top: auto; }
+.examples-note { margin: 10px 0 0; font-size: 11px; line-height: 1.6; color: var(--muted); }
+.experiment-guide { margin: 12px 0 18px; padding: 14px; background: white; border: 1px solid #bad0c2; border-radius: 9px; }
+.experiment-guide .eyebrow { margin: 0 0 6px; font-size: 10px; }
+.experiment-guide h3 { margin: 0 0 8px; font-size: 17px; }
+.experiment-guide p { font-size: 12px; line-height: 1.6; margin: 8px 0; }
+.experiment-guide .example-edit { color: var(--muted); font-size: 11px; }
+.experiment-guide .example-result { padding: 10px; background: #eef5f0; border-radius: 5px; font-variant-numeric: tabular-nums; }
+.example-result strong { font: 16px monospace; }
+.experiment-guide .example-draft { color: #725122; background: #fff8ed; padding: 7px 10px; border-radius: 4px; }
+.example-guide-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.example-guide-actions button { width: auto; min-height: 42px; font-size: 12px; }
+.custom-guide { background: #f3f7f4; padding: 12px 14px; }
+@media (max-width: 800px) {
+  .example-cards { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .examples-heading { flex-direction: column; gap: 5px; }
+  .example-card { padding: 12px; }
+  .example-guide-actions { flex-direction: column; }
+  .example-guide-actions button { width: 100%; min-height: 44px; }
+}
 .binding-editor { display: flex; align-items: center; gap: 24px; }
 .binding-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .binding { display: flex; gap: 8px; align-items: center; padding: 5px 8px; background: #f2f6f5; border: 1px solid var(--line); border-radius: 8px; }

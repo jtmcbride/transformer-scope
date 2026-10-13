@@ -287,6 +287,8 @@ test('a lost WebGL context during a trace discards measurements and restarts tra
   await page.getByRole('button', { name: 'Follow the change', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('WebGL context lost');
   await expect(page.getByTestId('trace-step')).toHaveText('Worker session ended');
+  await expect(page.getByTestId('example-guide')).toContainText('Last completed example · session ended');
+  await expect(page.getByRole('button', { name: 'Trace this example', exact: true })).toBeDisabled();
   await expect(page.locator('.flow-node[data-trace-change]')).toHaveCount(0);
   await page.getByRole('button', { name: 'Restart on CPU', exact: true }).click();
   await ready(page);

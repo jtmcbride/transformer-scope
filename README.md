@@ -6,6 +6,8 @@ A browser laboratory for inspecting transformer computations and measuring inter
 
 The computation workspace presents editable bindings, a clickable transformer flowchart, contextual head-strength controls, and a persistent baseline/modified prediction card. Selecting a node inspects the completed experiment; an intervention is applied when its controls change. Use **Edit tokens** for raw symbol inputs. See `docs/frontend-workspace.md` for the interaction and verification details.
 
+**Try an example** starts one of three prepared experiments: a large answer-changing edit, a tiny reachable effect, or a local edit with no route to the prediction. The completed-example guide shows the actual measured result and provides **Inspect the edited head** and **Trace this example** actions. Input and source drafts remain separate from the completed guide.
+
 **Follow the change** traces a completed head-scaling, attention-redirect, or residual-copy intervention through the graph, with separate route and measured-difference badges, guided steps, cross-position attention handoffs, and diagnostic residual readouts. Redirect attention by selecting query and source tokens; future sources are unavailable. The graph separates the edited weights from the resulting head output. To copy a residual, select a junction, compare aligned source/current tokens, and press **Copy from source**. Source and position choices remain drafts until applied. Navigation reuses one batched measurement and keeps the prediction visible.
 
 ## Run

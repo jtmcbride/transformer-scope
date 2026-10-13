@@ -19,6 +19,7 @@ import { PredictionSummary } from './components/PredictionSummary';
 import { EffectTrace } from './components/EffectTrace';
 import { AttentionRedirect } from './components/AttentionRedirect';
 import { ResidualCopy, type CopyDraft } from './components/ResidualCopy';
+import { GuidedExperiments, ExperimentGuide } from './components/GuidedExperiments';
 import { useEffectTrace } from './hooks/useEffectTrace';
 import { matchingStep, traceSteps, type TraceView } from './trace-view';
 import { ModelClient } from './workers/client';
@@ -28,8 +29,8 @@ type LoadedModel = Commands['LOAD']['response'];
 /** mode 'head' scales a head's output; 'patch' copies a source input's residual row (residual.replace); 'attention' replaces one attention row (attention.override). */
 interface Controls { layer: number; head: number; factor: number; scope: string; position: number; target: number; mode: 'head' | 'patch' | 'attention'; hook: string; patchPosition: number; query: number; focus: string }
 interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport; sourceTokens?: number[];
-  attentionRow?: { baseline: number[]; modified: number[] } }
-interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument; source?: RunSummary }
+  attentionRow?: { baseline: number[]; modified: number[] }; recipe?: ExperimentRecipe }
+interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument; source?: RunSummary; recipe?: ExperimentRecipe }
 const initialChoice: ModelChoice = new URLSearchParams(window.location.search).get('model') === 'verification' ? 'verification' : 'retrieval';
 const backendParameter = new URLSearchParams(window.location.search).get('backend');
 const initialBackend = backendParameter === 'cpu' || backendParameter === 'webgl' ? backendParameter : 'auto';
@@ -67,6 +68,7 @@ export default function App() {
   const [choice, setChoice] = useState<ModelChoice>(initialChoice);
   const [experiments, setExperiments] = useState<ExperimentMetadata | null>(null);
   const [activeRecipe, setActiveRecipe] = useState<ExperimentRecipe | null>(null);
+  const [launchingRecipe, setLaunchingRecipe] = useState<string | null>(null);
   const [controls, setControls] = useState(defaults);
   const [model, setModel] = useState<LoadedModel | null>(null);
   const [display, setDisplay] = useState<Display | null>(null);
@@ -180,7 +182,7 @@ export default function App() {
           }
           if (modifiedId.current) void owner.request('RELEASE', { runId: modifiedId.current }).catch(() => {});
           modifiedId.current = created; created = undefined;
-          setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds, ...vectors, replay, sourceTokens: job.source?.tokenIds });
+          setDisplay({ comparison, controls: c, tokens: job.baseline.tokenIds, ...vectors, replay, sourceTokens: job.source?.tokenIds, recipe: job.recipe });
           setError(null);
         } catch (failure) {
           if (alive.current && job.version === version.current) setError(failure instanceof Error ? failure.message : String(failure));
@@ -199,7 +201,7 @@ export default function App() {
     controlsRef.current = next; setControls(next);
     const current = ++version.current;
     if (!run) return;
-    latest.current = { version: current, baseline: run, controls: { ...next }, replay, source: next.mode === 'patch' ? source.current?.run : undefined };
+    latest.current = { version: current, baseline: run, controls: { ...next }, replay, source: next.mode === 'patch' ? source.current?.run : undefined, recipe: recipe ?? undefined };
     setPending(true); void drain();
   }
 
@@ -283,7 +285,7 @@ export default function App() {
     const generation = ++version.current;
     latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null; source.current = null;
     sourceFlight.current = null; setCopying(false); setCopyDraft(null);
-    setChoice(selected); setExperiments(null); setActiveRecipe(null);
+    setChoice(selected); setExperiments(null); setActiveRecipe(null); setLaunchingRecipe(null);
     setLoading(true); setModel(null); setDisplay(null); setError(null); setProbe(null);
     try {
       const manifestUrl = new URL(`${import.meta.env.BASE_URL}models/${selected}/manifest.json`, window.location.origin).href;
@@ -309,10 +311,10 @@ export default function App() {
     if (!recipe || !model) return;
     const owner = client.current;
     const generation = ++version.current;
-    latest.current = null; setLoading(true); setError(null); setText(recipe.text);
+    latest.current = null; setLaunchingRecipe(id); setLoading(true); setError(null); setText(recipe.text);
     try { await establish(model, recipe.text, generation, recipe); }
     catch (failure) { if (alive.current && client.current === owner) setError(failure instanceof Error ? failure.message : String(failure)); }
-    finally { if (alive.current && client.current === owner) setLoading(false); }
+    finally { if (alive.current && client.current === owner) { setLoading(false); setLaunchingRecipe(null); } }
   }
 
   useEffect(() => {
@@ -447,6 +449,10 @@ export default function App() {
   const selectionTitle = selectedNode.kind === 'head' ? `Layer ${selectedNode.layer + 1} · Head ${selectedNode.head + 1}${selectedNode.part === 'attention' ? ' attention weights' : ''}`
     : selectedNode.kind === 'stage' ? `Layer ${selectedNode.layer + 1} · ${stageNames[selectedNode.stage]}` : selectedNode.kind === 'embedding' ? 'Input embeddings' : 'Final readout';
   const completedText = display && tokenizer ? display.tokens.slice(1).map(id => tokenizer.tokens[id]).join(' ') : '';
+  const inputDraft = !!display && text.trim().split(/\s+/u).join(' ') !== completedText;
+  const completedSource = display?.sourceTokens && tokenizer ? display.sourceTokens.slice(1).map(id => tokenizer.tokens[id]).join(' ') : '';
+  const hasDraft = inputDraft || !!copyDraft && (display?.controls.mode !== 'patch' || copyDraft.hook !== display.controls.hook || copyDraft.position !== display.controls.patchPosition || sourceText.trim().split(/\s+/u).join(' ') !== completedSource);
+  const completedRecipe = display?.comparison.execution.runtimeGeneration === model?.runtimeGeneration ? display?.recipe : undefined;
   function inspectNode(node: FlowNode) {
     setSelectedNode(node);
     if (copyDraft && node.kind === 'stage' && residualHooks.some(hook => hook === node.stage)) setCopyDraft({ ...copyDraft, hook: `${node.layer}:${node.stage}` });
@@ -478,6 +484,24 @@ export default function App() {
     if (selectedNode.kind !== 'stage' || !residualNode) return;
     chooseMode('patch', { ...controlsRef.current, hook: `${selectedNode.layer}:${selectedNode.stage}` });
   }
+  function traceExample() {
+    if (report) { moveTrace(0); return; }
+    if (tracing.error) tracing.retry();
+    setTraceNavigation({ key: '', index: 0, origin: 0, position: 0 }); tracing.setOpen(true);
+  }
+  function inspectEditedHead() {
+    const patch = display?.comparison.interventions[0];
+    if (!patch || patch.kind !== 'head.scale') return;
+    const node: FlowNode = { kind: 'head', layer: patch.layer, head: patch.head };
+    inspectNode(node);
+    const position = patch.tokens.kind === 'indices' ? patch.tokens.indices[0] : display!.comparison.predictionPosition;
+    if (traceView) setTraceNavigation({ ...navigation, position, index: matchingStep(steps, node, position) });
+    requestAnimationFrame(() => {
+      const selected = document.querySelector<HTMLButtonElement>('.computation-graph .flow-node[aria-pressed=true]');
+      selected?.focus({ preventScroll: true });
+      if (!window.matchMedia('(max-width: 800px)').matches) selected?.scrollIntoView({ block: 'center', behavior: 'instant' });
+    });
+  }
 
   return <main className={`flow-app ${tracing.open ? 'trace-active' : ''}`}>
     <header className="masthead">
@@ -494,8 +518,10 @@ export default function App() {
         {experiments && <label>Prepared experiment<select aria-label="Prepared experiment" disabled={locked} value={activeRecipe?.id ?? ''} onChange={event => void selectRecipe(event.target.value)}>
           <option value="" disabled>Custom experiment</option>{experiments.recipes.map(recipe => <option key={recipe.id} value={recipe.id}>{recipe.title}</option>)}</select></label>}
       </div>
+      {experiments && <GuidedExperiments recipes={experiments.recipes} completed={completedRecipe?.id} launching={launchingRecipe}
+        disabled={pending || locked} draft={hasDraft} onLaunch={id => void selectRecipe(id)} />}
       <InputEditor key={model?.manifest.modelId ?? 'loading'} choice={choice} text={text} disabled={locked} busy={loading}
-        draft={!!display && text.trim().split(/\s+/u).join(' ') !== completedText} onChange={setText} onSubmit={runInput} />
+        draft={inputDraft} onChange={setText} onSubmit={runInput} />
     </section>
     {error && <p className="error" role="alert">{error}
       {sessionEnded && <button type="button" className="secondary recover" onClick={() => void restart()}>Restart on CPU</button>}</p>}
@@ -504,6 +530,9 @@ export default function App() {
         <section className="graph-pane" aria-label="Computation workspace">
           <div className="step-heading"><span className="step-number">2</span><div><p className="eyebrow">Explore the computation</p><h2>Choose where to look</h2></div></div>
           <p className="hint">Click a node to inspect the completed run. {c?.heads ?? 4} heads in each layer run in parallel; arrows show computation order.</p>
+          {display && <ExperimentGuide recipe={completedRecipe} comparison={display.comparison} target={display.controls.target}
+            disabled={pending || locked} pending={pending || loading || copying} ended={sessionEnded} draft={hasDraft} traceOpen={!!report}
+            onInspect={inspectEditedHead} onTrace={traceExample} />}
           {copyDraft && tokenizer && c && <ResidualCopy draft={copyDraft} sourceText={sourceText} tokens={tokenIds} sourceTokens={sourcePreview.tokens} symbols={tokenizer.tokens} layers={c.layers}
             disabled={locked} pending={pending || copying} validation={sourcePreview.error} alternate={swappedQuery(tokenIds, tokenizer)}
             onSource={setSourceText} onDraft={draftCopy} onCopy={() => void applySource(sourceText, { ...controlsRef.current, mode: 'patch', hook: copyDraft.hook, patchPosition: copyDraft.position })}
@@ -635,8 +664,8 @@ export default function App() {
             <p>Saved {display.replay.savedBackend} → current {display.replay.currentBackend}. Maximum logit difference: baseline {display.replay.baselineMaximumError.toExponential(2)}, modified {display.replay.modifiedMaximumError.toExponential(2)}.</p>
             <span>Showing newly computed predictions. Comparison tolerance: 2e-5 absolute + 1e-5 relative.</span>
           </div>}
-          {activeRecipe && <div className="recipe-note" data-testid="recipe-note"><strong>{activeRecipe.title}</strong><p>{activeRecipe.interpretation}</p>
-            <span>Recorded PyTorch target probability: {(activeRecipe.metrics.baselineTargetProbability * 100).toFixed(2)}% → {(activeRecipe.metrics.modifiedTargetProbability * 100).toFixed(2)}%. Live browser results appear below.</span></div>}
+          {completedRecipe && <div className="recipe-note" data-testid="recipe-note"><strong>{completedRecipe.title}</strong><p>{completedRecipe.interpretation}</p>
+            <span>Recorded PyTorch target probability: {(completedRecipe.metrics.baselineTargetProbability * 100).toFixed(2)}% → {(completedRecipe.metrics.modifiedTargetProbability * 100).toFixed(2)}%. Live browser results appear below.</span></div>}
           {display.controls.mode === 'patch' ? <div className="trace" aria-label="Intervention computation"><span>Source residual</span><span aria-hidden="true">→</span>
             <strong>{hookLabel(display.controls.hook)} · position {display.controls.patchPosition}</strong><span aria-hidden="true">→</span><span>Later layers</span><span aria-hidden="true">→</span><span>New prediction</span></div>
           : display.controls.mode === 'attention' ? <div className="trace" aria-label="Intervention computation"><strong>Layer {display.controls.layer + 1}, head {display.controls.head + 1} · query {display.controls.query} · {focusLabel(display.controls)}</strong>

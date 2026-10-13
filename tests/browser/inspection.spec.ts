@@ -30,7 +30,7 @@ test('projection/residual/MLP selectors show independent completed values, reset
   await page.getByRole('button', { name: 'Inspect projection, residual, and MLP' }).click();
   const table = page.getByRole('table', { name: 'Baseline and modified computation vectors' });
   for (const layer of ['0', '1'] as const) {
-    await page.getByLabel('Inspect layer').selectOption(layer);
+    await page.getByRole('combobox', { name: 'Inspect layer', exact: true }).selectOption(layer);
     for (const stage of ['attention.projected', 'attention.residual', 'mlp.output', 'block.output'] as const) {
       await page.getByLabel('Computation stage').selectOption(stage);
       await expect(table.locator('tbody tr')).toHaveCount(8);

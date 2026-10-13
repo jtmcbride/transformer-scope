@@ -4,6 +4,10 @@ A browser laboratory for inspecting transformer computations and measuring inter
 
 **The default checkpoint learns a controlled symbol retrieval task.** It answers 453/453 held-out three-binding inputs correctly. It is not a general language model; accuracy drops with different binding counts. The untrained numerical verification checkpoint remains selectable.
 
+The computation workspace presents editable bindings, a clickable transformer flowchart, contextual head-strength controls, and a persistent baseline/modified prediction card. Selecting a node inspects the completed experiment; an intervention is applied when its controls change. Use **Edit tokens** for raw symbol inputs. See `docs/frontend-workspace.md` for the interaction and verification details.
+
+**Follow the change** traces a completed head-scaling intervention through the graph, with separate route and measured-difference badges, guided steps, cross-position attention handoffs, and diagnostic residual readouts. Navigation reuses one batched measurement and keeps the prediction visible.
+
 ## Run
 
 Use Node.js 24 and npm:

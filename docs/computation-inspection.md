@@ -1,5 +1,17 @@
 # Computation inspection
 
+## Guided effect trace
+
+**Follow the change** measures the completed baseline and modified head-scaling runs in one `TRACE` worker command. The engine performs one full forward pass per run, captures all requested stages together, and reuses those captures for residual readouts. It returns norms, maximum component differences, L2 differences, and a per-position architecture route; whole activation tensors remain in the worker. Captures and temporary readout tensors are disposed before responding. Estimated capture storage is bounded at 8 MiB, with at most 8,192 summary rows. Closed tracing adds no trace calls; guided navigation adds no forward passes.
+
+The modified descriptor retains the comparison's selected-position logits. Trace recomputation must reproduce these and the recorded baseline logits within `2e-5 + 1e-5 * abs(recorded)`. A mismatch fails tracing while preserving the completed prediction. Diagnostic readouts use the same final normalization and tied unembedding as the existing lens. The final model-prediction row uses the recorded comparison values. Run IDs, session generation, model revision, backend, and positions identify every report.
+
+`trace-topology.ts` computes possible routes from the head's scaled output, after its weights and raw output. Same-position operations retain position; only attention can propagate changes to later positions. The route to the prediction is the downstream/ancestor intersection, independent of measured values or attention magnitude. An exhaustive dependency-graph oracle checks identities, multi-position roots, residual bypasses, final-layer locality, future edits, and one-, two-, and three-layer configurations.
+
+`scripts/export_trace.py` loads hash-checked shipped weights into PyTorch and exports seven cases: the three retrieval recipes and four verification cases (identity, future edit, same-position final-layer scaling, and earlier-position reachability). It produces all per-position stage summaries and prediction-position residual readouts. `tests/fixtures/trace-reference.json` was generated with PyTorch 2.9.1+cpu and NumPy 2.3.3. Regenerate with `npm run fixtures:trace` in the reference environment. Engine and production tests compare every exported stage summary and readout, check snapshot agreement, and verify tensor/cache cleanup after successful, repeated, and failed traces.
+
+The browser tests also check that node and position navigation issue no new `TRACE` or `COMPARE` requests. The persistent toolbar and result summary support keyboard navigation and reduced motion. See `docs/frontend-workspace.md` for user-facing semantics and milestone verification.
+
 Attention cells are selectable with a mouse or keyboard. Selecting a cell reads the baseline Q vector at the query position, K vector at the source position, raw score, and masked score row from the computation worker. The panel shows Q·K, head-dimension scaling, the actual computed score, the causal mask, stable-softmax numerator/denominator, and the attention weight. Expand Q/K products for individual dimensions.
 
 The explanatory dot product and softmax use double-precision JavaScript arithmetic on read-back float32 vectors/scores. The worker's score and probability remain separately labeled; small rounding differences are expected. Future-position cells expose the -1e9 mask and zero probability. Same-layer head-output scaling occurs after attention weights are computed, so this map and arithmetic are unchanged by that operation.

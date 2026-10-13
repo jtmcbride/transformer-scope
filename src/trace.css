@@ -1,0 +1,50 @@
+.follow-change { margin: 10px 0 14px; justify-content: space-between; background: #e5f0e9; border-color: #a6c5b4; min-height: 38px; }
+.trace-active { padding-top: 100px; }
+.effect-trace { background: white; border: 1px solid #bad0c2; border-radius: 9px; padding: 14px; margin: 12px 0 18px; }
+.trace-heading .eyebrow { margin: 0; }
+.trace-scope { font-size: 12px; font-weight: 550; line-height: 1.6; margin: 8px 0; }
+.trace-path { font-size: 12px; line-height: 1.5; color: #335f4a; margin: 8px 0; }
+.trace-navigation { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 900px; z-index: 8; display: grid; grid-template-columns: 85px minmax(0, 1fr) 75px 85px; gap: 12px; align-items: center; background: #f3f8f5; border: 1px solid #a6c5b4; border-radius: 9px; padding: 10px 14px; box-shadow: 0 4px 18px #183a3520; }
+.trace-navigation > span { font-size: 12px; line-height: 1.5; color: #183a35; text-align: center; }
+.trace-navigation .secondary { padding: 9px 6px; background: white; min-height: 36px; }
+.trace-navigation .trace-exit { border-left: 1px solid var(--line); border-radius: 0; }
+.trace-position { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-size: 11px; }
+.trace-position select { margin: 0; width: 110px; }
+.trace-flip { font-size: 12px; line-height: 1.6; border-left: 3px solid #b87831; padding: 7px 10px; margin: 10px 0; background: #fff9ee; }
+.trace-definition, .trace-legend { font-size: 11px; line-height: 1.5; color: var(--muted); margin-bottom: 0; }
+.trace-active .node-panel, .trace-active .prediction-panel { top: 105px; }
+.trace-active button, .trace-active select, .trace-active input, .trace-active textarea { scroll-margin-top: 110px; }
+.trace-active .trace-navigation button, .trace-active .prediction-summary button { scroll-margin: 0; }
+.traced-graph .measured-node { gap: 5px; padding: 10px 7px; }
+.traced-graph .head-node { height: auto; min-height: 145px; }
+.traced-graph .flow-node > .trace-node-position { font-size: 10px; }
+.flow-node[data-trace-route=prediction] { border-left: 3px solid #3c7967; }
+.flow-node[data-trace-route=local] { border-left: 3px dashed #a17b49; }
+.route-tag { border-radius: 3px; padding: 3px 5px; line-height: 1.4; }
+.flow-node > .route-prediction { background: #e4f1e9; color: #305c45; }
+.flow-node > .route-local { background: #faf0df; color: #71512a; }
+.change-tag { display: block; font-size: 11px; line-height: 1.4; }
+.flow-node > .change-changed { color: #6e4725; font-weight: 600; }
+.flow-node > .change-small { color: #674f2e; }
+.flow-node > .change-exact { color: #65766f; }
+.flow-node > .node-readout { background: #f0f4f1; border-radius: 3px; padding: 4px; color: #234b38; font-size: 10px; line-height: 1.5; }
+.trace-arrow-prediction { color: #336c54; font-weight: bold; }
+.trace-arrow-local { color: #9b7849; text-decoration: underline dashed; }
+.residual-branch.trace-bypass::before { border-color: #3c7967; border-width: 2px; }
+.trace-handoff { border: 1px dashed #3c7967; border-radius: 5px; padding: 7px; margin: 0 0 10px; font: 12px monospace; text-align: center; background: #e6f0e9; }
+.trace-handoff small { display: block; font: 10px/1.5 sans-serif; margin-top: 4px; color: #3b5b4b; }
+.collapsed-layer span { display: block; margin-top: 5px; color: #335f4a; }
+.trace-readout { margin-top: 14px; padding: 12px; background: #eef5f0; border-radius: 6px; }
+.trace-readout p { font-size: 11px; line-height: 1.5; }
+.trace-readout .eyebrow { font-size: 9px; }
+.trace-readout strong { font-family: monospace; font-size: 17px; }
+.node-inspection > .vector-table-scroll { margin-top: 10px; max-height: 230px; }
+@media (max-width: 800px) {
+  .trace-active { padding-top: 116px; }
+  .trace-navigation { grid-template-columns: 62px minmax(0, 1fr) 48px 54px; gap: 6px; padding: 8px; }
+  .trace-navigation > span { font-size: 11px; }
+  .trace-navigation .secondary, .trace-navigation .text-button { font-size: 11px; }
+  .trace-active .prediction-panel, .trace-active .node-panel { position: static; }
+  .effect-trace { padding: 12px; }
+  .traced-graph .flow-node > .change-tag, .traced-graph .flow-node > .trace-node-position, .traced-graph .flow-node > .route-tag, .traced-graph .flow-node > .node-readout { font-size: 11px; }
+}

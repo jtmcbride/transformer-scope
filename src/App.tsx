@@ -11,6 +11,7 @@ import { ComputationInspector } from './components/ComputationInspector';
 import { AttentionCellInspector } from './components/AttentionCellInspector';
 import { ResidualLens } from './components/ResidualLens';
 import { EmbeddingInspector } from './components/EmbeddingInspector';
+import { AblationExplorer } from './components/AblationExplorer';
 import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
 
@@ -529,6 +530,8 @@ export default function App() {
             symbols={tokenizer.tokens} inputSymbols={display.tokens.map(id => tokenizer.tokens[id])} />}
           {client.current && <ResidualLens client={client.current} baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId}
             position={display.controls.position} target={display.controls.target} symbols={tokenizer.tokens} />}
+          {client.current && <AblationExplorer client={client.current} baselineRunId={display.comparison.baselineRunId} position={display.controls.position} target={display.controls.target}
+            symbols={tokenizer.tokens} onApply={(layer, head) => schedule({ ...controlsRef.current, mode: 'head', layer, head, factor: 0, scope: 'all' })} />}
         </> : <div className="empty-observation">The model's computed predictions will appear here.</div>}
       </div>
     </div>

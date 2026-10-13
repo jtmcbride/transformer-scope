@@ -150,6 +150,10 @@ Two production tests inject a browser-initiated loss into the real worker bundle
 
 At 360 CSS px in Chromium with touch emulation, the strength slider's hit area was 16 px tall and the file input 17 px, below the 24 px WCAG 2.2 minimum target size. On coarse pointers, both are now 32 px; the mouse layout is unchanged. A production test checks every control except inline text links for at least 24 × 24 px, checks containment, and sets the strength with a touchscreen tap. It fails without the CSS change. If an engine does not report a coarse pointer under emulation, the test annotates that and asserts containment only. This is viewport/touch emulation, not physical-device evidence.
 
+## Ablation explorer
+
+The per-prediction head-ablation scan matches independent PyTorch logits for three inputs, covering all single heads and three pairs (maximum error 4.29e-6, unchanged bounds). Its metrics are identical to the shared comparison code applied to its logits. Details and the measured non-additive pairs: `docs/computation-inspection.md`.
+
 ## Attention overrides
 
 `scripts/export_attention.py` (`npm run fixtures:attention`) loads the shipped weights into the independent PyTorch model and writes `tests/fixtures/attention-reference.json`. It exports five verification-model cases:

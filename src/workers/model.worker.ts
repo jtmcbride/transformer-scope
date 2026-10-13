@@ -93,6 +93,7 @@ async function run(request: Exclude<WorkerRequest, { command: 'LOSE_CONTEXT' }>)
     case 'INSPECT': return engine.inspectActivation(request.payload.runId, request.payload.reference, request.payload.selection);
     case 'LENS': return engine.inspectResidualLens(request.payload.runId, request.payload.position);
     case 'EMBEDDING': return engine.inspectEmbedding(request.payload.runId, request.payload.position);
+    case 'ABLATION_SCAN': return engine.scanHeadAblations(request.payload.baselineRunId, request.payload.predictionPosition, request.payload.targetTokenId);
     case 'RELEASE': engine.releaseRun(request.payload.runId); return null;
     case 'RESOURCES': {
       const memory = tf.memory();

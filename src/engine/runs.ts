@@ -20,6 +20,11 @@ export interface ComparisonResult extends PredictionComparison {
 export interface ActivationSlice {
   shape: number[]; axes: string[]; values: Float32Array;
 }
+/** One all-position head ablation (factor 0) per layer and head, for one prediction. Each entry comes from the comparison path. */
+export interface HeadAblationScan {
+  predictionPosition: number; targetTokenId: number; baselineLogits: Float32Array;
+  entries: { layer: number; head: number; logits: Float32Array; metrics: ComparisonResult['metrics']; topTokenId: number; targetProbability: number; strategy: ComparisonResult['execution']['strategy'] }[];
+}
 /** Embedding rows are weights: identical for a baseline and every modified run of the same input. */
 export interface EmbeddingSlice { position: number; tokenId: number; token: Float32Array; positionEmbedding: Float32Array; sum: Float32Array; similarity: Float32Array }
 /** Residual rows at one position read out through the final normalization and unembedding. Only the last row is a model prediction. */
@@ -223,6 +228,23 @@ export class RunEngine {
         return { shape: sizes, axes, values: Float32Array.from(await slice.data()) };
       } finally { slice?.dispose(); owned?.dispose(); if (result) disposeForward(result); lease?.release(); }
     });
+  }
+
+  /** Ablates every head in turn for one baseline prediction; modified runs are released before returning. */
+  async scanHeadAblations(baselineRunId: string, predictionPosition: number, targetTokenId: number): Promise<HeadAblationScan> {
+    const { layers, heads } = this.model.config;
+    const baselineLogits = await this.inspectActivation(baselineRunId, { stage: 'logits' }, { position: predictionPosition });
+    const entries: HeadAblationScan['entries'] = [];
+    for (let layer = 0; layer < layers; layer++) for (let head = 0; head < heads; head++) {
+      const result = await this.compare({ baselineRunId, predictionPosition, targetTokenId, topK: 1,
+        interventions: [{ id: `ablate-${layer}-${head}`, kind: 'head.scale', layer, head, factor: 0, tokens: { kind: 'all' } }] });
+      try {
+        const logits = await this.inspectActivation(result.modifiedRunId, { stage: 'logits' }, { position: predictionPosition });
+        entries.push({ layer, head, logits: logits.values, metrics: result.metrics, topTokenId: result.modifiedTopTokens[0].tokenId,
+          targetProbability: result.displayTokens.find(token => token.tokenId === targetTokenId)!.probability, strategy: result.execution.strategy });
+      } finally { this.releaseRun(result.modifiedRunId); }
+    }
+    return { predictionPosition, targetTokenId, baselineLogits: baselineLogits.values, entries };
   }
 
   async inspectEmbedding(runId: string, position: number): Promise<EmbeddingSlice> {

@@ -113,3 +113,5 @@ a { color: var(--green); }
 .observation { min-width: 0; }
 .embedding-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; margin: 12px 0; font-size: 12px; }.embedding-summary dt { color: var(--muted); }.embedding-summary dd { margin: 2px 0 0; font-family: "SFMono-Regular", Consolas, monospace; }.embedding-inspector details { margin-top: 12px; font-size: 12px; }
 .patch-controls textarea { margin-bottom: 8px; }.patch-controls > .secondary { margin-bottom: 14px; }.patched-row { margin-top: 20px; }
+.ablation-table td:nth-child(2) { white-space: nowrap; }.effect-bar { display: inline-block; height: 8px; margin-right: 6px; background: var(--amber); border-radius: 2px; vertical-align: middle; }.secondary.compact { width: auto; padding: 4px 8px; }.pair-controls { margin-top: 12px; }.pair-result { font-size: 12px; line-height: 1.6; }
+.ablation-table th:first-child { position: sticky; left: 0; z-index: 1; background: #fafcfb; }.ablation-table tbody th:first-child { background: white; }

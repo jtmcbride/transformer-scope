@@ -20,7 +20,8 @@
     "analysis:heads": "vitest run --config vitest.analysis.config.ts",
     "fixtures:exploration": ".venv/bin/python scripts/export_exploration.py",
     "fixtures:residual": ".venv/bin/python scripts/export_residual.py",
-    "fixtures:attention": ".venv/bin/python scripts/export_attention.py"
+    "fixtures:attention": ".venv/bin/python scripts/export_attention.py",
+    "fixtures:ablation": ".venv/bin/python scripts/export_ablation.py"
   },
   "dependencies": {
     "@tensorflow/tfjs-core": "4.22.0",

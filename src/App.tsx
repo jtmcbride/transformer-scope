@@ -17,6 +17,7 @@ import { ComputationGraph, stageNames, type FlowNode } from './components/Comput
 import { NodeInspector } from './components/NodeInspector';
 import { PredictionSummary } from './components/PredictionSummary';
 import { EffectTrace } from './components/EffectTrace';
+import { AttentionRedirect } from './components/AttentionRedirect';
 import { useEffectTrace } from './hooks/useEffectTrace';
 import { matchingStep, traceSteps, type TraceView } from './trace-view';
 import { ModelClient } from './workers/client';
@@ -25,7 +26,8 @@ import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoic
 type LoadedModel = Commands['LOAD']['response'];
 /** mode 'head' scales a head's output; 'patch' copies a source input's residual row (residual.replace); 'attention' replaces one attention row (attention.override). */
 interface Controls { layer: number; head: number; factor: number; scope: string; position: number; target: number; mode: 'head' | 'patch' | 'attention'; hook: string; patchPosition: number; query: number; focus: string }
-interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport; sourceTokens?: number[] }
+interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport; sourceTokens?: number[];
+  attentionRow?: { baseline: number[]; modified: number[] } }
 interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument; source?: RunSummary }
 const initialChoice: ModelChoice = new URLSearchParams(window.location.search).get('model') === 'verification' ? 'verification' : 'retrieval';
 const backendParameter = new URLSearchParams(window.location.search).get('backend');
@@ -118,16 +120,29 @@ export default function App() {
           created = comparison.modifiedRunId;
           if (job.version !== version.current) continue;
           // Each mode reads the vectors its panels show; replay checking and display are shared.
-          let vectors: { attention: number[]; raw: number[]; modified: number[] };
+          let vectors: { attention: number[]; raw: number[]; modified: number[]; attentionRow?: Display['attentionRow'] };
           if (intervention.kind === 'attention.override') {
             // Overrides change the weights themselves, so this mode shows the modified run's attention.
             const at = { head: c.head, position: c.query };
-            const [weights, raw, changed] = await Promise.all([
+            const inspectorKey = JSON.stringify([job.baseline.runId, c.layer, c.head, c.query]);
+            const savedInspector = baselineInspector.current;
+            const readBaseline = async () => {
+              if (savedInspector?.key === inspectorKey) return savedInspector;
+              const [weights, raw] = await Promise.all([
+                owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
+                owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: at }),
+              ]);
+              return { key: inspectorKey, attention: Array.from(weights.values), raw: Array.from(raw.values) };
+            };
+            const [weights, changed, inspector] = await Promise.all([
               owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.weights', layer: c.layer }, selection: { head: c.head } }),
-              owner.request('INSPECT', { runId: job.baseline.runId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: at }),
               owner.request('INSPECT', { runId: comparison.modifiedRunId, reference: { stage: 'attention.head.raw', layer: c.layer }, selection: at }),
+              readBaseline(),
             ]);
-            vectors = { attention: Array.from(weights.values), raw: Array.from(raw.values), modified: Array.from(changed.values) };
+            if (job.version === version.current) baselineInspector.current = inspector;
+            const begin = c.query * job.baseline.tokenIds.length, end = begin + job.baseline.tokenIds.length;
+            vectors = { attention: Array.from(weights.values), raw: inspector.raw, modified: Array.from(changed.values),
+              attentionRow: { baseline: inspector.attention.slice(begin, end), modified: Array.from(weights.values.slice(begin, end)) } };
           } else if (intervention.kind === 'residual.replace') {
             // The patched row: this input's own residual at the patch point, and the source row that replaces it.
             const own = await owner.request('INSPECT', { runId: job.baseline.runId, reference: parseHook(c.hook), selection: { position: c.patchPosition } });
@@ -383,7 +398,8 @@ export default function App() {
   const locked = loading || probing || transferring || !model || sessionEnded;
   const tracing = useEffectTrace(client.current, display?.comparison ?? null, pending || locked);
   const report = tracing.report;
-  const origin = report?.intervention.tokens.kind === 'indices' ? report.intervention.tokens.indices[0] ?? report.predictionPosition : report?.predictionPosition ?? 0;
+  const origin = report?.intervention.kind === 'attention.override' ? report.intervention.query
+    : report?.intervention.tokens.kind === 'indices' ? report.intervention.tokens.indices[0] ?? report.predictionPosition : report?.predictionPosition ?? 0;
   const navigation = report && traceNavigation.key === report.modifiedRunId ? traceNavigation : { key: report?.modifiedRunId ?? '', index: 0, origin, position: origin };
   const steps = useMemo(() => report ? traceSteps(report, navigation.origin) : [], [report, navigation.origin]);
   const measurements = useMemo(() => new Map(report?.nodes.map(node => [node.key, node]) ?? []), [report]);
@@ -399,7 +415,7 @@ export default function App() {
   const activeHead = display && selectedNode.kind === 'head' && display.controls.mode !== 'patch' && selectedNode.layer === display.controls.layer && selectedNode.head === display.controls.head;
   const inspectPosition = traceView ? selectedNode.kind === 'readout' ? traceView.report.predictionPosition : traceView.position : display ? activeHead ? display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)
     : patchNode ? display.controls.patchPosition : display.controls.position : 0;
-  const selectionTitle = selectedNode.kind === 'head' ? `Layer ${selectedNode.layer + 1} · Head ${selectedNode.head + 1}`
+  const selectionTitle = selectedNode.kind === 'head' ? `Layer ${selectedNode.layer + 1} · Head ${selectedNode.head + 1}${selectedNode.part === 'attention' ? ' attention weights' : ''}`
     : selectedNode.kind === 'stage' ? `Layer ${selectedNode.layer + 1} · ${stageNames[selectedNode.stage]}` : selectedNode.kind === 'embedding' ? 'Input embeddings' : 'Final readout';
   const completedText = display && tokenizer ? display.tokens.slice(1).map(id => tokenizer.tokens[id]).join(' ') : '';
   function inspectNode(node: FlowNode) {
@@ -417,6 +433,10 @@ export default function App() {
     if (!step) return;
     setTraceNavigation({ ...navigation, index, position: step.position }); setSelectedNode(step.node);
     requestAnimationFrame(() => document.querySelector('.computation-graph .flow-node[aria-pressed=true]')?.scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }));
+  }
+  function redirectQuery(query: number) {
+    const focus = headControls.focus;
+    schedule({ ...headControls, query, focus: focus !== 'uniform' && Number(focus) > query ? String(query) : focus });
   }
 
   return <main className={`flow-app ${tracing.open ? 'trace-active' : ''}`}>
@@ -461,7 +481,7 @@ export default function App() {
           {display && tokenizer && client.current && !loading && display.comparison.baselineRunId === baseline.current?.runId && <NodeInspector node={selectedNode} client={client.current}
             baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId} position={inspectPosition}
             symbol={tokenizer.tokens[display.tokens[inspectPosition]]} trace={traceView} target={display.controls.target} symbols={tokenizer.tokens}
-            preset={activeHead && inspectPosition === (display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)) ? { baseline: display.raw, modified: display.modified } : undefined} />}
+            preset={activeHead && !(selectedNode.kind === 'head' && selectedNode.part === 'attention') && inspectPosition === (display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)) ? { baseline: display.raw, modified: display.modified } : undefined} />}
           {selectedNode.kind === 'head' || patchNode ? <>
         <section>
           <p className="eyebrow">At the selected node</p><h3>{headControls.mode === 'patch' ? 'Patch a residual vector' : headControls.mode === 'attention' ? "Redirect a head's attention" : "Change a head's contribution"}</h3>
@@ -482,13 +502,18 @@ export default function App() {
             <label>Head<select aria-label="Head" disabled={loading || probing || transferring || !c} value={headControls.head} onChange={event => schedule({ ...headControls, head: Number(event.target.value) })}>
               {c && Array.from({ length: c.heads }, (_, i) => <option value={i} key={i}>Head {i + 1}</option>)}</select></label></div>
           {headControls.mode === 'attention' ? <div className="attention-controls">
-            <label>Query position<select aria-label="Query position" disabled={loading || probing || transferring || !model} value={headControls.query} onChange={event => {
-              const query = Number(event.target.value), focus = headControls.focus;
-              schedule({ ...headControls, query, focus: focus !== 'uniform' && Number(focus) > query ? String(query) : focus });
-            }}>{tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
-            <label>Attend to<select aria-label="Attend to" disabled={loading || probing || transferring || !model} value={headControls.focus} onChange={event => schedule({ ...headControls, focus: event.target.value })}>
+            {tokenizer && <AttentionRedirect tokens={tokenIds} symbols={tokenizer.tokens} query={headControls.query} focus={headControls.focus} disabled={locked} pending={pending}
+              showWeights={!(traceView && selectedNode.kind === 'head' && selectedNode.part === 'attention' && traceView.position === display?.controls.query)}
+              onQuery={redirectQuery} onFocus={focus => schedule({ ...headControls, focus })}
+              completed={display?.attentionRow && display.comparison.interventions[0]?.kind === 'attention.override' && activeHead
+                ? { intervention: display.comparison.interventions[0], ...display.attentionRow } : undefined} />}
+            <details className="attention-position-controls"><summary>Choose positions by number</summary>
+            <label>Query position<select aria-label="Query position" disabled={locked} value={headControls.query} onChange={event => redirectQuery(Number(event.target.value))}>
+              {tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
+            <label>Attend to<select aria-label="Attend to" disabled={locked} value={headControls.focus} onChange={event => schedule({ ...headControls, focus: event.target.value })}>
               <option value="uniform">Evenly over positions 0–{headControls.query}</option>
               {tokenizer && tokenIds.slice(0, headControls.query + 1).map((id, i) => <option key={i} value={i}>All weight on position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
+            </details>
             <p className="hint">Replaces this head's attention probabilities for one query position after the softmax, then recomputes the head's output and everything downstream. The scores are unchanged; only later positions are excluded.</p>
           </div> : <>
           <label>Apply at<select aria-label="Apply at" disabled={loading || probing || transferring || !model} value={headControls.scope} onChange={event => schedule({ ...headControls, scope: event.target.value })}>

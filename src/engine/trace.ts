@@ -1,14 +1,16 @@
 import * as tf from '@tensorflow/tfjs-core';
-import { activationKey, EngineError, type ActivationReference, type HeadScaleIntervention, type ModelConfig } from './contracts';
+import { activationKey, EngineError, type ActivationReference, type ModelConfig } from './contracts';
 import { TransformerModel, disposeForward } from './model';
-import { traceNodeKey, traceRoute, type TraceAddress, type TraceRoute } from './trace-topology';
+import { traceNodeKey, traceRoute, type TraceAddress, type TraceIntervention, type TraceRoute } from './trace-topology';
 
 export interface TraceMetrics { baselineNorm: number; modifiedNorm: number; maxDifference: number; differenceNorm: number; change: 'exact' | 'small' | 'changed' }
 export interface TraceMeasurement extends TraceAddress, TraceMetrics { key: string; route: TraceRoute }
 export interface TraceReadout extends ActivationReference { baselineLogits: number[]; modifiedLogits: number[]; prediction: boolean }
+export interface TraceAttentionRow { baselineWeights: number[]; modifiedWeights: number[]; scores: TraceMetrics }
 export interface EffectTraceReport {
   baselineRunId: string; modifiedRunId: string; predictionPosition: number; tokenIds: number[]; config: ModelConfig;
-  modelRevision: string; runtimeGeneration: string; backend: string; intervention: HeadScaleIntervention; hasComputationalPath: boolean;
+  modelRevision: string; runtimeGeneration: string; backend: string; intervention: TraceIntervention; hasComputationalPath: boolean;
+  attentionRow?: TraceAttentionRow;
   nodes: TraceMeasurement[]; readouts: TraceReadout[]; elapsedMs: number;
 }
 export const TRACE_CAPTURE_BUDGET = 8 * 1024 * 1024;
@@ -18,10 +20,10 @@ export const traceReferences = (config: ModelConfig): ActivationReference[] => [
   ...Array.from({ length: config.layers }, (_, layer) => (['block.input', 'attention.normalized', 'attention.weights', 'attention.head.raw', 'attention.head.modified',
     'attention.projected', 'attention.residual', 'mlp.output', 'block.output'] as const).map(stage => ({ layer, stage }))).flat(),
 ];
-export function traceBudget(config: ModelConfig, length: number) {
+export function traceBudget(config: ModelConfig, length: number, redirect = false) {
   const floats = (2 + 8 * config.layers) * length * config.modelDim + config.layers * config.heads * length * length + length * config.vocabularySize;
   const readouts = (1 + 2 * config.layers) * (config.modelDim + config.vocabularySize);
-  return { captureBytes: 2 * (floats + readouts) * 4, nodes: length * (3 + config.layers * (6 + 3 * config.heads)) };
+  return { captureBytes: 2 * (floats + readouts + (redirect ? config.heads * length * length : 0)) * 4, nodes: length * (3 + config.layers * (6 + 3 * config.heads)) };
 }
 export function measureTrace(baseline: ArrayLike<number>, modified: ArrayLike<number>): TraceMetrics {
   if (baseline.length !== modified.length) throw new EngineError('NUMERICAL_FAILURE', 'Trace vector dimensions do not agree.');
@@ -41,8 +43,10 @@ export function checkTracePrediction(actual: ArrayLike<number>, recorded: ArrayL
 }
 interface TracePass { values: Record<string, Float32Array>; lens: number[][] }
 /** One forward pass per run. Captures and readout tensors are released before returning owned CPU arrays. */
-export async function captureTracePass(model: TransformerModel, tokens: number[], patches: HeadScaleIntervention[], prediction: number): Promise<TracePass> {
-  const result = model.forward(tokens, patches, traceReferences(model.config));
+export async function captureTracePass(model: TransformerModel, tokens: number[], patches: TraceIntervention[], prediction: number, scoreLayer?: number): Promise<TracePass> {
+  const references = traceReferences(model.config);
+  if (scoreLayer !== undefined) references.push({ layer: scoreLayer, stage: 'attention.scores' });
+  const result = model.forward(tokens, patches, references);
   let read: tf.Tensor3D | undefined;
   try {
     const values = Object.fromEntries(await Promise.all(Object.entries(result.captured).map(async ([key, tensor]) => [key, Float32Array.from(await tensor.data())])));
@@ -57,7 +61,14 @@ export async function captureTracePass(model: TransformerModel, tokens: number[]
     return { values, lens: residuals.map((_, i) => Array.from(logits.slice(i * size, (i + 1) * size))) };
   } finally { read?.dispose(); disposeForward(result); }
 }
-export function summarizeTrace(config: ModelConfig, length: number, prediction: number, patch: HeadScaleIntervention, baseline: TracePass, modified: TracePass): TraceMeasurement[] {
+export function summarizeAttentionRow(length: number, patch: TraceIntervention, baseline: TracePass, modified: TracePass): TraceAttentionRow | undefined {
+  if (patch.kind !== 'attention.override') return undefined;
+  const offset = (patch.head * length + patch.query) * length;
+  const row = (pass: TracePass, stage: 'attention.weights' | 'attention.scores') => pass.values[`${patch.layer}:${stage}`].subarray(offset, offset + length);
+  return { baselineWeights: Array.from(row(baseline, 'attention.weights')), modifiedWeights: Array.from(row(modified, 'attention.weights')),
+    scores: measureTrace(row(baseline, 'attention.scores'), row(modified, 'attention.scores')) };
+}
+export function summarizeTrace(config: ModelConfig, length: number, prediction: number, patch: TraceIntervention, baseline: TracePass, modified: TracePass): TraceMeasurement[] {
   const nodes: TraceMeasurement[] = [];
   for (const reference of traceReferences(config)) {
     const headStage = ['attention.weights', 'attention.head.raw', 'attention.head.modified'].includes(reference.stage);

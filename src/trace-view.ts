@@ -9,7 +9,7 @@ export const changeLabel = { exact: 'Exact match', small: 'Small difference', ch
 export const routeLabel = { unaffected: 'Outside the edit route', prediction: 'Can affect this prediction', local: 'Local downstream computation' };
 export const traceNumber = (value: number) => value === 0 ? '0' : Math.abs(value) < .001 ? value.toExponential(2) : value.toPrecision(3);
 export const measurementFor = (view: TraceView, node: FlowNode, weights = false) => view.measurements.get(traceNodeKey(
-  node.kind === 'head' ? { stage: weights ? 'attention.weights' : 'attention.head.modified', layer: node.layer, head: node.head, position: view.position }
+  node.kind === 'head' ? { stage: weights || node.part === 'attention' ? 'attention.weights' : 'attention.head.modified', layer: node.layer, head: node.head, position: view.position }
     : node.kind === 'stage' ? { layer: node.layer, stage: node.stage, position: view.position }
     : { stage: node.kind === 'embedding' ? 'embedding.output' : 'logits', position: node.kind === 'readout' ? view.report.predictionPosition : view.position }));
 export const readoutFor = (view: TraceView, node: FlowNode) => view.report.readouts.find(row => node.kind === 'readout' ? row.prediction
@@ -20,7 +20,10 @@ export function traceSteps(report: EffectTraceReport, origin: number): TraceStep
   const stage = (layer: number, key: 'block.input' | 'attention.normalized' | 'attention.projected' | 'attention.residual' | 'mlp.output' | 'block.output') =>
     steps.push({ node: { kind: 'stage', layer, stage: key }, position, title: `Layer ${layer + 1} · ${stageNames[key]}` });
   for (let layer = patch.layer; layer < report.config.layers; layer++) {
-    if (layer === patch.layer) steps.push({ node: { kind: 'head', layer, head: patch.head }, position, title: `Layer ${layer + 1} · Head ${patch.head + 1} output` });
+    if (layer === patch.layer) {
+      if (patch.kind === 'attention.override') steps.push({ node: { kind: 'head', layer, head: patch.head, part: 'attention' }, position, title: `Layer ${layer + 1} · Head ${patch.head + 1} attention weights` });
+      steps.push({ node: { kind: 'head', layer, head: patch.head }, position, title: `Layer ${layer + 1} · Head ${patch.head + 1} output` });
+    }
     else {
       stage(layer, 'block.input'); stage(layer, 'attention.normalized');
       if (report.hasComputationalPath && position <= report.predictionPosition) position = report.predictionPosition;
@@ -40,9 +43,9 @@ export function readoutProbabilities(logits: number[], target: number) {
 export const firstReadoutFlip = (report: EffectTraceReport) => report.readouts.find(row => readoutProbabilities(row.baselineLogits, 0).top !== readoutProbabilities(row.modifiedLogits, 0).top);
 export function handoff(report: EffectTraceReport, origin?: number) {
   const patch = report.intervention;
-  const from = patch.tokens.kind === 'all' ? origin : patch.tokens.indices.length === 1 ? patch.tokens.indices[0] : undefined;
+  const from = patch.kind === 'attention.override' ? patch.query : patch.tokens.kind === 'all' ? origin : patch.tokens.indices.length === 1 ? patch.tokens.indices[0] : undefined;
   if (!report.hasComputationalPath || from === undefined || from >= report.predictionPosition || patch.layer >= report.config.layers - 1) return null;
-  return { layer: patch.layer + 1, from, to: report.predictionPosition, allPositions: patch.tokens.kind === 'all' };
+  return { layer: patch.layer + 1, from, to: report.predictionPosition, allPositions: patch.kind === 'head.scale' && patch.tokens.kind === 'all' };
 }
 export function readoutTitle(row: TraceReadout) {
   return row.prediction ? 'Model prediction' : row.stage === 'embedding.output' ? 'Input embedding' : `Layer ${row.layer! + 1} ${row.stage === 'attention.residual' ? 'after attention' : 'block output'}`;

@@ -1,6 +1,6 @@
 **Milestone 2 — Trace the effect**
 
-Status: implemented in the working checkout. Builds on the first computation-workspace milestone in `docs/frontend-workspace.md`. The plan below is retained as the design and acceptance contract; implementation details and verification are in `docs/frontend-workspace.md` and `docs/computation-inspection.md`.
+Status: implemented. Attention-redirect tracing has since been added; see the next slice in `docs/frontend-workspace.md`. Builds on the first computation-workspace milestone in `docs/frontend-workspace.md`. The plan below is retained as the design and acceptance contract; implementation details and verification are in `docs/frontend-workspace.md` and `docs/computation-inspection.md`.
 
 **Outcome**
 

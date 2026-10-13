@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { canReachPrediction, type HeadScaleIntervention, type ModelConfig } from '../../src/engine/contracts';
+import { canReachPrediction, type AttentionOverrideIntervention, type HeadScaleIntervention, type ModelConfig } from '../../src/engine/contracts';
 import { traceReferences } from '../../src/engine/trace';
 import { traceNodeKey, traceRoute, type TraceAddress } from '../../src/engine/trace-topology';
 
@@ -58,6 +58,29 @@ it('position-aware routes agree with the dependency graph, including identities,
             expect(traceRoute(node, patch, config, length, prediction), key).toBe(!downstream.has(key) ? 'unaffected' : ancestors.has(key) ? 'prediction' : 'local');
           }
         }
+      }
+    }
+  }
+});
+
+it('redirect routes start at the query attention row, rather than at the source being read', () => {
+  for (const layers of [1, 2, 3]) {
+    const config: ModelConfig = { layers, heads: 2, modelDim: 8, mlpDim: 16, contextLength: 4, vocabularySize: 16, layerNormEpsilon: 1e-5 };
+    const length = 4, graph = dependencyGraph(config, length);
+    for (let layer = 0; layer < layers; layer++) for (let query = 0; query < length; query++) for (let head = 0; head < config.heads; head++) {
+      const patch: AttentionOverrideIntervention = { id: 'redirect', kind: 'attention.override', layer, head, query, weights: [1, 0, 0, 0] };
+      const downstream = graph.visit([traceNodeKey({ stage: 'attention.weights', layer, head, position: query })], graph.next);
+      for (let prediction = 0; prediction < length; prediction++) {
+        const end = traceNodeKey({ stage: 'logits', position: prediction }), ancestors = graph.visit([end], graph.prior);
+        expect(downstream.has(end)).toBe(canReachPrediction(patch, prediction, config, length));
+        for (const reference of traceReferences(config)) for (let position = 0; position < length; position++) {
+          const headed = ['attention.weights', 'attention.head.raw', 'attention.head.modified'].includes(reference.stage);
+          for (let h = 0; h < (headed ? config.heads : 1); h++) {
+            const node = { ...reference, position, ...(headed ? { head: h } : {}) }, key = traceNodeKey(node);
+            expect(traceRoute(node, patch, config, length, prediction), key).toBe(!downstream.has(key) ? 'unaffected' : ancestors.has(key) ? 'prediction' : 'local');
+          }
+        }
+        expect(traceRoute({ stage: 'attention.scores', layer, head, position: query }, patch, config, length, prediction)).toBe('unaffected');
       }
     }
   }

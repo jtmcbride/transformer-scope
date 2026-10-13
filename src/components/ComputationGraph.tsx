@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Intervention, ModelConfig } from '../engine/contracts';
 import { nodeKey, stageNames, type FlowNode } from '../flow';
 import { changeLabel, handoff, measurementFor, readoutFor, readoutProbabilities, routeLabel, traceNumber, type TraceView } from '../trace-view';
+import { redirectConnection } from './AttentionRedirect';
 export { nodeKey, stageNames, type FlowNode, type FlowStage } from '../flow';
 
 interface Props { config: ModelConfig; selected: FlowNode; intervention?: Intervention; disabled: boolean; onSelect: (node: FlowNode) => void; trace?: TraceView; symbols?: string[]; target?: number }
@@ -15,22 +16,22 @@ export function ComputationGraph(props: Props) {
     }
   }, [selectedKey, !!props.trace, props.trace?.position]);
   const activeKey = props.intervention?.kind === 'residual.replace' ? `${props.intervention.layer}:${props.intervention.stage}`
-    : props.intervention && (props.intervention.kind !== 'head.scale' || props.intervention.factor !== 1) ? `head:${props.intervention.layer}:${props.intervention.head}` : null;
+    : props.intervention && (props.intervention.kind !== 'head.scale' || props.intervention.factor !== 1) ? `head:${props.intervention.layer}:${props.intervention.head}${props.intervention.kind === 'attention.override' ? ':attention' : ''}` : null;
   function node(selection: FlowNode, title: string, detail?: string, extra = '') {
     const key = nodeKey(selection), edited = key === activeKey;
     const measured = props.trace ? measurementFor(props.trace, selection) : undefined;
-    const weights = props.trace && selection.kind === 'head' ? measurementFor(props.trace, selection, true) : undefined;
+    const weights = props.trace && selection.kind === 'head' && selection.part !== 'attention' ? measurementFor(props.trace, selection, true) : undefined;
     const readout = props.trace ? readoutFor(props.trace, selection) : undefined;
     return <button type="button" data-trace-route={measured?.route} data-trace-change={measured?.change}
       className={`flow-node ${extra} ${nodeKey(props.selected) === key ? 'node-selected' : ''} ${edited ? 'node-edited' : ''} ${measured ? 'measured-node' : ''}`}
-      aria-label={selection.kind === 'head' ? `Inspect Layer ${selection.layer + 1} Head ${selection.head + 1}` : selection.kind === 'stage' ? `Inspect Layer ${selection.layer + 1} ${title}` : `Inspect ${title}`}
+      aria-label={selection.kind === 'head' ? `Inspect Layer ${selection.layer + 1} Head ${selection.head + 1}${selection.part === 'attention' ? ' attention row' : ''}` : selection.kind === 'stage' ? `Inspect Layer ${selection.layer + 1} ${title}` : `Inspect ${title}`}
       aria-pressed={nodeKey(props.selected) === key} disabled={props.disabled} onClick={() => props.onSelect(selection)}>
-      <strong>{title}</strong>{detail && <span>{detail}</span>}{edited && <span className="node-tag">{props.trace && props.intervention?.kind === 'head.scale' && props.intervention.tokens.kind === 'indices' ? `Edited at position ${props.intervention.tokens.indices.join(', ')}` : 'Edited here'}</span>}
+      <strong>{title}</strong>{detail && <span>{detail}</span>}{edited && <span className="node-tag">{props.intervention?.kind === 'attention.override' ? `Edited query ${props.intervention.query}` : props.trace && props.intervention?.kind === 'head.scale' && props.intervention.tokens.kind === 'indices' ? `Edited at position ${props.intervention.tokens.indices.join(', ')}` : 'Edited here'}</span>}
       {measured && <>
         <span className="trace-node-position">{selection.kind === 'readout' ? `Prediction position ${props.trace!.report.predictionPosition}` : `At position ${props.trace!.position}`}</span>
         {measured.route !== 'unaffected' && <span className={`route-tag route-${measured.route}`}>{routeLabel[measured.route]}</span>}
         <span className={`change-tag change-${measured.change}`} title={`L2 difference: ${traceNumber(measured.differenceNorm)}`}>
-          {selection.kind === 'head' ? 'Output: ' : ''}{changeLabel[measured.change]}{measured.maxDifference !== 0 ? ` · Δ ${traceNumber(measured.maxDifference)}` : ''}</span>
+          {selection.kind === 'head' ? selection.part === 'attention' ? 'Attention: ' : 'Output: ' : ''}{changeLabel[measured.change]}{measured.maxDifference !== 0 ? ` · Δ ${traceNumber(measured.maxDifference)}` : ''}</span>
       </>}
       {weights && <span className={`change-tag change-${weights.change}`}>Attention: {changeLabel[weights.change]}{weights.maxDifference !== 0 ? ` · Δ ${traceNumber(weights.maxDifference)}` : ''}</span>}
       {readout && props.symbols && <span className="node-readout" title={`Probability of ${props.symbols[props.target ?? 0]}: ${(readoutProbabilities(readout.baselineLogits, props.target ?? 0).targetProbability * 100).toFixed(4)}% → ${(readoutProbabilities(readout.modifiedLogits, props.target ?? 0).targetProbability * 100).toFixed(4)}%`}>
@@ -57,7 +58,14 @@ export function ComputationGraph(props: Props) {
             {node({ kind: 'stage', layer, stage: 'attention.normalized' }, 'Normalize for attention')}{arrow([{ kind: 'stage', layer, stage: 'attention.normalized' }], { kind: 'head', layer, head: 0 })}
             {connection?.layer === layer && <div className="trace-handoff" data-testid="trace-handoff">Position {connection.from} → {connection.to}<small>{connection.allPositions ? 'One route among all edited positions' : 'Possible route through this attention layer'}</small></div>}
             <div className="flow-heads" aria-label={`Layer ${layer + 1} parallel attention heads`}>
-              {Array.from({ length: props.config.heads }, (_, head) => <div key={head}>{node({ kind: 'head', layer, head }, `Head ${head + 1}`, 'Attention → output', 'head-node')}</div>)}
+              {Array.from({ length: props.config.heads }, (_, head) => <div key={head}>
+                {props.intervention?.kind === 'attention.override' && props.intervention.layer === layer && props.intervention.head === head && <>
+                  {node({ kind: 'head', layer, head, part: 'attention' }, 'Redirect attention', 'Weights for one query', 'attention-route-node')}
+                  {props.trace && props.symbols && <p className="redirect-connection graph-redirect" data-testid="graph-redirect-connection">{redirectConnection(props.intervention, props.trace.report.tokenIds, props.symbols)}<small>Source vectors stay unchanged in this layer.</small></p>}
+                  {arrow([{ kind: 'head', layer, head, part: 'attention' }], { kind: 'head', layer, head })}
+                </>}
+                {node({ kind: 'head', layer, head }, `Head ${head + 1}`, 'Attention → output', 'head-node')}
+              </div>)}
             </div>{arrow(Array.from({ length: props.config.heads }, (_, head) => ({ kind: 'head', layer, head })), { kind: 'stage', layer, stage: 'attention.projected' })}
             {node({ kind: 'stage', layer, stage: 'attention.projected' }, 'Join heads + project')}{arrow([{ kind: 'stage', layer, stage: 'attention.projected' }], { kind: 'stage', layer, stage: 'attention.residual' })}
             {node({ kind: 'stage', layer, stage: 'attention.residual' }, 'Residual after attention', 'Add the layer input', 'add-node')}

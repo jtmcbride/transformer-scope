@@ -6,7 +6,7 @@ A browser laboratory for inspecting transformer computations and measuring inter
 
 The computation workspace presents editable bindings, a clickable transformer flowchart, contextual head-strength controls, and a persistent baseline/modified prediction card. Selecting a node inspects the completed experiment; an intervention is applied when its controls change. Use **Edit tokens** for raw symbol inputs. See `docs/frontend-workspace.md` for the interaction and verification details.
 
-**Follow the change** traces a completed head-scaling intervention through the graph, with separate route and measured-difference badges, guided steps, cross-position attention handoffs, and diagnostic residual readouts. Navigation reuses one batched measurement and keeps the prediction visible.
+**Follow the change** traces a completed head-scaling or attention-redirect intervention through the graph, with separate route and measured-difference badges, guided steps, cross-position attention handoffs, and diagnostic residual readouts. Redirect attention by selecting query and source tokens; future sources are unavailable. The graph separates the edited weights from the resulting head output. Navigation reuses one batched measurement and keeps the prediction visible.
 
 ## Run
 
@@ -55,6 +55,8 @@ npm run fixtures:exploration   # residual read-out and embedding values for the 
 npm run fixtures:residual      # residual-replacement cases and the retrieval patching sweep
 npm run fixtures:attention     # attention-override cases and the retrieval routing sweep
 npm run fixtures:ablation      # single-head and pairwise ablation logits
+npm run fixtures:trace         # head-scaling stage summaries and diagnostic readouts
+npm run fixtures:attention-trace # redirect rows, stage summaries, and diagnostic readouts
 ```
 
 Fixture regeneration is deliberate and must be reviewed when the numerical contract changes. The exporter records its seeds and PyTorch version, produces 84 original forward/intervention cases and 261 additional three-layer cases at seeds 1, 7, and 42, and saves loss, all gradients, and one Adam update. Weights and expected values come from the independent implementation in `scripts/reference_model.py`.

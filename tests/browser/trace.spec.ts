@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import fixture from '../fixtures/trace-reference.json' with { type: 'json' };
+import redirectFixture from '../fixtures/attention-trace-reference.json' with { type: 'json' };
 import type { Commands, Command, WorkerResponse } from '../../src/workers/protocol';
 import type { EffectTraceReport } from '../../src/engine/trace';
 
@@ -146,12 +147,13 @@ test('CPU and supported WebGL traces match all independent fixtures and clean up
     };
     try {
       for (const backend of ['cpu', 'webgl'] as const) for (const checkpoint of ['retrieval', 'verification']) {
-        try { await request('LOAD', { manifestUrl: new URL(`models/${checkpoint}/manifest.json`, window.location.href).href, backend }); }
+        let revision = '';
+        try { revision = (await request('LOAD', { manifestUrl: new URL(`models/${checkpoint}/manifest.json`, window.location.href).href, backend })).manifest.modelRevision; }
         catch (error) {
           if (backend === 'webgl' && error instanceof Error && error.message.startsWith('UNSUPPORTED_BACKEND')) { reports.push({ backend, checkpoint, status: 'unsupported', detail: error.message }); continue; }
           throw error;
         }
-        const selected = cases.filter(item => ['effect', 'small', 'unreachable'].includes(item.name) === (checkpoint === 'retrieval'));
+        const selected = cases.filter(item => item.modelRevision === revision);
         for (const item of selected) {
           const baseline = await request('BASELINE', { tokenIds: item.tokens });
           const comparison = await request('COMPARE', { baselineRunId: baseline.runId, interventions: [item.intervention as Commands['COMPARE']['request']['interventions'][number]], predictionPosition: item.predictionPosition });
@@ -164,13 +166,18 @@ test('CPU and supported WebGL traces match all independent fixtures and clean up
             [item.nodes[i].baselineNorm, item.nodes[i].modifiedNorm, item.nodes[i].maxDifference, item.nodes[i].differenceNorm], .0005, 2e-5));
           trace.readouts.slice(0, -1).forEach((row, i) => { close(row.baselineLogits, item.baselineReadouts[i]); close(row.modifiedLogits, item.modifiedReadouts[i]); });
           close(trace.readouts.at(-1)!.modifiedLogits, item.modifiedLogits);
+          if ('attentionRow' in item) {
+            close(trace.attentionRow!.baselineWeights, item.attentionRow.baselineWeights);
+            close(trace.attentionRow!.modifiedWeights, item.attentionRow.modifiedWeights);
+            if (trace.attentionRow!.scores.change !== 'exact') throw new Error('A redirect changed its own scores.');
+          }
           await request('RELEASE', { runId: comparison.modifiedRunId }); await request('RELEASE', { runId: baseline.runId });
         }
         reports.push({ backend, checkpoint, status: 'passed', count: selected.length });
       }
       return reports;
     } finally { worker.terminate(); }
-  }, { url: workerUrl, cases: fixture.cases });
+  }, { url: workerUrl, cases: [...fixture.cases, ...redirectFixture.cases] });
   for (const result of results) {
     if (result.status === 'unsupported') testInfo.annotations.push({ type: 'unsupported-webgl', description: result.detail! });
     if (result.backend === 'cpu' || testInfo.project.name === 'chromium') expect(result.status).toBe('passed');
@@ -228,7 +235,11 @@ test('input replacement and replay reset the trace, while export and unsupported
   await expect(page.getByTestId('modified-answer')).toHaveText('0');
   await page.getByLabel('Intervention type').selectOption('attention');
   await expect(page.locator('.status')).toHaveText('Showing redirected attention');
-  await expect(page.getByTestId('trace-step')).toHaveText('Head scaling required');
+  await ready(page);
+  await expect(page.getByTestId('trace-step')).toContainText('attention weights');
+  await page.getByLabel('Intervention type').selectOption('patch');
+  await expect(page.locator('.status')).toHaveText('Showing patched residual');
+  await expect(page.getByTestId('trace-step')).toHaveText('Head scaling or attention redirect required');
   await expect(page.locator('.flow-node[data-trace-change]')).toHaveCount(0);
   await expect(page.getByRole('alert')).toHaveCount(0);
   await page.getByRole('button', { name: 'Exit trace', exact: true }).click();

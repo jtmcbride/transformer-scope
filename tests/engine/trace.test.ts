@@ -5,14 +5,62 @@ import { RunEngine } from '../../src/engine/runs';
 import { TransformerModel } from '../../src/engine/model';
 import { checkTracePrediction, measureTrace, traceBudget, TRACE_CAPTURE_BUDGET } from '../../src/engine/trace';
 import { traceNodeKey, type TraceAddress } from '../../src/engine/trace-topology';
-import type { HeadScaleIntervention } from '../../src/engine/contracts';
+import { normalizedAttention, type AttentionOverrideIntervention, type HeadScaleIntervention } from '../../src/engine/contracts';
 import fixture from '../fixtures/trace-reference.json';
+import redirectFixture from '../fixtures/attention-trace-reference.json';
 import { loadShippedArtifact } from './retrieval-artifact';
 import { assertClose } from './numerical';
 import { firstReadoutFlip, readoutTitle } from '../../src/trace-view';
 
 beforeAll(async () => { await tf.setBackend('cpu'); await tf.ready(); });
 const retrieval = loadShippedArtifact('retrieval'), verification = loadShippedArtifact('verification');
+
+it('redirect traces match independent rows, stages and readouts without editing source positions or retaining tensors', async () => {
+  const initial = tf.memory().numTensors;
+  for (const item of redirectFixture.cases) {
+    const loaded = item.modelRevision === retrieval.manifest.modelRevision ? retrieval : verification;
+    const engine = new RunEngine(loaded.artifact), patch = item.intervention as AttentionOverrideIntervention;
+    try {
+      const baseline = await engine.runBaseline(item.tokens);
+      const comparison = await engine.compare({ baselineRunId: baseline.runId, interventions: [patch], predictionPosition: item.predictionPosition });
+      const count = tf.memory().numTensors, cache = engine.cacheStats();
+      const trace = await engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, item.predictionPosition);
+      expect(trace.hasComputationalPath).toBe(comparison.hasComputationalPath);
+      expect(trace.nodes).toHaveLength(item.nodes.length);
+      for (const [i, node] of trace.nodes.entries()) {
+        const expected = item.nodes[i];
+        expect(node.key).toBe(traceNodeKey(expected as TraceAddress));
+        assertClose([node.baselineNorm, node.modifiedNorm, node.maxDifference, node.differenceNorm],
+          [expected.baselineNorm, expected.modifiedNorm, expected.maxDifference, expected.differenceNorm], `${item.name} ${node.key}`, .0005, 2e-5);
+        if (node.stage === 'embedding.output' || node.layer === patch.layer &&
+          (['block.input', 'attention.normalized'].includes(node.stage) || node.position !== patch.query || node.head !== undefined && node.head !== patch.head)) expect(node.change, node.key).toBe('exact');
+      }
+      assertClose(trace.attentionRow!.baselineWeights, item.attentionRow.baselineWeights, `${item.name} baseline row`);
+      expect(trace.attentionRow!.modifiedWeights).toEqual(Array.from(normalizedAttention(patch.weights)));
+      assertClose(trace.attentionRow!.modifiedWeights, item.attentionRow.modifiedWeights, `${item.name} modified row`);
+      const scores = measureTrace(item.attentionRow.baselineScores, item.attentionRow.modifiedScores);
+      assertClose([trace.attentionRow!.scores.baselineNorm, trace.attentionRow!.scores.modifiedNorm], [scores.baselineNorm, scores.modifiedNorm], `${item.name} scores`);
+      expect(trace.attentionRow!.scores.change).toBe('exact');
+      item.baselineReadouts.forEach((row, i) => {
+        assertClose(trace.readouts[i].baselineLogits, row, `${item.name} lens ${i} baseline`);
+        assertClose(trace.readouts[i].modifiedLogits, item.modifiedReadouts[i], `${item.name} lens ${i} modified`);
+      });
+      assertClose(trace.readouts.at(-1)!.baselineLogits, item.baselineLogits, `${item.name} prediction baseline`);
+      assertClose(trace.readouts.at(-1)!.modifiedLogits, item.modifiedLogits, `${item.name} prediction modified`);
+      if (item.name === 'redirect-effect') expect(readoutTitle(firstReadoutFlip(trace)!)).toBe('Layer 2 after attention');
+      if (['redirect-future', 'redirect-unreachable'].includes(item.name)) {
+        expect(trace.hasComputationalPath).toBe(false);
+        expect(trace.nodes.some(node => node.route === 'local' && node.change !== 'exact')).toBe(true);
+        expect(trace.nodes.find(node => node.stage === 'logits' && node.position === item.predictionPosition)?.change).toBe('exact');
+      }
+      if (item.name === 'redirect-identical-row') expect(trace.nodes.every(node => node.change === 'exact')).toBe(true);
+      for (let i = 0; i < 3; i++) await engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, item.predictionPosition);
+      expect(tf.memory().numTensors).toBe(count);
+      expect(engine.cacheStats()).toEqual(cache);
+    } finally { engine.dispose(); }
+  }
+  expect(tf.memory().numTensors).toBe(initial);
+});
 
 it('all seven traces match independent PyTorch stages and readouts and retain no tensors', async () => {
   const initial = tf.memory().numTensors;
@@ -73,7 +121,7 @@ it('validates pair ownership, supported interventions, comparison position, and 
     await expect(engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, 3)).rejects.toThrow('completed comparison');
     await expect(engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, 2.5)).rejects.toThrow('completed comparison');
     expect(tf.memory().numTensors).toBe(before);
-    const unsupported = await engine.compare({ baselineRunId: baseline.runId, interventions: [{ kind: 'attention.override', id: 'a', layer: 0, head: 0, query: 3, weights: [1, 0, 0, 0] }] });
+    const unsupported = await engine.compare({ baselineRunId: baseline.runId, interventions: [{ kind: 'residual.replace', id: 'a', layer: 0, stage: 'block.input', position: 3, values: Array(8).fill(0) }] });
     await expect(engine.inspectEffectTrace(baseline.runId, unsupported.modifiedRunId, 3)).rejects.toThrow('one head scaling');
     const multiple = await engine.compare({ baselineRunId: baseline.runId, interventions: [patch, { ...patch, id: 'second', head: 1 }] });
     await expect(engine.inspectEffectTrace(baseline.runId, multiple.modifiedRunId, 3)).rejects.toThrow('one head scaling');

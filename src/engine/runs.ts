@@ -3,7 +3,8 @@ import { TransformerModel, disposeForward, type ForwardResult } from './model';
 import { BaselineCache, type CacheLease, type CacheStats } from './cache';
 import { effectiveInterventions, planExecution, type ExecutionPreference } from './execution';
 import { comparePredictions, type PredictionComparison } from './comparison';
-import { captureTracePass, checkTracePrediction, summarizeTrace, traceBudget, TRACE_CAPTURE_BUDGET, TRACE_NODE_BUDGET, type EffectTraceReport } from './trace';
+import { captureTracePass, checkTracePrediction, summarizeAttentionRow, summarizeTrace, traceBudget, TRACE_CAPTURE_BUDGET, TRACE_NODE_BUDGET, type EffectTraceReport } from './trace';
+import type { TraceIntervention } from './trace-topology';
 import { activationKey, canReachPrediction, EngineError, requireInput, stages, validateInterventions, validateTokens,
   type ActivationReference, type HeadScaleIntervention, type Intervention, type ModelArtifact } from './contracts';
 
@@ -238,14 +239,15 @@ export class RunEngine {
       const baseline = this.descriptor(baselineRunId), modified = this.descriptor(modifiedRunId);
       requireInput(!baseline.baselineRunId && !baseline.interventions.length && modified.baselineRunId === baselineRunId &&
         JSON.stringify(baseline.tokenIds) === JSON.stringify(modified.tokenIds), 'Trace requires a comparison and its own baseline.');
-      requireInput(modified.interventions.length === 1 && modified.interventions[0].kind === 'head.scale', 'Tracing supports one head scaling.');
+      requireInput(modified.interventions.length === 1 && ['head.scale', 'attention.override'].includes(modified.interventions[0].kind), 'Tracing supports one head scaling or attention redirect.');
       requireInput(Number.isInteger(predictionPosition) && predictionPosition === modified.observedPrediction?.position, 'Trace position must match the completed comparison.');
-      const patch = modified.interventions[0] as HeadScaleIntervention, config = this.model.config, length = baseline.tokenIds.length;
-      const budget = traceBudget(config, length);
+      const patch = modified.interventions[0] as TraceIntervention, config = this.model.config, length = baseline.tokenIds.length;
+      const scoreLayer = patch.kind === 'attention.override' ? patch.layer : undefined;
+      const budget = traceBudget(config, length, scoreLayer !== undefined);
       if (budget.captureBytes > TRACE_CAPTURE_BUDGET || budget.nodes > TRACE_NODE_BUDGET) throw new EngineError('RESOURCE_EXHAUSTION', 'This model/input exceeds the trace measurement budget.');
       const start = performance.now();
-      const original = await captureTracePass(this.model, baseline.tokenIds, [], predictionPosition);
-      const changed = await captureTracePass(this.model, modified.tokenIds, [patch], predictionPosition);
+      const original = await captureTracePass(this.model, baseline.tokenIds, [], predictionPosition, scoreLayer);
+      const changed = await captureTracePass(this.model, modified.tokenIds, [patch], predictionPosition, scoreLayer);
       const size = config.vocabularySize, offset = predictionPosition * size;
       const baseLogits = baseline.logits!.slice(offset, offset + size), changedLogits = modified.observedPrediction!.logits;
       checkTracePrediction(original.values.logits.subarray(offset, offset + size), baseLogits);
@@ -256,6 +258,7 @@ export class RunEngine {
         modelRevision: this.artifact.manifest.modelRevision, runtimeGeneration: this.runtimeGeneration, backend: tf.getBackend(), intervention: structuredClone(patch),
         hasComputationalPath: canReachPrediction(patch, predictionPosition, config, length),
         nodes: summarizeTrace(config, length, predictionPosition, patch, original, changed),
+        attentionRow: summarizeAttentionRow(length, patch, original, changed),
         readouts: [...residuals.map((reference, i) => ({ ...reference, prediction: false, baselineLogits: original.lens[i], modifiedLogits: changed.lens[i] })),
           { stage: 'logits', prediction: true, baselineLogits: Array.from(baseLogits), modifiedLogits: Array.from(changedLogits) }], elapsedMs: performance.now() - start };
     });

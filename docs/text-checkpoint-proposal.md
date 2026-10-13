@@ -83,16 +83,24 @@ All outputs go to `.cache/` (not committed). Run from the repository root after 
 
 ## First run findings
 
-From the first local run (default settings; the weight hash and full `training.json`/`probes.json` are still to be recorded here):
+From the first local run (default settings, seed 2026, 24,000 steps; macOS arm64, PyTorch 2.9.1, CPU, 4 threads, 1,881 s). Weights SHA-256 `174f1f72d4558d86be4842afe5cc79b981c08fc238a798d22e764cf55fe43149`; 49.2M tokens seen. The determinism re-run has not been made on this host.
 
-- **Criterion 2:** met. Validation loss beats the bigram baseline by at least 1 nat/token and beats unigram.
+- **Criterion 2:** met. Selected step 23,500. Validation loss (nats/token):
+
+  | Window set | Model | Bigram | Unigram |
+  | --- | --- | --- | --- |
+  | Openings | 1.463 | 3.117 | 5.728 |
+  | Random offsets | 2.212 | 3.704 | 5.902 |
+  | Mean | 1.838 | 3.410 | 5.815 |
+
+  End of the validation history (mean): 1.847 at step 21,500, 1.844 at 22,000, 1.842 at 22,500, 1.841 at 23,000, 1.838 at 23,500, 1.838 at 24,000. It was still falling slowly when the cosine schedule ended.
 - **Pronoun agreement:** 200 of 200 (threshold 80%). Passed.
 - **Name copying, as first implemented:** 37 of 200 top-1 (18.5%). Not passed. That probe was an implementation error: its templates put two names in context (for example "{A} and {B} went to the {place}. {B} gave a {object} to") and required the earlier one, which tests choosing between names, not the single-name repeat the proposal specifies. Diagnostics on the same prompts:
   - The right name beats a name absent from the prompt in 77% of prompts; mean probability 0.134 against 0.009. The model raises the probability of names it has read.
   - The right name beats the other mentioned name in only 41% of prompts (mean 0.134 against 0.118). It does not pick the correct one.
   - Top-1 predictions are mostly function words: " the" 45, " his" 39, " her" 21.
   - Per template: 9%, 6%, and 41%.
-- **Name copying, as specified (`nameRepeat`):** 155 of 200 top-1 (77.5%). Not passed. It is just under the 80% threshold, and the threshold stays at 80%.
+- **Name copying, as specified (`nameRepeat`):** 155 of 200 top-1 (77.5%). Not passed. It is just under the 80% threshold, and the threshold stays at 80%. Per template: 55/67, 57/67, 43/66. The name outranks every other listed name in 97% of prompts; mean probability 0.453, against 0.003 for an absent name (the control).
 - **Gate:** not met. Criterion 3 fails on name copying, so this run is not an accepted checkpoint.
 - **How the two name probes came about:** the two-name result stays recorded as a failure, under its own name (`twoNameChoice` in `probes.json`). The proposal's single-name probe (`nameRepeat`) was added afterwards, with templates written before seeing any result for them, and with the same 80% top-1 threshold over 200 prompts. Its control is the probability of a name absent from the prompt, and it also reports how often the name outranks every other listed name.
 

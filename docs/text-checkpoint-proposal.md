@@ -1,6 +1,6 @@
 # Proposal: first text checkpoint (for review)
 
-Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. The full training run has not been done, so no checkpoint, probe result, or quality figure exists yet.
+Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. A first full run was made locally; see "First run findings". No text checkpoint is shipped.
 
 ## Goal
 
@@ -80,6 +80,19 @@ All outputs go to `.cache/` (not committed). Run from the repository root after 
 - Determinism: two runs, and a run stopped at step 100 and resumed, produced the same weight hash on this container (300-step smoke runs). Different hosts or PyTorch builds may not match each other; record the hash from the host that trains.
 - `text_probes.py` writes `probes.json` next to the model. The name and object lists are fixed in the script; the names are common in TinyStories (they must be single tokens), so they are not held out from training.
 - Tests: `npm run test:data` (Python; the standard-library tokenizer tests also run in CI), `npm test` (TypeScript encoder), and `npm run parity:tokenizer` (every validation story; needs `scripts/export_text_tokenizer.py --all` first).
+
+## First run findings
+
+From the first local run (default settings; the weight hash and full `training.json`/`probes.json` are still to be recorded here):
+
+- **Criterion 2:** met. Validation loss beats the bigram baseline by at least 1 nat/token and beats unigram.
+- **Pronoun agreement:** 200 of 200 (threshold 80%). Passed.
+- **Name copying, as first implemented:** 37 of 200 top-1 (18.5%). Not passed. That probe was an implementation error: its templates put two names in context (for example "{A} and {B} went to the {place}. {B} gave a {object} to") and required the earlier one, which tests choosing between names, not the single-name repeat the proposal specifies. Diagnostics on the same prompts:
+  - The right name beats a name absent from the prompt in 77% of prompts; mean probability 0.134 against 0.009. The model raises the probability of names it has read.
+  - The right name beats the other mentioned name in only 41% of prompts (mean 0.134 against 0.118). It does not pick the correct one.
+  - Top-1 predictions are mostly function words: " the" 45, " his" 39, " her" 21.
+  - Per template: 9%, 6%, and 41%.
+- **Response:** the result stays recorded as a failure, under its own name (`twoNameChoice` in `probes.json`). The proposal's single-name probe (`nameRepeat`) was added afterwards, with templates written before seeing any result for them, and with the same 80% top-1 threshold over 200 prompts. Its control is the probability of a name absent from the prompt, and it also reports how often the name outranks every other listed name.
 
 ## Decisions requested
 

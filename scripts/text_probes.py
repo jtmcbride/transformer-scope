@@ -27,6 +27,13 @@ COPYING = [
     'One day, {A} met {B} at the {place}. {B} wanted to share a {object} with',
 ]
 PRONOUN = 'Once upon a time, there was a little {kind} named {name}. One day,'
+# The proposal's name-copying probe: one name in context, a position where a name is expected. Added after the
+# two-name probe failed (that probe was an implementation error, not the proposal's design); thresholds unchanged.
+REPEAT = [
+    'Once upon a time, there was a little {kind} named {name}. One day, {name} went to the {place}. Mom said, "Hello,',
+    'One day, a {kind} named {name} went to the {place}. At the {place}, {name} found a {object}. "Look!" said',
+    'There was a {kind} named {name} who loved the {place}. Every day, {name} played with a {object}. One morning,',
+]
 
 
 def load_model(directory):
@@ -57,7 +64,28 @@ def next_log_probs(model, tokenizer, text):
     return logits[0, -1].double().log_softmax(-1)
 
 
-def name_copying(model, tokenizer, generator):
+def name_repeat(model, tokenizer, generator):
+    results = []
+    for i in range(PROMPTS):
+        kind = 'boy' if i % 2 == 0 else 'girl'
+        name = generator.choice(BOYS if kind == 'boy' else GIRLS)
+        absent = generator.choice([n for n in GIRLS + BOYS if n != name])
+        prompt = REPEAT[i % len(REPEAT)].format(kind=kind, name=name, place=generator.choice(PLACES), object=generator.choice(OBJECTS))
+        scores = next_log_probs(model, tokenizer, prompt)
+        top, expected = int(scores.argmax()), single(tokenizer, name)
+        others = [single(tokenizer, n) for n in GIRLS + BOYS if n != name]
+        results.append(dict(prompt=prompt, expected=name, top=tokenizer.display(top), correct=top == expected,
+                            highestName=bool(scores[expected] > scores[others].max()),
+                            pExpected=float(scores[expected].exp()), pAbsentName=float(scores[single(tokenizer, absent)].exp())))
+    rate = sum(r['correct'] for r in results) / len(results)
+    return dict(description='The only name in the context is the top-1 next token; control: probability of a name that never appeared.',
+                templates=REPEAT, prompts=len(results), top1Rate=rate, threshold=THRESHOLD, passed=rate >= THRESHOLD,
+                highestNameRate=sum(r['highestName'] for r in results) / len(results),
+                meanExpectedProbability=float(np.mean([r['pExpected'] for r in results])),
+                meanAbsentNameProbability=float(np.mean([r['pAbsentName'] for r in results])), results=results)
+
+
+def two_name_choice(model, tokenizer, generator):
     names = GIRLS + BOYS
     results = []
     for i in range(PROMPTS):
@@ -70,8 +98,12 @@ def name_copying(model, tokenizer, generator):
                             pExpected=float(scores[single(tokenizer, a)].exp()), pOther=float(scores[single(tokenizer, b)].exp()),
                             pAbsentName=float(scores[single(tokenizer, absent)].exp())))
     rate = sum(r['correct'] for r in results) / len(results)
-    return dict(description='The earlier-mentioned name is the top-1 next token; control: probability of a name that never appeared.',
+    return dict(description='Two names in context; the earlier-mentioned one is the top-1 next token; control: probability of a name that never appeared. '
+                'This was implemented as the name-copying gate by mistake; it tests choosing between names, which the proposal did not specify.',
                 templates=COPYING, prompts=len(results), top1Rate=rate, threshold=THRESHOLD, passed=rate >= THRESHOLD,
+                expectedOverOtherRate=float(np.mean([r['pExpected'] > r['pOther'] for r in results])),
+                expectedOverAbsentRate=float(np.mean([r['pExpected'] > r['pAbsentName'] for r in results])),
+                meanOtherProbability=float(np.mean([r['pOther'] for r in results])),
                 meanExpectedProbability=float(np.mean([r['pExpected'] for r in results])),
                 meanAbsentNameProbability=float(np.mean([r['pAbsentName'] for r in results])), results=results)
 
@@ -98,10 +130,11 @@ def main():
     directory = Path(parser.parse_args().model)
     model, tokenizer, manifest = load_model(directory)
     report = dict(modelRevision=manifest['modelRevision'], seed=SEED,
-                  nameCopying=name_copying(model, tokenizer, random.Random(SEED)),
-                  pronounAgreement=pronoun_agreement(model, tokenizer, random.Random(SEED + 1)))
+                  twoNameChoice=two_name_choice(model, tokenizer, random.Random(SEED)),
+                  pronounAgreement=pronoun_agreement(model, tokenizer, random.Random(SEED + 1)),
+                  nameRepeat=name_repeat(model, tokenizer, random.Random(SEED + 2)))
     (directory / 'probes.json').write_text(json.dumps(report, indent=2) + '\n')
-    for key in ('nameCopying', 'pronounAgreement'):
+    for key in ('nameRepeat', 'pronounAgreement', 'twoNameChoice'):
         probe = report[key]
         rate = probe.get('top1Rate', probe.get('agreementRate'))
         print(f"{key}: {rate:.1%} (threshold {THRESHOLD:.0%}) — {'passed' if probe['passed'] else 'NOT passed; report as a finding'}")

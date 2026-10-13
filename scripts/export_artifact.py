@@ -8,7 +8,8 @@ from torch.nn import functional as F
 from reference_model import configuration, serialized_tensor
 
 
-def write_artifact(model, output, symbols, model_id, provenance):
+def write_artifact(model, output, symbols, model_id, provenance, tokenizer_bytes=None):
+    """symbols: a symbol list for a format 1 tokenizer, or None when tokenizer_bytes holds a serialized tokenizer."""
     output.mkdir(parents=True, exist_ok=True)
     binary, entries = bytearray(), []
     for name, (parameter, transpose) in model.exported_parameters().items():
@@ -16,8 +17,9 @@ def write_artifact(model, output, symbols, model_id, provenance):
         payload = np.asarray(record['values'], dtype='<f4').tobytes()
         entries.append(dict(name=name, shape=record['shape'], byteOffset=len(binary), byteLength=len(payload)))
         binary.extend(payload)
-    tokenizer = dict(schemaVersion=1, kind='symbols', bosTokenId=0, tokens=symbols)
-    tokenizer_bytes = (json.dumps(tokenizer, indent=2) + '\n').encode()
+    if tokenizer_bytes is None:
+        tokenizer = dict(schemaVersion=1, kind='symbols', bosTokenId=0, tokens=symbols)
+        tokenizer_bytes = (json.dumps(tokenizer, indent=2) + '\n').encode()
     manifest = dict(schemaVersion=1, architectureVersion='preln-absolute-tied-v1', modelId=model_id,
                     config=configuration(model), dtype='float32-le', matrixOrientation='input-output',
                     conventions=dict(gelu='tanh', layerNormVariance='population', position='learned-absolute',

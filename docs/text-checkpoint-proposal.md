@@ -1,6 +1,6 @@
 # Proposal: first text checkpoint (for review)
 
-Status: proposed, not approved. Nothing in this document has been trained or measured beyond the throughput figures below.
+Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. The full training run has not been done, so no checkpoint, probe result, or quality figure exists yet.
 
 ## Goal
 
@@ -10,13 +10,13 @@ A small checkpoint trained on TinyStories V2 that runs interactively in the brow
 
 - **Source:** TinyStories V2 (GPT-4) at the pinned revision in `docs/tinystories-source.json` (CDLA-Sharing-1.0 on the dataset card; the generator's terms also need review before weights are redistributed).
 - **Preprocessing:** split stories on `<|endoftext|>` and drop the leading fragment in the validation file. Normalize line endings to `\n` and strip surrounding whitespace. No lowercasing or other normalization; anything else is reported, not altered.
-- **Training subset:** the first stories in file order, up to the token budget below, with byte offsets and a SHA-256 of the subset recorded. The validation file is used only for model selection.
+- **Training subset:** the first 250,000 stories in file order (about 55M tokens), with a SHA-256 of the subset recorded. The validation file is used only for model selection.
 - **Held-out audit:** a separate audit set of 2,000 stories, taken from the end of the training file and excluded from training, kept untouched until the final report. This fixes the retrieval model's weakness, where test data also served as a development gate.
 
 ## Tokenizer
 
 - **Type:** byte-level BPE trained by our own Python script on the training subset. Vocabulary 2,048: 256 byte tokens, 1,789 merges, and the specials `<BOS>`, `<EOS>`, `<PAD>`.
-- **Pre-splitting:** a documented regular expression, ASCII-oriented, with byte fallback for anything else: `` ?[A-Za-z]+| ?[0-9]| ?[^A-Za-z0-9\s]+|\s+``. Merges are applied in rank order within each piece, with deterministic tie-breaking.
+- **Pre-splitting:** a documented regular expression, ASCII-oriented, with byte fallback for anything else: `` ?[A-Za-z]+| ?[0-9]| ?[^A-Za-z0-9 \t\n\r]+|[ \t\n\r]+``. Whitespace is listed explicitly because Python's and JavaScript's `\s` differ. Training breaks count ties by the smallest pair; encoding applies the lowest-rank merge first, to every occurrence, left to right. Trained on the first 20,000 training stories.
 - **Artifact:** `tokenizer.json` (format version 2) records the regular expression, the ordered merges, the specials, and a hash. The model manifest pins that hash, as it does today.
 - **Browser parity:** a TypeScript encoder and decoder must produce byte-identical token IDs to the Python reference on every validation story, and decoding must reproduce the input bytes exactly.
 - **Screen changes:** free-text input replaces the symbol list for this checkpoint. Tokens are displayed as decoded pieces, with spaces made visible.
@@ -32,11 +32,11 @@ A small checkpoint trained on TinyStories V2 that runs interactively in the brow
 
 A 64-token context keeps the attention matrix (64 × 64 cells) usable on phones. Longer contexts first need a virtualized attention view.
 
-Measured on this container (4 CPU cores, PyTorch 2.9.1 reference model, batch 32 × 64, Adam): about 430 ms per step, or about 4,700 tokens/s. A 2.59M-parameter, 128-context alternative ran at about 1,800 tokens/s.
+Measured on this container (4 CPU cores, PyTorch 2.9.1 reference model, batch 32 × 64, Adam): an early benchmark gave about 430 ms per step; the implemented trainer runs at about 80 ms per step (about 26,000 tokens/s). A 2.59M-parameter, 128-context alternative ran at about 1,800 tokens/s.
 
 ## Training budget
 
-- About 3 CPU hours, which is roughly 50M tokens. That is about 10% of the V2 training file and well over one pass of this model's parameter count in tokens.
+- 24,000 steps of 32 × 64 tokens, roughly 50M tokens or about one pass over the training subset. At the measured speed that is about 35 minutes on this container's 4 cores; other hosts differ.
 - The training recipe follows the retrieval trainer: Adam, gradient clipping 1.0, cosine decay, and checkpoint selection by validation loss every 500 steps. One recorded seed.
 - A second identical run must reproduce the same weight hash on this host, as was done for the retrieval model.
 
@@ -63,6 +63,23 @@ All criteria are fixed before training.
 5. Fixtures, engine and browser parity tests.
 6. Screen support for free text and decoded tokens.
 7. Prepared text recipes: one effect, one small reachable effect, one no-path control, all measured as before.
+
+## Pipeline
+
+All outputs go to `.cache/` (not committed). Run from the repository root after `uv sync --locked`:
+
+```sh
+.venv/bin/python scripts/text_data.py            # fetch the pinned files, verify sizes and SHA-256, write the subsets and prepared.json
+.venv/bin/python scripts/text_tokenizer.py       # train the BPE tokenizer; prints its SHA-256
+.venv/bin/python scripts/train_text.py           # train, select by validation loss, export; --resume continues from the checkpoint
+.venv/bin/python scripts/text_probes.py          # run the gating probes against the export
+```
+
+- `text_tokenizer.py` on the default subsets must print SHA-256 `bea77691157fbd7c2e339aa80e421057392fdda28dd003625336ed70dd0fc551`, the tokenizer whose parity was checked.
+- `train_text.py` writes `.cache/text/export/` (manifest, tokenizer, weights, `training.json`). `training.json` records the environment, unigram and bigram baselines, criterion 2's result, and the validation history. Validation loss is the mean of two window sets: story openings and seeded random offsets.
+- Determinism: two runs, and a run stopped at step 100 and resumed, produced the same weight hash on this container (300-step smoke runs). Different hosts or PyTorch builds may not match each other; record the hash from the host that trains.
+- `text_probes.py` writes `probes.json` next to the model. The name and object lists are fixed in the script; the names are common in TinyStories (they must be single tokens), so they are not held out from training.
+- Tests: `npm run test:data` (Python; the standard-library tokenizer tests also run in CI), `npm test` (TypeScript encoder), and `npm run parity:tokenizer` (every validation story; needs `scripts/export_text_tokenizer.py --all` first).
 
 ## Decisions requested
 

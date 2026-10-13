@@ -22,10 +22,11 @@ jobs:
           node-version: 24.18.0
           cache: npm
       - run: npm ci
-      - name: Dataset invariants (standard library)
+      - name: Dataset and tokenizer invariants (standard library)
         run: |
           python3 -m unittest discover -s scripts -p 'test_retrieval_data.py'
           python3 -m unittest discover -s scripts -p 'test_artifacts.py'
+          python3 -m unittest discover -s scripts -p 'test_text_pipeline.py'
       - run: npm test
       - run: npm run build
       - run: npm run check:artifacts

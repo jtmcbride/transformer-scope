@@ -21,7 +21,8 @@
     "fixtures:exploration": ".venv/bin/python scripts/export_exploration.py",
     "fixtures:residual": ".venv/bin/python scripts/export_residual.py",
     "fixtures:attention": ".venv/bin/python scripts/export_attention.py",
-    "fixtures:ablation": ".venv/bin/python scripts/export_ablation.py"
+    "fixtures:ablation": ".venv/bin/python scripts/export_ablation.py",
+    "parity:tokenizer": "vitest run --config vitest.parity.config.ts"
   },
   "dependencies": {
     "@tensorflow/tfjs-core": "4.22.0",

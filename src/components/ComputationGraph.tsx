@@ -5,7 +5,7 @@ import { changeLabel, handoff, measurementFor, readoutFor, readoutProbabilities,
 import { redirectConnection } from './AttentionRedirect';
 export { nodeKey, stageNames, type FlowNode, type FlowStage } from '../flow';
 
-interface Props { config: ModelConfig; selected: FlowNode; intervention?: Intervention; disabled: boolean; onSelect: (node: FlowNode) => void; trace?: TraceView; symbols?: string[]; target?: number }
+interface Props { config: ModelConfig; selected: FlowNode; intervention?: Intervention; disabled: boolean; onSelect: (node: FlowNode) => void; trace?: TraceView; symbols?: string[]; target?: number; sourceTokens?: number[] }
 export function ComputationGraph(props: Props) {
   const [collapsed, setCollapsed] = useState<number[]>([]);
   const selectedKey = nodeKey(props.selected);
@@ -22,11 +22,16 @@ export function ComputationGraph(props: Props) {
     const measured = props.trace ? measurementFor(props.trace, selection) : undefined;
     const weights = props.trace && selection.kind === 'head' && selection.part !== 'attention' ? measurementFor(props.trace, selection, true) : undefined;
     const readout = props.trace ? readoutFor(props.trace, selection) : undefined;
-    return <button type="button" data-trace-route={measured?.route} data-trace-change={measured?.change}
+    return <>
+      {edited && props.trace && props.intervention?.kind === 'residual.replace' && <div className="graph-copy-connection" data-testid="graph-copy-connection">
+        Source residual at position {props.intervention.position} <span aria-hidden="true">↓</span><strong>Copy into {title.toLowerCase()}</strong>
+        {props.sourceTokens && props.symbols && <small>Source input: {props.symbols[props.sourceTokens[props.intervention.position]]} → current input: {props.symbols[props.trace.report.tokenIds[props.intervention.position]]}</small>}
+      </div>}
+      <button type="button" data-trace-route={measured?.route} data-trace-change={measured?.change}
       className={`flow-node ${extra} ${nodeKey(props.selected) === key ? 'node-selected' : ''} ${edited ? 'node-edited' : ''} ${measured ? 'measured-node' : ''}`}
       aria-label={selection.kind === 'head' ? `Inspect Layer ${selection.layer + 1} Head ${selection.head + 1}${selection.part === 'attention' ? ' attention row' : ''}` : selection.kind === 'stage' ? `Inspect Layer ${selection.layer + 1} ${title}` : `Inspect ${title}`}
       aria-pressed={nodeKey(props.selected) === key} disabled={props.disabled} onClick={() => props.onSelect(selection)}>
-      <strong>{title}</strong>{detail && <span>{detail}</span>}{edited && <span className="node-tag">{props.intervention?.kind === 'attention.override' ? `Edited query ${props.intervention.query}` : props.trace && props.intervention?.kind === 'head.scale' && props.intervention.tokens.kind === 'indices' ? `Edited at position ${props.intervention.tokens.indices.join(', ')}` : 'Edited here'}</span>}
+      <strong>{title}</strong>{detail && <span>{detail}</span>}{edited && <span className="node-tag">{props.intervention?.kind === 'residual.replace' ? `Copied at position ${props.intervention.position}` : props.intervention?.kind === 'attention.override' ? `Edited query ${props.intervention.query}` : props.trace && props.intervention?.kind === 'head.scale' && props.intervention.tokens.kind === 'indices' ? `Edited at position ${props.intervention.tokens.indices.join(', ')}` : 'Edited here'}</span>}
       {measured && <>
         <span className="trace-node-position">{selection.kind === 'readout' ? `Prediction position ${props.trace!.report.predictionPosition}` : `At position ${props.trace!.position}`}</span>
         {measured.route !== 'unaffected' && <span className={`route-tag route-${measured.route}`}>{routeLabel[measured.route]}</span>}
@@ -37,7 +42,7 @@ export function ComputationGraph(props: Props) {
       {readout && props.symbols && <span className="node-readout" title={`Probability of ${props.symbols[props.target ?? 0]}: ${(readoutProbabilities(readout.baselineLogits, props.target ?? 0).targetProbability * 100).toFixed(4)}% → ${(readoutProbabilities(readout.modifiedLogits, props.target ?? 0).targetProbability * 100).toFixed(4)}%`}>
         {readout.prediction ? 'Prediction' : 'Diagnostic'} @{props.trace!.report.predictionPosition}: {props.symbols[readoutProbabilities(readout.baselineLogits, 0).top]} → {props.symbols[readoutProbabilities(readout.modifiedLogits, 0).top]}
       </span>}
-    </button>;
+    </button></>;
   }
   const arrow = (from: FlowNode[], to: FlowNode) => {
     const route = props.trace && measurementFor(props.trace, to)?.route;

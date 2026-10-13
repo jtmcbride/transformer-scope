@@ -39,6 +39,10 @@ def case(model, manifest, tokens, patch, position, name):
                 return capture[f"{patch['layer']}:{stage}"][0, patch['head'], patch['query']].tolist()
             result['attentionRow'] = dict(baselineWeights=row(baseline, 'attention.weights'), modifiedWeights=row(changed, 'attention.weights'),
                                           baselineScores=row(baseline, 'attention.scores'), modifiedScores=row(changed, 'attention.scores'))
+        if patch['kind'] == 'residual.replace':
+            key = f"{patch['layer']}:{patch['stage']}"
+            result['residualRow'] = dict(baselineValues=baseline[key][0, patch['position']].tolist(), copiedValues=changed[key][0, patch['position']].tolist())
+            assert result['residualRow']['copiedValues'] == patch['values'], 'The capture must contain the copied row.'
         return result
 
 if __name__ == '__main__':

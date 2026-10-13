@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import fixture from '../fixtures/trace-reference.json' with { type: 'json' };
 import redirectFixture from '../fixtures/attention-trace-reference.json' with { type: 'json' };
+import copyFixture from '../fixtures/residual-trace-reference.json' with { type: 'json' };
 import type { Commands, Command, WorkerResponse } from '../../src/workers/protocol';
 import type { EffectTraceReport } from '../../src/engine/trace';
 
@@ -156,7 +157,14 @@ test('CPU and supported WebGL traces match all independent fixtures and clean up
         const selected = cases.filter(item => item.modelRevision === revision);
         for (const item of selected) {
           const baseline = await request('BASELINE', { tokenIds: item.tokens });
-          const comparison = await request('COMPARE', { baselineRunId: baseline.runId, interventions: [item.intervention as Commands['COMPARE']['request']['interventions'][number]], predictionPosition: item.predictionPosition });
+          let sourceId: string | undefined;
+          let patch = item.intervention as Commands['COMPARE']['request']['interventions'][number];
+          if ('sourceTokens' in item && patch.kind === 'residual.replace') {
+            sourceId = (await request('BASELINE', { tokenIds: item.sourceTokens })).runId;
+            const read = await request('INSPECT', { runId: sourceId, reference: { layer: patch.layer, stage: patch.stage }, selection: { position: patch.position } });
+            patch = { ...patch, values: Array.from(read.values) };
+          }
+          const comparison = await request('COMPARE', { baselineRunId: baseline.runId, interventions: [patch], predictionPosition: item.predictionPosition });
           const before = await request('RESOURCES', {});
           const trace: EffectTraceReport = await request('TRACE', { baselineRunId: baseline.runId, modifiedRunId: comparison.modifiedRunId, predictionPosition: item.predictionPosition });
           const after = await request('RESOURCES', {});
@@ -171,13 +179,19 @@ test('CPU and supported WebGL traces match all independent fixtures and clean up
             close(trace.attentionRow!.modifiedWeights, item.attentionRow.modifiedWeights);
             if (trace.attentionRow!.scores.change !== 'exact') throw new Error('A redirect changed its own scores.');
           }
+          if ('residualRow' in item && patch.kind === 'residual.replace') {
+            close(trace.residualRow!.baselineValues, item.residualRow.baselineValues);
+            close(trace.residualRow!.copiedValues, item.residualRow.copiedValues);
+            if (trace.residualRow!.copiedValues.some((value, i) => value !== Math.fround(patch.values[i]))) throw new Error('The trace did not capture the copied row.');
+          }
+          if (sourceId) await request('RELEASE', { runId: sourceId });
           await request('RELEASE', { runId: comparison.modifiedRunId }); await request('RELEASE', { runId: baseline.runId });
         }
         reports.push({ backend, checkpoint, status: 'passed', count: selected.length });
       }
       return reports;
     } finally { worker.terminate(); }
-  }, { url: workerUrl, cases: [...fixture.cases, ...redirectFixture.cases] });
+  }, { url: workerUrl, cases: [...fixture.cases, ...redirectFixture.cases, ...copyFixture.cases] });
   for (const result of results) {
     if (result.status === 'unsupported') testInfo.annotations.push({ type: 'unsupported-webgl', description: result.detail! });
     if (result.backend === 'cpu' || testInfo.project.name === 'chromium') expect(result.status).toBe('passed');
@@ -209,7 +223,7 @@ test('mobile and keyboard trace navigation keep controls and prediction visible'
   }
 });
 
-test('input replacement and replay reset the trace, while export and unsupported modes preserve the completed experiment', async ({ page }) => {
+test('input replacement and replay reset the trace, while export and copy drafts preserve the completed experiment', async ({ page }) => {
   await recordCommands(page);
   await page.goto('');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
@@ -238,9 +252,12 @@ test('input replacement and replay reset the trace, while export and unsupported
   await ready(page);
   await expect(page.getByTestId('trace-step')).toContainText('attention weights');
   await page.getByLabel('Intervention type').selectOption('patch');
+  await expect(page.locator('.status')).toHaveText('Showing redirected attention');
+  await page.getByRole('button', { name: 'Copy from source', exact: true }).click();
   await expect(page.locator('.status')).toHaveText('Showing patched residual');
-  await expect(page.getByTestId('trace-step')).toHaveText('Head scaling or attention redirect required');
-  await expect(page.locator('.flow-node[data-trace-change]')).toHaveCount(0);
+  await ready(page);
+  await expect(page.getByTestId('trace-step')).toContainText('Layer input');
+  await expect(page.getByTestId('graph-copy-connection')).toHaveCount(1);
   await expect(page.getByRole('alert')).toHaveCount(0);
   await page.getByRole('button', { name: 'Exit trace', exact: true }).click();
 });

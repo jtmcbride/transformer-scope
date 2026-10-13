@@ -20,7 +20,11 @@ export function traceSteps(report: EffectTraceReport, origin: number): TraceStep
   const stage = (layer: number, key: 'block.input' | 'attention.normalized' | 'attention.projected' | 'attention.residual' | 'mlp.output' | 'block.output') =>
     steps.push({ node: { kind: 'stage', layer, stage: key }, position, title: `Layer ${layer + 1} · ${stageNames[key]}` });
   for (let layer = patch.layer; layer < report.config.layers; layer++) {
-    if (layer === patch.layer) {
+    if (layer === patch.layer && patch.kind === 'residual.replace' && patch.stage === 'attention.residual') {
+      stage(layer, 'attention.residual'); stage(layer, 'mlp.output'); stage(layer, 'block.output');
+      continue;
+    }
+    if (layer === patch.layer && patch.kind !== 'residual.replace') {
       if (patch.kind === 'attention.override') steps.push({ node: { kind: 'head', layer, head: patch.head, part: 'attention' }, position, title: `Layer ${layer + 1} · Head ${patch.head + 1} attention weights` });
       steps.push({ node: { kind: 'head', layer, head: patch.head }, position, title: `Layer ${layer + 1} · Head ${patch.head + 1} output` });
     }
@@ -43,9 +47,11 @@ export function readoutProbabilities(logits: number[], target: number) {
 export const firstReadoutFlip = (report: EffectTraceReport) => report.readouts.find(row => readoutProbabilities(row.baselineLogits, 0).top !== readoutProbabilities(row.modifiedLogits, 0).top);
 export function handoff(report: EffectTraceReport, origin?: number) {
   const patch = report.intervention;
-  const from = patch.kind === 'attention.override' ? patch.query : patch.tokens.kind === 'all' ? origin : patch.tokens.indices.length === 1 ? patch.tokens.indices[0] : undefined;
-  if (!report.hasComputationalPath || from === undefined || from >= report.predictionPosition || patch.layer >= report.config.layers - 1) return null;
-  return { layer: patch.layer + 1, from, to: report.predictionPosition, allPositions: patch.kind === 'head.scale' && patch.tokens.kind === 'all' };
+  const from = patch.kind === 'attention.override' ? patch.query : patch.kind === 'residual.replace' ? patch.position
+    : patch.tokens.kind === 'all' ? origin : patch.tokens.indices.length === 1 ? patch.tokens.indices[0] : undefined;
+  const layer = patch.kind === 'residual.replace' && patch.stage === 'block.input' ? patch.layer : patch.layer + 1;
+  if (!report.hasComputationalPath || from === undefined || from >= report.predictionPosition || layer >= report.config.layers) return null;
+  return { layer, from, to: report.predictionPosition, allPositions: patch.kind === 'head.scale' && patch.tokens.kind === 'all' };
 }
 export function readoutTitle(row: TraceReadout) {
   return row.prediction ? 'Model prediction' : row.stage === 'embedding.output' ? 'Input embedding' : `Layer ${row.layer! + 1} ${row.stage === 'attention.residual' ? 'after attention' : 'block output'}`;

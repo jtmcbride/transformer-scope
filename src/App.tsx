@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { requireInput, tokenize, type Intervention, type SymbolTokenizer } from './engine/contracts';
-import { hookKeys, hookLabel, parseHook, swappedQuery } from './patching';
+import { requireInput, residualHooks, tokenize, type Intervention, type SymbolTokenizer } from './engine/contracts';
+import { hookLabel, parseHook, swappedQuery } from './patching';
 import type { ComparisonResult, RunSummary } from './engine/runs';
 import type { Commands } from './workers/protocol';
 import type { ProbeReport } from './engine/probe';
@@ -18,6 +18,7 @@ import { NodeInspector } from './components/NodeInspector';
 import { PredictionSummary } from './components/PredictionSummary';
 import { EffectTrace } from './components/EffectTrace';
 import { AttentionRedirect } from './components/AttentionRedirect';
+import { ResidualCopy, type CopyDraft } from './components/ResidualCopy';
 import { useEffectTrace } from './hooks/useEffectTrace';
 import { matchingStep, traceSteps, type TraceView } from './trace-view';
 import { ModelClient } from './workers/client';
@@ -62,6 +63,7 @@ export default function App() {
   const controlsRef = useRef<Controls>(defaults);
   const baselineInspector = useRef<{ key: string; attention: number[]; raw: number[] } | null>(null);
   const source = useRef<{ owner: ModelClient; run: RunSummary } | null>(null);
+  const sourceFlight = useRef<object | null>(null);
   const [choice, setChoice] = useState<ModelChoice>(initialChoice);
   const [experiments, setExperiments] = useState<ExperimentMetadata | null>(null);
   const [activeRecipe, setActiveRecipe] = useState<ExperimentRecipe | null>(null);
@@ -79,7 +81,8 @@ export default function App() {
   const [selectedCell, setSelectedCell] = useState<{ query: number; source: number } | null>(null);
   const [sessionEnded, setSessionEnded] = useState(false);
   const [sourceText, setSourceText] = useState('');
-  const [sourceTokens, setSourceTokens] = useState<number[] | null>(null);
+  const [copying, setCopying] = useState(false);
+  const [copyDraft, setCopyDraft] = useState<CopyDraft | null>(null);
   // Inspection is navigation. It does not change the completed intervention until a control is edited.
   const [selectedNode, setSelectedNode] = useState<FlowNode>({ kind: 'head', layer: 0, head: 0 });
   const [traceNavigation, setTraceNavigation] = useState({ key: '', index: 0, origin: 0, position: 0 });
@@ -189,6 +192,8 @@ export default function App() {
   }
 
   function schedule(next: Controls, run = baseline.current, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument) {
+    if (next.mode === 'patch') setCopyDraft({ hook: next.hook, position: next.patchPosition });
+    else { setCopyDraft(null); sourceFlight.current = null; setCopying(false); }
     setSelectedNode(next.mode === 'patch' ? { kind: 'stage', ...parseHook(next.hook) } : { kind: 'head', layer: next.layer, head: next.head });
     setActiveRecipe(recipe);
     controlsRef.current = next; setControls(next);
@@ -200,39 +205,51 @@ export default function App() {
 
   /** A source run belongs to one target input and worker; it is released whenever either changes. */
   function releaseSource(owner = client.current) {
+    sourceFlight.current = null; setCopying(false);
     const old = source.current;
-    source.current = null; setSourceTokens(null);
+    source.current = null;
     if (old && old.owner === owner) void owner.request('RELEASE', { runId: old.run.runId }).catch(() => {});
   }
 
   async function applySource(text: string, restored?: Controls, replay?: ExperimentDocument, loaded = model) {
     const target = baseline.current, owner = client.current;
     if (!loaded || !target || !owner) return;
+    const flight = {}, generation = version.current;
+    sourceFlight.current = flight; setCopying(true);
     setError(null); setSourceText(text);
     try {
       const tokens = tokenize(text, loaded.tokenizer, loaded.manifest.config.contextLength);
       requireInput(tokens.length === target.tokenIds.length, `The source must have the same number of symbols as the input (${target.tokenIds.length - 1}).`);
-      const run = await owner.request('BASELINE', { tokenIds: tokens });
-      if (!alive.current || client.current !== owner || baseline.current !== target) { void owner.request('RELEASE', { runId: run.runId }).catch(() => {}); return; }
-      releaseSource(owner);
-      source.current = { owner, run }; setSourceTokens(tokens);
+      const reusable = source.current?.owner === owner && JSON.stringify(source.current.run.tokenIds) === JSON.stringify(tokens) ? source.current.run : undefined;
+      const run = reusable ?? await owner.request('BASELINE', { tokenIds: tokens });
+      if (!alive.current || client.current !== owner || baseline.current !== target || sourceFlight.current !== flight || generation !== version.current) {
+        if (!reusable) void owner.request('RELEASE', { runId: run.runId }).catch(() => {});
+        return;
+      }
+      if (!reusable) releaseSource(owner);
+      source.current = { owner, run };
       const differing = tokens.findIndex((token, i) => token !== target.tokenIds[i]);
       schedule(restored ? { ...restored, mode: 'patch' }
         : { ...controlsRef.current, mode: 'patch', patchPosition: differing >= 0 ? differing : Math.min(controlsRef.current.patchPosition, tokens.length - 1) }, target, null, replay);
-    } catch (failure) { if (alive.current && client.current === owner) setError(failure instanceof Error ? failure.message : String(failure)); }
+    } catch (failure) { if (alive.current && client.current === owner && sourceFlight.current === flight) setError(failure instanceof Error ? failure.message : String(failure)); }
+    finally { if (sourceFlight.current === flight) { sourceFlight.current = null; if (alive.current) setCopying(false); } }
   }
 
   function chooseMode(mode: Controls['mode'], base = controlsRef.current) {
     if (mode === 'head') { schedule({ ...base, mode }); return; }
     if (mode === 'attention') { schedule({ ...base, mode, query: base.position, focus: 'uniform' }); return; }
-    if (source.current && sourceTokens) { schedule({ ...base, mode }); return; }
     const target = baseline.current, loaded = model;
     if (!target || !loaded) return;
     const own = target.tokenIds.slice(1).map(id => loaded.tokenizer.tokens[id]).join(' ');
     // Text left from another input or checkpoint may no longer fit; then start from a suggestion that does.
     const fits = (text: string) => { try { return tokenize(text, loaded.tokenizer, loaded.manifest.config.contextLength).length === target.tokenIds.length; } catch { return false; } };
     const typed = sourceText.trim();
-    void applySource(typed && fits(typed) ? typed : swappedQuery(target.tokenIds, loaded.tokenizer) ?? own);
+    const proposed = typed && fits(typed) ? typed : swappedQuery(target.tokenIds, loaded.tokenizer) ?? own;
+    const preview = tokenize(proposed, loaded.tokenizer, loaded.manifest.config.contextLength);
+    const differing = preview.findIndex((token, i) => token !== target.tokenIds[i]);
+    const position = copyDraft?.position ?? (controlsRef.current.mode === 'patch' ? controlsRef.current.patchPosition : differing >= 0 ? differing : 0);
+    setSourceText(proposed); draftCopy({ hook: base.hook, position });
+    requestAnimationFrame(() => document.querySelector('.residual-copy')?.scrollIntoView({ block: 'start', behavior: 'instant' }));
   }
 
   async function establish(loaded: LoadedModel, input: string, generation: number, recipe: ExperimentRecipe | null = null, replay?: ExperimentDocument, settings?: Controls) {
@@ -264,7 +281,8 @@ export default function App() {
   async function load(backend: 'auto' | 'cpu' | 'webgl', selected: ModelChoice, input?: string, restored?: ExperimentDocument, settings?: Controls) {
     const owner = client.current;
     const generation = ++version.current;
-    latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null; source.current = null; setSourceTokens(null);
+    latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null; source.current = null;
+    sourceFlight.current = null; setCopying(false); setCopyDraft(null);
     setChoice(selected); setExperiments(null); setActiveRecipe(null);
     setLoading(true); setModel(null); setDisplay(null); setError(null); setProbe(null);
     try {
@@ -395,10 +413,11 @@ export default function App() {
   const rows = display ? display.comparison.displayTokens : [];
   const length = display?.tokens.length ?? 0;
 
-  const locked = loading || probing || transferring || !model || sessionEnded;
+  const locked = loading || probing || transferring || copying || !model || sessionEnded;
   const tracing = useEffectTrace(client.current, display?.comparison ?? null, pending || locked);
   const report = tracing.report;
   const origin = report?.intervention.kind === 'attention.override' ? report.intervention.query
+    : report?.intervention.kind === 'residual.replace' ? report.intervention.position
     : report?.intervention.tokens.kind === 'indices' ? report.intervention.tokens.indices[0] ?? report.predictionPosition : report?.predictionPosition ?? 0;
   const navigation = report && traceNavigation.key === report.modifiedRunId ? traceNavigation : { key: report?.modifiedRunId ?? '', index: 0, origin, position: origin };
   const steps = useMemo(() => report ? traceSteps(report, navigation.origin) : [], [report, navigation.origin]);
@@ -412,14 +431,25 @@ export default function App() {
   const headControls: Controls = selectedNode.kind === 'head' && (selectedNode.layer !== controls.layer || selectedNode.head !== controls.head || controls.mode === 'patch')
     ? { ...controls, mode: 'head', layer: selectedNode.layer, head: selectedNode.head, factor: 1, scope: 'all' } : controls;
   const patchNode = controls.mode === 'patch' && selectedNode.kind === 'stage' && selectedNode.layer === parseHook(controls.hook).layer && selectedNode.stage === parseHook(controls.hook).stage;
+  const residualNode = selectedNode.kind === 'stage' && residualHooks.some(hook => hook === selectedNode.stage);
+  const sourcePreview = useMemo(() => {
+    if (!copyDraft || !tokenizer || !c) return {};
+    try {
+      const tokens = tokenize(sourceText, tokenizer, c.contextLength);
+      requireInput(tokens.length === tokenIds.length, `The source must have the same number of symbols as the input (${tokenIds.length - 1}).`);
+      return { tokens };
+    } catch (error) { return { error: error instanceof Error ? error.message : String(error) }; }
+  }, [!!copyDraft, sourceText, tokenizer, c, tokenIds]);
   const activeHead = display && selectedNode.kind === 'head' && display.controls.mode !== 'patch' && selectedNode.layer === display.controls.layer && selectedNode.head === display.controls.head;
-  const inspectPosition = traceView ? selectedNode.kind === 'readout' ? traceView.report.predictionPosition : traceView.position : display ? activeHead ? display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)
+  const inspectPosition = traceView ? selectedNode.kind === 'readout' ? traceView.report.predictionPosition : traceView.position
+    : copyDraft && selectedNode.kind === 'stage' && `${selectedNode.layer}:${selectedNode.stage}` === copyDraft.hook ? copyDraft.position : display ? activeHead ? display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)
     : patchNode ? display.controls.patchPosition : display.controls.position : 0;
   const selectionTitle = selectedNode.kind === 'head' ? `Layer ${selectedNode.layer + 1} · Head ${selectedNode.head + 1}${selectedNode.part === 'attention' ? ' attention weights' : ''}`
     : selectedNode.kind === 'stage' ? `Layer ${selectedNode.layer + 1} · ${stageNames[selectedNode.stage]}` : selectedNode.kind === 'embedding' ? 'Input embeddings' : 'Final readout';
   const completedText = display && tokenizer ? display.tokens.slice(1).map(id => tokenizer.tokens[id]).join(' ') : '';
   function inspectNode(node: FlowNode) {
     setSelectedNode(node);
+    if (copyDraft && node.kind === 'stage' && residualHooks.some(hook => hook === node.stage)) setCopyDraft({ ...copyDraft, hook: `${node.layer}:${node.stage}` });
     if (traceView) {
       const position = node.kind === 'readout' ? report!.predictionPosition : navigation.position;
       setTraceNavigation({ ...navigation, position, index: matchingStep(steps, node, position) });
@@ -438,11 +468,21 @@ export default function App() {
     const focus = headControls.focus;
     schedule({ ...headControls, query, focus: focus !== 'uniform' && Number(focus) > query ? String(query) : focus });
   }
+  function draftCopy(draft: CopyDraft) {
+    const node: FlowNode = { kind: 'stage', ...parseHook(draft.hook) };
+    setSelectedNode(node);
+    setCopyDraft(draft);
+    if (traceView) setTraceNavigation({ ...navigation, position: draft.position, index: matchingStep(steps, node, draft.position) });
+  }
+  function openCopy() {
+    if (selectedNode.kind !== 'stage' || !residualNode) return;
+    chooseMode('patch', { ...controlsRef.current, hook: `${selectedNode.layer}:${selectedNode.stage}` });
+  }
 
   return <main className={`flow-app ${tracing.open ? 'trace-active' : ''}`}>
     <header className="masthead">
       <div className="wordmark"><span className="mark" aria-hidden="true">μ</span><div><p className="eyebrow">Follow a prediction through the model</p><h1>Transformer Microscope</h1></div></div>
-      <span className={`status ${pending || loading ? 'working' : ''}`} role="status">{loading ? 'Loading model…' : pending ? `Computing…${display ? ` previous ${shown(display.controls)}` : ''}` : display ? `Showing ${shown(display.controls)}` : 'Ready'}</span>
+      <span className={`status ${pending || loading || copying ? 'working' : ''}`} role="status">{loading ? 'Loading model…' : copying ? 'Preparing source input…' : pending ? `Computing…${display ? ` previous ${shown(display.controls)}` : ''}` : display ? `Showing ${shown(display.controls)}` : 'Ready'}</span>
     </header>
     <div className="notice"><strong>{choice === 'retrieval' ? 'Learned associative retrieval' : 'Verification model'}</strong>
       <span>{choice === 'retrieval' ? 'A small transformer trained to answer questions about key–value bindings. Select a node to inspect it, then change a head to see the consequence.' : 'Random weights, real computations. These predictions verify the engine; they do not demonstrate learned language.'}</span></div>
@@ -464,6 +504,11 @@ export default function App() {
         <section className="graph-pane" aria-label="Computation workspace">
           <div className="step-heading"><span className="step-number">2</span><div><p className="eyebrow">Explore the computation</p><h2>Choose where to look</h2></div></div>
           <p className="hint">Click a node to inspect the completed run. {c?.heads ?? 4} heads in each layer run in parallel; arrows show computation order.</p>
+          {copyDraft && tokenizer && c && <ResidualCopy draft={copyDraft} sourceText={sourceText} tokens={tokenIds} sourceTokens={sourcePreview.tokens} symbols={tokenizer.tokens} layers={c.layers}
+            disabled={locked} pending={pending || copying} validation={sourcePreview.error} alternate={swappedQuery(tokenIds, tokenizer)}
+            onSource={setSourceText} onDraft={draftCopy} onCopy={() => void applySource(sourceText, { ...controlsRef.current, mode: 'patch', hook: copyDraft.hook, patchPosition: copyDraft.position })}
+            onClose={() => setCopyDraft(null)} completed={display?.comparison.interventions[0]?.kind === 'residual.replace' && display.sourceTokens
+              ? { patch: display.comparison.interventions[0], sourceTokens: display.sourceTokens, baseline: display.raw, copied: display.modified } : undefined} />}
           <EffectTrace open={tracing.open} supported={tracing.supported} busy={pending || locked} ended={sessionEnded} report={report} error={tracing.error}
             position={navigation.position} origin={navigation.origin} steps={steps} index={navigation.index} symbols={tokenizer?.tokens ?? []}
             onOpen={open => { if (open) setTraceNavigation({ key: '', index: 0, origin: 0, position: 0 }); tracing.setOpen(open); }} onRetry={tracing.retry} onMove={moveTrace}
@@ -473,29 +518,24 @@ export default function App() {
             aria-label={`Predict after position ${index}: ${tokenizer.tokens[id]}`} aria-pressed={controls.position === index}>
             <small>{index}</small>{tokenizer.tokens[id]}</button>)}</div></div>
           {c ? <ComputationGraph key={model!.runtimeGeneration} config={c} selected={selectedNode} intervention={display?.comparison.interventions[0]} disabled={locked || !display} onSelect={inspectNode}
-            trace={traceView} symbols={tokenizer?.tokens} target={display?.controls.target} />
+            trace={traceView} symbols={tokenizer?.tokens} target={display?.controls.target} sourceTokens={display?.sourceTokens} />
             : <p className="hint">Loading the model's computation graph…</p>}
         </section>
         <aside className="controls-panel node-panel" aria-label="Selected node">
           <div className="node-panel-heading"><p className="eyebrow">Selected node</p><h2>{selectionTitle}</h2><span className="inspection-note">Inspection keeps the active experiment intact</span></div>
           {display && tokenizer && client.current && !loading && display.comparison.baselineRunId === baseline.current?.runId && <NodeInspector node={selectedNode} client={client.current}
             baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId} position={inspectPosition}
-            symbol={tokenizer.tokens[display.tokens[inspectPosition]]} trace={traceView} target={display.controls.target} symbols={tokenizer.tokens}
-            preset={activeHead && !(selectedNode.kind === 'head' && selectedNode.part === 'attention') && inspectPosition === (display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)) ? { baseline: display.raw, modified: display.modified } : undefined} />}
-          {selectedNode.kind === 'head' || patchNode ? <>
+            symbol={tokenizer.tokens[display.tokens[inspectPosition]]} trace={traceView} target={display.controls.target} symbols={tokenizer.tokens} sourceTokens={display.sourceTokens}
+            preset={patchNode && selectedNode.kind === 'stage' && display.comparison.interventions[0]?.kind === 'residual.replace' && selectedNode.layer === display.comparison.interventions[0].layer && selectedNode.stage === display.comparison.interventions[0].stage && inspectPosition === display.controls.patchPosition
+              || activeHead && !(selectedNode.kind === 'head' && selectedNode.part === 'attention') && inspectPosition === (display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)) ? { baseline: display.raw, modified: display.modified } : undefined} />}
+          {selectedNode.kind === 'head' || residualNode ? <>
         <section>
-          <p className="eyebrow">At the selected node</p><h3>{headControls.mode === 'patch' ? 'Patch a residual vector' : headControls.mode === 'attention' ? "Redirect a head's attention" : "Change a head's contribution"}</h3>
-          <label>Intervention type<select aria-label="Intervention type" disabled={loading || probing || transferring || !model} value={headControls.mode} onChange={event => chooseMode(event.target.value as Controls['mode'], headControls)}>
+          <p className="eyebrow">At the selected node</p><h3>{residualNode ? 'Copy at this residual junction' : headControls.mode === 'attention' ? "Redirect a head's attention" : "Change a head's contribution"}</h3>
+          <label>Intervention type<select aria-label="Intervention type" disabled={locked} value={residualNode ? 'patch' : headControls.mode} onChange={event => chooseMode(event.target.value as Controls['mode'], headControls)}>
             <option value="head">Scale a head's output</option><option value="attention">Redirect a head's attention</option><option value="patch">Patch the residual from another input</option></select></label>
-          {headControls.mode === 'patch' ? <div className="patch-controls">
-            <label htmlFor="source">Source input (same number of symbols)</label>
-            <textarea id="source" rows={2} spellCheck={false} value={sourceText} disabled={loading || probing || transferring} onChange={event => setSourceText(event.target.value)} />
-            <button type="button" className="secondary" disabled={loading || probing || transferring || !model} onClick={() => void applySource(sourceText)}>Use source input</button>
-            <label>Patch point<select aria-label="Patch point" disabled={loading || probing || transferring || !c || !sourceTokens} value={headControls.hook} onChange={event => schedule({ ...headControls, hook: event.target.value })}>
-              {c && hookKeys(c.layers).map(key => <option key={key} value={key}>{hookLabel(key)}</option>)}</select></label>
-            <label>Patch position<select aria-label="Patch position" disabled={loading || probing || transferring || !sourceTokens} value={headControls.patchPosition} onChange={event => schedule({ ...headControls, patchPosition: Number(event.target.value) })}>
-              {tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}{sourceTokens && sourceTokens[i] !== id ? ` ← ${tokenizer.tokens[sourceTokens[i]]}` : ''}</option>)}</select></label>
-            <p className="hint">Copies the source input's residual vector at this point and position into this input's computation, then recomputes everything after it. Positions marked ← differ between the inputs. Changing the input returns to head scaling.</p>
+          {residualNode ? <div className="patch-controls">
+            <p className="hint">Copies the source input's vector into {selectedNode.kind === 'stage' ? hookLabel(`${selectedNode.layer}:${selectedNode.stage}`) : 'this junction'}. Source and position choices stay a draft until you press Copy from source.</p>
+            <button type="button" className="secondary" disabled={locked} onClick={openCopy}>Choose source and position</button>
           </div> : <>
           <div className="paired"><label>Layer<select aria-label="Layer" disabled={loading || probing || transferring || !c} value={headControls.layer} onChange={event => schedule({ ...headControls, layer: Number(event.target.value) })}>
             {c && Array.from({ length: c.layers }, (_, i) => <option value={i} key={i}>Layer {i + 1}</option>)}</select></label>
@@ -539,7 +579,7 @@ export default function App() {
         <div className="step-heading"><span className="step-number">3</span><div><p className="eyebrow">Observe the consequence</p><h2>Compare the prediction</h2></div></div>
         {display && tokenizer ? <>
           <PredictionSummary comparison={display.comparison} target={display.controls.target} symbol={tokenizer.tokens[display.controls.target]}
-            position={display.controls.position} pending={pending || loading} ended={sessionEnded} disabled={locked}
+            position={display.controls.position} pending={pending || loading || copying} ended={sessionEnded} disabled={locked}
             onReset={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })} />
           <div className="prediction-title"><p>Next token after position <strong>{display.controls.position}</strong> · <SymbolLabel tokenizer={tokenizer} tokenId={display.tokens[display.controls.position]} /></p>
             <div className="legend"><span className="baseline-key">Baseline</span><span className="modified-key">Modified</span></div></div>

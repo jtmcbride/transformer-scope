@@ -9,7 +9,7 @@ export function useEffectTrace(client: ModelClient | null, comparison: Compariso
   const [open, setOpen] = useState(false), [read, setRead] = useState<Read | null>(null);
   const alive = useRef(true), attempt = useRef(''), flight = useRef<object | null>(null);
   const key = comparison ? JSON.stringify([comparison.execution.runtimeGeneration, comparison.baselineRunId, comparison.modifiedRunId, comparison.predictionPosition]) : '';
-  const supported = comparison?.interventions.length === 1 && ['head.scale', 'attention.override'].includes(comparison.interventions[0].kind);
+  const supported = comparison?.interventions.length === 1;
   const enabled = open && !!client && !!comparison && supported && !busy;
   const desired = useRef<{ client: ModelClient; comparison: ComparisonResult; key: string } | null>(null);
   desired.current = enabled ? { client: client!, comparison: comparison!, key } : null;

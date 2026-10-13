@@ -5,15 +5,67 @@ import { RunEngine } from '../../src/engine/runs';
 import { TransformerModel } from '../../src/engine/model';
 import { checkTracePrediction, measureTrace, traceBudget, TRACE_CAPTURE_BUDGET } from '../../src/engine/trace';
 import { traceNodeKey, type TraceAddress } from '../../src/engine/trace-topology';
-import { normalizedAttention, type AttentionOverrideIntervention, type HeadScaleIntervention } from '../../src/engine/contracts';
+import { normalizedAttention, type AttentionOverrideIntervention, type HeadScaleIntervention, type ResidualReplaceIntervention } from '../../src/engine/contracts';
 import fixture from '../fixtures/trace-reference.json';
 import redirectFixture from '../fixtures/attention-trace-reference.json';
+import copyFixture from '../fixtures/residual-trace-reference.json';
 import { loadShippedArtifact } from './retrieval-artifact';
 import { assertClose } from './numerical';
-import { firstReadoutFlip, readoutTitle } from '../../src/trace-view';
+import { firstReadoutFlip, handoff, readoutTitle, traceSteps } from '../../src/trace-view';
 
 beforeAll(async () => { await tf.setBackend('cpu'); await tf.ready(); });
 const retrieval = loadShippedArtifact('retrieval'), verification = loadShippedArtifact('verification');
+
+it('source residual copies match independent stages and readouts, including identities and both attention handoffs', async () => {
+  const initial = tf.memory().numTensors;
+  for (const item of copyFixture.cases) {
+    const loaded = item.modelRevision === retrieval.manifest.modelRevision ? retrieval : verification;
+    const engine = new RunEngine(loaded.artifact);
+    try {
+      const baseline = await engine.runBaseline(item.tokens), source = await engine.runBaseline(item.sourceTokens);
+      const patch = item.intervention as ResidualReplaceIntervention;
+      const read = await engine.inspectActivation(source.runId, { layer: patch.layer, stage: patch.stage }, { position: patch.position });
+      assertClose(read.values, item.intervention.values, `${item.name} source vector`);
+      const comparison = await engine.compare({ baselineRunId: baseline.runId, interventions: [{ ...patch, values: Array.from(read.values) }], predictionPosition: item.predictionPosition });
+      const before = tf.memory().numTensors, cache = engine.cacheStats();
+      const trace = await engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, item.predictionPosition);
+      expect(trace.hasComputationalPath).toBe(comparison.hasComputationalPath);
+      expect(trace.residualRow!.copiedValues).toEqual(Array.from(read.values));
+      assertClose(trace.residualRow!.baselineValues, item.residualRow.baselineValues, `${item.name} original residual`);
+      assertClose(trace.residualRow!.copiedValues, item.residualRow.copiedValues, `${item.name} copied residual`);
+      expect(trace.nodes).toHaveLength(item.nodes.length);
+      for (const [i, node] of trace.nodes.entries()) {
+        const expected = item.nodes[i];
+        expect(node.key).toBe(traceNodeKey(expected as TraceAddress));
+        assertClose([node.baselineNorm, node.modifiedNorm, node.maxDifference, node.differenceNorm],
+          [expected.baselineNorm, expected.modifiedNorm, expected.maxDifference, expected.differenceNorm], `${item.name} ${node.key}`, .0005, 2e-5);
+        if (node.stage === 'embedding.output' || node.layer !== undefined && node.layer < patch.layer ||
+          patch.stage === 'attention.residual' && node.layer === patch.layer && !['attention.residual', 'mlp.output', 'block.output'].includes(node.stage)) expect(node.change, node.key).toBe('exact');
+      }
+      item.baselineReadouts.forEach((row, i) => {
+        assertClose(trace.readouts[i].baselineLogits, row, `${item.name} diagnostic ${i} baseline`);
+        assertClose(trace.readouts[i].modifiedLogits, item.modifiedReadouts[i], `${item.name} diagnostic ${i} modified`);
+      });
+      assertClose(trace.readouts.at(-1)!.baselineLogits, item.baselineLogits, `${item.name} baseline prediction`);
+      assertClose(trace.readouts.at(-1)!.modifiedLogits, item.modifiedLogits, `${item.name} modified prediction`);
+      const steps = traceSteps(trace, patch.position);
+      expect(steps[0].node).toEqual({ kind: 'stage', layer: patch.layer, stage: patch.stage });
+      if (patch.stage === 'attention.residual') expect(steps.filter(step => step.node.kind === 'head' && step.node.layer === patch.layer)).toHaveLength(0);
+      else expect(steps.filter(step => step.node.kind === 'head' && step.node.layer === patch.layer)).toHaveLength(loaded.manifest.config.heads);
+      if (item.name === 'copy-input-effect') expect(handoff(trace)).toEqual({ layer: 1, from: 14, to: 15, allPositions: false });
+      if (item.name === 'copy-later-handoff') expect(handoff(trace)).toEqual({ layer: 1, from: 14, to: 15, allPositions: false });
+      if (['copy-local', 'copy-future'].includes(item.name)) {
+        expect(trace.hasComputationalPath).toBe(false);
+        expect(trace.nodes.some(node => node.route === 'local' && node.change !== 'exact')).toBe(true);
+        expect(trace.nodes.find(node => node.stage === 'logits' && node.position === item.predictionPosition)?.change).toBe('exact');
+      }
+      if (item.name === 'copy-identical') expect(trace.nodes.every(node => node.change === 'exact')).toBe(true);
+      for (let i = 0; i < 3; i++) await engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, item.predictionPosition);
+      expect(tf.memory().numTensors).toBe(before); expect(engine.cacheStats()).toEqual(cache);
+    } finally { engine.dispose(); }
+  }
+  expect(tf.memory().numTensors).toBe(initial);
+});
 
 it('redirect traces match independent rows, stages and readouts without editing source positions or retaining tensors', async () => {
   const initial = tf.memory().numTensors;
@@ -110,7 +162,7 @@ it('all seven traces match independent PyTorch stages and readouts and retain no
   expect(tf.memory().numTensors).toBe(initial);
 });
 
-it('validates pair ownership, supported interventions, comparison position, and released sessions', async () => {
+it('validates pair ownership, one intervention, comparison position, and released sessions', async () => {
   const engine = new RunEngine(verification.artifact), tokens = [0, 1, 5, 9];
   const patch: HeadScaleIntervention = { id: 'trace', kind: 'head.scale', layer: 0, head: 0, factor: .37, tokens: { kind: 'all' } };
   try {
@@ -121,10 +173,10 @@ it('validates pair ownership, supported interventions, comparison position, and 
     await expect(engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, 3)).rejects.toThrow('completed comparison');
     await expect(engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, 2.5)).rejects.toThrow('completed comparison');
     expect(tf.memory().numTensors).toBe(before);
-    const unsupported = await engine.compare({ baselineRunId: baseline.runId, interventions: [{ kind: 'residual.replace', id: 'a', layer: 0, stage: 'block.input', position: 3, values: Array(8).fill(0) }] });
-    await expect(engine.inspectEffectTrace(baseline.runId, unsupported.modifiedRunId, 3)).rejects.toThrow('one head scaling');
+    const empty = await engine.compare({ baselineRunId: baseline.runId, interventions: [] });
+    await expect(engine.inspectEffectTrace(baseline.runId, empty.modifiedRunId, 3)).rejects.toThrow('one intervention');
     const multiple = await engine.compare({ baselineRunId: baseline.runId, interventions: [patch, { ...patch, id: 'second', head: 1 }] });
-    await expect(engine.inspectEffectTrace(baseline.runId, multiple.modifiedRunId, 3)).rejects.toThrow('one head scaling');
+    await expect(engine.inspectEffectTrace(baseline.runId, multiple.modifiedRunId, 3)).rejects.toThrow('one intervention');
     engine.releaseRun(comparison.modifiedRunId);
     await expect(engine.inspectEffectTrace(baseline.runId, comparison.modifiedRunId, 2)).rejects.toThrow('unavailable');
   } finally { engine.dispose(); }

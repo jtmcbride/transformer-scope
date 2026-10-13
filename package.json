@@ -24,6 +24,7 @@
     "fixtures:ablation": ".venv/bin/python scripts/export_ablation.py",
     "fixtures:trace": ".venv/bin/python scripts/export_trace.py",
     "fixtures:attention-trace": ".venv/bin/python scripts/export_attention_trace.py",
+    "fixtures:residual-trace": ".venv/bin/python scripts/export_residual_trace.py",
     "parity:tokenizer": "vitest run --config vitest.parity.config.ts"
   },
   "dependencies": {

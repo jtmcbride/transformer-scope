@@ -7,10 +7,12 @@ export interface TraceMetrics { baselineNorm: number; modifiedNorm: number; maxD
 export interface TraceMeasurement extends TraceAddress, TraceMetrics { key: string; route: TraceRoute }
 export interface TraceReadout extends ActivationReference { baselineLogits: number[]; modifiedLogits: number[]; prediction: boolean }
 export interface TraceAttentionRow { baselineWeights: number[]; modifiedWeights: number[]; scores: TraceMetrics }
+export interface TraceResidualRow { baselineValues: number[]; copiedValues: number[] }
 export interface EffectTraceReport {
   baselineRunId: string; modifiedRunId: string; predictionPosition: number; tokenIds: number[]; config: ModelConfig;
   modelRevision: string; runtimeGeneration: string; backend: string; intervention: TraceIntervention; hasComputationalPath: boolean;
   attentionRow?: TraceAttentionRow;
+  residualRow?: TraceResidualRow;
   nodes: TraceMeasurement[]; readouts: TraceReadout[]; elapsedMs: number;
 }
 export const TRACE_CAPTURE_BUDGET = 8 * 1024 * 1024;
@@ -67,6 +69,14 @@ export function summarizeAttentionRow(length: number, patch: TraceIntervention, 
   const row = (pass: TracePass, stage: 'attention.weights' | 'attention.scores') => pass.values[`${patch.layer}:${stage}`].subarray(offset, offset + length);
   return { baselineWeights: Array.from(row(baseline, 'attention.weights')), modifiedWeights: Array.from(row(modified, 'attention.weights')),
     scores: measureTrace(row(baseline, 'attention.scores'), row(modified, 'attention.scores')) };
+}
+export function summarizeResidualRow(config: ModelConfig, patch: TraceIntervention, baseline: TracePass, modified: TracePass): TraceResidualRow | undefined {
+  if (patch.kind !== 'residual.replace') return undefined;
+  const offset = patch.position * config.modelDim, key = activationKey(patch);
+  const copied = modified.values[key].subarray(offset, offset + config.modelDim);
+  if (copied.length !== patch.values.length || Array.from(copied).some((value, i) => value !== Math.fround(patch.values[i])))
+    throw new EngineError('NUMERICAL_FAILURE', 'The trace does not reproduce the copied residual vector.');
+  return { baselineValues: Array.from(baseline.values[key].subarray(offset, offset + config.modelDim)), copiedValues: Array.from(copied) };
 }
 export function summarizeTrace(config: ModelConfig, length: number, prediction: number, patch: TraceIntervention, baseline: TracePass, modified: TracePass): TraceMeasurement[] {
   const nodes: TraceMeasurement[] = [];

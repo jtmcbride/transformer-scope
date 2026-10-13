@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { canReachPrediction, type AttentionOverrideIntervention, type HeadScaleIntervention, type ModelConfig } from '../../src/engine/contracts';
+import { canReachPrediction, type AttentionOverrideIntervention, type HeadScaleIntervention, type ModelConfig, type ResidualReplaceIntervention } from '../../src/engine/contracts';
 import { traceReferences } from '../../src/engine/trace';
 import { traceNodeKey, traceRoute, type TraceAddress } from '../../src/engine/trace-topology';
 
@@ -81,6 +81,28 @@ it('redirect routes start at the query attention row, rather than at the source 
           }
         }
         expect(traceRoute({ stage: 'attention.scores', layer, head, position: query }, patch, config, length, prediction)).toBe('unaffected');
+      }
+    }
+  }
+});
+
+it('residual routes begin at the copied junction and mix positions only through subsequent attention', () => {
+  for (const layers of [1, 2, 3]) {
+    const config: ModelConfig = { layers, heads: 2, modelDim: 8, mlpDim: 16, contextLength: 4, vocabularySize: 16, layerNormEpsilon: 1e-5 };
+    const length = 4, graph = dependencyGraph(config, length);
+    for (let layer = 0; layer < layers; layer++) for (let root = 0; root < length; root++) for (const stage of ['block.input', 'attention.residual'] as const) {
+      const patch: ResidualReplaceIntervention = { id: 'copy', kind: 'residual.replace', layer, stage, position: root, values: Array(8).fill(0) };
+      const downstream = graph.visit([traceNodeKey({ stage, layer, position: root })], graph.next);
+      for (let prediction = 0; prediction < length; prediction++) {
+        const end = traceNodeKey({ stage: 'logits', position: prediction }), ancestors = graph.visit([end], graph.prior);
+        expect(downstream.has(end)).toBe(canReachPrediction(patch, prediction, config, length));
+        for (const reference of traceReferences(config)) for (let position = 0; position < length; position++) {
+          const headed = ['attention.weights', 'attention.head.raw', 'attention.head.modified'].includes(reference.stage);
+          for (let h = 0; h < (headed ? config.heads : 1); h++) {
+            const node = { ...reference, position, ...(headed ? { head: h } : {}) }, key = traceNodeKey(node);
+            expect(traceRoute(node, patch, config, length, prediction), `${stage} ${root} → ${prediction}, ${key}`).toBe(!downstream.has(key) ? 'unaffected' : ancestors.has(key) ? 'prediction' : 'local');
+          }
+        }
       }
     }
   }

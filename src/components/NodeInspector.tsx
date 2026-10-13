@@ -14,7 +14,7 @@ const explanations = {
   'block.output': 'The MLP contribution is added at the second + junction. This residual enters the next layer, or the final readout.',
 };
 const norm = (values: ArrayLike<number>) => Math.sqrt(Array.from(values).reduce((sum, value) => sum + value * value, 0));
-interface Props { node: FlowNode; client: ModelClient; baselineRunId: string; modifiedRunId: string; position: number; symbol: string; preset?: { baseline: number[]; modified: number[] };
+interface Props { node: FlowNode; client: ModelClient; baselineRunId: string; modifiedRunId: string; position: number; symbol: string; sourceTokens?: number[]; preset?: { baseline: number[]; modified: number[] };
   trace?: TraceView; target?: number; symbols?: string[] }
 export function NodeInspector(props: Props) {
   const [read, setRead] = useState<{ key: string; baseline?: number[]; modified?: number[]; error?: string } | null>(null);
@@ -22,8 +22,11 @@ export function NodeInspector(props: Props) {
   const [vectorKey, setVectorKey] = useState('');
   const fullVector = vectorKey === key, measurement = props.trace ? measurementFor(props.trace, props.node) : undefined;
   const readout = props.trace ? readoutFor(props.trace, props.node) : undefined;
+  const patch = props.trace?.report.intervention;
+  const residual = patch?.kind === 'residual.replace' && props.node.kind === 'stage' && props.node.layer === patch.layer && props.node.stage === patch.stage && props.position === patch.position
+    ? props.trace!.report.residualRow : undefined;
   useEffect(() => {
-    if (props.preset || measurement && !fullVector) return;
+    if (props.preset || residual || measurement && !fullVector) return;
     let current = true;
     const node = props.node;
     const reference: ActivationReference = node.kind === 'embedding' ? { stage: 'embedding.output' } : node.kind === 'readout' ? { stage: 'logits' }
@@ -34,8 +37,8 @@ export function NodeInspector(props: Props) {
       .then(([baseline, modified]) => { if (current) setRead({ key, baseline: Array.from(baseline.values), modified: Array.from(modified.values) }); })
       .catch(error => { if (current) setRead({ key, error: error instanceof Error ? error.message : String(error) }); });
     return () => { current = false; };
-  }, [props.client, props.baselineRunId, props.modifiedRunId, props.position, props.node, props.preset, key, measurement, fullVector]);
-  const current = props.preset ?? (read?.key === key ? read : null);
+  }, [props.client, props.baselineRunId, props.modifiedRunId, props.position, props.node, props.preset, key, measurement, fullVector, residual]);
+  const current = residual ? { baseline: residual.baselineValues, modified: residual.copiedValues } : props.preset ?? (read?.key === key ? read : null);
   const baseline = current?.baseline, modified = current?.modified;
   const metrics = measurement ?? (baseline && modified ? { baselineNorm: norm(baseline), modifiedNorm: norm(modified),
     maxDifference: Math.max(...baseline.map((value, i) => Math.abs(value - modified[i]))) } : null);
@@ -57,6 +60,12 @@ export function NodeInspector(props: Props) {
       {measurement && <div><dt>L2 difference</dt><dd>{traceNumber(measurement.differenceNorm)}</dd></div>}
     </dl>}
     {measurement && <p className={`change-tag change-${measurement.change}`}>{changeLabel[measurement.change]}{measurement.change === 'small' ? ' · nonzero, within the display tolerance' : ''}</p>}
+    {residual && <div className="copied-residual" data-testid="copied-residual">
+      <p className="eyebrow">Completed vector copy · position {props.position}</p>
+      {props.sourceTokens && props.symbols && <p>Source input: {props.symbols[props.sourceTokens[props.position]]} → current input: {props.symbol}</p>}
+      <p>The source's residual vector at this junction and position replaced the current input's vector. The norms and differences above compare the original and copied vectors.</p>
+      <p className="hint">{patch?.kind === 'residual.replace' && patch.stage === 'block.input' ? 'This copy enters attention in this layer and the residual bypass.' : 'This copy enters the MLP and its residual bypass. Attention in this layer was computed before the copy.'}</p>
+    </div>}
     {props.node.kind === 'head' && props.node.part === 'attention' && props.trace?.report.intervention.kind === 'attention.override' && props.trace.report.attentionRow &&
       props.node.layer === props.trace.report.intervention.layer && props.node.head === props.trace.report.intervention.head && props.position === props.trace.report.intervention.query && props.symbols && <>
         <p className="redirect-connection">{redirectConnection(props.trace.report.intervention, props.trace.report.tokenIds, props.symbols)}</p>

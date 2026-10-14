@@ -13,7 +13,7 @@ async function exported(page: Page): Promise<ExperimentDocument> {
 test('graph navigation preserves the intervention; a head preset applies to the selected head and matches PyTorch', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('');
+  await page.goto('?view=details');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   const before = await exported(page);
   await page.getByRole('button', { name: 'Inspect Layer 2 Head 2', exact: true }).click();
@@ -39,7 +39,7 @@ test('graph navigation preserves the intervention; a head preset applies to the 
 });
 
 test('the structured input stays a draft until run, and the exported input reflects the executed bindings', async ({ page }) => {
-  await page.goto('');
+  await page.goto('?view=details');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   await page.getByRole('group', { name: 'Head strength presets' }).getByRole('button', { name: 'Normal' }).click();
   await expect(page.locator('.status')).toHaveText('Showing 1.00×');
@@ -60,7 +60,7 @@ test('the structured input stays a draft until run, and the exported input refle
 });
 
 test('stage nodes inspect actual completed vectors without applying an intervention', async ({ page }) => {
-  await page.goto('?model=verification');
+  await page.goto('?model=verification&view=details');
   await expect(page.locator('.status')).toHaveText('Showing 0.50×');
   await page.getByLabel('Exact head strength').fill('0.37');
   await page.getByLabel('Exact head strength').press('Enter');
@@ -83,7 +83,7 @@ test('stage nodes inspect actual completed vectors without applying an intervent
 test('the result remains in the mobile viewport while exploring and resetting', async ({ page }, testInfo) => {
   for (const width of [360, 390, 768]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto('');
+    await page.goto('?view=details');
     await expect(page.locator('.status')).toHaveText('Showing 0.00×');
     const summary = page.getByLabel('Prediction summary');
     const contained = async () => summary.evaluate(element => {
@@ -113,7 +113,7 @@ test('pending edits keep the completed prediction and intervention visibly ident
         : dispatch.call(self, event);
     }` });
   });
-  await page.goto('');
+  await page.goto('?view=details');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   const summary = page.getByLabel('Prediction summary');
   const previous = await page.getByTestId('target-probability').innerText();

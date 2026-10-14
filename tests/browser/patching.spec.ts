@@ -22,7 +22,7 @@ async function roundTrip(page: Page) {
 }
 
 test('residual patching from another input matches the independent PyTorch sweep', async ({ page }) => {
-  await page.goto('');
+  await page.goto('?view=details');
   const status = page.locator('.status');
   await expect(status).toHaveText('Showing 0.00×', { timeout: 30_000 });
   await page.getByLabel('Intervention type').selectOption('patch');

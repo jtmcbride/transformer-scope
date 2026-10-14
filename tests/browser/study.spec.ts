@@ -21,7 +21,7 @@ test('a facilitated session records predictions before revealing each live recip
   const requests: string[] = [], errors: string[] = [];
   page.on('request', request => requests.push(request.url()));
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('');
+  await page.goto('?view=details');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×', { timeout: 30_000 });
   expect(requests.filter(url => /study/u.test(url))).toEqual([]);
 

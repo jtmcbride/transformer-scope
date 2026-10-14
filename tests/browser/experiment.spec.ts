@@ -5,7 +5,7 @@ import type { ExperimentDocument } from '../../src/engine/experiment';
 import type { HeadScaleIntervention } from '../../src/engine/contracts';
 
 test('export and replay restore completed settings, switch checkpoints and compare newly computed predictions', async ({ page }, testInfo) => {
-  await page.goto('?model=verification');
+  await page.goto('?model=verification&view=details');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await page.getByRole('slider', { name: 'Head strength', exact: true }).fill('0.35');
   await page.getByRole('button', { name: 'Predict after position 2: E' }).click();
@@ -54,7 +54,7 @@ test('export and replay restore completed settings, switch checkpoints and compa
 });
 
 test('invalid imports preserve the current experiment; self-consistent changed measurements are exposed on replay', async ({ page }) => {
-  await page.goto('?model=verification');
+  await page.goto('?model=verification&view=details');
   await expect(page.getByRole('button', { name: 'Export experiment' })).toBeEnabled({ timeout: 30_000 });
   const downloaded = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export experiment' }).click();

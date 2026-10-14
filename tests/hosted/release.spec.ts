@@ -64,7 +64,7 @@ test('hosted worker runs recipes, inspection, reference verification, reset, exp
   const errors: string[] = [], failed: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('requestfailed', request => failed.push(`${request.url()}: ${request.failure()?.errorText}`));
-  await page.goto('');
+  await page.goto('?view=details');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.00×' })).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId('recipe-note')).toContainText('Ablation changes the answer');
   await expect(page.getByTestId('execution-strategy')).toHaveText('Cached suffix · layer 1');

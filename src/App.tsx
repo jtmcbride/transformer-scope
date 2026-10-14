@@ -22,6 +22,7 @@ import { ResidualCopy, type CopyDraft } from './components/ResidualCopy';
 import { GuidedExperiments, ExperimentGuide } from './components/GuidedExperiments';
 import { useEffectTrace } from './hooks/useEffectTrace';
 import { matchingStep, traceSteps, type TraceView } from './trace-view';
+import { VisualFlow } from './components/VisualFlow';
 import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
 
@@ -54,6 +55,7 @@ function SymbolLabel({ tokenizer, tokenId }: { tokenizer: SymbolTokenizer; token
 }
 
 export default function App() {
+  const [view, setView] = useState<'visual' | 'details'>(() => new URLSearchParams(window.location.search).get('view') === 'details' ? 'details' : 'visual');
   const client = useRef<ModelClient | null>(null);
   const alive = useRef(true);
   const version = useRef(0);
@@ -481,15 +483,18 @@ export default function App() {
     if (traceView) setTraceNavigation({ ...navigation, position: draft.position, index: matchingStep(steps, node, draft.position) });
   }
   function openCopy() {
+    setView('details');
     if (selectedNode.kind !== 'stage' || !residualNode) return;
     chooseMode('patch', { ...controlsRef.current, hook: `${selectedNode.layer}:${selectedNode.stage}` });
   }
   function traceExample() {
+    setView('details');
     if (report) { moveTrace(0); return; }
     if (tracing.error) tracing.retry();
     setTraceNavigation({ key: '', index: 0, origin: 0, position: 0 }); tracing.setOpen(true);
   }
   function inspectEditedHead() {
+    setView('details');
     const patch = display?.comparison.interventions[0];
     if (!patch || patch.kind !== 'head.scale') return;
     const node: FlowNode = { kind: 'head', layer: patch.layer, head: patch.head };
@@ -503,13 +508,15 @@ export default function App() {
     });
   }
 
-  return <main className={`flow-app ${tracing.open ? 'trace-active' : ''}`}>
+  return <main className={`flow-app view-${view} ${tracing.open ? 'trace-active' : ''}`}>
     <header className="masthead">
       <div className="wordmark"><span className="mark" aria-hidden="true">μ</span><div><p className="eyebrow">Follow a prediction through the model</p><h1>Transformer Microscope</h1></div></div>
       <span className={`status ${pending || loading || copying ? 'working' : ''}`} role="status">{loading ? 'Loading model…' : copying ? 'Preparing source input…' : pending ? `Computing…${display ? ` previous ${shown(display.controls)}` : ''}` : display ? `Showing ${shown(display.controls)}` : 'Ready'}</span>
     </header>
-    <div className="notice"><strong>{choice === 'retrieval' ? 'Learned associative retrieval' : 'Verification model'}</strong>
-      <span>{choice === 'retrieval' ? 'A small transformer trained to answer questions about key–value bindings. Select a node to inspect it, then change a head to see the consequence.' : 'Random weights, real computations. These predictions verify the engine; they do not demonstrate learned language.'}</span></div>
+    <div className="view-toolbar"><p>A transformer learns how symbols relate. Explore how one small change affects its answer.</p>
+      <div role="group" aria-label="Workspace view"><button type="button" aria-pressed={view === 'visual'} onClick={() => setView('visual')}>Visual flow</button><button type="button" aria-pressed={view === 'details'} onClick={() => setView('details')}>Detailed</button></div></div>
+    <div className="notice"><strong>{choice === 'retrieval' ? 'A simple memory game' : 'Verification model'}</strong>
+      <span>{choice === 'retrieval' ? 'Give each letter a number, then ask the model to recall one. This small trained model helps us see how a transformer works.' : 'Random weights, real computations. These predictions verify the engine; they do not demonstrate learned language.'}</span></div>
     <section className="input-workbench" aria-label="Input editor">
       <div className="setup-row">
         <div className="step-heading"><span className="step-number">1</span><div><p className="eyebrow">Set the input</p><h2>Give the model a question</h2></div></div>
@@ -518,16 +525,20 @@ export default function App() {
         {experiments && <label>Prepared experiment<select aria-label="Prepared experiment" disabled={locked} value={activeRecipe?.id ?? ''} onChange={event => void selectRecipe(event.target.value)}>
           <option value="" disabled>Custom experiment</option>{experiments.recipes.map(recipe => <option key={recipe.id} value={recipe.id}>{recipe.title}</option>)}</select></label>}
       </div>
-      {experiments && <GuidedExperiments recipes={experiments.recipes} completed={completedRecipe?.id} launching={launchingRecipe}
-        disabled={pending || locked} draft={hasDraft} onLaunch={id => void selectRecipe(id)} />}
+      {experiments && <details className="guided-choices" open={view === 'details' ? true : undefined}><summary>Try a guided experiment</summary><GuidedExperiments recipes={experiments.recipes} completed={completedRecipe?.id} launching={launchingRecipe}
+        disabled={pending || locked} draft={hasDraft} onLaunch={id => void selectRecipe(id)} /></details>}
       <InputEditor key={model?.manifest.modelId ?? 'loading'} choice={choice} text={text} disabled={locked} busy={loading}
         draft={inputDraft} onChange={setText} onSubmit={runInput} />
     </section>
     {error && <p className="error" role="alert">{error}
       {sessionEnded && <button type="button" className="secondary recover" onClick={() => void restart()}>Restart on CPU</button>}</p>}
+    {view === 'visual' && c && display && tokenizer && <VisualFlow config={c} tokens={display.tokens.map(id => tokenizer.tokens[id])} selected={selectedNode}
+      comparison={display.comparison} attention={display.attention} layer={display.controls.layer} head={display.controls.head}
+      position={display.controls.mode === 'attention' ? display.controls.query : display.controls.position} pending={pending || loading || copying || sessionEnded}
+      disabled={locked} onSelect={inspectNode} onDetails={() => setView('details')} />}
     <div className="workspace flow-workspace">
       <div className="exploration">
-        <section className="graph-pane" aria-label="Computation workspace">
+        <section className="graph-pane" aria-label="Computation workspace" hidden={view === 'visual'}>
           <div className="step-heading"><span className="step-number">2</span><div><p className="eyebrow">Explore the computation</p><h2>Choose where to look</h2></div></div>
           <p className="hint">Click a node to inspect the completed run. {c?.heads ?? 4} heads in each layer run in parallel; arrows show computation order.</p>
           {display && <ExperimentGuide recipe={completedRecipe} comparison={display.comparison} target={display.controls.target}
@@ -552,7 +563,7 @@ export default function App() {
         </section>
         <aside className="controls-panel node-panel" aria-label="Selected node">
           <div className="node-panel-heading"><p className="eyebrow">Selected node</p><h2>{selectionTitle}</h2><span className="inspection-note">Inspection keeps the active experiment intact</span></div>
-          {display && tokenizer && client.current && !loading && display.comparison.baselineRunId === baseline.current?.runId && <NodeInspector node={selectedNode} client={client.current}
+          {view === 'details' && display && tokenizer && client.current && !loading && display.comparison.baselineRunId === baseline.current?.runId && <NodeInspector node={selectedNode} client={client.current}
             baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId} position={inspectPosition}
             symbol={tokenizer.tokens[display.tokens[inspectPosition]]} trace={traceView} target={display.controls.target} symbols={tokenizer.tokens} sourceTokens={display.sourceTokens}
             preset={patchNode && selectedNode.kind === 'stage' && display.comparison.interventions[0]?.kind === 'residual.replace' && selectedNode.layer === display.comparison.interventions[0].layer && selectedNode.stage === display.comparison.interventions[0].stage && inspectPosition === display.controls.patchPosition
@@ -560,7 +571,7 @@ export default function App() {
           {selectedNode.kind === 'head' || residualNode ? <>
         <section>
           <p className="eyebrow">At the selected node</p><h3>{residualNode ? 'Copy at this residual junction' : headControls.mode === 'attention' ? "Redirect a head's attention" : "Change a head's contribution"}</h3>
-          <label>Intervention type<select aria-label="Intervention type" disabled={locked} value={residualNode ? 'patch' : headControls.mode} onChange={event => chooseMode(event.target.value as Controls['mode'], headControls)}>
+          <label>Intervention type<select aria-label="Intervention type" disabled={locked} value={residualNode ? 'patch' : headControls.mode} onChange={event => { if (event.target.value === 'patch') setView('details'); chooseMode(event.target.value as Controls['mode'], headControls); }}>
             <option value="head">Scale a head's output</option><option value="attention">Redirect a head's attention</option><option value="patch">Patch the residual from another input</option></select></label>
           {residualNode ? <div className="patch-controls">
             <p className="hint">Copies the source input's vector into {selectedNode.kind === 'stage' ? hookLabel(`${selectedNode.layer}:${selectedNode.stage}`) : 'this junction'}. Source and position choices stay a draft until you press Copy from source.</p>
@@ -630,7 +641,7 @@ export default function App() {
         </> : <div className="empty-observation">The computed prediction will appear here.</div>}
       </div>
     </div>
-    <div className="workspace-tools">
+    <details className="workspace-utilities" open={view === 'details' ? true : undefined}><summary>Save, replay & runtime settings</summary><div className="workspace-tools">
         <section className="saved-experiments">
           <p className="eyebrow">Save and replay</p>
           <button className="secondary" disabled={loading || probing || transferring || pending || !display} onClick={() => void exportExperiment()}>Export experiment</button>
@@ -652,7 +663,8 @@ export default function App() {
         </section>
 
     </div>
-    {display && tokenizer && <section className="details-workspace" aria-label="Detailed computation inspection">
+    </details>
+    {display && tokenizer && <section className="details-workspace" aria-label="Detailed computation inspection" hidden={view === 'visual'}>
       <div className="step-heading"><span className="step-number">＋</span><div><p className="eyebrow">Go deeper</p><h2>Inspect the numbers</h2></div></div>
           {experiments && <div className="checkpoint-evidence">
             <p><strong>{(experiments.evaluation.heldOut.accuracy * 100).toFixed(1)}% held-out answer accuracy</strong> · {experiments.evaluation.heldOut.count} distinct three-binding inputs</p>

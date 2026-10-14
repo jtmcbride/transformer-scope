@@ -219,3 +219,9 @@ Coverage: four engine tests check that the prediction cards match `recipes.json`
 - Larger-model, wider-seed, ill-conditioned-input, and lower-precision backend coverage.
 
 Do not regenerate expected arrays or widen tolerances automatically after a failure. Inspect the earliest divergent tensor, artifact identity, matrix orientation, and backend precision first.
+
+## Visual flow redesign
+
+The default visual diagram and the full Detailed workspace share the completed experiment state. New Chromium/WebKit checks cover keyboard node selection, head edits, export after view switching, baseline reset, mobile containment, bounded canvas scrolling, and draft input separation. Existing workflow regressions explicitly open `?view=details` to keep exercising all numerical and advanced controls. The build and artifact audits pass.
+
+Touch emulation exposed WebKit native selects ignoring minimum sizing; the coarse-pointer style now draws a select indicator and supplies a usable control height. The opt-in validation harness now scrolls its iframe into view before timing edits, because WebKit throttles offscreen animation frames. Its 30-second timeout also covers the two animation callbacks, and exported timing records identify the visual workspace. Both harness tests pass in Chromium and WebKit after this fix. These remain automated browser checks, not physical-device evidence.

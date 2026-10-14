@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import fixture from '../fixtures/inspection.json' with { type: 'json' };
 
 test('exact strength entry and attention-cell arithmetic match independent PyTorch values', async ({ page }) => {
-  await page.goto('?model=verification');
+  await page.goto('?model=verification&view=details');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await page.getByLabel('Exact head strength').fill('3');
   await page.getByLabel('Exact head strength').press('Enter');
@@ -23,7 +23,7 @@ test('exact strength entry and attention-cell arithmetic match independent PyTor
 });
 
 test('projection/residual/MLP selectors show independent completed values, reset, and mobile containment', async ({ page }, testInfo) => {
-  await page.goto('?model=verification');
+  await page.goto('?model=verification&view=details');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await page.getByLabel('Exact head strength').fill('0.37'); await page.getByLabel('Exact head strength').press('Enter');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.37×' })).toBeVisible();
@@ -54,7 +54,7 @@ test('projection/residual/MLP selectors show independent completed values, reset
 test('worker restart during edits creates a fresh CPU session and preserves the requested experiment', async ({ page }) => {
   const workers: string[] = [];
   page.on('worker', worker => workers.push(worker.url()));
-  await page.goto('?model=verification');
+  await page.goto('?model=verification&view=details');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await page.getByLabel('Layer', { exact: true }).selectOption('1');
   await page.getByLabel('Apply at').selectOption('0');
@@ -82,7 +82,7 @@ test('CPU restart can cancel an unfinished model load', async ({ page }) => {
     else await route.continue();
   });
   try {
-    await page.goto('?model=verification');
+    await page.goto('?model=verification&view=details');
     await loadStarted;
     await expect(page.getByRole('status').filter({ hasText: 'Loading model…' })).toBeVisible();
     await page.getByRole('button', { name: 'Restart computation worker on CPU' }).click();

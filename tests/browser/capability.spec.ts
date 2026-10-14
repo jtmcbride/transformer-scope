@@ -14,7 +14,7 @@ test('an unavailable worker WebGL context produces a clear error and CPU recover
     }\n`;
     await route.fulfill({ response, body: capability + script });
   });
-  await page.goto('?model=verification');
+  await page.goto('?model=verification&view=details');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.50×' })).toBeVisible();
   await page.getByLabel('Backend').selectOption('webgl');
   await expect(page.getByRole('alert')).toContainText('WebGL worker unavailable:');
@@ -56,7 +56,7 @@ for (const timing of ['idle', 'in-flight'] as const) {
     });
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto('?backend=webgl');
+    await page.goto('?backend=webgl&view=details');
     const status = page.locator('.status');
     await expect(status.filter({ hasText: 'Showing 0.00×' }).or(page.getByRole('alert'))).toBeVisible({ timeout: 30_000 });
     const unsupported = await page.getByRole('alert').filter({ hasText: 'WebGL worker unavailable' }).count();

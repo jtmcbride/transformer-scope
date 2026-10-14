@@ -3,5 +3,6 @@ import App from './App';
 import './style.css';
 import './flow.css';
 import './trace.css';
+import './visual.css';
 
 createRoot(document.getElementById('root')!).render(<App />);

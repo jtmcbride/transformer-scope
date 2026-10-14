@@ -6,7 +6,7 @@ test('trained checkpoint reproduces reference probes and prepared recipes on CPU
   test.setTimeout(120_000);
   let workerUrl = '';
   page.on('request', request => { if (/model\.worker-.*\.js/u.test(request.url())) workerUrl = request.url(); });
-  await page.goto('');
+  await page.goto('?view=details');
   await expect(page.getByTestId('recipe-note')).toContainText('Ablation changes the answer', { timeout: 30_000 });
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.00×' })).toBeVisible();
   const report = await page.evaluate(async url => {
@@ -92,7 +92,7 @@ test('trained checkpoint reproduces reference probes and prepared recipes on CPU
 test('prepared experiments, custom inputs, checkpoint switching, and mobile matrix stay coherent', async ({ page }, testInfo) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('');
+  await page.goto('?view=details');
   await expect(page.getByTestId('recipe-note')).toContainText('Ablation changes the answer', { timeout: 30_000 });
   await expect(page.getByText('100.0% held-out answer accuracy')).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.00×' })).toBeVisible();

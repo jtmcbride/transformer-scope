@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 test.use({ viewport: { width: 360, height: 740 }, hasTouch: true });
 
 test('emulated touch layout keeps controls finger-sized and the page width contained', async ({ page }, testInfo) => {
-  await page.goto('');
+  await page.goto('?view=details');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×', { timeout: 30_000 });
   await page.getByRole('button', { name: 'Inspect projection, residual, and MLP' }).click();
   await expect(page.getByRole('table', { name: 'Baseline and modified computation vectors' })).toBeVisible();

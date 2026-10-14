@@ -94,12 +94,14 @@ async function interfaceChecks(host: HTMLElement, model: HarnessModel, backend: 
         throw new Error(alert || 'The application did not show a result.');
       }
       await waitFor(frame, () => settled(frame.doc), 'default inspectors');
+      // WebKit throttles animation frames for offscreen iframes even when the parent is visible.
+      frame.frame.scrollIntoView({ block: 'center', behavior: 'instant' });
       const actual = select(frame.doc, 'Backend').value;
       if (actual !== backend) throw new Error(`Requested ${backend}; the application reports ${actual}.`);
       const weights = frame.win.performance.getEntriesByType('resource').filter(entry => entry.name.endsWith(`models/${model}/weights.bin`))
         .map(entry => { const timing = entry as PerformanceResourceTiming; return { transferSize: timing.transferSize ?? null, encodedBodySize: timing.encodedBodySize ?? null, durationMs: timing.duration }; });
       return { detail: `${ready.at.toFixed(1)} ms${ready.alreadyTrue ? ' (upper bound: complete before observation began)' : ''}`,
-        data: { coldReadyMs: ready.at, observationStartedAfterCompletion: ready.alreadyTrue, actualBackend: actual, weightsFetch: weights,
+        data: { workspaceView: 'visual', coldReadyMs: ready.at, observationStartedAfterCompletion: ready.alreadyTrue, actualBackend: actual, weightsFetch: weights,
           definition: 'Embedded page navigation start until the first completed comparison is committed to the DOM. HTTP, filesystem, driver, and shader caches are not reset; transferSize 0 usually means a cache hit.' } };
     }));
     if (checks[0].status !== 'passed') { skipRemaining(checks[0].status === 'unsupported' ? 'Backend unsupported.' : 'The application did not become ready.'); return checks; }
@@ -119,15 +121,18 @@ async function interfaceChecks(host: HTMLElement, model: HarnessModel, backend: 
         const samples: { domCommitMs: number; frameOpportunityMs: number }[] = [];
         for (let i = 0; i < settings.warmupSamples + settings.measuredSamples; i++) {
           const factor = warmFactors[(i + offset) % warmFactors.length];
+          frame.frame.scrollIntoView({ block: 'center', behavior: 'instant' });
           const expected = `Showing ${factor.toFixed(2)}×`;
           const started = frame.win.performance.now();
           const sample = await new Promise<{ domCommitMs: number; frameOpportunityMs: number }>((resolve, reject) => {
             const timer = setTimeout(() => { observer.disconnect(); reject(new Error(`Edit to ${factor} did not complete within 30 s.`)); }, 30_000);
             const observer = new frame.win.MutationObserver(() => {
               if (statusText(frame.doc) !== expected) return;
-              observer.disconnect(); clearTimeout(timer);
+              observer.disconnect();
               const domCommitMs = frame.win.performance.now() - started;
-              frame.win.requestAnimationFrame(() => frame.win.requestAnimationFrame(() => resolve({ domCommitMs, frameOpportunityMs: frame.win.performance.now() - started })));
+              frame.win.requestAnimationFrame(() => frame.win.requestAnimationFrame(() => {
+                clearTimeout(timer); resolve({ domCommitMs, frameOpportunityMs: frame.win.performance.now() - started });
+              }));
             });
             observer.observe(frame.doc, { childList: true, subtree: true, characterData: true });
             setter.call(input, String(factor)); input.dispatchEvent(new frame.win.Event('input', { bubbles: true }));
@@ -137,7 +142,7 @@ async function interfaceChecks(host: HTMLElement, model: HarnessModel, backend: 
         results.push({ layer, domCommit: summarize(samples.map(sample => sample.domCommitMs)), frameOpportunity: summarize(samples.map(sample => sample.frameOpportunityMs)), samples });
       }
       return { detail: results.map(result => `layer ${result.layer + 1}: commit p95 ${result.domCommit.p95Ms.toFixed(1)} ms, frame opportunity p95 ${result.frameOpportunity.p95Ms.toFixed(1)} ms`).join('; '),
-        data: { head: benchmarkHead, scope: 'all positions', factors: warmFactors, layers: results,
+        data: { workspaceView: 'visual', head: benchmarkHead, scope: 'all positions', factors: warmFactors, layers: results,
           definition: 'Synthetic in-page input event to the completed result DOM commit (scheduling, worker comparison, default inspector reads, React update). Frame opportunity adds two animation-frame callbacks; it is not measured display latency and excludes touch hardware and OS input latency.' } };
     }));
 

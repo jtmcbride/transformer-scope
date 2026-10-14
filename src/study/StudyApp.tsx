@@ -76,7 +76,7 @@ export default function StudyApp() {
     let current = true;
     setFrameState('loading'); setError(null);
     void (async () => {
-      const frame = await openFrame(host.current!, base, 'Transformer Microscope', 'study-frame');
+      const frame = await openFrame(host.current!, new URL('?model=retrieval', base), 'Transformer Microscope', 'study-frame');
       await waitFor(frame, () => settled(frame.doc), 'the application to load');
       if (draft.step === 'orientation') await presetOrientation(frame);
       if (reveal) {

@@ -1,4 +1,4 @@
-import { requireInput, type SymbolTokenizer } from './contracts';
+import { requireInput, type ModelTokenizer } from './contracts';
 
 export interface TokenProbability { tokenId: number; text: string; logit: number; probability: number }
 export interface TokenDelta extends TokenProbability { baselineProbability: number; probabilityDelta: number }
@@ -18,7 +18,7 @@ export function logSoftmax(values: ArrayLike<number>): Float64Array {
   for (let i = 0; i < values.length; i++) sum += Math.exp(values[i] - max);
   return Float64Array.from(values, value => (value - max) - Math.log(sum));
 }
-export function comparePredictions(baseline: ArrayLike<number>, modified: ArrayLike<number>, tokenizer: SymbolTokenizer,
+export function comparePredictions(baseline: ArrayLike<number>, modified: ArrayLike<number>, tokenizer: ModelTokenizer,
   topK = 8, targetTokenId?: number): PredictionComparison {
   requireInput(baseline.length === modified.length && baseline.length === tokenizer.tokens.length, 'Prediction vocabulary mismatch.');
   requireInput(Number.isInteger(topK) && topK > 0 && topK <= baseline.length, 'Invalid prediction display limit.');

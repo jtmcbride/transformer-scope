@@ -220,6 +220,14 @@ Coverage: four engine tests check that the prediction cards match `recipes.json`
 
 Do not regenerate expected arrays or widen tolerances automatically after a failure. Inspect the earliest divergent tensor, artifact identity, matrix orientation, and backend precision first.
 
+## TinyStories real-text release
+
+The shipped 48,000-step checkpoint adds two engine tests (74 total): exact text tokenization/export/replay and independent Python baseline/full/suffix logits for three prompts. Production worker checks pass the complete forward, gradient, Adam, and intervention fixtures on local Chromium and WebKit, using CPU and supported float32 WebGL. Each case and numerical probe retains zero extra tensors. Exact reports and the scale-aware error bounds are recorded in `tinystories-numerical-results.json` and `tinystories-deployment.md`.
+
+The final compact layer navigation and real-text workflow pass 12 focused Chromium/WebKit cases. These cover navigation without changing the prediction, head edits, model switching, live replay, exact Unicode and whitespace export, worker restart preserving the completed prompt, context overflow retaining the last result, and the existing visual flow controls. WebKit can compile a new GPU shape slowly; text workflows wait for actual completed status for up to 60 seconds, without changing numerical tolerances. The complete release suite has 55 browser cases per browser and five hosted checks, including the default English prompt and every exported next-token logit.
+
+The original name-copying gate remains failed (56%, required 80%). Full-run training determinism, the untouched language-quality audit, physical mobile performance, and whole-story generation are not established by these checks. Text inference currently predicts one next token with a 64-token context including BOS.
+
 ## Visual flow redesign
 
 The default visual diagram and the full Detailed workspace share the completed experiment state. New Chromium/WebKit checks cover keyboard node selection, head edits, export after view switching, baseline reset, mobile containment, bounded canvas scrolling, and draft input separation. Existing workflow regressions explicitly open `?view=details` to keep exercising all numerical and advanced controls. The build and artifact audits pass.

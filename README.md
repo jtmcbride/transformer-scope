@@ -4,6 +4,8 @@ A browser laboratory for inspecting transformer computations and measuring inter
 
 **The default checkpoint learns a controlled symbol retrieval task.** It answers 453/453 held-out three-binding inputs correctly. It is not a general language model; accuracy drops with different binding counts. The untrained numerical verification checkpoint remains selectable.
 
+The default model now accepts real English text with the TinyStories checkpoint. The retrieval and verification symbol models remain selectable.
+
 The default **Visual flow** follows symbols through embeddings, parallel attention heads, per-position processing, and prediction. Click a stage to select its existing controls, or switch to **Detailed** for the full computation graph, traces, and numerical inspectors. Both views share the same experiment. See `docs/visual-flow.md` for diagram semantics and accessibility.
 
 The computation workspace presents editable bindings, a clickable transformer flowchart, contextual head-strength controls, and a persistent baseline/modified prediction card. Selecting a node inspects the completed experiment; an intervention is applied when its controls change. Use **Edit tokens** for raw symbol inputs. See `docs/frontend-workspace.md` for the interaction and verification details.
@@ -88,7 +90,7 @@ The exporter saves 411,648 weight bytes, a hash-checked manifest/tokenizer, eval
 - Implemented in Milestone F: named-host browser latency measurements, source/build artifact auditing, pinned-action CI, verified Pages deployment, and hosted asset/workflow checks.
 - [Live application](https://jtmcbride.github.io/transformer-scope/). CI passes Chromium CPU/WebGL, Firefox CPU (worker WebGL unavailable on that runner), and hosted release checks. Installed Safari passes manual CPU/WebGL reference checks and hosted CPU verification.
 - Implemented in expansion (started before the educational gate by project decision): a residual-stream read-out (logit lens) and an input-embedding view, and an ablation explorer with pairwise non-additivity, all verified against PyTorch. The intervention panel can also redirect a head's attention (`attention.override`) and patch a residual vector from another input of the same length (`residual.replace`); see `docs/model-contract.md`.
-- Text checkpoint (in progress): a TinyStories data, byte-level BPE tokenizer, training, and probe pipeline, with Python/TypeScript tokenizer parity on every validation story. Both permitted training runs failed the name-copying probe gate, so no text model is accepted or shipped; commands are in `docs/text-checkpoint-proposal.md`.
+- TinyStories real text: the locally trained 48,000-step, 1.06M-parameter checkpoint is shipped as an experimental model with a 2,048-token BPE vocabulary and 64-token context. Its original name-copying gate remains failed; numerical verification and release behavior are documented in `docs/tinystories-deployment.md`.
 - Implemented for release validation: an opt-in on-device harness (`validation.html`), a physical-device protocol, an educational evaluation protocol with a findings template, and WebGL context-loss detection with CPU recovery.
 - Remaining release validation: educational sessions (the session page is ready), and performance across more named hardware/browser combinations. The physical lower-powered phone run is deferred by project decision and not validated.
 

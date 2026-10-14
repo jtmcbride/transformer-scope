@@ -12,7 +12,7 @@ test('the ablation explorer ranks independent PyTorch head effects and exposes a
   const target = input.targetTokenId, base = logSoftmax(input.baselineLogits)[target];
   const expected = input.single.map(entry => ({ name: `Layer ${entry.layer + 1}, Head ${entry.head + 1}`, delta: logSoftmax(entry.logits)[target] - base,
     probability: Math.exp(logSoftmax(entry.logits)[target]) })).sort((a, b) => a.delta - b.delta);
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   const status = page.locator('.status');
   await expect(status).toHaveText('Showing 0.00×', { timeout: 30_000 });
   await page.getByLabel('Prepared experiment').selectOption('small');

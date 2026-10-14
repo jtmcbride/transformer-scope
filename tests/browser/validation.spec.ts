@@ -24,7 +24,7 @@ test('the validation harness is opt-in and records identity, numerical checks, a
   const requests: string[] = [], errors: string[] = [];
   page.on('request', request => requests.push(request.url()));
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.00×' })).toBeVisible({ timeout: 30_000 });
   expect(requests.filter(url => /validation/u.test(url))).toEqual([]);
   requests.length = 0;

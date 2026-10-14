@@ -1,4 +1,4 @@
-import type { ResidualHook, SymbolTokenizer } from './engine/contracts';
+import type { ResidualHook, ModelTokenizer } from './engine/contracts';
 import { retrievalAnswer } from './experiments';
 
 /** A patch point is serialized as "layer:stage" for a select control. */
@@ -15,7 +15,8 @@ export function hookKeys(layers: number): string[] {
 }
 
 /** For a well-formed retrieval input, the same bindings queried for another key; otherwise undefined. */
-export function swappedQuery(tokens: readonly number[], tokenizer: SymbolTokenizer): string | undefined {
+export function swappedQuery(tokens: readonly number[], tokenizer: ModelTokenizer): string | undefined {
+  if (tokenizer.kind !== 'symbols') return;
   if (retrievalAnswer([...tokens], tokenizer) === undefined) return;
   const symbols = tokens.slice(1).map(id => tokenizer.tokens[id]);
   const query = symbols.at(-2)!;

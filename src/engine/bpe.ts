@@ -12,9 +12,15 @@ export function validateBpe(value: unknown, vocabularySize: number): BpeDocument
   requireInput(document?.schemaVersion === 2 && document.kind === 'byte-bpe' && document.pattern === BPE_PATTERN, 'Unsupported text tokenizer.');
   requireInput(document.bosTokenId === 0 && document.eosTokenId === 1 && document.padTokenId === 2 && document.byteOffset === 3, 'Unexpected special token layout.');
   requireInput(Array.isArray(document.merges) && 3 + 256 + document.merges.length === vocabularySize &&
-    Array.isArray(document.tokens) && document.tokens.length === vocabularySize, 'Tokenizer size does not match the model vocabulary.');
+    Array.isArray(document.tokens) && document.tokens.length === vocabularySize && document.tokens.every(token => typeof token === 'string' && token.length > 0), 'Tokenizer size does not match the model vocabulary.');
+  requireInput(document.tokens.slice(0, 3).join('|') === '<BOS>|<EOS>|<PAD>', 'Unexpected special token labels.');
+  requireInput(document.merges.every(pair => Array.isArray(pair) && pair.length === 2), 'Each merge needs two token IDs.');
+  const pairs = new Set<string>();
   document.merges.forEach(([a, b], rank) => requireInput(Number.isInteger(a) && Number.isInteger(b) && a >= 3 && b >= 3 && a < 259 + rank && b < 259 + rank,
     'Merges may only combine bytes or earlier merges.'));
+  for (const pair of document.merges) { const key = pair.join(':'); requireInput(!pairs.has(key), 'Duplicate tokenizer merge.'); pairs.add(key); }
+  const encoder = new BpeTokenizer(document);
+  document.tokens.forEach((label, id) => requireInput(label === encoder.display(id), 'Token labels do not match their UTF-8 bytes.'));
   return document;
 }
 
@@ -57,6 +63,7 @@ export class BpeTokenizer {
       }
       sequence = merged;
     }
+    if (this.cache.size >= 4096) this.cache.clear();
     this.cache.set(piece, sequence);
     return sequence;
   }
@@ -71,10 +78,17 @@ export class BpeTokenizer {
   }
 
   decode(ids: readonly number[]): string {
+    requireInput(ids.every(id => Number.isInteger(id) && id >= 0 && id < this.bytes.length), 'Token ID is outside the text vocabulary.');
     const parts = ids.filter(id => id >= this.document.byteOffset).map(id => this.bytes[id]);
     const joined = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
     let offset = 0;
     for (const part of parts) { joined.set(part, offset); offset += part.length; }
     return new TextDecoder('utf-8', { fatal: true }).decode(joined);
+  }
+
+  display(id: number): string {
+    if (id < this.document.byteOffset) return ['<BOS>', '<EOS>', '<PAD>'][id];
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(this.bytes[id]); }
+    catch { return Array.from(this.bytes[id], byte => `<0x${byte.toString(16).toUpperCase().padStart(2, '0')}>`).join(''); }
   }
 }

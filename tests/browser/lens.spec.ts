@@ -14,7 +14,7 @@ const percent = (text: string) => Number(text.match(/(-?\d+\.\d+)%/u)![1]);
 
 test('the residual-stream read-out shows independent PyTorch lens values for baseline and ablation', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×', { timeout: 30_000 });
   await expect(page.getByRole('table', { name: 'Residual stream read-out' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Read out the residual stream' }).click();
@@ -51,7 +51,7 @@ const embedding = JSON.parse(readFileSync('tests/fixtures/embedding.json', 'utf8
   positions: { position: number; tokenId: number; token: number[]; positionEmbedding: number[]; sum: number[]; similarity: number[] }[] };
 
 test('the input-embedding panel shows independent PyTorch rows and token similarities', async ({ page }) => {
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×', { timeout: 30_000 });
   await page.getByRole('button', { name: 'Inspect the input embedding' }).click();
   for (const position of [15, 14]) {

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { tokenize, type ModelTokenizer } from '../engine/contracts';
 import type { ModelChoice } from '../experiments';
 
 interface Binding { key: string; value: string }
@@ -14,9 +15,11 @@ function retrievalInput(text: string): { bindings: Binding[]; query: string } | 
   return bindings.some(binding => binding.key === query) ? { bindings, query } : null;
 }
 
-interface Props { choice: ModelChoice; text: string; disabled: boolean; busy: boolean; draft: boolean; onChange: (text: string) => void; onSubmit: (event: FormEvent) => void }
+interface Props { tokenizer?: ModelTokenizer; contextLength?: number; choice: ModelChoice; text: string; disabled: boolean; busy: boolean; draft: boolean; onChange: (text: string) => void; onSubmit: (event: FormEvent) => void }
 export function InputEditor(props: Props) {
   const [rawOpen, setRawOpen] = useState(false);
+  let textCount: number | undefined;
+  if (props.choice === 'tinystories' && props.tokenizer) { try { textCount = tokenize(props.text, props.tokenizer, 65_537).length; } catch { /* Input validation is reported on submission. */ } }
   const task = props.choice === 'retrieval' ? retrievalInput(props.text) : null;
   function edit(bindings: Binding[], query: string) {
     props.onChange(`${bindings.map(binding => `${binding.key} = ${binding.value} ;`).join(' ')} ? ${query} =`);
@@ -36,9 +39,9 @@ export function InputEditor(props: Props) {
         {task.bindings.map(binding => <option key={binding.key}>{binding.key}</option>)}</select></label>
     </div>}
     <div className="raw-input" hidden={!!task && !rawOpen}>
-      <label htmlFor="sequence">Space-separated symbols</label>
-      <textarea id="sequence" value={props.text} onChange={event => props.onChange(event.target.value)} rows={1} spellCheck={false} disabled={props.disabled} />
-      <p className="hint">{props.choice === 'verification' ? 'Use A–O. Up to 7 symbols, plus the beginning token.' : 'Separate every symbol with spaces. Three distinct bindings match the training task. Up to 31 symbols, plus the beginning token.'}</p>
+      <label htmlFor="sequence">{props.choice === 'tinystories' ? 'Story prompt' : 'Space-separated symbols'}</label>
+      <textarea id="sequence" value={props.text} onChange={event => props.onChange(event.target.value)} rows={props.choice === 'tinystories' ? 3 : 1} spellCheck={false} disabled={props.disabled} />
+      <p className="hint">{props.choice === 'tinystories' ? `${textCount ?? '—'} / ${props.contextLength ?? 64} tokens, including the beginning token. Preserve spaces and punctuation; ␠ marks spaces in token labels. Shorten text that exceeds the context.` : props.choice === 'verification' ? 'Use A–O. Up to 7 symbols, plus the beginning token.' : 'Separate every symbol with spaces. Three distinct bindings match the training task. Up to 31 symbols, plus the beginning token.'}</p>
     </div>
     <div className="input-actions">
       {task && <button type="button" className="text-button" aria-expanded={rawOpen} aria-controls="sequence" onClick={() => setRawOpen(!rawOpen)}>{rawOpen ? 'Hide tokens' : 'Edit tokens'}</button>}

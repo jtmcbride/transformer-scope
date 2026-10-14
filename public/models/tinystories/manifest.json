@@ -1,0 +1,638 @@
+{
+  "schemaVersion": 1,
+  "architectureVersion": "preln-absolute-tied-v1",
+  "modelId": "text-tinystories-seed-2026",
+  "config": {
+    "layers": 4,
+    "heads": 4,
+    "modelDim": 128,
+    "mlpDim": 512,
+    "vocabularySize": 2048,
+    "contextLength": 64,
+    "layerNormEpsilon": 1e-05
+  },
+  "dtype": "float32-le",
+  "matrixOrientation": "input-output",
+  "conventions": {
+    "gelu": "tanh",
+    "layerNormVariance": "population",
+    "position": "learned-absolute",
+    "tiedEmbeddings": true,
+    "dropout": 0,
+    "maskValue": -1000000000.0
+  },
+  "weightsFile": "weights.bin",
+  "tokenizerFile": "tokenizer.json",
+  "tensors": [
+    {
+      "name": "tokenEmbedding",
+      "shape": [
+        2048,
+        128
+      ],
+      "byteOffset": 0,
+      "byteLength": 1048576
+    },
+    {
+      "name": "positionEmbedding",
+      "shape": [
+        64,
+        128
+      ],
+      "byteOffset": 1048576,
+      "byteLength": 32768
+    },
+    {
+      "name": "finalNorm.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1081344,
+      "byteLength": 512
+    },
+    {
+      "name": "finalNorm.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1081856,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.ln1.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1082368,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.ln1.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1082880,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.ln2.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1083392,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.ln2.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1083904,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.q.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 1084416,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.0.q.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1149952,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.k.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 1150464,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.0.k.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1216000,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.v.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 1216512,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.0.v.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1282048,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.output.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 1282560,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.0.output.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1348096,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.0.mlpIn.weight",
+      "shape": [
+        128,
+        512
+      ],
+      "byteOffset": 1348608,
+      "byteLength": 262144
+    },
+    {
+      "name": "blocks.0.mlpIn.bias",
+      "shape": [
+        512
+      ],
+      "byteOffset": 1610752,
+      "byteLength": 2048
+    },
+    {
+      "name": "blocks.0.mlpOut.weight",
+      "shape": [
+        512,
+        128
+      ],
+      "byteOffset": 1612800,
+      "byteLength": 262144
+    },
+    {
+      "name": "blocks.0.mlpOut.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1874944,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.ln1.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1875456,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.ln1.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1875968,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.ln2.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1876480,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.ln2.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1876992,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.q.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 1877504,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.1.q.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 1943040,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.k.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 1943552,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.1.k.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2009088,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.v.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 2009600,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.1.v.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2075136,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.output.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 2075648,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.1.output.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2141184,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.1.mlpIn.weight",
+      "shape": [
+        128,
+        512
+      ],
+      "byteOffset": 2141696,
+      "byteLength": 262144
+    },
+    {
+      "name": "blocks.1.mlpIn.bias",
+      "shape": [
+        512
+      ],
+      "byteOffset": 2403840,
+      "byteLength": 2048
+    },
+    {
+      "name": "blocks.1.mlpOut.weight",
+      "shape": [
+        512,
+        128
+      ],
+      "byteOffset": 2405888,
+      "byteLength": 262144
+    },
+    {
+      "name": "blocks.1.mlpOut.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2668032,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.ln1.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2668544,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.ln1.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2669056,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.ln2.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2669568,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.ln2.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2670080,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.q.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 2670592,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.2.q.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2736128,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.k.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 2736640,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.2.k.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2802176,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.v.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 2802688,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.2.v.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2868224,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.output.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 2868736,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.2.output.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 2934272,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.2.mlpIn.weight",
+      "shape": [
+        128,
+        512
+      ],
+      "byteOffset": 2934784,
+      "byteLength": 262144
+    },
+    {
+      "name": "blocks.2.mlpIn.bias",
+      "shape": [
+        512
+      ],
+      "byteOffset": 3196928,
+      "byteLength": 2048
+    },
+    {
+      "name": "blocks.2.mlpOut.weight",
+      "shape": [
+        512,
+        128
+      ],
+      "byteOffset": 3198976,
+      "byteLength": 262144
+    },
+    {
+      "name": "blocks.2.mlpOut.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3461120,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.ln1.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3461632,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.ln1.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3462144,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.ln2.scale",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3462656,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.ln2.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3463168,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.q.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 3463680,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.3.q.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3529216,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.k.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 3529728,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.3.k.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3595264,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.v.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 3595776,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.3.v.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3661312,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.output.weight",
+      "shape": [
+        128,
+        128
+      ],
+      "byteOffset": 3661824,
+      "byteLength": 65536
+    },
+    {
+      "name": "blocks.3.output.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 3727360,
+      "byteLength": 512
+    },
+    {
+      "name": "blocks.3.mlpIn.weight",
+      "shape": [
+        128,
+        512
+      ],
+      "byteOffset": 3727872,
+      "byteLength": 262144
+    },
+    {
+      "name": "blocks.3.mlpIn.bias",
+      "shape": [
+        512
+      ],
+      "byteOffset": 3990016,
+      "byteLength": 2048
+    },
+    {
+      "name": "blocks.3.mlpOut.weight",
+      "shape": [
+        512,
+        128
+      ],
+      "byteOffset": 3992064,
+      "byteLength": 262144
+    },
+    {
+      "name": "blocks.3.mlpOut.bias",
+      "shape": [
+        128
+      ],
+      "byteOffset": 4254208,
+      "byteLength": 512
+    }
+  ],
+  "weightsSha256": "0011a5f8e314f63325a7231dfa60664e5bab37dbd8a27c1e5c03fab45996f294",
+  "tokenizerSha256": "bea77691157fbd7c2e339aa80e421057392fdda28dd003625336ed70dd0fc551",
+  "provenance": {
+    "purpose": "TinyStories V2 text checkpoint",
+    "seed": 2026,
+    "torchVersion": "2.9.1",
+    "generatorVersion": 1,
+    "data": {
+      "dataset": "roneneldan/TinyStories",
+      "revision": "f54c09fd23315a6f9c86f9dc80f725de7d8f9c64",
+      "files": {
+        "TinyStoriesV2-GPT4-train.txt": "6418d412de72888f52b5142c761ac21a582f7d1166f0bfbdb5f03ccfdec90443",
+        "TinyStoriesV2-GPT4-valid.txt": "6874bae9a4c1a4e7edcf0e53b86c17817e9cf881fc75ff2368da457b80c0585d"
+      }
+    },
+    "subsets": {
+      "train": {
+        "stories": 250000,
+        "characters": 200896049,
+        "sha256": "e5fb509f32de9f3ed6e52f3fbc6f4ac97a7b343c37f71ac1b2d4bb520efed483"
+      },
+      "audit": {
+        "stories": 2000,
+        "characters": 1610485,
+        "sha256": "710b0b8777f9f3e610b05e5398f27438bb66a6cf5e0acf3141832f6e0b68f797"
+      },
+      "validation": {
+        "stories": 27629,
+        "characters": 22067663,
+        "sha256": "1083388fd0fe7067bcc4b2b384704fb68f1b7335b94eaf735cb1ef0b6aed876e"
+      },
+      "tokenizer": {
+        "stories": 20000,
+        "characters": 16143530,
+        "sha256": "bcadb4995606b8dbcf3cbfaa7a4b6d0f284cb7e61c040b2527bbc5df65d968b6"
+      }
+    },
+    "selectedStep": 48000
+  },
+  "modelRevision": "23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6"
+}

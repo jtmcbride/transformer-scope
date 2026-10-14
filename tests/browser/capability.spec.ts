@@ -56,7 +56,7 @@ for (const timing of ['idle', 'in-flight'] as const) {
     });
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto('?backend=webgl&view=details');
+    await page.goto('?backend=webgl&view=details&model=retrieval');
     const status = page.locator('.status');
     await expect(status.filter({ hasText: 'Showing 0.00×' }).or(page.getByRole('alert'))).toBeVisible({ timeout: 30_000 });
     const unsupported = await page.getByRole('alert').filter({ hasText: 'WebGL worker unavailable' }).count();

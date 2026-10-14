@@ -1,6 +1,6 @@
 # Proposal: first text checkpoint (for review)
 
-Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. Both permitted runs failed the probe gate on name copying (see "First run findings" and "Retry findings"). The gate is not met, and no text checkpoint is accepted or shipped. A revised name-copying probe is drafted in `docs/text-checkpoint-probes-v2.md`.
+Status: the pipeline for these defaults is implemented (2026-10-13; see "Pipeline" below). Tokenizer parity (criterion 1) is met. Both permitted runs failed the probe gate on name copying (see "First run findings" and "Retry findings"). The gate is not met. The 48,000-step checkpoint is subsequently shipped at the project owner’s request as an experimental real-text model; this does not turn the failed gate into a pass. See `tinystories-deployment.md`. A revised name-copying probe is drafted in `docs/text-checkpoint-probes-v2.md`.
 
 ## Goal
 

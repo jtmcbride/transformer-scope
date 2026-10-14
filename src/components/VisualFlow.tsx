@@ -19,6 +19,10 @@ const explanation = (node: FlowNode) => node.kind === 'embedding'
 export function VisualFlow(props: Props) {
   const [title, description] = explanation(props.selected);
   const active = props.comparison.interventions[0];
+  const compact = props.config.layers > 2;
+  const layer = props.selected.kind === 'head' || props.selected.kind === 'stage' ? props.selected.layer : active?.layer ?? 0;
+  const visibleLayers = compact ? [layer] : Array.from({ length: props.config.layers }, (_, i) => i);
+  const selectedHead = props.selected.kind === 'head' ? props.selected.head : 0;
   const rows = [...props.comparison.displayTokens].sort((a, b) => b.probability - a.probability || a.tokenId - b.tokenId).slice(0, 4);
   const query = Math.min(props.position, props.tokens.length - 1);
   const weights = props.attention.slice(query * props.tokens.length, (query + 1) * props.tokens.length);
@@ -34,17 +38,23 @@ export function VisualFlow(props: Props) {
   return <section className={`visual-flow ${props.pending || props.ended ? 'visual-pending' : ''}`} aria-label="Visual transformer flow" aria-busy={props.pending}>
     <div className="visual-intro"><div><p className="eyebrow">From symbols to a prediction</p><h2>Follow the information.</h2></div>
       <p>Click a stage to explore it. Change a head and see what happens to the answer.</p></div>
+    {compact && <div className="visual-layer-navigation" role="group" aria-label="Model layer navigation">
+      <button type="button" aria-label="Previous model layer" disabled={props.disabled || layer === 0} onClick={() => props.onSelect({ kind: 'head', layer: layer - 1, head: selectedHead })}>←</button>
+      <strong>Layer {layer + 1} of {props.config.layers}</strong>
+      <button type="button" aria-label="Next model layer" disabled={props.disabled || layer === props.config.layers - 1} onClick={() => props.onSelect({ kind: 'head', layer: layer + 1, head: selectedHead })}>→</button>
+      <span>All {props.config.layers} layers run. Choose one to inspect.</span>
+    </div>}
     <div className="visual-scroll" tabIndex={0} role="region" aria-label="Scrollable model flow">
-      <div className="visual-canvas" style={{ gridTemplateColumns: `170px repeat(${props.config.layers}, minmax(260px, 1fr)) 205px` }}>
+      <div className="visual-canvas" style={{ gridTemplateColumns: `170px repeat(${visibleLayers.length}, minmax(260px, 1fr)) 205px` }}>
         <div className="visual-embedding"><p className="visual-stage-label">01 <strong>Embedding</strong></p><p className="visual-subtitle">Give each symbol a place</p>
           <div className="visual-token-stream">{props.tokens.map((token, i) => <span key={i} className={i === props.position ? 'visual-token-current' : ''} title={`Position ${i}: ${token}`}>{token}</span>)}</div>
           <svg className="embedding-ribbons" viewBox="0 0 160 110" aria-hidden="true">{['#528acf', '#cf7096', '#218a89', '#7963cb'].map((color, i) => <path key={color} d={`M 12 ${15 + i * 22} C 75 ${15 + i * 22}, 85 55, 152 55`} fill="none" stroke={color} strokeWidth="10" opacity=".22" />)}</svg>
           {select({ kind: 'embedding' }, 'Read the input', 'Symbols + their positions')}
         </div>
-        {Array.from({ length: props.config.layers }, (_, layer) => <div className="visual-block" key={layer}>
+        {visibleLayers.map(layer => <div className="visual-block" key={layer}>
           <svg className="visual-layer-link" viewBox="0 0 32 100" preserveAspectRatio="none" aria-hidden="true"><path d="M 0 100 C 36 100, -4 0, 32 0" /></svg>
           <p className="visual-stage-label">{String(layer + 2).padStart(2, '0')} <strong>Transformer layer {layer + 1}</strong></p>
-          <p className="visual-subtitle">Share information, then process it</p>
+          <p className="visual-subtitle">{compact && layer > 0 ? `${layer} earlier ${layer === 1 ? 'layer has' : 'layers have'} already processed the input` : 'Share information, then process it'}</p>
           <div className="visual-residual"><span>Carry the input forward</span><i aria-hidden="true">→</i></div>
           <p className="visual-part-label">Attention <span>{props.config.heads} heads working together</span></p>
           <svg className="head-ribbons" viewBox="0 0 240 44" preserveAspectRatio="none" aria-hidden="true">{Array.from({ length: props.config.heads }, (_, head) => <path key={head} d={`M 120 0 C 120 20, ${(head + .5) * 240 / props.config.heads} 20, ${(head + .5) * 240 / props.config.heads} 44`} />)}</svg>
@@ -56,7 +66,7 @@ export function VisualFlow(props: Props) {
           <span className="visual-down" aria-hidden="true">↓</span>
           {select({ kind: 'stage', layer, stage: 'block.output' }, `Pass it on · layer ${layer + 1}`, 'Add the processing result', 'visual-output')}
         </div>)}
-        <div className="visual-predictions"><p className="visual-stage-label">{String(props.config.layers + 2).padStart(2, '0')} <strong>Prediction</strong></p><p className="visual-subtitle">What comes next?</p>
+        <div className="visual-predictions"><p className="visual-stage-label">{String(props.config.layers + 2).padStart(2, '0')} <strong>Prediction</strong></p><p className="visual-subtitle">{compact && layer < props.config.layers - 1 ? `After ${props.config.layers - layer - 1} more ${props.config.layers - layer - 1 === 1 ? 'layer' : 'layers'} · what comes next?` : 'What comes next?'}</p>
           <div className="visual-answer"><span>{props.pending || props.ended ? 'Last completed answer' : 'After your change'}</span><strong>{props.comparison.modifiedTopTokens[0].text}</strong><small>Original answer: {props.comparison.baselineTopTokens[0].text}</small></div>
           <div className="visual-probabilities" aria-label="Flow prediction probabilities">{rows.map(row => <div key={row.tokenId}><span>{row.text}</span><div><i style={{ width: `${row.baselineProbability * 100}%` }} /><b style={{ width: `${row.probability * 100}%` }} /></div><strong>{(row.probability * 100).toFixed(1)}%</strong></div>)}</div>
           <p className="visual-probability-key"><i /> Original <b /> After change</p>

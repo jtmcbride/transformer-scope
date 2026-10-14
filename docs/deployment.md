@@ -33,7 +33,8 @@ HOSTED_BASE_URL=https://jtmcbride.github.io/transformer-scope/ EXPECTED_COMMIT=<
 
 The hosted tests verify:
 
-- The page, module worker, both manifests/tokenizers/binaries, recipes, evaluation, and probes return the intended content and MIME types under the subpath.
+- The page, module worker, all three manifests/tokenizers/binaries, recipes, evaluation, and probes return the intended content and MIME types under the subpath.
+- The default TinyStories workspace runs real English text and compares every exported logit with the independent fixture. Its four-layer model is labeled experimental; see `tinystories-deployment.md` for quality results and limitations. The 47.3 MB numerical probe is fetched only on demand, while ordinary inference loads the 4.25 MB weights and tokenizer.
 - Hash validation, prepared experiments, inspection, reset, export/replay, and CPU worker restart behave as in the production tests.
 - Explicit CPU mode and automatic WebGL fallback remain usable. `?backend=cpu` selects CPU at initial load; `?backend=webgl` explicitly requests WebGL.
 - The opt-in `validation.html` harness identifies the exact deployed commit and passes every supported check (Chromium; WebGL may be reported unsupported, never failed).

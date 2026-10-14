@@ -16,7 +16,7 @@ async function recordCommands(page: Page) {
 const calls = (page: Page, command: string) => page.evaluate(cmd => (window as unknown as { __redirectCommands: string[] }).__redirectCommands.filter(item => item === cmd).length, command);
 const ready = (page: Page) => expect(page.getByTestId('trace-step')).toContainText('Step 1 of');
 async function startRedirect(page: Page, source = 5) {
-  await page.goto('?backend=cpu&view=details');
+  await page.goto('?backend=cpu&view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   await page.getByLabel('Intervention type').selectOption('attention');
   await page.getByLabel('Layer', { exact: true }).selectOption('1');

@@ -1,0 +1,80 @@
+{
+  "records": [
+    {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "revision": "23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6",
+      "records": [
+        {
+          "backend": "cpu",
+          "maximum": 1.52587890625e-05,
+          "probe": {
+            "backend": "cpu",
+            "elapsedMs": 557.3000000119209,
+            "forwardMaximumError": 9.918212890625e-05,
+            "gradientMaximumError": 1.1086463928222656e-05,
+            "optimizerMaximumError": 1.0877847671508789e-05,
+            "loss": 5.167910575866699,
+            "retainedTensorDelta": 0,
+            "float32Textures": null,
+            "webglPacking": null
+          },
+          "retainedTensors": 0
+        },
+        {
+          "backend": "webgl",
+          "maximum": 1.52587890625e-05,
+          "probe": {
+            "backend": "webgl",
+            "elapsedMs": 6596.800000011921,
+            "forwardMaximumError": 6.103515625e-05,
+            "gradientMaximumError": 9.298324584960938e-06,
+            "optimizerMaximumError": 1.0311603546142578e-05,
+            "loss": 5.167911052703857,
+            "retainedTensorDelta": 0,
+            "float32Textures": true,
+            "webglPacking": false
+          },
+          "retainedTensors": 0
+        }
+      ]
+    },
+    {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15",
+      "revision": "23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6",
+      "records": [
+        {
+          "backend": "cpu",
+          "maximum": 1.52587890625e-05,
+          "probe": {
+            "backend": "cpu",
+            "elapsedMs": 1240,
+            "forwardMaximumError": 9.918212890625e-05,
+            "gradientMaximumError": 1.1086463928222656e-05,
+            "optimizerMaximumError": 1.0877847671508789e-05,
+            "loss": 5.167910575866699,
+            "retainedTensorDelta": 0,
+            "float32Textures": null,
+            "webglPacking": null
+          },
+          "retainedTensors": 0
+        },
+        {
+          "backend": "webgl",
+          "maximum": 1.52587890625e-05,
+          "probe": {
+            "backend": "webgl",
+            "elapsedMs": 15534,
+            "forwardMaximumError": 5.340576171875e-05,
+            "gradientMaximumError": 8.58306884765625e-06,
+            "optimizerMaximumError": 1.0907649993896484e-05,
+            "loss": 5.167911052703857,
+            "retainedTensorDelta": 0,
+            "float32Textures": true,
+            "webglPacking": false
+          },
+          "retainedTensors": 0
+        }
+      ]
+    }
+  ]
+}

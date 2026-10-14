@@ -1,3 +1,4 @@
+import textFixture from '../fixtures/text-inference.json' with { type: 'json' };
 import { execFileSync } from 'node:child_process';
 import { cpus, platform, release, totalmem } from 'node:os';
 import { expect, test } from '@playwright/test';
@@ -8,7 +9,8 @@ const hardware = { machineModel: platform() === 'darwin' ? execFileSync('sysctl'
   cpuModel: cpus()[0]?.model ?? 'unknown', logicalCpuCount: cpus().length, memoryGiB: totalmem() / 1024 ** 3,
   os: platform() === 'darwin' ? `macOS ${execFileSync('sw_vers', ['-productVersion'], { encoding: 'utf8' }).trim()}` : `${platform()} ${release()}` };
 
-for (const model of ['verification', 'retrieval'] as const) for (const backend of ['cpu', 'webgl'] as const) {
+const models = process.env.BENCHMARK_MODEL === 'tinystories' ? ['tinystories'] as const : ['verification', 'retrieval'] as const;
+for (const model of models) for (const backend of ['cpu', 'webgl'] as const) {
   test(`${model} ${backend}: cold page, warm interaction, and full/cached RPC`, async ({ page }, testInfo) => {
     test.setTimeout(180_000);
     let workerUrl = '';
@@ -22,12 +24,15 @@ for (const model of ['verification', 'retrieval'] as const) for (const backend o
       observation.observe(document, { childList: true, subtree: true, characterData: true });
     });
     await page.goto(`?model=${model}&backend=${backend}`);
+    await expect(page.locator('.status')).toHaveText(/^Showing/u, { timeout: 60_000 });
+    await page.getByText('Save, replay & runtime settings', { exact: true }).click();
     await expect(page.getByRole('button', { name: 'Export experiment' })).toBeEnabled({ timeout: 60_000 });
     await expect(page.getByLabel('Backend')).toHaveValue(backend);
     const coldReadyMs = await page.evaluate(() => (window as unknown as { benchmarkReadyMs: number }).benchmarkReadyMs);
     const ui = [];
+    const measuredLayers = model === 'tinystories' ? [0, 2, 3] : [0, 1];
     await page.getByLabel('Head', { exact: true }).selectOption('0');
-    for (const layer of [0, 1]) {
+    for (const layer of measuredLayers) {
       await page.getByLabel('Layer', { exact: true }).selectOption(String(layer));
       await expect(page.getByRole('button', { name: 'Export experiment' })).toBeEnabled();
       const samples = await page.evaluate(async () => {
@@ -56,7 +61,7 @@ for (const model of ['verification', 'retrieval'] as const) for (const backend o
       });
       ui.push({ layer, samples });
     }
-    const rpc = await page.evaluate(async ({ workerUrl, model, backend }) => {
+    const rpc = await page.evaluate(async ({ workerUrl, model, backend, textTokens, measuredLayers }) => {
       const worker = new Worker(workerUrl, { type: 'module' });
       let id = 0;
       const pending = new Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>();
@@ -72,12 +77,12 @@ for (const model of ['verification', 'retrieval'] as const) for (const backend o
       try {
         const loaded = await request('LOAD', { manifestUrl: new URL(`models/${model}/manifest.json`, window.location.href).href, backend });
         const symbols = (document.getElementById('sequence') as HTMLTextAreaElement).value.trim().split(/\s+/u);
-        const tokens = [loaded.tokenizer.bosTokenId, ...symbols.map(symbol => loaded.tokenizer.tokens.indexOf(symbol))];
+        const tokens = textTokens ?? [loaded.tokenizer.bosTokenId, ...symbols.map(symbol => loaded.tokenizer.tokens.indexOf(symbol))];
         const start = performance.now();
         const baseline = await request('BASELINE', { tokenIds: tokens });
         const baselineFirstMs = performance.now() - start;
         const layers = [];
-        for (const layer of [0, 1]) {
+        for (const layer of measuredLayers) {
           const samples = { full: [] as { rpcMs: number; workerMs: number }[], cached: [] as { rpcMs: number; workerMs: number }[] };
           for (let i = 0; i < 45; i++) for (const mode of (i % 2 ? ['cached', 'full'] : ['full', 'cached']) as ('full' | 'cached')[]) {
             const started = performance.now();
@@ -94,7 +99,7 @@ for (const model of ['verification', 'retrieval'] as const) for (const backend o
         await request('RELEASE', { runId: baseline.runId });
         return { modelRevision: loaded.manifest.modelRevision, config: loaded.manifest.config, precision: loaded.precision, baselineFirstMs, sequenceLength: tokens.length, layers };
       } finally { worker.terminate(); }
-    }, { workerUrl, model, backend });
+    }, { workerUrl, model, backend, textTokens: model === 'tinystories' ? textFixture.cases[0].tokenIds : undefined, measuredLayers });
     const result = { model, backend, browser: testInfo.project.name, userAgent: await page.evaluate(() => navigator.userAgent),
       hardware, coldReadyMs,
       ui: ui.map(item => ({ ...item, domCommit: summarize(item.samples.map(sample => sample.domCommitMs)), frameOpportunity: summarize(item.samples.map(sample => sample.frameOpportunityMs)) })),

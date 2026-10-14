@@ -22,7 +22,7 @@ async function roundTrip(page: Page) {
 }
 
 test('redirecting a head\'s attention matches the independent PyTorch routing sweep', async ({ page }) => {
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   const status = page.locator('.status');
   await expect(status).toHaveText('Showing 0.00×', { timeout: 30_000 });
   await page.getByLabel('Intervention type').selectOption('attention');

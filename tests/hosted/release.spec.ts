@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type { ValidationReport } from '../../src/validation/report';
+import textFixture from '../fixtures/text-inference.json' with { type: 'json' };
 
 interface Release {
   format: string; schemaVersion: number; commit: string; sourceTreeDirty: boolean; basePath: string;
@@ -52,7 +53,7 @@ test('hosted release identity, asset bytes, MIME types, and model revisions agre
   expect(paths.has('validation.html')).toBe(true);
   expect(paths.has('study.html')).toBe(true);
   expect([...paths].some(path => /assets\/model\.worker-.*\.js/u.test(path))).toBe(true);
-  for (const name of ['verification', 'retrieval']) {
+  for (const name of ['verification', 'retrieval', 'tinystories']) {
     for (const file of ['manifest.json', 'weights.bin', 'tokenizer.json', 'probe.json']) expect(paths.has(`models/${name}/${file}`)).toBe(true);
     const manifest = await (await request.get(`models/${name}/manifest.json`)).json();
     expect(manifest.modelRevision).toBe(release.models[name].modelRevision);
@@ -64,7 +65,7 @@ test('hosted worker runs recipes, inspection, reference verification, reset, exp
   const errors: string[] = [], failed: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('requestfailed', request => failed.push(`${request.url()}: ${request.failure()?.errorText}`));
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.getByRole('status').filter({ hasText: 'Showing 0.00×' })).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId('recipe-note')).toContainText('Ablation changes the answer');
   await expect(page.getByTestId('execution-strategy')).toHaveText('Cached suffix · layer 1');
@@ -98,7 +99,7 @@ test('hosted worker runs recipes, inspection, reference verification, reset, exp
 });
 
 test('hosted default flow edits a head and restores the computed prediction', async ({ page }, testInfo) => {
-  await page.goto('');
+  await page.goto('?model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×', { timeout: 60_000 });
   const flow = page.getByRole('region', { name: 'Visual transformer flow', exact: true });
   await flow.getByRole('button', { name: 'Normal selected head', exact: true }).click();
@@ -117,6 +118,29 @@ test('hosted default flow edits a head and restores the computed prediction', as
   await expect(page.getByTestId('target-probability')).toHaveText('99.99% → 99.99%');
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.locator('.visual-flow').screenshot({ path: testInfo.outputPath('hosted-visual-flow.png') });
+});
+
+test('hosted TinyStories default accepts real text and exports verified trained-model predictions', async ({ page }, testInfo) => {
+  await page.goto('');
+  await expect(page.locator('.status')).toHaveText('Showing 1.00×', { timeout: 60_000 });
+  await expect(page.getByLabel('Model', { exact: true })).toHaveValue('tinystories');
+  await expect(page.locator('.visual-answer strong')).toHaveText('she');
+  const example = textFixture.cases[1];
+  await page.getByLabel('Story prompt').fill(example.text);
+  await page.getByRole('button', { name: 'Run input', exact: true }).click();
+  await expect(page.locator('.status')).toHaveText('Showing 1.00×');
+  await expect(page.locator('.visual-answer strong')).toHaveText('play');
+  await page.getByRole('button', { name: 'Mute selected head', exact: true }).click();
+  await expect(page.locator('.status')).toHaveText('Showing 0.00×');
+  await page.getByText('Save, replay & runtime settings', { exact: true }).click();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export experiment' }).click();
+  const saved = JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  expect(saved.input).toEqual({ text: example.text, tokenIds: example.tokenIds });
+  expect(saved.checkpoint.modelRevision).toBe(textFixture.modelRevision);
+  example.variants[0].logits.forEach((value, i) => expect(Math.abs(saved.results.modifiedLogits[i] - value)).toBeLessThanOrEqual(2e-5 + 1e-5 * Math.abs(value)));
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.screenshot({ path: testInfo.outputPath('hosted-tinystories.png'), fullPage: true });
 });
 
 test('hosted opt-in validation harness identifies the release and passes every supported check', async ({ page }, testInfo) => {

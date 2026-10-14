@@ -26,7 +26,7 @@ async function ready(page: Page) {
 test('the guided large-effect trace distinguishes attention, output and diagnostic changes without recomputing during navigation', async ({ page }, testInfo) => {
   await recordCommands(page);
   await page.setViewportSize({ width: 1440, height: 1100 });
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   expect(await calls(page, 'TRACE')).toBe(0);
   const compareCount = await calls(page, 'COMPARE');
@@ -63,7 +63,7 @@ test('the guided large-effect trace distinguishes attention, output and diagnost
 });
 
 test('position-aware tracing explains a small probability effect, a local no-path edit, and an identity', async ({ page }) => {
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   await page.getByLabel('Prepared experiment').selectOption('small');
   await expect(page.getByRole('button', { name: 'Export experiment' })).toBeEnabled();
@@ -105,7 +105,7 @@ test('late traces cannot overwrite rapid edits, checkpoint switching or a fresh 
         : send(message, ...args);
     }\n${await response.text()}` });
   });
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   await page.getByRole('button', { name: 'Follow the change', exact: true }).click();
   await expect.poll(() => calls(page, 'TRACE')).toBe(1);
@@ -129,7 +129,7 @@ test('CPU and supported WebGL traces match all independent fixtures and clean up
   test.setTimeout(120_000);
   let workerUrl = '';
   page.on('request', request => { if (/model\.worker-.*\.js/u.test(request.url())) workerUrl = request.url(); });
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   const results = await page.evaluate(async ({ url, cases }) => {
     const worker = new Worker(url, { type: 'module' }), pending = new Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>();
@@ -203,7 +203,7 @@ test('mobile and keyboard trace navigation keep controls and prediction visible'
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const width of [360, 390, 768]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto('?view=details');
+    await page.goto('?view=details&model=retrieval');
     await expect(page.locator('.status')).toHaveText('Showing 0.00×');
     await page.getByRole('button', { name: 'Follow the change', exact: true }).click();
     await ready(page);
@@ -225,7 +225,7 @@ test('mobile and keyboard trace navigation keep controls and prediction visible'
 
 test('input replacement and replay reset the trace, while export and copy drafts preserve the completed experiment', async ({ page }) => {
   await recordCommands(page);
-  await page.goto('?view=details');
+  await page.goto('?view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   await page.getByRole('button', { name: 'Follow the change', exact: true }).click();
   await ready(page);
@@ -280,7 +280,7 @@ test('a lost WebGL context during a trace discards measurements and restarts tra
       });
     }\n${await response.text()}` });
   });
-  await page.goto('?backend=webgl&view=details');
+  await page.goto('?backend=webgl&view=details&model=retrieval');
   await expect(page.locator('.status').filter({ hasText: 'Showing 0.00×' }).or(page.getByRole('alert'))).toBeVisible();
   const unsupported = page.getByRole('alert').filter({ hasText: 'WebGL worker unavailable' });
   if (await unsupported.count()) { testInfo.annotations.push({ type: 'unsupported-webgl', description: await unsupported.innerText() }); return; }

@@ -42,9 +42,13 @@ async function load(request: Extract<WorkerRequest, { command: 'LOAD' }>) {
   // Named-checkpoint measurements favor CPU startup and meet the warm interaction target.
   // Recalibrate this preference when weights/configuration change; explicit WebGL remains available.
   const measuredCpuRevision = 'd95b28530c047010f403dc6b8c7256c7d9223df2cf83a02bd4a5a1bcb9d64eea';
-  const cpuPreferred = parameterCount < 10_000 || nextArtifact.manifest.modelRevision === measuredCpuRevision;
+  const measuredTextRevision = '23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6';
+  // The named-host TinyStories measurements favor CPU startup on Chromium, but WebGL on WebKit.
+  const textCpuPreferred = nextArtifact.manifest.modelRevision === measuredTextRevision && /Chrom(?:e|ium)\//u.test(navigator.userAgent);
+  const cpuPreferred = parameterCount < 10_000 || nextArtifact.manifest.modelRevision === measuredCpuRevision || textCpuPreferred;
   const desired = request.payload.backend === 'auto' && cpuPreferred ? 'cpu' : request.payload.backend;
-  let fallbackReason: string | undefined;
+  let fallbackReason: string | undefined = request.payload.backend === 'auto' && textCpuPreferred
+    ? 'CPU selected for this TinyStories revision based on faster measured Chromium startup on the tested Mac. Choose WebGL explicitly to compare on your device.' : undefined;
   if (desired !== 'cpu') {
     try {
       // Packed execution produced non-finite tied-embedding gradients on tested WebKit.

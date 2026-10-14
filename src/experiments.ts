@@ -1,6 +1,6 @@
-import { tokenize, validateInterventions, validateTokens, type HeadScaleIntervention, type ModelManifest, type SymbolTokenizer } from './engine/contracts';
+import { tokenize, validateInterventions, validateTokens, type HeadScaleIntervention, type ModelManifest, type ModelTokenizer } from './engine/contracts';
 
-export type ModelChoice = 'retrieval' | 'verification';
+export type ModelChoice = 'retrieval' | 'verification' | 'tinystories';
 export interface ExperimentRecipe {
   id: string; title: string; interpretation: string; modelRevision: string; text: string;
   tokenIds: number[]; predictionPosition: number; targetTokenId: number; intervention: HeadScaleIntervention;
@@ -23,7 +23,7 @@ export async function fetchExperiments(manifestUrl: string): Promise<unknown[]> 
   }));
 }
 
-export function validateExperiments(data: unknown[], manifest: ModelManifest, tokenizer: SymbolTokenizer): ExperimentMetadata {
+export function validateExperiments(data: unknown[], manifest: ModelManifest, tokenizer: ModelTokenizer): ExperimentMetadata {
   const [catalog, evaluation] = data as [{ schemaVersion: number; modelRevision: string; recipes: ExperimentRecipe[] }, RetrievalEvaluation];
   if (catalog?.schemaVersion !== 1 || catalog.modelRevision !== manifest.modelRevision || evaluation?.modelRevision !== manifest.modelRevision ||
       !Array.isArray(catalog.recipes) || catalog.recipes.length !== 3) throw new Error('The prepared experiments do not match this checkpoint.');
@@ -51,7 +51,8 @@ export function validateExperiments(data: unknown[], manifest: ModelManifest, to
   return { recipes: catalog.recipes, evaluation };
 }
 
-export function retrievalAnswer(tokens: number[], tokenizer: SymbolTokenizer): number | undefined {
+export function retrievalAnswer(tokens: number[], tokenizer: ModelTokenizer): number | undefined {
+  if (tokenizer.kind !== 'symbols') return;
   const symbols = tokens.slice(1).map(id => tokenizer.tokens[id]);
   if (symbols.length < 11 || symbols.slice(-3).join(' ') !== `? ${symbols.at(-2)} =` || (symbols.length - 3) % 4 !== 0) return;
   const bindings = new Map<string, string>();

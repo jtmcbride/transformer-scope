@@ -16,7 +16,7 @@ function entries(path) {
 }
 const commit = process.env.GITHUB_SHA ?? execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const dirty = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim().length > 0;
-const models = Object.fromEntries(['verification', 'retrieval'].map(name => {
+const models = Object.fromEntries(['verification', 'retrieval', 'tinystories'].map(name => {
   const manifest = JSON.parse(readFileSync(join(directory, 'models', name, 'manifest.json'), 'utf8'));
   return [name, { modelId: manifest.modelId, modelRevision: manifest.modelRevision }];
 }));

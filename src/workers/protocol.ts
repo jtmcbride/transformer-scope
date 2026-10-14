@@ -1,4 +1,4 @@
-import type { ActivationReference, EngineErrorCode, ModelManifest, SymbolTokenizer } from '../engine/contracts';
+import type { ActivationReference, EngineErrorCode, ModelManifest, ModelTokenizer } from '../engine/contracts';
 import type { ActivationSlice, CompareRequest, ComparisonResult, EmbeddingSlice, HeadAblationScan, ResidualLens, RunSummary } from '../engine/runs';
 import type { ProbeReport } from '../engine/probe';
 import type { RuntimePrecision } from '../engine/experiment';
@@ -7,7 +7,7 @@ import type { EffectTraceReport } from '../engine/trace';
 
 export interface Commands {
   LOAD: { request: { manifestUrl: string; backend: 'cpu' | 'webgl' | 'auto'; cacheBudgetBytes?: number }; response: {
-    manifest: ModelManifest; tokenizer: SymbolTokenizer; backend: string; fallbackReason?: string; runtimeGeneration: string; precision: RuntimePrecision } };
+    manifest: ModelManifest; tokenizer: ModelTokenizer; backend: string; fallbackReason?: string; runtimeGeneration: string; precision: RuntimePrecision } };
   BASELINE: { request: { tokenIds: number[] }; response: RunSummary };
   COMPARE: { request: CompareRequest; response: ComparisonResult };
   INSPECT: { request: { runId: string; reference: ActivationReference; selection?: Record<string, number> }; response: ActivationSlice };

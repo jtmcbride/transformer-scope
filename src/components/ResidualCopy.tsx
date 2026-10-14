@@ -4,13 +4,13 @@ import { hookKeys, hookLabel } from '../patching';
 export interface CopyDraft { hook: string; position: number }
 interface Props {
   draft: CopyDraft; sourceText: string; tokens: number[]; sourceTokens?: number[]; symbols: string[]; layers: number;
-  disabled: boolean; pending: boolean; validation?: string; alternate?: string;
+  currentText?: string; disabled: boolean; pending: boolean; validation?: string; alternate?: string;
   completed?: { patch: ResidualReplaceIntervention; sourceTokens: number[]; baseline: number[]; copied: number[] };
   onSource: (text: string) => void; onDraft: (draft: CopyDraft) => void; onCopy: () => void; onClose: () => void;
 }
 const norm = (values: number[]) => Math.sqrt(values.reduce((sum, value) => sum + value * value, 0));
 export function ResidualCopy(props: Props) {
-  const current = props.tokens.slice(1).map(token => props.symbols[token]).join(' ');
+  const current = props.currentText ?? props.tokens.slice(1).map(token => props.symbols[token]).join(' ');
   return <section className="residual-copy" aria-label="Copy a residual vector">
     <div className="copy-heading"><div><p className="eyebrow">Copy a residual vector</p><h3>Source → current input</h3></div>
       <button type="button" className="text-button" disabled={props.disabled} onClick={props.onClose}>Close source editor</button></div>

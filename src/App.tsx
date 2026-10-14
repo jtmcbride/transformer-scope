@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { requireInput, residualHooks, tokenize, type Intervention, type SymbolTokenizer } from './engine/contracts';
+import { requireInput, residualHooks, tokenize, textForTokens, tokenLabel, type Intervention, type ModelTokenizer } from './engine/contracts';
 import { hookLabel, parseHook, swappedQuery } from './patching';
 import type { ComparisonResult, RunSummary } from './engine/runs';
 import type { Commands } from './workers/protocol';
@@ -22,6 +22,7 @@ import { ResidualCopy, type CopyDraft } from './components/ResidualCopy';
 import { GuidedExperiments, ExperimentGuide } from './components/GuidedExperiments';
 import { useEffectTrace } from './hooks/useEffectTrace';
 import { matchingStep, traceSteps, type TraceView } from './trace-view';
+import { defaultStory, textExamples, fetchTextEvaluation, validateTextEvaluation, type TextEvaluation } from './text-model';
 import { VisualFlow } from './components/VisualFlow';
 import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
@@ -32,7 +33,8 @@ interface Controls { layer: number; head: number; factor: number; scope: string;
 interface Display { comparison: ComparisonResult; controls: Controls; attention: number[]; raw: number[]; modified: number[]; tokens: number[]; replay?: ReplayReport; sourceTokens?: number[];
   attentionRow?: { baseline: number[]; modified: number[] }; recipe?: ExperimentRecipe }
 interface Job { version: number; baseline: RunSummary; controls: Controls; replay?: ExperimentDocument; source?: RunSummary; recipe?: ExperimentRecipe }
-const initialChoice: ModelChoice = new URLSearchParams(window.location.search).get('model') === 'verification' ? 'verification' : 'retrieval';
+const requestedModel = new URLSearchParams(window.location.search).get('model');
+const initialChoice: ModelChoice = requestedModel === 'verification' || requestedModel === 'retrieval' ? requestedModel : 'tinystories';
 const backendParameter = new URLSearchParams(window.location.search).get('backend');
 const initialBackend = backendParameter === 'cpu' || backendParameter === 'webgl' ? backendParameter : 'auto';
 const defaults: Controls = { layer: 0, head: 0, factor: .5, scope: 'all', position: 5, target: 2, mode: 'head', hook: '0:block.input', patchPosition: 0, query: 0, focus: 'uniform' };
@@ -50,8 +52,8 @@ function restoredControls(base: Controls, patch: Intervention, predictionPositio
 }
 const focusLabel = (c: Controls) => c.focus === 'uniform' ? `evenly over positions 0–${c.query}` : `all on position ${c.focus}`;
 
-function SymbolLabel({ tokenizer, tokenId }: { tokenizer: SymbolTokenizer; tokenId: number }) {
-  return <span className="symbol">{tokenizer.tokens[tokenId]}</span>;
+function SymbolLabel({ tokenizer, tokenId }: { tokenizer: ModelTokenizer; tokenId: number }) {
+  return <span className="symbol">{tokenLabel(tokenizer, tokenId)}</span>;
 }
 
 export default function App() {
@@ -68,6 +70,7 @@ export default function App() {
   const source = useRef<{ owner: ModelClient; run: RunSummary } | null>(null);
   const sourceFlight = useRef<object | null>(null);
   const [choice, setChoice] = useState<ModelChoice>(initialChoice);
+  const [textEvaluation, setTextEvaluation] = useState<TextEvaluation | null>(null);
   const [experiments, setExperiments] = useState<ExperimentMetadata | null>(null);
   const [activeRecipe, setActiveRecipe] = useState<ExperimentRecipe | null>(null);
   const [launchingRecipe, setLaunchingRecipe] = useState<string | null>(null);
@@ -244,10 +247,10 @@ export default function App() {
     if (mode === 'attention') { schedule({ ...base, mode, query: base.position, focus: 'uniform' }); return; }
     const target = baseline.current, loaded = model;
     if (!target || !loaded) return;
-    const own = target.tokenIds.slice(1).map(id => loaded.tokenizer.tokens[id]).join(' ');
+    const own = textForTokens(target.tokenIds, loaded.tokenizer);
     // Text left from another input or checkpoint may no longer fit; then start from a suggestion that does.
     const fits = (text: string) => { try { return tokenize(text, loaded.tokenizer, loaded.manifest.config.contextLength).length === target.tokenIds.length; } catch { return false; } };
-    const typed = sourceText.trim();
+    const typed = loaded.tokenizer.kind === 'byte-bpe' ? sourceText : sourceText.trim();
     const proposed = typed && fits(typed) ? typed : swappedQuery(target.tokenIds, loaded.tokenizer) ?? own;
     const preview = tokenize(proposed, loaded.tokenizer, loaded.manifest.config.contextLength);
     const differing = preview.findIndex((token, i) => token !== target.tokenIds[i]);
@@ -262,6 +265,12 @@ export default function App() {
     const next = await owner.request('BASELINE', { tokenIds: tokens });
     if (!alive.current || generation !== version.current || client.current !== owner) {
       void owner.request('RELEASE', { runId: next.runId }).catch(() => {}); return;
+    }
+    let textTarget: number | undefined;
+    if (loaded.tokenizer.kind === 'byte-bpe' && !recipe && !replay && !settings) {
+      const logits = await owner.request('INSPECT', { runId: next.runId, reference: { stage: 'logits' }, selection: { position: tokens.length - 1 } });
+      textTarget = logits.values.reduce((best, value, index, values) => value > values[best] ? index : best, 0);
+      if (!alive.current || generation !== version.current || client.current !== owner) { void owner.request('RELEASE', { runId: next.runId }).catch(() => {}); return; }
     }
     const old = baseline.current;
     baseline.current = next; setTokenIds(tokens); setSelectedCell(null);
@@ -278,7 +287,7 @@ export default function App() {
       await applySource(replay.observation.source!.text, restored, replay, loaded);
       return;
     }
-    schedule(settings ?? restored ?? { ...controlsRef.current, mode: 'head', position: tokens.length - 1, scope: 'all', target: retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target },
+    schedule(settings ?? restored ?? { ...controlsRef.current, mode: 'head', position: tokens.length - 1, scope: 'all', target: textTarget ?? retrievalAnswer(tokens, loaded.tokenizer) ?? controlsRef.current.target },
       next, recipe, replay);
   }
 
@@ -287,20 +296,21 @@ export default function App() {
     const generation = ++version.current;
     latest.current = null; baseline.current = null; modifiedId.current = null; baselineInspector.current = null; source.current = null;
     sourceFlight.current = null; setCopying(false); setCopyDraft(null);
-    setChoice(selected); setExperiments(null); setActiveRecipe(null); setLaunchingRecipe(null);
+    setChoice(selected); setTextEvaluation(null); setExperiments(null); setActiveRecipe(null); setLaunchingRecipe(null);
     setLoading(true); setModel(null); setDisplay(null); setError(null); setProbe(null);
     try {
       const manifestUrl = new URL(`${import.meta.env.BASE_URL}models/${selected}/manifest.json`, window.location.origin).href;
       const [loaded, data] = await Promise.all([
         owner!.request('LOAD', { manifestUrl, backend }),
-        selected === 'retrieval' ? fetchExperiments(manifestUrl) : Promise.resolve(null),
+        selected === 'retrieval' ? fetchExperiments(manifestUrl) : selected === 'tinystories' ? fetchTextEvaluation(manifestUrl) : Promise.resolve(null),
       ]);
       if (!alive.current || generation !== version.current) return;
       if (restored) validateExperiment(restored, loaded.manifest, loaded.tokenizer);
-      const metadata = data ? validateExperiments(data, loaded.manifest, loaded.tokenizer) : null;
+      const metadata = selected === 'retrieval' && data ? validateExperiments(data as unknown[], loaded.manifest, loaded.tokenizer) : null;
+      if (selected === 'tinystories') setTextEvaluation(validateTextEvaluation(data, loaded.manifest.modelRevision));
       const recipe = input === undefined ? metadata?.recipes[0] ?? null : null;
-      const sequence = input ?? recipe?.text ?? 'A E I C G';
-      if (input === undefined) controlsRef.current = defaults;
+      const sequence = input ?? recipe?.text ?? (selected === 'tinystories' ? defaultStory : 'A E I C G');
+      if (input === undefined) controlsRef.current = selected === 'tinystories' ? { ...defaults, factor: 1 } : defaults;
       setExperiments(metadata); setModel(loaded); setText(sequence);
       await establish(loaded, sequence, generation, recipe, restored, settings);
     } catch (failure) {
@@ -338,10 +348,10 @@ export default function App() {
   }
 
   async function restart() {
-    const sequence = display && model ? display.tokens.slice(1).map(id => model.tokenizer.tokens[id]).join(' ') : undefined;
+    const sequence = display && model ? textForTokens(display.tokens, model.tokenizer) : undefined;
     // Source runs belong to the old worker; the patch is restored by re-running the active source (not unsubmitted edits) in the new one.
     const active = source.current;
-    const patchSource = controlsRef.current.mode === 'patch' && active && model ? active.run.tokenIds.slice(1).map(id => model.tokenizer.tokens[id]).join(' ') : null;
+    const patchSource = controlsRef.current.mode === 'patch' && active && model ? textForTokens(active.run.tokenIds, model.tokenizer) : null;
     const settings = display ? { ...controlsRef.current, ...(patchSource !== null ? { mode: 'head' as const } : {}) } : undefined;
     ++version.current; latest.current = null;
     client.current?.dispose(); client.current = createClient(); setProbing(false); setSessionEnded(false);
@@ -386,7 +396,7 @@ export default function App() {
       if (file.size > MAX_EXPERIMENT_BYTES) throw new Error('Experiment files must be at most 1 MiB.');
       const document = parseExperiment(await file.text());
       const selected: ModelChoice | undefined = document.checkpoint.modelId === 'retrieval-seed-2026' ? 'retrieval'
-        : document.checkpoint.modelId === 'verification-seed-1729' ? 'verification' : undefined;
+        : document.checkpoint.modelId === 'verification-seed-1729' ? 'verification' : document.checkpoint.modelId === 'text-tinystories-seed-2026' ? 'tinystories' : undefined;
       if (!selected) throw new Error('This saved model is not installed. Choose an experiment exported by an available checkpoint.');
       // Validate before replacing the visible experiment or loading another GPU model.
       if (selected === choice) validateExperiment(document, model.manifest, model.tokenizer);
@@ -414,6 +424,7 @@ export default function App() {
 
   const tokenizer = model?.tokenizer;
   const c = model?.manifest.config;
+  const symbols = useMemo(() => tokenizer?.tokens.map((_, id) => tokenLabel(tokenizer, id)), [tokenizer]);
   const rows = display ? display.comparison.displayTokens : [];
   const length = display?.tokens.length ?? 0;
 
@@ -450,10 +461,11 @@ export default function App() {
     : patchNode ? display.controls.patchPosition : display.controls.position : 0;
   const selectionTitle = selectedNode.kind === 'head' ? `Layer ${selectedNode.layer + 1} · Head ${selectedNode.head + 1}${selectedNode.part === 'attention' ? ' attention weights' : ''}`
     : selectedNode.kind === 'stage' ? `Layer ${selectedNode.layer + 1} · ${stageNames[selectedNode.stage]}` : selectedNode.kind === 'embedding' ? 'Input embeddings' : 'Final readout';
-  const completedText = display && tokenizer ? display.tokens.slice(1).map(id => tokenizer.tokens[id]).join(' ') : '';
-  const inputDraft = !!display && text.trim().split(/\s+/u).join(' ') !== completedText;
-  const completedSource = display?.sourceTokens && tokenizer ? display.sourceTokens.slice(1).map(id => tokenizer.tokens[id]).join(' ') : '';
-  const hasDraft = inputDraft || !!copyDraft && (display?.controls.mode !== 'patch' || copyDraft.hook !== display.controls.hook || copyDraft.position !== display.controls.patchPosition || sourceText.trim().split(/\s+/u).join(' ') !== completedSource);
+  const completedText = display && tokenizer ? textForTokens(display.tokens, tokenizer) : '';
+  const canonicalDraft = (draft: string) => tokenizer?.kind === 'byte-bpe' ? draft : draft.trim().split(/\s+/u).join(' ');
+  const inputDraft = !!display && canonicalDraft(text) !== completedText;
+  const completedSource = display?.sourceTokens && tokenizer ? textForTokens(display.sourceTokens, tokenizer) : '';
+  const hasDraft = inputDraft || !!copyDraft && (display?.controls.mode !== 'patch' || copyDraft.hook !== display.controls.hook || copyDraft.position !== display.controls.patchPosition || canonicalDraft(sourceText) !== completedSource);
   const completedRecipe = display?.comparison.execution.runtimeGeneration === model?.runtimeGeneration ? display?.recipe : undefined;
   function inspectNode(node: FlowNode) {
     setSelectedNode(node);
@@ -515,24 +527,26 @@ export default function App() {
     </header>
     <div className="view-toolbar"><p>A transformer learns how symbols relate. Explore how one small change affects its answer.</p>
       <div role="group" aria-label="Workspace view"><button type="button" aria-pressed={view === 'visual'} onClick={() => setView('visual')}>Visual flow</button><button type="button" aria-pressed={view === 'details'} onClick={() => setView('details')}>Detailed</button></div></div>
-    <div className="notice"><strong>{choice === 'retrieval' ? 'A simple memory game' : 'Verification model'}</strong>
-      <span>{choice === 'retrieval' ? 'Give each letter a number, then ask the model to recall one. This small trained model helps us see how a transformer works.' : 'Random weights, real computations. These predictions verify the engine; they do not demonstrate learned language.'}</span></div>
+    <div className="notice"><strong>{choice === 'tinystories' ? 'TinyStories · real text' : choice === 'retrieval' ? 'A simple memory game' : 'Verification model'}</strong>
+      <span>{choice === 'tinystories' ? 'Enter a short passage and see which word or word-piece comes next. This experimental model learned from children’s stories.' : choice === 'retrieval' ? 'Give each letter a number, then ask the model to recall one. This small trained model helps us see how a transformer works.' : 'Random weights, real computations. These predictions verify the engine; they do not demonstrate learned language.'}</span></div>
     <section className="input-workbench" aria-label="Input editor">
       <div className="setup-row">
-        <div className="step-heading"><span className="step-number">1</span><div><p className="eyebrow">Set the input</p><h2>Give the model a question</h2></div></div>
+        <div className="step-heading"><span className="step-number">1</span><div><p className="eyebrow">Set the input</p><h2>{choice === 'tinystories' ? 'Start a short story' : 'Give the model a question'}</h2></div></div>
         <label>Model<select aria-label="Model" disabled={loading || probing || transferring} value={choice} onChange={event => void load('auto', event.target.value as ModelChoice)}>
-          <option value="retrieval">Trained retrieval model</option><option value="verification">Untrained verification model</option></select></label>
+          <option value="tinystories">TinyStories · real text (experimental)</option><option value="retrieval">Trained retrieval model</option><option value="verification">Untrained verification model</option></select></label>
         {experiments && <label>Prepared experiment<select aria-label="Prepared experiment" disabled={locked} value={activeRecipe?.id ?? ''} onChange={event => void selectRecipe(event.target.value)}>
           <option value="" disabled>Custom experiment</option>{experiments.recipes.map(recipe => <option key={recipe.id} value={recipe.id}>{recipe.title}</option>)}</select></label>}
       </div>
       {experiments && <details className="guided-choices" open={view === 'details' ? true : undefined}><summary>Try a guided experiment</summary><GuidedExperiments recipes={experiments.recipes} completed={completedRecipe?.id} launching={launchingRecipe}
         disabled={pending || locked} draft={hasDraft} onLaunch={id => void selectRecipe(id)} /></details>}
       <InputEditor key={model?.manifest.modelId ?? 'loading'} choice={choice} text={text} disabled={locked} busy={loading}
-        draft={inputDraft} onChange={setText} onSubmit={runInput} />
+        draft={inputDraft} tokenizer={tokenizer} contextLength={c?.contextLength} onChange={setText} onSubmit={runInput} />
+      {choice === 'tinystories' && <div className="story-examples" role="group" aria-label="Story examples"><span>Try a prompt</span>{textExamples.map(example => <button type="button" key={example.label} disabled={locked} onClick={() => setText(example.text)}>{example.label}</button>)}</div>}
+      {textEvaluation && <details className="text-model-about"><summary>About this trained model</summary><p>Trained locally on TinyStories V2 · {textEvaluation.training.step.toLocaleString()} steps · {c?.layers} layers · {c?.heads} heads per layer. Validation loss: {textEvaluation.training.validation.mean.toFixed(3)} nats/token; bigram baseline: {textEvaluation.baselines.bigram.toFixed(3)}.</p><p>Experimental: the original name-copying gate failed ({(textEvaluation.nameCopying.rate * 100).toFixed(1)}%, required 80%). Pronoun agreement: {(textEvaluation.pronounAgreement.rate * 100).toFixed(0)}%. These template scores describe measured tasks, not general language ability. Full-run determinism and the untouched audit set remain unevaluated.</p><a href="https://huggingface.co/datasets/roneneldan/TinyStories" target="_blank" rel="noreferrer">Dataset and source</a></details>}
     </section>
     {error && <p className="error" role="alert">{error}
       {sessionEnded && <button type="button" className="secondary recover" onClick={() => void restart()}>Restart on CPU</button>}</p>}
-    {view === 'visual' && c && display && tokenizer && <VisualFlow config={c} tokens={display.tokens.map(id => tokenizer.tokens[id])} selected={selectedNode}
+    {view === 'visual' && c && display && tokenizer && <VisualFlow config={c} tokens={display.tokens.map(id => symbols![id])} selected={selectedNode}
       comparison={display.comparison} attention={display.attention} layer={display.controls.layer} head={display.controls.head}
       position={display.controls.mode === 'attention' ? display.controls.query : display.controls.position} pending={pending || loading || copying} ended={sessionEnded}
       disabled={locked} onSelect={inspectNode} onDetails={() => setView('details')}
@@ -547,28 +561,28 @@ export default function App() {
           {display && <ExperimentGuide recipe={completedRecipe} comparison={display.comparison} target={display.controls.target}
             disabled={pending || locked} pending={pending || loading || copying} ended={sessionEnded} draft={hasDraft} traceOpen={!!report}
             onInspect={inspectEditedHead} onTrace={traceExample} />}
-          {copyDraft && tokenizer && c && <ResidualCopy draft={copyDraft} sourceText={sourceText} tokens={tokenIds} sourceTokens={sourcePreview.tokens} symbols={tokenizer.tokens} layers={c.layers}
+          {copyDraft && tokenizer && c && <ResidualCopy draft={copyDraft} sourceText={sourceText} currentText={completedText} tokens={tokenIds} sourceTokens={sourcePreview.tokens} symbols={symbols!} layers={c.layers}
             disabled={locked} pending={pending || copying} validation={sourcePreview.error} alternate={swappedQuery(tokenIds, tokenizer)}
             onSource={setSourceText} onDraft={draftCopy} onCopy={() => void applySource(sourceText, { ...controlsRef.current, mode: 'patch', hook: copyDraft.hook, patchPosition: copyDraft.position })}
             onClose={() => setCopyDraft(null)} completed={display?.comparison.interventions[0]?.kind === 'residual.replace' && display.sourceTokens
               ? { patch: display.comparison.interventions[0], sourceTokens: display.sourceTokens, baseline: display.raw, copied: display.modified } : undefined} />}
           <EffectTrace open={tracing.open} supported={tracing.supported} busy={pending || locked} ended={sessionEnded} report={report} error={tracing.error}
-            position={navigation.position} origin={navigation.origin} steps={steps} index={navigation.index} symbols={tokenizer?.tokens ?? []}
+            position={navigation.position} origin={navigation.origin} steps={steps} index={navigation.index} symbols={symbols ?? []}
             onOpen={open => { if (open) setTraceNavigation({ key: '', index: 0, origin: 0, position: 0 }); tracing.setOpen(open); }} onRetry={tracing.retry} onMove={moveTrace}
             onPosition={position => { setTraceNavigation({ ...navigation, origin: position, position, index: 0 }); if (report) setSelectedNode(traceSteps(report, position)[0].node); }} />
           <div className="prediction-position"><span>Predict after</span><div className="tokens" aria-label="Input tokens">{tokenizer && tokenIds.map((id, index) => <button key={index} disabled={locked}
             className={controls.position === index ? 'token selected' : 'token'} onClick={() => schedule({ ...controlsRef.current, position: index })}
-            aria-label={`Predict after position ${index}: ${tokenizer.tokens[id]}`} aria-pressed={controls.position === index}>
-            <small>{index}</small>{tokenizer.tokens[id]}</button>)}</div></div>
+            aria-label={`Predict after position ${index}: ${symbols![id]}`} aria-pressed={controls.position === index}>
+            <small>{index}</small>{symbols![id]}</button>)}</div></div>
           {c ? <ComputationGraph key={model!.runtimeGeneration} config={c} selected={selectedNode} intervention={display?.comparison.interventions[0]} disabled={locked || !display} onSelect={inspectNode}
-            trace={traceView} symbols={tokenizer?.tokens} target={display?.controls.target} sourceTokens={display?.sourceTokens} />
+            trace={traceView} symbols={symbols} target={display?.controls.target} sourceTokens={display?.sourceTokens} />
             : <p className="hint">Loading the model's computation graph…</p>}
         </section>
         <aside className="controls-panel node-panel" aria-label="Selected node">
           <div className="node-panel-heading"><p className="eyebrow">Selected node</p><h2>{selectionTitle}</h2><span className="inspection-note">Inspection keeps the active experiment intact</span></div>
           {view === 'details' && display && tokenizer && client.current && !loading && display.comparison.baselineRunId === baseline.current?.runId && <NodeInspector node={selectedNode} client={client.current}
             baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId} position={inspectPosition}
-            symbol={tokenizer.tokens[display.tokens[inspectPosition]]} trace={traceView} target={display.controls.target} symbols={tokenizer.tokens} sourceTokens={display.sourceTokens}
+            symbol={symbols![display.tokens[inspectPosition]]} trace={traceView} target={display.controls.target} symbols={symbols!} sourceTokens={display.sourceTokens}
             preset={patchNode && selectedNode.kind === 'stage' && display.comparison.interventions[0]?.kind === 'residual.replace' && selectedNode.layer === display.comparison.interventions[0].layer && selectedNode.stage === display.comparison.interventions[0].stage && inspectPosition === display.controls.patchPosition
               || activeHead && !(selectedNode.kind === 'head' && selectedNode.part === 'attention') && inspectPosition === (display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)) ? { baseline: display.raw, modified: display.modified } : undefined} />}
           {selectedNode.kind === 'head' || residualNode ? <>
@@ -585,22 +599,22 @@ export default function App() {
             <label>Head<select aria-label="Head" disabled={loading || probing || transferring || !c} value={headControls.head} onChange={event => schedule({ ...headControls, head: Number(event.target.value) })}>
               {c && Array.from({ length: c.heads }, (_, i) => <option value={i} key={i}>Head {i + 1}</option>)}</select></label></div>
           {headControls.mode === 'attention' ? <div className="attention-controls">
-            {tokenizer && <AttentionRedirect tokens={tokenIds} symbols={tokenizer.tokens} query={headControls.query} focus={headControls.focus} disabled={locked} pending={pending}
+            {tokenizer && <AttentionRedirect tokens={tokenIds} symbols={symbols!} query={headControls.query} focus={headControls.focus} disabled={locked} pending={pending}
               showWeights={!(traceView && selectedNode.kind === 'head' && selectedNode.part === 'attention' && traceView.position === display?.controls.query)}
               onQuery={redirectQuery} onFocus={focus => schedule({ ...headControls, focus })}
               completed={display?.attentionRow && display.comparison.interventions[0]?.kind === 'attention.override' && activeHead
                 ? { intervention: display.comparison.interventions[0], ...display.attentionRow } : undefined} />}
             <details className="attention-position-controls"><summary>Choose positions by number</summary>
             <label>Query position<select aria-label="Query position" disabled={locked} value={headControls.query} onChange={event => redirectQuery(Number(event.target.value))}>
-              {tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
+              {tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {symbols![id]}</option>)}</select></label>
             <label>Attend to<select aria-label="Attend to" disabled={locked} value={headControls.focus} onChange={event => schedule({ ...headControls, focus: event.target.value })}>
               <option value="uniform">Evenly over positions 0–{headControls.query}</option>
-              {tokenizer && tokenIds.slice(0, headControls.query + 1).map((id, i) => <option key={i} value={i}>All weight on position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
+              {tokenizer && tokenIds.slice(0, headControls.query + 1).map((id, i) => <option key={i} value={i}>All weight on position {i}: {symbols![id]}</option>)}</select></label>
             </details>
             <p className="hint">Replaces this head's attention probabilities for one query position after the softmax, then recomputes the head's output and everything downstream. The scores are unchanged; only later positions are excluded.</p>
           </div> : <>
           <label>Apply at<select aria-label="Apply at" disabled={loading || probing || transferring || !model} value={headControls.scope} onChange={event => schedule({ ...headControls, scope: event.target.value })}>
-            <option value="all">All positions</option>{tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {tokenizer.tokens[id]}</option>)}</select></label>
+            <option value="all">All positions</option>{tokenizer && tokenIds.map((id, i) => <option key={i} value={i}>Position {i}: {symbols![id]}</option>)}</select></label>
           <div className="strength-presets" role="group" aria-label="Head strength presets">
             {[[0, 'Mute'], [1, 'Normal'], [2, 'Amplify']].map(([factor, label]) => <button type="button" key={label} aria-pressed={headControls.factor === factor}
               disabled={locked} onClick={() => schedule({ ...headControls, factor: Number(factor) })}>{label}<small>{factor}×</small></button>)}
@@ -621,7 +635,7 @@ export default function App() {
       <div className="observation prediction-panel">
         <div className="step-heading"><span className="step-number">3</span><div><p className="eyebrow">Observe the consequence</p><h2>Compare the prediction</h2></div></div>
         {display && tokenizer ? <>
-          <PredictionSummary comparison={display.comparison} target={display.controls.target} symbol={tokenizer.tokens[display.controls.target]}
+          <PredictionSummary comparison={display.comparison} target={display.controls.target} symbol={symbols![display.controls.target]}
             position={display.controls.position} pending={pending || loading || copying} ended={sessionEnded} disabled={locked}
             onReset={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })} />
           <div className="prediction-title"><p>Next token after position <strong>{display.controls.position}</strong> · <SymbolLabel tokenizer={tokenizer} tokenId={display.tokens[display.controls.position]} /></p>
@@ -634,7 +648,7 @@ export default function App() {
           </div>
           <div className="metrics"><div><span>Distribution change</span><strong>{display.comparison.metrics.jsDivergence.toExponential(3)} <small>nats</small></strong></div>
             <div><label>Target symbol<select aria-label="Target symbol" value={controls.target} onChange={event => schedule({ ...controlsRef.current, target: Number(event.target.value) })} disabled={loading || probing || transferring}>
-              {tokenizer.tokens.map((symbol, i) => <option key={i} value={i}>{symbol}</option>)}</select></label><strong>{display.comparison.metrics.targetLogProbabilityDelta?.toFixed(4)} <small>Δ log p · {tokenizer.tokens[display.controls.target]}</small></strong></div>
+              {symbols!.map((symbol, i) => <option key={i} value={i}>{symbol}</option>)}</select></label><strong>{display.comparison.metrics.targetLogProbabilityDelta?.toFixed(4)} <small>Δ log p · {symbols![display.controls.target]}</small></strong></div>
             <div><span>Model computation</span><strong>{display.comparison.execution.elapsedMs.toFixed(1)} <small>ms</small></strong>
               <span data-testid="execution-strategy">{display.comparison.execution.strategy === 'cached-suffix'
                 ? `Cached suffix · layer ${display.comparison.execution.recomputedFromLayer! + 1}`
@@ -714,13 +728,13 @@ export default function App() {
           {client.current && c && <ComputationInspector client={client.current} baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId}
             layer={display.controls.mode === 'patch' ? parseHook(display.controls.hook).layer : display.controls.layer}
             position={display.controls.mode === 'patch' ? display.controls.patchPosition : display.controls.mode === 'attention' ? display.controls.query : display.controls.scope === 'all' ? display.controls.position : Number(display.controls.scope)} layers={c.layers}
-            symbols={display.tokens.map(id => tokenizer.tokens[id])} />}
+            symbols={display.tokens.map(id => symbols![id])} />}
           {client.current && <EmbeddingInspector client={client.current} runId={display.comparison.baselineRunId} position={display.controls.position}
-            symbols={tokenizer.tokens} inputSymbols={display.tokens.map(id => tokenizer.tokens[id])} />}
+            symbols={symbols!} inputSymbols={display.tokens.map(id => symbols![id])} />}
           {client.current && <ResidualLens client={client.current} baselineRunId={display.comparison.baselineRunId} modifiedRunId={display.comparison.modifiedRunId}
-            position={display.controls.position} target={display.controls.target} symbols={tokenizer.tokens} />}
+            position={display.controls.position} target={display.controls.target} symbols={symbols!} />}
           {client.current && <AblationExplorer client={client.current} baselineRunId={display.comparison.baselineRunId} position={display.controls.position} target={display.controls.target}
-            symbols={tokenizer.tokens} onApply={(layer, head) => schedule({ ...controlsRef.current, mode: 'head', layer, head, factor: 0, scope: 'all' })} />}
+            symbols={symbols!} onApply={(layer, head) => schedule({ ...controlsRef.current, mode: 'head', layer, head, factor: 0, scope: 'all' })} />}
 
     </section>}
     <footer><span>Computed entirely in your browser.</span><span>Pre-LN · learned positions · tied embeddings · no dropout</span></footer>

@@ -22,7 +22,7 @@ test('each example card recomputes its reference result and connects inspection 
   await record(page);
   await page.setViewportSize({ width: 1440, height: 1100 });
   for (const id of ['effect', 'small', 'unreachable'] as const) {
-    await page.goto('?backend=cpu&view=details');
+    await page.goto('?backend=cpu&view=details&model=retrieval');
     await expect(page.locator('.status')).toHaveText('Showing 0.00×');
     const reference = fixture.cases.find(item => item.name === id)!;
     const card = page.getByRole('button', { name: `Start example: ${titles[id]}`, exact: true });
@@ -79,7 +79,7 @@ test('drafts retain the completed guide; pending edits, replay, restart and chec
         ? setTimeout(() => { delayed.delete(message.id); send(message, ...args); }, 500) : send(message, ...args);
     }\n${await response.text()}` });
   });
-  await page.goto('?backend=cpu&view=details');
+  await page.goto('?backend=cpu&view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   const comparisons = await calls(page, 'COMPARE');
   await page.getByLabel('Binding 1 value').selectOption('2');
@@ -130,7 +130,7 @@ test('example cards and guide actions work by keyboard at mobile and tablet widt
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const width of [360, 390, 768]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto('?backend=cpu&view=details');
+    await page.goto('?backend=cpu&view=details&model=retrieval');
     await expect(page.locator('.status')).toHaveText('Showing 0.00×');
     if (width === 390) {
       await page.locator('.guided-experiments').evaluate(element => element.scrollIntoView({ block: 'start' }));

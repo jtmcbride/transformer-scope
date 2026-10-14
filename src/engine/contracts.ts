@@ -1,3 +1,5 @@
+import type { BpeDocument } from './bpe';
+export { tokenize, textForTokens, tokenLabel } from './tokenizer';
 export interface ModelConfig {
   layers: number;
   heads: number;
@@ -32,9 +34,10 @@ export interface ModelManifest {
 export interface SymbolTokenizer {
   schemaVersion: 1; kind: 'symbols'; bosTokenId: number; tokens: string[];
 }
+export type ModelTokenizer = SymbolTokenizer | BpeDocument;
 export interface ModelArtifact {
   manifest: ModelManifest;
-  tokenizer: SymbolTokenizer;
+  tokenizer: ModelTokenizer;
   weights: Record<string, TensorRecord>;
 }
 export type TokenSelection = { kind: 'all' } | { kind: 'indices'; indices: number[] };
@@ -132,18 +135,6 @@ export function validateInterventions(patches: readonly Intervention[], config: 
       occupied.add(key);
     }
   }
-}
-
-export function tokenize(text: string, tokenizer: SymbolTokenizer, contextLength: number): number[] {
-  const symbols = text.trim() ? text.trim().split(/\s+/u) : [];
-  const vocabulary = new Map(tokenizer.tokens.map((token, id) => [token, id]));
-  const tokens = [tokenizer.bosTokenId, ...symbols.map(symbol => {
-    const id = vocabulary.get(symbol);
-    requireInput(id !== undefined && id !== tokenizer.bosTokenId, `Unknown symbol "${symbol}". Use the displayed vocabulary.`);
-    return id;
-  })];
-  requireInput(tokens.length <= contextLength, `Use at most ${contextLength - 1} symbols; the beginning-of-sequence token uses one position.`);
-  return tokens;
 }
 
 export function canReachPrediction(patch: Intervention, predictionPosition: number, config: ModelConfig, length: number): boolean {

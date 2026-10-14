@@ -1,5 +1,5 @@
 import { comparePredictions, type PredictionComparison } from './comparison';
-import { requireInput, residualHooks, tokenize, validateInterventions, validateTokens, type Intervention, type ModelManifest, type SymbolTokenizer } from './contracts';
+import { requireInput, residualHooks, tokenize, textForTokens, validateInterventions, validateTokens, type Intervention, type ModelManifest, type ModelTokenizer } from './contracts';
 
 export interface RuntimePrecision { dtype: 'float32'; float32Textures: boolean | null; webglPacking: boolean | null }
 /** Exports are written as version 2; version 1 (one head scaling) files remain importable. */
@@ -70,7 +70,7 @@ export function parseExperiment(text: string): ExperimentDocument {
   return structuredClone(value);
 }
 
-export function validateExperiment(document: ExperimentDocument, manifest: ModelManifest, tokenizer: SymbolTokenizer): void {
+export function validateExperiment(document: ExperimentDocument, manifest: ModelManifest, tokenizer: ModelTokenizer): void {
   checkDocument(document);
   requireInput(['modelId', 'modelRevision', 'architectureVersion', 'weightsSha256', 'tokenizerSha256'].every(key =>
     document.checkpoint[key as keyof ExperimentDocument['checkpoint']] === manifest[key as keyof ExperimentDocument['checkpoint']]),
@@ -91,7 +91,7 @@ export function validateExperiment(document: ExperimentDocument, manifest: Model
 }
 
 /** observation.source carries token IDs; canonical text is derived like the input's. */
-export function createExperiment(manifest: ModelManifest, tokenizer: SymbolTokenizer, tokenIds: number[],
+export function createExperiment(manifest: ModelManifest, tokenizer: ModelTokenizer, tokenIds: number[],
   observation: Omit<ExperimentDocument['observation'], 'source'> & { sourceTokenIds?: number[] },
   baselineLogits: ArrayLike<number>, modifiedLogits: ArrayLike<number>, runtime: { backend: string; precision: RuntimePrecision }): ExperimentDocument {
   const results = comparePredictions(baselineLogits, modifiedLogits, tokenizer, Math.min(8, tokenizer.tokens.length), observation.targetTokenId);
@@ -109,7 +109,7 @@ export function createExperiment(manifest: ModelManifest, tokenizer: SymbolToken
   return document;
 }
 
-const savedInput = (tokenIds: number[], tokenizer: SymbolTokenizer): SavedInput => ({ text: tokenIds.slice(1).map(id => tokenizer.tokens[id]).join(' '), tokenIds: [...tokenIds] });
+const savedInput = (tokenIds: number[], tokenizer: ModelTokenizer): SavedInput => ({ text: textForTokens(tokenIds, tokenizer), tokenIds: [...tokenIds] });
 
 export function checkReplay(document: ExperimentDocument, baseline: ArrayLike<number>, modified: ArrayLike<number>, currentBackend: string): ReplayReport {
   let matches = true;

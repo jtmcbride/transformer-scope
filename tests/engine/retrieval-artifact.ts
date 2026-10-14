@@ -3,7 +3,7 @@ import { validateManifest, validateTokenizer } from '../../src/engine/weights';
 import type { ModelArtifact, TensorRecord } from '../../src/engine/contracts';
 
 /** A shipped checkpoint, loaded from public/ for Node engine tests and analyses. */
-export function loadShippedArtifact(name: 'retrieval' | 'verification') {
+export function loadShippedArtifact(name: 'retrieval' | 'verification' | 'tinystories') {
   const directory = new URL(`../../public/models/${name}/`, import.meta.url);
   const read = (file: string) => JSON.parse(readFileSync(new URL(file, directory), 'utf8'));
   const manifest = validateManifest(read('manifest.json'));

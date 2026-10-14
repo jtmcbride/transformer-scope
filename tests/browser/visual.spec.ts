@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 test('visual flow is the default and view switching preserves completed experiments', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('');
+  await page.goto('?model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   const flow = page.getByRole('region', { name: 'Visual transformer flow', exact: true });
   await expect(flow).toBeVisible();
@@ -38,7 +38,7 @@ test('visual flow is the default and view switching preserves completed experime
 
 test('visual flow fits mobile, supports keyboard selection, and keeps draft input separate', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('');
+  await page.goto('?model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const region = page.getByRole('region', { name: 'Scrollable model flow' });
@@ -71,7 +71,7 @@ test('inline controls retain the completed result during rapid edits and preserv
         : dispatch.call(self, event);
     }` });
   });
-  await page.goto('');
+  await page.goto('?model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   const flow = page.getByRole('region', { name: 'Visual transformer flow', exact: true });
   const previous = await page.locator('.visual-answer strong').innerText();

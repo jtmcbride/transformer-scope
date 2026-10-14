@@ -1,4 +1,5 @@
-import { EngineError, type ModelArtifact, type ModelConfig, type ModelManifest, type SymbolTokenizer, type TensorRecord } from './contracts';
+import { validateBpe } from './bpe';
+import { EngineError, type ModelArtifact, type ModelConfig, type ModelManifest, type SymbolTokenizer, type ModelTokenizer, type TensorRecord } from './contracts';
 
 export function expectedShapes(c: ModelConfig): Record<string, number[]> {
   const shapes: Record<string, number[]> = {
@@ -55,7 +56,11 @@ export function validateManifest(value: unknown): ModelManifest {
   return structuredClone(m);
 }
 
-export function validateTokenizer(value: unknown, vocabularySize: number): SymbolTokenizer {
+export function validateTokenizer(value: unknown, vocabularySize: number): ModelTokenizer {
+  if ((value as { kind?: string })?.kind === 'byte-bpe') {
+    try { return structuredClone(validateBpe(value, vocabularySize)); }
+    catch (error) { throw new EngineError('INCOMPATIBLE_MODEL', `Invalid text tokenizer: ${error instanceof Error ? error.message : String(error)}`); }
+  }
   const t = value as SymbolTokenizer;
   compatible(t && t.schemaVersion === 1 && t.kind === 'symbols' && Array.isArray(t.tokens) &&
     t.tokens.length === vocabularySize && t.tokens.every(token => typeof token === 'string' && token.length > 0 && !/\s/u.test(token)), 'Invalid symbol tokenizer.');

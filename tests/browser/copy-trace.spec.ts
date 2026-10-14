@@ -17,7 +17,7 @@ async function recordCommands(page: Page) {
 const calls = (page: Page, command: string) => page.evaluate(cmd => (window as unknown as { __copyCommands: string[] }).__copyCommands.filter(item => item === cmd).length, command);
 const ready = (page: Page) => expect(page.getByTestId('trace-step')).toContainText('Step 1 of');
 async function openCopy(page: Page, point = '1:block.input', position = 14) {
-  await page.goto('?backend=cpu&view=details');
+  await page.goto('?backend=cpu&view=details&model=retrieval');
   await expect(page.locator('.status')).toHaveText('Showing 0.00×');
   await page.getByRole('button', { name: 'Inspect Layer 2 Layer input', exact: true }).click();
   await page.getByRole('button', { name: 'Choose source and position', exact: true }).click();

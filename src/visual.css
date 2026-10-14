@@ -121,3 +121,18 @@
     background-image:linear-gradient(45deg, transparent 50%, #606c82 50%), linear-gradient(135deg, #606c82 50%, transparent 50%);
     background-position:calc(100% - 12px) 50%, calc(100% - 8px) 50%; background-size:4px 4px; background-repeat:no-repeat; }
 }
+.visual-reset { width:100%; border:1px solid #dfd6f4; background:#faf8ff; color:#6550ae; padding:8px; font-size:11px; margin:0 0 10px; }
+.visual-head-control { display:grid; grid-template-columns:185px minmax(0, 1fr) 210px; gap:16px 22px; align-items:center; border-top:1px solid #e7eaf1; background:#faf9fd; padding:18px 25px; }
+.visual-control-title h3 { font-size:16px; letter-spacing:-.02em; }
+.visual-control-title > p:last-child { margin:6px 0 0; color:#606c82; font-size:11px; line-height:1.5; }
+.visual-presets { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+.visual-presets button { background:white; border:1px solid #dfd6f4; padding:12px 6px; display:flex; flex-direction:column; gap:5px; align-items:center; min-height:58px; }
+.visual-presets button strong { font-size:12px; }.visual-presets button span { font-size:10px; color:#606c82; }
+.visual-presets button[aria-pressed=true] { border-color:#7963cb; background:#eee9fb; color:#58429a; }
+.visual-strength { display:grid; grid-template-columns:1fr auto; align-items:center; gap:6px; font-size:11px; color:#34425d; }
+.visual-strength output { font:16px monospace; letter-spacing:0; color:#6550ae; }
+.visual-strength input { grid-column:1 / -1; margin:8px 0 0; accent-color:#7963cb; }
+.visual-control-note { grid-column:1 / -1; color:#606c82; font-size:11px; line-height:1.6; margin:0; }
+@media (max-width:1000px) { .visual-head-control { grid-template-columns:1fr 1fr; }.visual-control-title { grid-column:1 / -1; }.visual-presets button { padding:10px 5px; } }
+@media (max-width:600px) { .visual-head-control { grid-template-columns:1fr; padding:16px; }.visual-strength { grid-column:1; }.visual-control-title { grid-column:1; }.visual-presets button span { font-size:9px; } }
+@media (pointer:coarse) { .visual-strength input { min-height:32px; }.visual-reset { min-height:36px; } }

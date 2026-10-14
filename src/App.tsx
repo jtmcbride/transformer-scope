@@ -462,7 +462,7 @@ export default function App() {
       const position = node.kind === 'readout' ? report!.predictionPosition : navigation.position;
       setTraceNavigation({ ...navigation, position, index: matchingStep(steps, node, position) });
     }
-    if (window.matchMedia('(max-width: 800px)').matches) requestAnimationFrame(() => {
+    if (view === 'details' && window.matchMedia('(max-width: 800px)').matches) requestAnimationFrame(() => {
       document.querySelector('.node-panel')?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
     });
   }
@@ -534,8 +534,11 @@ export default function App() {
       {sessionEnded && <button type="button" className="secondary recover" onClick={() => void restart()}>Restart on CPU</button>}</p>}
     {view === 'visual' && c && display && tokenizer && <VisualFlow config={c} tokens={display.tokens.map(id => tokenizer.tokens[id])} selected={selectedNode}
       comparison={display.comparison} attention={display.attention} layer={display.controls.layer} head={display.controls.head}
-      position={display.controls.mode === 'attention' ? display.controls.query : display.controls.position} pending={pending || loading || copying || sessionEnded}
-      disabled={locked} onSelect={inspectNode} onDetails={() => setView('details')} />}
+      position={display.controls.mode === 'attention' ? display.controls.query : display.controls.position} pending={pending || loading || copying} ended={sessionEnded}
+      disabled={locked} onSelect={inspectNode} onDetails={() => setView('details')}
+      headControl={headControls.mode === 'head' ? { factor: headControls.factor, scope: headControls.scope === 'all' ? 'Applies at every input position' : `Applies at position ${headControls.scope}`,
+        onChange: factor => schedule({ ...headControls, factor }) } : undefined}
+      onReset={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })} />}
     <div className="workspace flow-workspace">
       <div className="exploration">
         <section className="graph-pane" aria-label="Computation workspace" hidden={view === 'visual'}>

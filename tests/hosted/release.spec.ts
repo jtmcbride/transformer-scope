@@ -97,6 +97,28 @@ test('hosted worker runs recipes, inspection, reference verification, reset, exp
   await testInfo.attach('hosted-workflow-check', { body: JSON.stringify({ url: page.url(), userAgent: await page.evaluate(() => navigator.userAgent), reference, errors, failed }, null, 2), contentType: 'application/json' });
 });
 
+test('hosted default flow edits a head and restores the computed prediction', async ({ page }, testInfo) => {
+  await page.goto('');
+  await expect(page.locator('.status')).toHaveText('Showing 0.00×', { timeout: 60_000 });
+  const flow = page.getByRole('region', { name: 'Visual transformer flow', exact: true });
+  await flow.getByRole('button', { name: 'Normal selected head', exact: true }).click();
+  await expect(page.locator('.status')).toHaveText('Showing 1.00×');
+  await expect(page.locator('.visual-answer strong')).toHaveText('3');
+  await flow.getByRole('button', { name: 'Mute selected head', exact: true }).click();
+  await expect(page.locator('.status')).toHaveText('Showing 0.00×');
+  await expect(page.locator('.visual-answer strong')).toHaveText('0');
+  await expect(page.getByTestId('target-probability')).toHaveText('99.99% → 0.00%');
+  await flow.getByRole('button', { name: 'Restore original prediction', exact: true }).click();
+  await expect(page.locator('.status')).toHaveText('Showing 1.00×');
+  await page.getByRole('button', { name: 'Detailed', exact: true }).click();
+  await expect(page.getByLabel('Exact head strength')).toHaveValue('1');
+  await expect(page.getByTestId('baseline-answer')).toHaveText(await page.getByTestId('modified-answer').innerText());
+  await page.getByRole('button', { name: 'Visual flow', exact: true }).click();
+  await expect(page.getByTestId('target-probability')).toHaveText('99.99% → 99.99%');
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.locator('.visual-flow').screenshot({ path: testInfo.outputPath('hosted-visual-flow.png') });
+});
+
 test('hosted opt-in validation harness identifies the release and passes every supported check', async ({ page }, testInfo) => {
   test.setTimeout(180_000);
   const errors: string[] = [];

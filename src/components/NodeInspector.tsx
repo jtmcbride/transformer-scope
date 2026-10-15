@@ -15,7 +15,7 @@ const explanations = {
 };
 const norm = (values: ArrayLike<number>) => Math.sqrt(Array.from(values).reduce((sum, value) => sum + value * value, 0));
 interface Props { node: FlowNode; client: ModelClient; baselineRunId: string; modifiedRunId: string; position: number; symbol: string; sourceTokens?: number[]; preset?: { baseline: number[]; modified: number[] };
-  trace?: TraceView; target?: number; symbols?: string[] }
+  trace?: TraceView; target?: number; symbols?: string[]; allowVector?: boolean }
 export function NodeInspector(props: Props) {
   const [read, setRead] = useState<{ key: string; baseline?: number[]; modified?: number[]; error?: string } | null>(null);
   const key = JSON.stringify([nodeKey(props.node), props.baselineRunId, props.modifiedRunId, props.position]);
@@ -49,7 +49,7 @@ export function NodeInspector(props: Props) {
       : props.trace?.report.intervention.kind === 'attention.override'
       ? 'Attention weights combine source values into an output at each query. A redirect replaces one row of weights before this computation; an earlier-layer edit can also change later heads\' inputs and attention.'
       : props.trace ? 'Attention and head output are measured separately. Scaling this head acts after its attention weights are computed. An edit in an earlier layer can change this head\'s inputs and attention.'
-      : 'This head combines value vectors using causal attention weights. Strength scales its output before the shared output projection; its own attention weights stay unchanged.' : explanations[props.node.stage];
+      : 'This head combines value vectors using causal attention weights. Strength scales its output before the shared output projection. Scaling this head leaves its own attention weights unchanged; edits in earlier layers can change its inputs and attention.' : explanations[props.node.stage];
   return <div className="node-inspection">
     <p className="hint">{explanation}</p>
     <p className="slice-label">Completed vectors · position {props.position} · <span className="symbol">{props.symbol}</span>{props.node.kind === 'stage' ? ` · ${stageNames[props.node.stage]}` : ''}</p>
@@ -80,8 +80,8 @@ export function NodeInspector(props: Props) {
       <p data-testid="readout-delta">Δ log p: {traceNumber(readoutProbabilities(readout.modifiedLogits, props.target ?? 0).targetLogProbability - readoutProbabilities(readout.baselineLogits, props.target ?? 0).targetLogProbability)} nats</p>
       {!readout.prediction && <p className="hint">Final normalization and unembedding applied here for inspection. This is an intermediate residual readout.</p>}
     </div>}
-    {measurement && <button type="button" className="text-button" aria-expanded={fullVector} onClick={() => setVectorKey(fullVector ? '' : key)}>{fullVector ? 'Hide full vector' : 'Inspect full vector'}</button>}
-    {measurement && fullVector && baseline && modified && <div className="vector-table-scroll"><table className="vector-table" aria-label="Selected node vector dimensions">
+    {(measurement || props.allowVector) && <button type="button" className="text-button" aria-expanded={fullVector} onClick={() => setVectorKey(fullVector ? '' : key)}>{fullVector ? 'Hide full vector' : 'Inspect full vector'}</button>}
+    {(measurement || props.allowVector) && fullVector && baseline && modified && <div className="vector-table-scroll"><table className="vector-table" aria-label="Selected node vector dimensions">
       <thead><tr><th>Dim</th><th>Baseline</th><th>Modified</th><th>Difference</th></tr></thead>
       <tbody>{baseline.map((value, i) => <tr key={i}><th>{i}</th><td>{value.toFixed(6)}</td><td>{modified[i].toFixed(6)}</td><td>{traceNumber(modified[i] - value)}</td></tr>)}</tbody>
     </table></div>}

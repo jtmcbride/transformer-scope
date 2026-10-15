@@ -170,6 +170,15 @@ test('hosted continuation generates the independent original and edited story to
   await testInfo.attach('hosted-continuation-record', { body: JSON.stringify(record, null, 2), contentType: 'application/json' });
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.locator('.story-continuation').screenshot({ path: testInfo.outputPath('hosted-continuation.png') });
+  await page.getByRole('button', { name: /^Inspect edited token 7:/ }).click();
+  const inspection = page.getByRole('region', { name: 'Generated token computation', exact: true });
+  await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
+  expect(parseFloat(await inspection.getByTestId('selected-token-probability').innerText()) / 100).toBeCloseTo(continuationFixture.edited.choices[6].probability, 5);
+  await expect(inspection.getByLabel('Context before selected token')).toHaveText(`${continuationFixture.prompt} play with it. He asked`);
+  await expect(inspection.locator('.visual-token-stream > span')).toHaveCount(continuationFixture.promptTokenIds.length + 6);
+  await inspection.getByRole('button', { name: 'L1 · Head 1', exact: true }).click();
+  await expect(inspection.getByTestId('node-values').locator('dd').nth(1)).toHaveText('0.0000');
+  await inspection.screenshot({ path: testInfo.outputPath('hosted-token-inspection.png') });
 });
 
 test('hosted opt-in validation harness identifies the release and passes every supported check', async ({ page }, testInfo) => {

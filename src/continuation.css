@@ -24,7 +24,21 @@
 .story-prose strong { color:#34425d; font-weight:400; }
 .story-prose i { display:inline-block; width:2px; height:1em; background:#7963cb; margin-left:3px; vertical-align:text-bottom; }
 .generated-tokens { display:flex; flex-wrap:wrap; gap:5px; }
-.generated-tokens > span { display:inline-flex; align-items:center; gap:6px; background:#eee9fb; color:#58429a; border-radius:5px; padding:6px 8px; font:12px monospace; overflow-wrap:anywhere; max-width:100%; }
+.generated-tokens > button { display:inline-flex; align-items:center; gap:6px; background:#eee9fb; color:#58429a; border:1px solid transparent; border-radius:5px; padding:6px 8px; font:12px monospace; overflow-wrap:anywhere; max-width:100%; }
+.generated-tokens > button[aria-pressed=true] { border-color:#6651aa; background:#ddd3f5; box-shadow:0 0 0 1px #6651aa; }
 .generated-tokens small { color:#7963cb; font-size:9px; }
+.story-token-inspector { min-width:0; margin-top:24px; padding-top:24px; border-top:2px solid #ddd3f5; scroll-margin-top:20px; }
+.token-inspection-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+.token-inspection-heading h2 { font-size:23px; overflow-wrap:anywhere; }
+.token-inspection-heading h2 span { color:#6651aa; }
+.token-inspection-navigation { display:flex; flex-wrap:wrap; gap:6px; }
+.token-inspection-navigation button { font-size:12px; padding:9px; }
+.story-token-inspector > p { font-size:13px; line-height:1.6; }
+.inspection-prefix { padding:16px; border-left:3px solid #7963cb; background:#f7f5fc; white-space:pre-wrap; overflow-wrap:anywhere; font-family:Georgia,serif; }
+.selected-token-result { display:flex; flex-wrap:wrap; gap:12px 24px; padding:14px; border:1px solid #ddd3f5; border-radius:8px; font-size:12px; }
+.selected-token-result strong { color:#58429a; }
+.historical-node { border:1px solid #dfe4ee; border-radius:8px; padding:16px; }
+.story-token-inspector .visual-flow { margin-top:18px; }
+@media(pointer:coarse) { .generated-tokens > button,.token-inspection-navigation button { min-height:44px; } }
 @media(max-width:700px) { .story-continuation { padding:16px; } .continuation-heading { display:block; } .continuation-heading > p { margin-top:10px; } .paired-stories { grid-template-columns:minmax(0,1fr); } .continuation-settings label { max-width:100%; } .continuation-settings select { max-width:100%; } }
 @media(pointer:coarse) { .continuation-settings select,.continuation-settings input,.continuation-actions button { min-height:32px; } }

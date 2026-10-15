@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-cpu';
 import { beforeAll, expect, it } from 'vitest';
-import { chooseToken, drawAt, StoryContinuation, type Sampling } from '../../src/continuation';
+import { chooseToken, drawAt, selectStoryToken, StoryContinuation, type Sampling, type StoryFrame } from '../../src/continuation';
 import { BpeTokenizer } from '../../src/engine/bpe';
 import { RunEngine } from '../../src/engine/runs';
 import type { HeadScaleIntervention } from '../../src/engine/contracts';
@@ -11,6 +11,25 @@ import reference from '../fixtures/continuation-reference.json';
 
 const sampling: Sampling = { temperature: 1, topP: 1, seed: 42, maxTokens: 5 };
 beforeAll(async () => { await tf.setBackend('cpu'); await tf.ready(); });
+it('historical selections freeze the exact pre-token branch prefix, settings and edit, including EOS and partial bytes', () => {
+  const frame = { step: 16, original: reference.original, edited: reference.edited } as StoryFrame;
+  const edit = structuredClone(reference.edit) as HeadScaleIntervention;
+  const settings = { ...sampling };
+  const selected = selectStoryToken(frame, reference.promptTokenIds.length, 'edited', 6, settings, edit);
+  expect(selected.prefix).toEqual(reference.edited.tokenIds.slice(0, reference.promptTokenIds.length + 6));
+  expect(selected.prefix).not.toEqual(reference.original.tokenIds.slice(0, reference.promptTokenIds.length + 6));
+  expect(selected.choice).toEqual(reference.edited.choices[6]);
+  expect(selected.step).toBe(7);
+  edit.factor = 2; settings.seed = 999;
+  expect(selected.edit?.factor).toBe(0); expect(selected.settings.seed).toBe(42);
+  expect(selectStoryToken(frame, reference.promptTokenIds.length, 'original', 0, settings, edit).edit).toBeUndefined();
+  expect(selectStoryToken(frame, reference.promptTokenIds.length, 'original', 0, settings).prefix).toEqual(reference.promptTokenIds);
+  expect(() => selectStoryToken(frame, reference.promptTokenIds.length, 'edited', 16, settings, edit)).toThrow('completed');
+  const raw = { step: 3, original: { tokenIds: [0, 243, 162, 1], choices: [{ tokenId: 243, probability: .1 }, { tokenId: 162, probability: .2 }, { tokenId: 1, probability: .3 }], finish: 'end of story' as const } };
+  expect(selectStoryToken(raw, 1, 'original', 2, settings).prefix).toEqual([0, 243, 162]);
+  expect(selectStoryToken(raw, 1, 'original', 2, settings).choice.tokenId).toBe(1);
+  expect(() => selectStoryToken(raw, 1, 'edited', 0, settings, edit)).toThrow('completed');
+});
 it('sampling masks BOS/PAD, keeps EOS, uses deterministic ties, and includes the top-p boundary', () => {
   expect(chooseToken([100, 2, 100, 2], { ...sampling, temperature: 0 }, .8).tokenId).toBe(1);
   // Eligible weights 1, .5, .25. Top-p .8 keeps the first two, then renormalizes to 2/3 and 1/3.

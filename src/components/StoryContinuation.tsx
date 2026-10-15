@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { BpeTokenizer, type BpeDocument } from '../engine/bpe';
 import type { HeadScaleIntervention, ModelManifest } from '../engine/contracts';
 import { tokenLabel } from '../engine/tokenizer';
-import { StoryContinuation as Session, type Sampling, type StoryBranch, type StoryFrame } from '../continuation';
+import { StoryContinuation as Session, selectStoryToken, type Sampling, type StoryBranch, type StoryFrame, type StorySelection } from '../continuation';
 import { ModelClient } from '../workers/client';
+import { StoryTokenInspector } from './StoryTokenInspector';
 
 interface Props { manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
 const defaults: Sampling = { temperature: 0, topP: .9, seed: 42, maxTokens: 24 };
@@ -11,6 +12,7 @@ export function StoryContinuation(props: Props) {
   const [settings, setSettings] = useState(defaults);
   const [compare, setCompare] = useState(false);
   const [frame, setFrame] = useState<StoryFrame | null>(null);
+  const [selection, setSelection] = useState<StorySelection | null>(null);
   const [busy, setBusy] = useState(false), [playing, setPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const session = useRef<Session | null>(null), worker = useRef<ModelClient | null>(null);
@@ -22,7 +24,12 @@ export function StoryContinuation(props: Props) {
     worker.current?.dispose(); worker.current = null; setBusy(false); setPlaying(false);
   }
   useEffect(() => () => { ++epoch.current; autoplay.current = false; worker.current?.dispose(); }, []);
-  function reset() { stop(); session.current = null; setFrame(null); setError(null); }
+  function reset() { stop(); session.current = null; setFrame(null); setSelection(null); setError(null); }
+  function inspect(branch: StorySelection['branch'], index: number) {
+    if (!frame || !session.current) return;
+    stop();
+    setSelection(selectStoryToken(frame, props.tokens.length, branch, index, session.current.settings, session.current.edit));
+  }
 
   async function generate(play: boolean) {
     if (flight.current || props.disabled || session.current?.finished) return;
@@ -89,7 +96,10 @@ export function StoryContinuation(props: Props) {
     return <article className="continuation-story" aria-label={`${name} story`}>
       <div className="continuation-story-heading"><h3>{name}</h3><span>{branch.finish ? `Stopped · ${branch.finish}` : `${generated.length} new tokens`}</span></div>
       <p className="story-prose" data-testid={`${name.toLowerCase()}-story-text`}><span>{props.prompt}</span><strong>{fullText.slice(props.prompt.length)}</strong><i aria-hidden="true" /></p>
-      <div className="generated-tokens" aria-label={`${name} generated tokens`}>{generated.map((id, i) => <span key={i} title={`Step ${i + 1} · token ${id} · model probability ${(branch.choices[i].probability * 100).toFixed(2)}%`}><small>{i + 1}</small>{tokenLabel(props.tokenizer, id)}</span>)}</div>
+      <div className="generated-tokens" aria-label={`${name} generated tokens`}>{generated.map((id, i) => <button type="button" key={i}
+        aria-label={`Inspect ${name.toLowerCase()} token ${i + 1}: ${tokenLabel(props.tokenizer, id)}`} aria-pressed={selection?.branch === name.toLowerCase() && selection.step === i + 1}
+        disabled={props.disabled} onClick={() => inspect(name === 'Original' ? 'original' : 'edited', i)}
+        title={`Inspect step ${i + 1} · token ${id} · model probability ${(branch.choices[i].probability * 100).toFixed(2)}%`}><small>{i + 1}</small>{tokenLabel(props.tokenizer, id)}</button>)}</div>
       {last && <p className="hint">Latest token: <b>{tokenLabel(props.tokenizer, last.tokenId)}</b> · model probability {(last.probability * 100).toFixed(2)}%</p>}
     </article>;
   }
@@ -117,6 +127,10 @@ export function StoryContinuation(props: Props) {
     {props.draft && <p className="hint">Your prompt has unrun edits. Generation uses the last completed prompt shown below; Run input starts a new story.</p>}
     {error && <p role="alert" className="error">{error}</p>}
     <div className={`continuation-stories ${frame?.edited ? 'paired-stories' : ''}`}>{story(frame?.original ?? { tokenIds: props.tokens, choices: [] }, 'Original')}{frame?.edited && story(frame.edited, 'Edited')}</div>
+    {!!frame?.original.choices.length && <p className="hint">Select a numbered token to pause generation and inspect the computation that produced it.</p>}
+    {selection && <StoryTokenInspector key={`${selection.branch}:${selection.step}`} selection={selection} manifest={props.manifest} tokenizer={props.tokenizer}
+      onClose={() => { setSelection(null); document.querySelector<HTMLButtonElement>('.generated-tokens button[aria-pressed=true]')?.focus({ preventScroll: true }); }} onNavigate={index => inspect(selection.branch, index)}
+      count={frame?.[selection.branch]?.choices.length ?? 0} />}
     <p className="hint">Stops at end-of-story, your new-token limit, or {props.manifest.config.contextLength} total tokens including the beginning token. No text is silently dropped. Tokens can be word pieces; incomplete characters wait for more bytes. Downloaded continuations are records, separate from replayable diagram experiments.</p>
   </section>;
 }

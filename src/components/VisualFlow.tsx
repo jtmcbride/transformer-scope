@@ -5,9 +5,10 @@ import { nodeKey, type FlowNode } from '../flow';
 interface Props {
   config: ModelConfig; tokens: string[]; selected: FlowNode; comparison: ComparisonResult;
   attention: number[]; layer: number; head: number; position: number; pending: boolean; ended: boolean; disabled: boolean;
-  onSelect: (node: FlowNode) => void; onDetails: () => void;
+  onSelect: (node: FlowNode) => void; onDetails?: () => void;
   headControl?: { factor: number; scope: string; onChange: (factor: number) => void };
-  onReset: () => void;
+  onReset?: () => void;
+  history?: { edited: boolean };
 }
 const explanation = (node: FlowNode) => node.kind === 'embedding'
   ? ['Turn symbols into numbers', 'Each symbol gets a learned list of numbers. The model adds its position so that order matters.']
@@ -18,6 +19,9 @@ const explanation = (node: FlowNode) => node.kind === 'embedding'
 
 export function VisualFlow(props: Props) {
   const [title, description] = explanation(props.selected);
+  const historical = !!props.history, editedHistory = props.history?.edited;
+  const originalLabel = historical ? 'Without edit · same context' : 'Original';
+  const changedLabel = historical ? 'Captured edit · same context' : 'After change';
   const active = props.comparison.interventions[0];
   const compact = props.config.layers > 2;
   const layer = props.selected.kind === 'head' || props.selected.kind === 'stage' ? props.selected.layer : active?.layer ?? 0;
@@ -32,12 +36,12 @@ export function VisualFlow(props: Props) {
     const edited = node.kind === 'head' && active?.kind !== 'residual.replace' && active?.layer === node.layer && active.head === node.head && (active.kind !== 'head.scale' || active.factor !== 1);
     return <button type="button" className={`visual-node ${className} ${edited ? 'visual-edited' : ''}`} disabled={props.disabled}
       aria-label={label} aria-pressed={nodeKey(node) === nodeKey(props.selected)} onClick={() => props.onSelect(node)}>
-      <strong>{label}</strong><span>{detail}</span>{edited && <small>Your change{active?.kind === 'head.scale' ? ` · ${active.factor.toFixed(2)}×` : ' · attention redirected'}</small>}
+      <strong>{label}</strong><span>{detail}</span>{edited && <small>{historical ? 'Captured edit' : 'Your change'}{active?.kind === 'head.scale' ? ` · ${active.factor.toFixed(2)}×` : ' · attention redirected'}</small>}
     </button>;
   }
   return <section className={`visual-flow ${props.pending || props.ended ? 'visual-pending' : ''}`} aria-label="Visual transformer flow" aria-busy={props.pending}>
     <div className="visual-intro"><div><p className="eyebrow">From symbols to a prediction</p><h2>Follow the information.</h2></div>
-      <p>Click a stage to explore it. Change a head and see what happens to the answer.</p></div>
+      <p>{historical ? 'Click a stage to inspect this recorded step. The context and edit stay fixed.' : 'Click a stage to explore it. Change a head and see what happens to the answer.'}</p></div>
     {compact && <div className="visual-layer-navigation" role="group" aria-label="Model layer navigation">
       <button type="button" aria-label="Previous model layer" disabled={props.disabled || layer === 0} onClick={() => props.onSelect({ kind: 'head', layer: layer - 1, head: selectedHead })}>←</button>
       <strong>Layer {layer + 1} of {props.config.layers}</strong>
@@ -67,10 +71,10 @@ export function VisualFlow(props: Props) {
           {select({ kind: 'stage', layer, stage: 'block.output' }, `Pass it on · layer ${layer + 1}`, 'Add the processing result', 'visual-output')}
         </div>)}
         <div className="visual-predictions"><p className="visual-stage-label">{String(props.config.layers + 2).padStart(2, '0')} <strong>Prediction</strong></p><p className="visual-subtitle">{compact && layer < props.config.layers - 1 ? `After ${props.config.layers - layer - 1} more ${props.config.layers - layer - 1 === 1 ? 'layer' : 'layers'} · what comes next?` : 'What comes next?'}</p>
-          <div className="visual-answer"><span>{props.pending || props.ended ? 'Last completed answer' : 'After your change'}</span><strong>{props.comparison.modifiedTopTokens[0].text}</strong><small>Original answer: {props.comparison.baselineTopTokens[0].text}</small></div>
+          <div className="visual-answer"><span>{historical ? 'Most likely token' : props.pending || props.ended ? 'Last completed answer' : 'After your change'}</span><strong>{props.comparison.modifiedTopTokens[0].text}</strong>{(!historical || editedHistory) && <small>{historical ? 'Without edit, same context' : 'Original answer'}: {props.comparison.baselineTopTokens[0].text}</small>}</div>
           <div className="visual-probabilities" aria-label="Flow prediction probabilities">{rows.map(row => <div key={row.tokenId}><span>{row.text}</span><div><i style={{ width: `${row.baselineProbability * 100}%` }} /><b style={{ width: `${row.probability * 100}%` }} /></div><strong>{(row.probability * 100).toFixed(1)}%</strong></div>)}</div>
-          <p className="visual-probability-key"><i /> Original <b /> After change</p>
-          <button type="button" className="visual-reset" disabled={props.disabled} onClick={props.onReset}>Restore original prediction</button>
+          <p className="visual-probability-key">{historical && !editedHistory ? <><b /> Original model</> : <><i /> {originalLabel} <b /> {changedLabel}</>}</p>
+          {props.onReset && <button type="button" className="visual-reset" disabled={props.disabled} onClick={props.onReset}>Restore original prediction</button>}
           {select({ kind: 'readout' }, 'Read the prediction', 'All symbols get a probability')}
         </div>
       </div>
@@ -84,12 +88,12 @@ export function VisualFlow(props: Props) {
         aria-label="Selected head output strength" value={props.headControl.factor} disabled={props.disabled} onChange={event => props.headControl!.onChange(Number(event.target.value))} /></label>
       <p className="visual-control-note">{props.ended ? 'Session ended. This is the last completed prediction.' : props.pending ? 'Updating… the diagram still shows the last completed prediction.' : 'The diagram shows the completed prediction.'} Attention weights stay the same when you scale the output.</p>
     </div>}
-    <div className="visual-explanation"><span className="visual-explanation-icon" aria-hidden="true">↳</span><div><h3>{title}</h3><p>{description}</p></div><button type="button" className="text-button" onClick={props.onDetails}>Open detailed computation →</button></div>
-    {sources.length > 0 && <details className="visual-attention"><summary>Where did the edited head look? <span>Layer {props.layer + 1} · Head {props.head + 1}</span></summary>
+    <div className="visual-explanation"><span className="visual-explanation-icon" aria-hidden="true">↳</span><div><h3>{title}</h3><p>{historical && props.selected.kind === 'head' ? 'This attention head gathers information from earlier tokens. Its measured output at the final input position appears below.' : historical && props.selected.kind === 'readout' ? 'These are the model’s next-token probabilities before sampling. The selected generated token is shown above; it need not be the most likely one.' : description}</p></div>{props.onDetails && <button type="button" className="text-button" onClick={props.onDetails}>Open detailed computation →</button>}</div>
+    {sources.length > 0 && <details className="visual-attention"><summary>{historical ? 'Where did this head look?' : 'Where did the edited head look?'} <span>Layer {props.layer + 1} · Head {props.head + 1}</span></summary>
       <div className="attention-story"><svg viewBox="0 0 420 150" role="img" aria-label={`Largest attention weights for query position ${query}`}>
         {sources.map(({ weight, position }, i) => <g key={position}><path d={`M 135 ${24 + i * 34} C 220 ${24 + i * 34}, 220 75, 290 75`} fill="none" stroke="#7963cb" strokeWidth={1 + weight * 16} opacity={.25 + weight * .65} /><text x="4" y={28 + i * 34}>{props.tokens[position]} · pos {position}</text><text x="105" y={28 + i * 34} textAnchor="end">{(weight * 100).toFixed(1)}%</text></g>)}<rect x="290" y="54" width="118" height="42" rx="8" fill="#eee9fb" /><text x="349" y="80" textAnchor="middle">{props.tokens[query]} · pos {query}</text>
-      </svg><p>These are the four largest measured attention weights for this query. Thicker lines mean more attention. {active?.kind === 'attention.override' ? 'This experiment directly replaces the attention weights for one query.' : 'Scaling a head changes its output, while its attention weights stay the same.'}</p></div>
+      </svg><p>These are the four largest measured attention weights for this query. Thicker lines mean more attention. {historical ? 'Weights come from the selected story branch. An edit in an earlier layer can change later attention.' : active?.kind === 'attention.override' ? 'This experiment directly replaces the attention weights for one query.' : 'Scaling a head changes its output, while its attention weights stay the same.'}</p></div>
     </details>}
-    <p className="visual-caption">The main connections show computation order, not measured strength. Normalization is included within each stage; Detailed view shows every step.</p>
+    <p className="visual-caption">The main connections show computation order, not measured strength. {historical ? 'Normalization is included within each stage. Select a stage to inspect its values below.' : 'Normalization is included within each stage; Detailed view shows every step.'}</p>
   </section>;
 }

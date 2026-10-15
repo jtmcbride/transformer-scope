@@ -343,3 +343,8 @@ No latency, checkpoint quality, browser compatibility, or numerical parity claim
 ## Controlled continuation slice
 
 At the project owner's request, generation expands beyond the original first-release scope. Implement bounded token-by-token TinyStories continuation with step/play/stop/reset, deterministic greedy or seeded temperature/top-p sampling, a fixed-context stopping policy, and optional original/edited head-output branches. Keep generated IDs exact, snapshot settings and interventions, isolate cancellation from the diagram, and verify rollouts against independent shipped-weight PyTorch fixtures. The contract and follow-up boundaries are recorded in `docs/controlled-continuation.md`; the earlier quality and educational gates are unchanged.
+
+
+## Generated-token inspection slice
+
+Completed continuation tokens open a read-only historical flow. Reconstruct the exact prefix before the selected token, replay its frozen greedy/seeded choice on the matching CPU checkpoint, and inspect the same stages/vectors as the main diagram. Edited-branch comparisons use the same edited prefix on both sides and state that distinction explicitly. Preserve the main prompt/experiment and recorded generation; dispose historical work on navigation, closure, or session changes. See `docs/controlled-continuation.md` for lifecycle, evidence, and remaining boundaries.

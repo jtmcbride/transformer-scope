@@ -8,6 +8,20 @@ export interface StoryBranch { tokenIds: number[]; choices: Choice[]; finish?: F
 export interface StoryFrame { step: number; original: StoryBranch; edited?: StoryBranch }
 export type Predict = (tokenIds: number[], edit?: HeadScaleIntervention) => Promise<ArrayLike<number>>;
 
+export interface StorySelection {
+  branch: 'original' | 'edited'; step: number; prefix: number[]; choice: Choice; settings: Sampling; edit?: HeadScaleIntervention;
+}
+/** Reconstruct the input BEFORE the chosen token. Never decode/re-encode a generated prefix. */
+export function selectStoryToken(frame: StoryFrame, promptLength: number, branch: StorySelection['branch'], index: number,
+  settings: Sampling, edit?: HeadScaleIntervention): StorySelection {
+  const story = frame[branch];
+  requireInput(!!story && Number.isInteger(index) && index >= 0 && index < story.choices.length, 'Choose a completed generated token.');
+  requireInput(Number.isInteger(promptLength) && promptLength > 0 && story!.tokenIds.length === promptLength + story!.choices.length, 'Invalid story prefix.');
+  requireInput(branch !== 'edited' || !!edit, 'The edited story needs its captured edit.');
+  return structuredClone({ branch, step: index + 1, prefix: story!.tokenIds.slice(0, promptLength + index),
+    choice: story!.choices[index], settings, ...(branch === 'edited' ? { edit } : {}) });
+}
+
 /** Counter-based randomness gives both branches the same draw at each step, even after divergence. */
 export function drawAt(seed: number, step: number): number {
   let value = (seed + Math.imul(step + 1, 0x6D2B79F5)) >>> 0;

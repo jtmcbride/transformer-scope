@@ -249,3 +249,8 @@ The continuation suite now includes exact immutable historical-prefix selection 
 ## Historical story branching
 
 Three additional engine tests (82 total) cover sampling-counter continuity, exact prefix/history preservation, inherited/replaced edits, first-prediction expiry, atomic failures, EOS/context limits, and four independent 12-token PyTorch branch pairs with no retained tensors. Three production browser cases per browser (62 total per browser) cover those pairs plus frozen results, unchanged source records, mobile containment, seeded identity forks, cancellation/resume, and source-token navigation during delayed inference. The sixth hosted check also runs and exports a branch from edited step seven, replacing its captured head edit. Earlier numerical tolerances and model-quality gates are unchanged.
+
+
+### Nested story inspection and branching
+
+Two additional engine tests (84 total) verify selecting exact prefixes from either fork, global seeded draw counters, multi-head inheritance, first-prediction expiry across generations of comparisons, and three independent nested PyTorch rollouts without retained tensors. Two additional production cases (64 per browser) cover both paths, two levels of further edits, preserved ancestor records, keyboard navigation/focus, narrow-screen layout, and bounded worker counts. The existing delayed-worker case now also checks sampled branch-token replay and returning while a deeper comparison is in flight. The sixth hosted check inspects a branch result and generates another paired continuation. Local and hosted execution results are reported separately; numerical tolerances, context length, and checkpoint quality gates are unchanged.

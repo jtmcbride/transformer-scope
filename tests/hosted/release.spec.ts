@@ -197,6 +197,29 @@ test('hosted continuation generates the independent original and edited story to
   }
   await testInfo.attach('hosted-fork-record', { body: JSON.stringify(forkRecord, null, 2), contentType: 'application/json' });
   await fork.screenshot({ path: testInfo.outputPath('hosted-story-fork.png') });
+  await fork.getByRole('button', { name: /^Inspect with head change token 8:/ }).click();
+  await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
+  await expect(inspection).toContainText('Comparison 1 · With head change story · step 8');
+  expect(parseFloat(await inspection.getByTestId('selected-token-probability').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
+  await fork.getByRole('button', { name: 'Normal branch head', exact: true }).click();
+  await fork.getByLabel('Branch new-token limit').fill('3');
+  await fork.getByRole('button', { name: 'Compare from this token', exact: true }).click();
+  await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60_000 });
+  const nestedDownload = page.waitForEvent('download');
+  await fork.getByRole('button', { name: 'Download branch comparison', exact: true }).click();
+  const nestedRecord = JSON.parse(await readFile((await (await nestedDownload).path())!, 'utf8'));
+  expect(nestedRecord.schemaVersion).toBe(2);
+  expect(nestedRecord.plan.source.edits).toEqual([example.plan.edit]);
+  expect(nestedRecord.drawOffset).toBe(7);
+  for (const branch of ['original', 'edited'] as const) {
+    expect(nestedRecord.frame[branch].choices.map((choice: { tokenId: number }) => choice.tokenId)).toEqual(example.edited.choices.slice(1, 4).map(choice => choice.tokenId));
+    nestedRecord.frame[branch].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(example.edited.choices[i + 1].probability, 5));
+  }
+  await testInfo.attach('hosted-nested-fork-record', { body: JSON.stringify(nestedRecord, null, 2), contentType: 'application/json' });
+  await inspection.screenshot({ path: testInfo.outputPath('hosted-nested-inspection.png') });
+  await inspection.getByRole('button', { name: 'Back to previous comparison', exact: true }).click();
+  await expect(fork.getByRole('button', { name: /^Inspect with head change token 8:/ })).toBeFocused();
+  await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.');
 });
 
 test('hosted opt-in validation harness identifies the release and passes every supported check', async ({ page }, testInfo) => {

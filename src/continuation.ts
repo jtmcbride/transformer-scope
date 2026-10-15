@@ -10,6 +10,12 @@ export type Predict = (tokenIds: number[], edit?: HeadScaleIntervention) => Prom
 
 export interface StorySelection {
   branch: 'original' | 'edited'; step: number; prefix: number[]; choice: Choice; settings: Sampling; edit?: HeadScaleIntervention;
+  /** Exact edits for this prediction and subsequent predictions. Absent on legacy, single-head selections. */
+  edits?: HeadScaleIntervention[]; continuationEdits?: HeadScaleIntervention[];
+}
+export function selectionEdits(selection: StorySelection, later = false): HeadScaleIntervention[] {
+  return structuredClone(later && selection.continuationEdits !== undefined ? selection.continuationEdits
+    : selection.edits ?? (selection.edit ? [selection.edit] : []));
 }
 /** Reconstruct the input BEFORE the chosen token. Never decode/re-encode a generated prefix. */
 export function selectStoryToken(frame: StoryFrame, promptLength: number, branch: StorySelection['branch'], index: number,

@@ -1,11 +1,12 @@
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-cpu';
 import { beforeAll, expect, it } from 'vitest';
-import { selectStoryToken, StoryContinuation } from '../../src/continuation';
-import { firstForkDifference, forkEdits, StoryFork, type ForkPlan } from '../../src/story-fork';
+import { chooseToken, drawAt, selectionEdits, selectStoryToken, StoryContinuation } from '../../src/continuation';
+import { firstForkDifference, forkEdits, selectForkToken, StoryFork, type ForkPlan } from '../../src/story-fork';
 import { RunEngine } from '../../src/engine/runs';
 import { loadShippedArtifact } from './retrieval-artifact';
 import reference from '../fixtures/story-forks-reference.json';
+import nested from '../fixtures/nested-story-forks-reference.json';
 
 beforeAll(async () => { await tf.setBackend('cpu'); await tf.ready(); });
 it('historical fork preserves sampling counter, exact prefixes and source history', async () => {
@@ -76,6 +77,68 @@ it('both historical edit durations and inherited/replaced heads match independen
         fork.frame[key]!.choices.forEach((choice, i) => expect(choice.probability).toBeCloseTo(example[key].choices[i].probability, 5));
       }
       expect(fork.frame.original.choices[0].tokenId).toBe(example.plan.source.choice.tokenId);
+      expect(tf.memory().numTensors).toBe(before);
+    }
+  } finally { engine.dispose(); }
+}, 60_000);
+
+it('nested selections preserve exact prefixes, global sampling counters, all edits and one-prediction expiry', async () => {
+  const config = loadShippedArtifact('tinystories').manifest.config;
+  for (const example of nested.cases) {
+    const parent = (example.parent.collection === 'root' ? reference.cases : nested.cases)[example.parent.case];
+    const frame = { step: parent.original.choices.length, original: parent.original, edited: parent.edited };
+    const selected = selectForkToken(parent.plan as ForkPlan, frame, example.parent.branch as 'edited', example.parent.index);
+    expect(selected).toEqual(example.plan.source);
+    const sourceSnapshot = structuredClone(selected);
+    selected.edits![0].factor = 1.5;
+    expect(selectForkToken(parent.plan as ForkPlan, frame, 'edited', example.parent.index)).toEqual(sourceSnapshot);
+  }
+  const once = nested.cases[1].plan as ForkPlan;
+  expect(forkEdits(once, false, 0)).toHaveLength(1);
+  expect(forkEdits(once, true, 0)).toHaveLength(2);
+  expect(forkEdits(once, false, 1)).toEqual([]);
+  expect(forkEdits(once, true, 1)).toEqual([]);
+  const sustained = { ...once, duration: 'continuation' as const };
+  expect(forkEdits(sustained, true, 1)).toEqual([once.edit]);
+  expect(() => new StoryFork({ ...once, source: { ...once.source, continuationEdits: [{ ...once.edit, head: 99 }] } }, config)).toThrow('Head is outside');
+  expect(() => selectForkToken(once, { step: 0, original: { tokenIds: once.source.prefix, choices: [] } }, 'original', 0)).toThrow('completed branch token');
+
+  const settings = { temperature: .8, topP: .9, seed: 23, maxTokens: 5 };
+  const logits = [-99, -99, -99, 0, .1, .2, .3];
+  const first = new StoryFork({ ...once, source: { ...once.source, settings } }, config);
+  while (!first.finished) await first.step(async () => logits);
+  const token = selectForkToken(first.plan, first.frame, 'edited', 2);
+  const next = new StoryFork({ ...once, source: token, maxTokens: 4 }, config);
+  while (!next.finished) await next.step(async () => logits);
+  expect(next.frame.original.choices).toEqual(first.frame.edited!.choices.slice(2));
+  expect(next.frame.edited).toEqual(next.frame.original);
+  expect(next.frame.original.choices[0]).toEqual(chooseToken(logits, settings, drawAt(settings.seed, token.step - 1)));
+});
+
+it('nested fork inspection and further changes match independent PyTorch with multiple inherited heads', async () => {
+  const loaded = loadShippedArtifact('tinystories');
+  expect(loaded.manifest.modelRevision).toBe(nested.modelRevision);
+  const engine = new RunEngine(loaded.artifact), before = tf.memory().numTensors;
+  async function predict(ids: number[], edits: ReturnType<typeof selectionEdits>) {
+    const base = await engine.runBaseline(ids);
+    let modified: string | undefined;
+    try {
+      if (edits.length) modified = (await engine.compare({ baselineRunId: base.runId, interventions: edits })).modifiedRunId;
+      return (await engine.inspectActivation(modified ?? base.runId, { stage: 'logits' }, { position: ids.length - 1 })).values;
+    } finally { if (modified) engine.releaseRun(modified); engine.releaseRun(base.runId); }
+  }
+  try {
+    for (const example of nested.cases) {
+      const plan = example.plan as ForkPlan;
+      const replay = chooseToken(await predict(plan.source.prefix, selectionEdits(plan.source)), plan.source.settings, drawAt(plan.source.settings.seed, plan.source.step - 1));
+      expect(replay.tokenId).toBe(plan.source.choice.tokenId);
+      expect(replay.probability).toBeCloseTo(plan.source.choice.probability, 5);
+      const fork = new StoryFork(plan, loaded.manifest.config);
+      while (!fork.finished) await fork.step(predict);
+      for (const branch of ['original', 'edited'] as const) {
+        expect(fork.frame[branch]!.tokenIds).toEqual(example[branch].tokenIds);
+        fork.frame[branch]!.choices.forEach((choice, i) => expect(choice.probability).toBeCloseTo(example[branch].choices[i].probability, 5));
+      }
       expect(tf.memory().numTensors).toBe(before);
     }
   } finally { engine.dispose(); }

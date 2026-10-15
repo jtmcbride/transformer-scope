@@ -24,19 +24,20 @@ export function VisualFlow(props: Props) {
   const changedLabel = historical ? 'Captured edit · same context' : 'After change';
   const active = props.comparison.interventions[0];
   const compact = props.config.layers > 2;
-  const layer = props.selected.kind === 'head' || props.selected.kind === 'stage' ? props.selected.layer : active?.layer ?? 0;
+  const layer = historical ? props.layer : props.selected.kind === 'head' || props.selected.kind === 'stage' ? props.selected.layer : active?.layer ?? 0;
   const visibleLayers = compact ? [layer] : Array.from({ length: props.config.layers }, (_, i) => i);
-  const selectedHead = props.selected.kind === 'head' ? props.selected.head : 0;
+  const selectedHead = historical ? props.head : props.selected.kind === 'head' ? props.selected.head : 0;
   const rows = [...props.comparison.displayTokens].sort((a, b) => b.probability - a.probability || a.tokenId - b.tokenId).slice(0, 4);
   const query = Math.min(props.position, props.tokens.length - 1);
   const weights = props.attention.slice(query * props.tokens.length, (query + 1) * props.tokens.length);
   const sources = weights.map((weight, position) => ({ weight, position })).filter(row => row.position <= query)
     .sort((a, b) => b.weight - a.weight || a.position - b.position).slice(0, 4).sort((a, b) => a.position - b.position);
   function select(node: FlowNode, label: string, detail: string, className = '') {
-    const edited = node.kind === 'head' && active?.kind !== 'residual.replace' && active?.layer === node.layer && active.head === node.head && (active.kind !== 'head.scale' || active.factor !== 1);
+    const applied = node.kind === 'head' ? props.comparison.interventions.find(edit => edit.kind !== 'residual.replace' && edit.layer === node.layer && edit.head === node.head) : undefined;
+    const edited = applied && (applied.kind !== 'head.scale' || applied.factor !== 1);
     return <button type="button" className={`visual-node ${className} ${edited ? 'visual-edited' : ''}`} disabled={props.disabled}
       aria-label={label} aria-pressed={nodeKey(node) === nodeKey(props.selected)} onClick={() => props.onSelect(node)}>
-      <strong>{label}</strong><span>{detail}</span>{edited && <small>{historical ? 'Captured edit' : 'Your change'}{active?.kind === 'head.scale' ? ` · ${active.factor.toFixed(2)}×` : ' · attention redirected'}</small>}
+      <strong>{label}</strong><span>{detail}</span>{edited && <small>{historical ? 'Captured edit' : 'Your change'}{applied.kind === 'head.scale' ? ` · ${applied.factor.toFixed(2)}×` : ' · attention redirected'}</small>}
     </button>;
   }
   return <section className={`visual-flow ${props.pending || props.ended ? 'visual-pending' : ''}`} aria-label="Visual transformer flow" aria-busy={props.pending}>

@@ -353,3 +353,8 @@ Completed continuation tokens open a read-only historical flow. Reconstruct the 
 ## Historical story branching slice
 
 Fork from a selected generated token without replacing its recorded story. Reuse exact pre-token IDs and the original sampling counter; compare retained source settings with a new head edit, applied once or throughout the fork. Preserve inherited edits on other heads and replace edits on the same head. Support step/play/stop/clear, independent stopping, first-difference markers, and a downloadable comparison record. Validate both policies and edit composition against independent PyTorch rollouts and hosted checks. The detailed contract is in `docs/controlled-continuation.md`.
+
+
+## Recursive story inspection slice
+
+Select tokens from either fork, replay their exact pre-token prefix and effective head edits in the flow, and branch again. Preserve original sampling counters and the expiry of one-prediction edits at every depth. Retain ancestor comparisons while descending, provide previous/next token navigation and Back to previous comparison, and suspend inactive model workers. Version branch downloads with multi-head source and future edit policies. Verify independent nested PyTorch rollouts, browser lifecycle and navigation, and the deployed flow. Saved-tree persistence/import and longer context remain follow-up work.

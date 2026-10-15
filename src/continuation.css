@@ -49,10 +49,13 @@
 .fork-presets button[aria-pressed=true] { background:#eee9fb; border-color:#7963cb; color:#58429a; }
 .fork-status,.fork-difference { color:#58429a; }
 .fork-tokens { display:flex; flex-wrap:wrap; gap:5px; }
-.fork-tokens > span { display:inline-flex; align-items:center; gap:6px; background:#edf0f5; color:#47546b; border:1px solid transparent; border-radius:5px; padding:6px 8px; font:12px monospace; overflow-wrap:anywhere; max-width:100%; }
+.fork-tokens > button { display:inline-flex; align-items:center; gap:6px; background:#edf0f5; color:#47546b; border:1px solid transparent; border-radius:5px; padding:6px 8px; font:12px monospace; overflow-wrap:anywhere; max-width:100%; }
 .fork-tokens > .fork-different { background:#fff2d9; border-color:#ddb66c; color:#694d13; }
 .fork-tokens small { font-size:9px; }
 @media(max-width:700px) { .story-fork { padding:12px; } }
-@media(pointer:coarse) { .generated-tokens > button,.token-inspection-navigation button { min-height:44px; } }
+@media(pointer:coarse) { .generated-tokens > button,.fork-tokens > button,.token-inspection-navigation button { min-height:44px; } }
 @media(max-width:700px) { .story-continuation { padding:16px; } .continuation-heading { display:block; } .continuation-heading > p { margin-top:10px; } .paired-stories { grid-template-columns:minmax(0,1fr); } .continuation-settings label { max-width:100%; } .continuation-settings select { max-width:100%; } }
 @media(pointer:coarse) { .continuation-settings select,.continuation-settings input,.continuation-actions button { min-height:32px; } }
+
+.inspection-ancestor { min-width:0; }
+.fork-tokens > button:focus-visible { outline:2px solid #6651aa; outline-offset:2px; }

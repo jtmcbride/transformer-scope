@@ -27,7 +27,7 @@ Example buttons fill a draft. Run input executes it and establishes the immutabl
 
 The visual flow shows one of the four layers at a time, with previous/next navigation and explicit labels for earlier and later layers. Navigation leaves the completed experiment intact; the Detailed graph still shows every layer.
 
-The screen predicts one next token. It does not yet generate whole stories or implement a rolling context. This release makes real text available to the intervention workspace.
+The diagram predicts one next token. The continuation panel can now feed each chosen token back into the model, with step/play/stop, seeded sampling, and original/edited branches. See `controlled-continuation.md` for the sampling and stopping contract. There is no rolling context; stories remain bounded by this checkpoint's 64-token context.
 
 ## Verification and resource limits
 

@@ -6,6 +6,8 @@ A browser laboratory for inspecting transformer computations and measuring inter
 
 The default model now accepts real English text with the TinyStories checkpoint. The retrieval and verification symbol models remain selectable.
 
+Use **Watch a story grow token by token** to step, play, stop, or reset a continuation of the completed prompt. Choose the most likely token or repeatable seeded sampling, and optionally compare the original story with a captured head-output edit. Generation stops at EOS, the chosen token budget, or the checkpoint's 64-token context; it does not drop earlier text. Continuation downloads preserve exact token IDs and settings. Details: `docs/controlled-continuation.md`.
+
 The default **Visual flow** follows symbols through embeddings, parallel attention heads, per-position processing, and prediction. Click a stage to select its existing controls, or switch to **Detailed** for the full computation graph, traces, and numerical inspectors. Both views share the same experiment. See `docs/visual-flow.md` for diagram semantics and accessibility.
 
 The computation workspace presents editable bindings, a clickable transformer flowchart, contextual head-strength controls, and a persistent baseline/modified prediction card. Selecting a node inspects the completed experiment; an intervention is applied when its controls change. Use **Edit tokens** for raw symbol inputs. See `docs/frontend-workspace.md` for the interaction and verification details.

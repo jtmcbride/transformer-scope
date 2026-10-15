@@ -226,7 +226,11 @@ The shipped 48,000-step checkpoint adds two engine tests (74 total): exact text 
 
 The final compact layer navigation and real-text workflow pass 12 focused Chromium/WebKit cases. These cover navigation without changing the prediction, head edits, model switching, live replay, exact Unicode and whitespace export, worker restart preserving the completed prompt, context overflow retaining the last result, and the existing visual flow controls. WebKit can compile a new GPU shape slowly; text workflows wait for actual completed status for up to 60 seconds, without changing numerical tolerances. The complete release suite has 55 browser cases per browser and five hosted checks, including the default English prompt and every exported next-token logit.
 
-The original name-copying gate remains failed (56%, required 80%). Full-run training determinism, the untouched language-quality audit, physical mobile performance, and whole-story generation are not established by these checks. Text inference currently predicts one next token with a 64-token context including BOS.
+The original name-copying gate remains failed (56%, required 80%). Full-run training determinism, the untouched language-quality audit, and physical mobile performance are not established by these checks. The diagram predicts one next token with a 64-token context including BOS.
+
+## Controlled continuation
+
+Four additional engine cases (78 total) cover sampling/stop policies, atomic paired failures, exact UTF-8 prefixes, and a 16-step original/edited rollout against independent shipped-weight PyTorch outputs, with no retained tensors. Three additional production cases per browser cover paired stepping/playback, frozen edit snapshots, seeded replay, completed-versus-draft prompts, context exhaustion, mobile containment, and cancellation during deliberately delayed worker inference. The hosted suite has a sixth check for the same original/edited rollout and its downloaded record. See `controlled-continuation.md` for the exact sampling, runtime, and resource contracts. Generation is bounded to this model's existing context; there is no claim of complete-story quality or physical-mobile generation speed.
 
 ## Visual flow redesign
 

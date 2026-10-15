@@ -32,5 +32,6 @@ export function textForTokens(ids: readonly number[], tokenizer: ModelTokenizer)
 /** Whitespace markers are for labels only, never for encoding or replay. */
 export function tokenLabel(tokenizer: ModelTokenizer, id: number): string {
   const text = tokenizer.tokens[id];
-  return tokenizer.kind === 'byte-bpe' ? text.replaceAll(' ', '␠').replaceAll('\n', '↵').replaceAll('\r', '␍').replaceAll('\t', '⇥') : text;
+  return tokenizer.kind === 'byte-bpe' ? text.replaceAll(' ', '␠').replaceAll('\n', '↵').replaceAll('\r', '␍').replaceAll('\t', '⇥')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/gu, byte => `<0x${byte.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')}>`) : text;
 }

@@ -24,6 +24,7 @@ import { useEffectTrace } from './hooks/useEffectTrace';
 import { matchingStep, traceSteps, type TraceView } from './trace-view';
 import { defaultStory, textExamples, fetchTextEvaluation, validateTextEvaluation, type TextEvaluation } from './text-model';
 import { VisualFlow } from './components/VisualFlow';
+import { StoryContinuation } from './components/StoryContinuation';
 import { ModelClient } from './workers/client';
 import { fetchExperiments, validateExperiments, retrievalAnswer, type ModelChoice, type ExperimentMetadata, type ExperimentRecipe } from './experiments';
 
@@ -542,6 +543,7 @@ export default function App() {
       <InputEditor key={model?.manifest.modelId ?? 'loading'} choice={choice} text={text} disabled={locked} busy={loading}
         draft={inputDraft} tokenizer={tokenizer} contextLength={c?.contextLength} onChange={setText} onSubmit={runInput} />
       {choice === 'tinystories' && <div className="story-examples" role="group" aria-label="Story examples"><span>Try a prompt</span>{textExamples.map(example => <button type="button" key={example.label} disabled={locked} onClick={() => setText(example.text)}>{example.label}</button>)}</div>}
+      {choice === 'tinystories' && display && <a className="continuation-jump" href="#story-continuation">Watch a story grow token by token ↓</a>}
       {textEvaluation && <details className="text-model-about"><summary>About this trained model</summary><p>Trained locally on TinyStories V2 · {textEvaluation.training.step.toLocaleString()} steps · {c?.layers} layers · {c?.heads} heads per layer. Validation loss: {textEvaluation.training.validation.mean.toFixed(3)} nats/token; bigram baseline: {textEvaluation.baselines.bigram.toFixed(3)}.</p><p>Experimental: the original name-copying gate failed ({(textEvaluation.nameCopying.rate * 100).toFixed(1)}%, required 80%). Pronoun agreement: {(textEvaluation.pronounAgreement.rate * 100).toFixed(0)}%. These template scores describe measured tasks, not general language ability. Full-run determinism and the untouched audit set remain unevaluated.</p><a href="https://huggingface.co/datasets/roneneldan/TinyStories" target="_blank" rel="noreferrer">Dataset and source</a></details>}
     </section>
     {error && <p className="error" role="alert">{error}
@@ -553,6 +555,10 @@ export default function App() {
       headControl={headControls.mode === 'head' ? { factor: headControls.factor, scope: headControls.scope === 'all' ? 'Applies at every input position' : `Applies at position ${headControls.scope}`,
         onChange: factor => schedule({ ...headControls, factor }) } : undefined}
       onReset={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })} />}
+    {choice === 'tinystories' && model && display && tokenizer?.kind === 'byte-bpe' && <StoryContinuation
+      key={`${model.runtimeGeneration}:${display.comparison.baselineRunId}`} manifest={model.manifest} tokenizer={tokenizer}
+      tokens={display.tokens} prompt={completedText} draft={inputDraft} disabled={loading || pending || probing || sessionEnded}
+      edit={display.comparison.interventions[0]?.kind === 'head.scale' && display.comparison.interventions[0].tokens.kind === 'all' && display.comparison.interventions[0].factor !== 1 ? display.comparison.interventions[0] : undefined} />}
     <div className="workspace flow-workspace">
       <div className="exploration">
         <section className="graph-pane" aria-label="Computation workspace" hidden={view === 'visual'}>

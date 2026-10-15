@@ -1,0 +1,224 @@
+{
+  "modelRevision": "23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6",
+  "prompt": "Tom found a red ball. He wanted to",
+  "promptTokenIds": [
+    0,
+    733,
+    508,
+    261,
+    673,
+    471,
+    49,
+    317,
+    409,
+    268
+  ],
+  "edit": {
+    "id": "continuation-head",
+    "kind": "head.scale",
+    "layer": 0,
+    "head": 0,
+    "factor": 0,
+    "tokens": {
+      "kind": "all"
+    }
+  },
+  "settings": {
+    "temperature": 0,
+    "topP": 0.9,
+    "seed": 42,
+    "maxTokens": 16
+  },
+  "original": {
+    "tokenIds": [
+      0,
+      733,
+      508,
+      261,
+      673,
+      471,
+      49,
+      317,
+      409,
+      268,
+      326,
+      329,
+      312,
+      49,
+      317,
+      591,
+      268,
+      343,
+      360,
+      47,
+      557,
+      47,
+      269,
+      327,
+      47,
+      319
+    ],
+    "choices": [
+      {
+        "tokenId": 326,
+        "probability": 0.7155640721321106
+      },
+      {
+        "tokenId": 329,
+        "probability": 0.9870775938034058
+      },
+      {
+        "tokenId": 312,
+        "probability": 0.9434382915496826
+      },
+      {
+        "tokenId": 49,
+        "probability": 0.6460754871368408
+      },
+      {
+        "tokenId": 317,
+        "probability": 0.9438279867172241
+      },
+      {
+        "tokenId": 591,
+        "probability": 0.12945398688316345
+      },
+      {
+        "tokenId": 268,
+        "probability": 0.5236368775367737
+      },
+      {
+        "tokenId": 343,
+        "probability": 0.5753060579299927
+      },
+      {
+        "tokenId": 360,
+        "probability": 0.5672256946563721
+      },
+      {
+        "tokenId": 47,
+        "probability": 0.765595018863678
+      },
+      {
+        "tokenId": 557,
+        "probability": 0.39553403854370117
+      },
+      {
+        "tokenId": 47,
+        "probability": 0.8741061687469482
+      },
+      {
+        "tokenId": 269,
+        "probability": 0.6977693438529968
+      },
+      {
+        "tokenId": 327,
+        "probability": 0.5478616952896118
+      },
+      {
+        "tokenId": 47,
+        "probability": 0.9971683621406555
+      },
+      {
+        "tokenId": 319,
+        "probability": 0.9997797608375549
+      }
+    ]
+  },
+  "edited": {
+    "tokenIds": [
+      0,
+      733,
+      508,
+      261,
+      673,
+      471,
+      49,
+      317,
+      409,
+      268,
+      326,
+      329,
+      312,
+      49,
+      317,
+      544,
+      343,
+      360,
+      47,
+      265,
+      471,
+      47,
+      269,
+      265,
+      471,
+      47
+    ],
+    "choices": [
+      {
+        "tokenId": 326,
+        "probability": 0.6303752660751343
+      },
+      {
+        "tokenId": 329,
+        "probability": 0.9578317403793335
+      },
+      {
+        "tokenId": 312,
+        "probability": 0.9374179244041443
+      },
+      {
+        "tokenId": 49,
+        "probability": 0.6786848306655884
+      },
+      {
+        "tokenId": 317,
+        "probability": 0.6842533349990845
+      },
+      {
+        "tokenId": 544,
+        "probability": 0.07098884135484695
+      },
+      {
+        "tokenId": 343,
+        "probability": 0.91471928358078
+      },
+      {
+        "tokenId": 360,
+        "probability": 0.3710586726665497
+      },
+      {
+        "tokenId": 47,
+        "probability": 0.7217422723770142
+      },
+      {
+        "tokenId": 265,
+        "probability": 0.36039212346076965
+      },
+      {
+        "tokenId": 471,
+        "probability": 0.21234947443008423
+      },
+      {
+        "tokenId": 47,
+        "probability": 0.2601844072341919
+      },
+      {
+        "tokenId": 269,
+        "probability": 0.3710292875766754
+      },
+      {
+        "tokenId": 265,
+        "probability": 0.7551869750022888
+      },
+      {
+        "tokenId": 471,
+        "probability": 0.4206469655036926
+      },
+      {
+        "tokenId": 47,
+        "probability": 0.47800320386886597
+      }
+    ]
+  }
+}

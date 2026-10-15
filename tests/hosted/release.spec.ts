@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type { ValidationReport } from '../../src/validation/report';
 import textFixture from '../fixtures/text-inference.json' with { type: 'json' };
+import continuationFixture from '../fixtures/continuation-reference.json' with { type: 'json' };
 
 interface Release {
   format: string; schemaVersion: number; commit: string; sourceTreeDirty: boolean; basePath: string;
@@ -141,6 +142,34 @@ test('hosted TinyStories default accepts real text and exports verified trained-
   example.variants[0].logits.forEach((value, i) => expect(Math.abs(saved.results.modifiedLogits[i] - value)).toBeLessThanOrEqual(2e-5 + 1e-5 * Math.abs(value)));
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.screenshot({ path: testInfo.outputPath('hosted-tinystories.png'), fullPage: true });
+});
+
+test('hosted continuation generates the independent original and edited story token by token', async ({ page }, testInfo) => {
+  await page.goto('?backend=cpu');
+  await expect(page.locator('.status')).toHaveText('Showing 1.00×', { timeout: 60_000 });
+  await page.getByLabel('Story prompt').fill(continuationFixture.prompt);
+  await page.getByRole('button', { name: 'Run input', exact: true }).click();
+  await expect(page.locator('.visual-answer strong')).toHaveText('play');
+  await page.getByRole('button', { name: 'Mute selected head', exact: true }).click();
+  await expect(page.locator('.status')).toHaveText('Showing 0.00×');
+  await page.getByLabel('New-token limit').fill('16');
+  await page.getByLabel('Compare with current head edit').check();
+  await page.getByRole('button', { name: 'Step one token', exact: true }).click();
+  await expect(page.locator('.continuation-status')).toContainText('Paused after 1 step', { timeout: 60_000 });
+  await page.getByRole('button', { name: 'Play story', exact: true }).click();
+  await expect(page.locator('.continuation-status')).toHaveText('Continuation complete.', { timeout: 90_000 });
+  const pending = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download continuation', exact: true }).click();
+  const record = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+  expect(record.checkpoint.modelRevision).toBe(continuationFixture.modelRevision);
+  expect(record.prompt.tokenIds).toEqual(continuationFixture.promptTokenIds);
+  for (const key of ['original', 'edited'] as const) {
+    expect(record.frame[key].tokenIds).toEqual(continuationFixture[key].tokenIds);
+    record.frame[key].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(continuationFixture[key].choices[i].probability, 5));
+  }
+  await testInfo.attach('hosted-continuation-record', { body: JSON.stringify(record, null, 2), contentType: 'application/json' });
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.locator('.story-continuation').screenshot({ path: testInfo.outputPath('hosted-continuation.png') });
 });
 
 test('hosted opt-in validation harness identifies the release and passes every supported check', async ({ page }, testInfo) => {

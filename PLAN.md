@@ -339,3 +339,7 @@ Single-head ablation coverage across all 453 held-out inputs is now recorded (`n
 Next actionable step: run five facilitated sessions with `study.html` (two on phones if possible). Code probes C1–C5 with two coders, summarize with `scripts/summarize_study.mjs`, and record the outcome in a findings document. Address any misconception seen twice and retest it with new participants. Wider trained-head/prompt coverage remains follow-up work; larger models, the training UI, new interventions, and the ablation explorer stay deferred until both gates pass.
 
 No latency, checkpoint quality, browser compatibility, or numerical parity claim is complete until its associated evidence is recorded.
+
+## Controlled continuation slice
+
+At the project owner's request, generation expands beyond the original first-release scope. Implement bounded token-by-token TinyStories continuation with step/play/stop/reset, deterministic greedy or seeded temperature/top-p sampling, a fixed-context stopping policy, and optional original/edited head-output branches. Keep generated IDs exact, snapshot settings and interventions, isolate cancellation from the diagram, and verify rollouts against independent shipped-weight PyTorch fixtures. The contract and follow-up boundaries are recorded in `docs/controlled-continuation.md`; the earlier quality and educational gates are unchanged.

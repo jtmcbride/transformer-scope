@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test';
 import type { ValidationReport } from '../../src/validation/report';
 import textFixture from '../fixtures/text-inference.json' with { type: 'json' };
 import continuationFixture from '../fixtures/continuation-reference.json' with { type: 'json' };
+import forkFixture from '../fixtures/story-forks-reference.json' with { type: 'json' };
 
 interface Release {
   format: string; schemaVersion: number; commit: string; sourceTreeDirty: boolean; basePath: string;
@@ -179,6 +180,23 @@ test('hosted continuation generates the independent original and edited story to
   await inspection.getByRole('button', { name: 'L1 · Head 1', exact: true }).click();
   await expect(inspection.getByTestId('node-values').locator('dd').nth(1)).toHaveText('0.0000');
   await inspection.screenshot({ path: testInfo.outputPath('hosted-token-inspection.png') });
+  const fork = page.getByRole('region', { name: 'Branch from selected token', exact: true });
+  await fork.getByRole('button', { name: 'Normal branch head', exact: true }).click();
+  await fork.getByLabel('Branch new-token limit').fill('12');
+  await fork.getByRole('button', { name: 'Compare from this token', exact: true }).click();
+  await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60_000 });
+  const forkDownload = page.waitForEvent('download');
+  await fork.getByRole('button', { name: 'Download branch comparison', exact: true }).click();
+  const forkRecord = JSON.parse(await readFile((await (await forkDownload).path())!, 'utf8'));
+  const example = forkFixture.cases[3];
+  expect(forkRecord.plan.source.prefix).toEqual(example.plan.source.prefix);
+  expect(forkRecord.plan.edit).toEqual(example.plan.edit);
+  for (const key of ['original', 'edited'] as const) {
+    expect(forkRecord.frame[key].tokenIds).toEqual(example[key].tokenIds);
+    forkRecord.frame[key].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(example[key].choices[i].probability, 5));
+  }
+  await testInfo.attach('hosted-fork-record', { body: JSON.stringify(forkRecord, null, 2), contentType: 'application/json' });
+  await fork.screenshot({ path: testInfo.outputPath('hosted-story-fork.png') });
 });
 
 test('hosted opt-in validation harness identifies the release and passes every supported check', async ({ page }, testInfo) => {

@@ -39,6 +39,20 @@
 .selected-token-result strong { color:#58429a; }
 .historical-node { border:1px solid #dfe4ee; border-radius:8px; padding:16px; }
 .story-token-inspector .visual-flow { margin-top:18px; }
+.story-fork { margin:20px 0; padding:20px; border:1px solid #cfc4ed; border-radius:10px; background:#fcfbff; min-width:0; }
+.story-fork h3 { font-size:21px; margin:6px 0 12px; }
+.story-fork > p { font-size:13px; line-height:1.6; }
+.fork-head-heading { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:16px 0; font-size:13px; }
+.fork-head-heading span { font-size:11px; color:#68748c; }
+.fork-presets { display:flex; flex-wrap:wrap; gap:5px; }
+.fork-presets button { padding:9px 12px; }
+.fork-presets button[aria-pressed=true] { background:#eee9fb; border-color:#7963cb; color:#58429a; }
+.fork-status,.fork-difference { color:#58429a; }
+.fork-tokens { display:flex; flex-wrap:wrap; gap:5px; }
+.fork-tokens > span { display:inline-flex; align-items:center; gap:6px; background:#edf0f5; color:#47546b; border:1px solid transparent; border-radius:5px; padding:6px 8px; font:12px monospace; overflow-wrap:anywhere; max-width:100%; }
+.fork-tokens > .fork-different { background:#fff2d9; border-color:#ddb66c; color:#694d13; }
+.fork-tokens small { font-size:9px; }
+@media(max-width:700px) { .story-fork { padding:12px; } }
 @media(pointer:coarse) { .generated-tokens > button,.token-inspection-navigation button { min-height:44px; } }
 @media(max-width:700px) { .story-continuation { padding:16px; } .continuation-heading { display:block; } .continuation-heading > p { margin-top:10px; } .paired-stories { grid-template-columns:minmax(0,1fr); } .continuation-settings label { max-width:100%; } .continuation-settings select { max-width:100%; } }
 @media(pointer:coarse) { .continuation-settings select,.continuation-settings input,.continuation-actions button { min-height:32px; } }

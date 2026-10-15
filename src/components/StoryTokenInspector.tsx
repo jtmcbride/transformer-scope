@@ -8,12 +8,13 @@ import type { FlowNode } from '../flow';
 import { ModelClient } from '../workers/client';
 import { VisualFlow } from './VisualFlow';
 import { NodeInspector } from './NodeInspector';
+import { StoryFork } from './StoryFork';
 
 interface Props {
   selection: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; count: number;
-  onClose: () => void; onNavigate: (index: number) => void;
+  onClose: () => void; onNavigate: (index: number) => void; onForkStart: () => void;
 }
-export function StoryTokenInspector({ selection, manifest, tokenizer, count, onClose, onNavigate }: Props) {
+export function StoryTokenInspector({ selection, manifest, tokenizer, count, onClose, onNavigate, onForkStart }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
   const [node, setNode] = useState<FlowNode>({ kind: 'readout' });
   const [retry, setRetry] = useState(0);
@@ -86,6 +87,7 @@ export function StoryTokenInspector({ selection, manifest, tokenizer, count, onC
       <VisualFlow config={manifest.config} tokens={selection.prefix.map(id => tokenLabel(tokenizer, id))} selected={node} comparison={result.comparison}
         attention={weights?.values ?? []} layer={layer} head={head} position={position} pending={false} ended={false} disabled={false}
         onSelect={setNode} history={{ edited: !!selection.edit }} />
+      <StoryFork source={selection} manifest={manifest} tokenizer={tokenizer} head={{ layer, head }} disabled={!result} onStart={onForkStart} />
       {weights?.error && <p role="alert" className="error">Could not read attention: {weights.error}</p>}
       <div className="historical-node"><p className="eyebrow">Inside the selected stage</p>
         <p className="hint">Measured at the final input position, {position}. {selection.edit ? 'Baseline = without edit on this same context. Modified = with the captured edit.' : 'Both columns describe the original model.'}</p>

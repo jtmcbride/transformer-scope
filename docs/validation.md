@@ -244,3 +244,8 @@ The follow-up puts head presets, a continuous strength slider, and baseline rest
 ## Generated-token inspection
 
 The continuation suite now includes exact immutable historical-prefix selection (79 engine tests total). Production browser checks inspect both branches after divergence, compare selected-token probabilities to the independent PyTorch rollout, verify a muted head's zero output and full vector dimensions, navigate layers/tokens, replay sampled choices, preserve downloaded stories, and handle keyboard/mobile navigation. A new delayed-worker case exercises token switching, close, reset, pause-by-selection, and model changes without stale results. There are 59 production cases per browser. The existing sixth hosted check additionally verifies edited step seven's prefix, probability, and head output on the deployed build. These checks do not establish physical-mobile performance or broader language quality.
+
+
+## Historical story branching
+
+Three additional engine tests (82 total) cover sampling-counter continuity, exact prefix/history preservation, inherited/replaced edits, first-prediction expiry, atomic failures, EOS/context limits, and four independent 12-token PyTorch branch pairs with no retained tensors. Three production browser cases per browser (62 total per browser) cover those pairs plus frozen results, unchanged source records, mobile containment, seeded identity forks, cancellation/resume, and source-token navigation during delayed inference. The sixth hosted check also runs and exports a branch from edited step seven, replacing its captured head edit. Earlier numerical tolerances and model-quality gates are unchanged.

@@ -59,10 +59,11 @@ export class StoryContinuation {
   private busy = false;
   readonly settings: Sampling;
   readonly edit?: HeadScaleIntervention;
-  constructor(prompt: number[], settings: Sampling, readonly contextLength: number, edit?: HeadScaleIntervention) {
+  constructor(prompt: number[], settings: Sampling, readonly contextLength: number, edit?: HeadScaleIntervention, readonly drawOffset = 0) {
     requireInput(prompt.length > 0 && prompt[0] === 0 && prompt.length <= contextLength, 'Use a completed text prompt within the context limit.');
     requireInput(Number.isInteger(settings.maxTokens) && settings.maxTokens >= 1 && settings.maxTokens <= 64, 'Choose between 1 and 64 new tokens.');
     requireInput(Number.isInteger(settings.seed) && settings.seed >= 0 && settings.seed <= 0xFFFFFFFF, 'Seed must be an integer from 0 to 4294967295.');
+    requireInput(Number.isSafeInteger(drawOffset) && drawOffset >= 0, 'Invalid sampling step offset.');
     // Validate sampling settings before creating a worker or retaining any results.
     chooseToken([0, 0, 0, 0], settings, 0);
     requireInput(!edit || edit.kind === 'head.scale' && edit.tokens.kind === 'all' && Number.isFinite(edit.factor), 'Continuation supports one head-output edit at all positions.');
@@ -77,7 +78,7 @@ export class StoryContinuation {
     if (this.finished) return this.frame;
     this.busy = true;
     try {
-      const draw = drawAt(this.settings.seed, this.current.step);
+      const draw = drawAt(this.settings.seed, this.drawOffset + this.current.step);
       const advance = async (previous: StoryBranch, edit?: HeadScaleIntervention): Promise<StoryBranch> => {
         if (previous.finish) return previous;
         const choice = chooseToken(await predict([...previous.tokenIds], edit), this.settings, draw);

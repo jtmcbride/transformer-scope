@@ -4,6 +4,7 @@ import type { HeadScaleIntervention, ModelManifest } from '../engine/contracts';
 import { tokenLabel } from '../engine/tokenizer';
 import { StoryContinuation as Session, selectStoryToken, type Sampling, type StoryBranch, type StoryFrame, type StorySelection } from '../continuation';
 import { ModelClient } from '../workers/client';
+import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import { StoryTokenInspector } from './StoryTokenInspector';
 
 interface Props { manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
@@ -28,6 +29,7 @@ export function StoryContinuation(props: Props) {
   function inspect(branch: StorySelection['branch'], index: number) {
     if (!frame || !session.current) return;
     stop();
+    if (selection?.branch === branch && selection.step === index + 1) return;
     setSelection(selectStoryToken(frame, props.tokens.length, branch, index, session.current.settings, session.current.edit));
   }
 
@@ -49,28 +51,11 @@ export function StoryContinuation(props: Props) {
     try {
       // A separate lazy CPU worker keeps generation cancelable and independent of diagram experiments.
       if (owner !== loaded.current) {
-        const loadedModel = await owner.request('LOAD', { manifestUrl: new URL(`${import.meta.env.BASE_URL}models/tinystories/manifest.json`, location.origin).href, backend: 'cpu' });
+        await loadStoryModel(owner, props.manifest);
         if (!valid()) return;
-        if (loadedModel.manifest.modelRevision !== props.manifest.modelRevision) throw new Error('The continuation checkpoint changed. Reload the page.');
         loaded.current = owner;
       }
-      const predict = async (tokenIds: number[], edit?: HeadScaleIntervention) => {
-        const run = await owner.request('BASELINE', { tokenIds });
-        let modified: string | undefined;
-        try {
-          let runId = run.runId;
-          if (edit) {
-            const changed = await owner.request('COMPARE', { baselineRunId: runId, interventions: [edit], predictionPosition: tokenIds.length - 1 });
-            modified = changed.modifiedRunId; runId = modified;
-          }
-          return (await owner.request('INSPECT', { runId, reference: { stage: 'logits' }, selection: { position: tokenIds.length - 1 } })).values;
-        } finally {
-          if (!owner.endReason) {
-            if (modified) await owner.request('RELEASE', { runId: modified });
-            await owner.request('RELEASE', { runId: run.runId });
-          }
-        }
-      };
+      const predict = (tokenIds: number[], edit?: HeadScaleIntervention) => predictStory(owner, tokenIds, edit ? [edit] : []);
       do {
         const next = await active.step(predict);
         if (!valid()) return;
@@ -129,6 +114,7 @@ export function StoryContinuation(props: Props) {
     <div className={`continuation-stories ${frame?.edited ? 'paired-stories' : ''}`}>{story(frame?.original ?? { tokenIds: props.tokens, choices: [] }, 'Original')}{frame?.edited && story(frame.edited, 'Edited')}</div>
     {!!frame?.original.choices.length && <p className="hint">Select a numbered token to pause generation and inspect the computation that produced it.</p>}
     {selection && <StoryTokenInspector key={`${selection.branch}:${selection.step}`} selection={selection} manifest={props.manifest} tokenizer={props.tokenizer}
+      onForkStart={stop}
       onClose={() => { setSelection(null); document.querySelector<HTMLButtonElement>('.generated-tokens button[aria-pressed=true]')?.focus({ preventScroll: true }); }} onNavigate={index => inspect(selection.branch, index)}
       count={frame?.[selection.branch]?.choices.length ?? 0} />}
     <p className="hint">Stops at end-of-story, your new-token limit, or {props.manifest.config.contextLength} total tokens including the beginning token. No text is silently dropped. Tokens can be word pieces; incomplete characters wait for more bytes. Downloaded continuations are records, separate from replayable diagram experiments.</p>

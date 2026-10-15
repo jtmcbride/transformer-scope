@@ -348,3 +348,8 @@ At the project owner's request, generation expands beyond the original first-rel
 ## Generated-token inspection slice
 
 Completed continuation tokens open a read-only historical flow. Reconstruct the exact prefix before the selected token, replay its frozen greedy/seeded choice on the matching CPU checkpoint, and inspect the same stages/vectors as the main diagram. Edited-branch comparisons use the same edited prefix on both sides and state that distinction explicitly. Preserve the main prompt/experiment and recorded generation; dispose historical work on navigation, closure, or session changes. See `docs/controlled-continuation.md` for lifecycle, evidence, and remaining boundaries.
+
+
+## Historical story branching slice
+
+Fork from a selected generated token without replacing its recorded story. Reuse exact pre-token IDs and the original sampling counter; compare retained source settings with a new head edit, applied once or throughout the fork. Preserve inherited edits on other heads and replace edits on the same head. Support step/play/stop/clear, independent stopping, first-difference markers, and a downloadable comparison record. Validate both policies and edit composition against independent PyTorch rollouts and hosted checks. The detailed contract is in `docs/controlled-continuation.md`.

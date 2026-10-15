@@ -139,10 +139,19 @@ test('example cards and guide actions work by keyboard at mobile and tablet widt
     const card = page.getByRole('button', { name: `Start example: ${titles.small}`, exact: true });
     await card.focus(); await page.keyboard.press('Enter');
     await expect(guide(page).getByRole('heading')).toHaveText(titles.small);
+    // Hold the navigation frame so the next focus happens first, as on a busy browser.
+    await page.evaluate(() => {
+      const request = window.requestAnimationFrame, queued: FrameRequestCallback[] = [];
+      window.requestAnimationFrame = callback => { queued.push(callback); return -1; };
+      Object.assign(window, { __finishInspectionFrame: () => { window.requestAnimationFrame = request; queued.forEach(callback => callback(performance.now())); } });
+    });
     const inspect = page.getByRole('button', { name: 'Inspect the edited head', exact: true });
     await expect(inspect).toBeEnabled(); await inspect.focus(); await page.keyboard.press('Enter');
     await expect(page.locator('.node-panel-heading h2')).toHaveText('Layer 1 · Head 2');
-    await page.getByRole('button', { name: 'Trace this example', exact: true }).focus(); await page.keyboard.press('Enter');
+    const trace = page.getByRole('button', { name: 'Trace this example', exact: true });
+    await trace.focus();
+    await page.evaluate(() => (window as unknown as { __finishInspectionFrame: () => void }).__finishInspectionFrame());
+    await expect(trace).toBeFocused(); await page.keyboard.press('Enter');
     await expect(page.getByTestId('trace-step')).toContainText('Step 1 of');
     await page.getByRole('button', { name: 'Next', exact: true }).focus(); await page.keyboard.press('Enter');
     await expect(page.getByTestId('trace-step')).toContainText('Step 2 of');

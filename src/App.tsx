@@ -507,6 +507,7 @@ export default function App() {
     setTraceNavigation({ key: '', index: 0, origin: 0, position: 0 }); tracing.setOpen(true);
   }
   function inspectEditedHead() {
+    const initiatingElement = document.activeElement;
     setView('details');
     const patch = display?.comparison.interventions[0];
     if (!patch || patch.kind !== 'head.scale') return;
@@ -515,6 +516,8 @@ export default function App() {
     const position = patch.tokens.kind === 'indices' ? patch.tokens.indices[0] : display!.comparison.predictionPosition;
     if (traceView) setTraceNavigation({ ...navigation, position, index: matchingStep(steps, node, position) });
     requestAnimationFrame(() => {
+      // Navigation must not take focus back after the user has moved to another control.
+      if (document.activeElement !== initiatingElement) return;
       const selected = document.querySelector<HTMLButtonElement>('.computation-graph .flow-node[aria-pressed=true]');
       selected?.focus({ preventScroll: true });
       if (!window.matchMedia('(max-width: 800px)').matches) selected?.scrollIntoView({ block: 'center', behavior: 'instant' });

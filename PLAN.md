@@ -373,3 +373,8 @@ Implemented the selected token's before/after raw probability, signed percentage
 ## Selected-token head scan slice
 
 Implemented 48 mute/normal/amplify trials on the selected token's shared prefix, ranked by raw probability effect. Preserve inherited source edits, reuse the recorded sampling draw, show progress/partial results, and terminate scan work on cancellation or navigation. Selecting a result fills the head-strength draft, highlights the head in the flow, and opens the probability preview before branching. Independent PyTorch scans cover original and multiple-inherited-head contexts; browser and hosted checks verify scan-to-branch behavior. Scan result persistence and broader checkpoint quality evaluation remain separate follow-up work.
+
+
+## Two-head story comparison slice
+
+Select two different heads and strengths from a completed or stopped scan, measure each alone and both together on the captured source prefix, then branch with both changes. Show the combined selected-token probability, alternatives, and interaction relative to the sum of individual percentage-point changes. Preserve inherited edits and expiry, both duration policies, nested inspection/further branching, and versioned workspace records with legacy import migration. Validate against independent PyTorch joint distributions and six-token rollouts, browser workflows, and the deployed release. Broader pair scanning, scan persistence, longer context, and existing model-quality/educational gates remain follow-up work.

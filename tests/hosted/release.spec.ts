@@ -216,17 +216,25 @@ test('hosted continuation generates the independent original and edited story to
   expect(parseFloat(await identityRow.getByTestId('scan-after').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
   await scan.getByRole('button', { name: 'Use layer 1 head 1 strength 1', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Scanned head probability preview', exact: true }).getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
+  await scan.getByLabel('Pair layer 1 head 1 strength 1', { exact: true }).check();
+  await scan.getByLabel('Pair layer 2 head 2 strength 1', { exact: true }).check();
+  await scan.getByRole('button', { name: 'Compare selected heads', exact: true }).click();
+  const pairPreview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
+  await expect(pairPreview.getByTestId('combined-probability')).toBeVisible({ timeout: 60_000 });
+  expect(parseFloat(await pairPreview.getByTestId('combined-probability').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
+  expect(parseFloat(await pairPreview.getByTestId('head-interaction').locator('strong').innerText())).toBeCloseTo(0, 4);
+  await pairPreview.screenshot({ path: testInfo.outputPath('hosted-two-head-probabilities.png') });
   await scan.getByRole('button', { name: 'Show strongest eight', exact: true }).click();
   await scan.screenshot({ path: testInfo.outputPath('hosted-head-scan.png') });
   expect(parseFloat(await inspection.getByTestId('selected-token-probability').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
-  await fork.getByRole('button', { name: 'Normal branch head', exact: true }).click();
   await fork.getByLabel('Branch new-token limit').fill('3');
   await fork.getByRole('button', { name: 'Compare from this token', exact: true }).click();
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60_000 });
   const nestedDownload = page.waitForEvent('download');
   await fork.getByRole('button', { name: 'Download branch comparison', exact: true }).click();
   const nestedRecord = JSON.parse(await readFile((await (await nestedDownload).path())!, 'utf8'));
-  expect(nestedRecord.schemaVersion).toBe(2);
+  expect(nestedRecord.schemaVersion).toBe(3);
+  expect(nestedRecord.plan.additionalEdits).toMatchObject([{ layer: 1, head: 1, factor: 1 }]);
   expect(nestedRecord.plan.source.edits).toEqual([example.plan.edit]);
   expect(nestedRecord.drawOffset).toBe(7);
   for (const branch of ['original', 'edited'] as const) {
@@ -234,7 +242,12 @@ test('hosted continuation generates the independent original and edited story to
     nestedRecord.frame[branch].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(example.edited.choices[i + 1].probability, 5));
   }
   await testInfo.attach('hosted-nested-fork-record', { body: JSON.stringify(nestedRecord, null, 2), contentType: 'application/json' });
+  await fork.getByRole('button', { name: /^Inspect with head change token 8:/ }).click();
+  await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
+  expect(parseFloat(await inspection.getByTestId('selected-token-probability').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
   await inspection.screenshot({ path: testInfo.outputPath('hosted-nested-inspection.png') });
+  await inspection.getByRole('button', { name: 'Back to previous comparison', exact: true }).click();
+  await expect(fork.getByRole('button', { name: /^Inspect with head change token 8:/ })).toBeFocused();
   await inspection.getByRole('button', { name: 'Back to previous comparison', exact: true }).click();
   await expect(fork.getByRole('button', { name: /^Inspect with head change token 8:/ })).toBeFocused();
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.');
@@ -247,7 +260,9 @@ test('hosted continuation generates the independent original and edited story to
   const workspaceDownload = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download workspace', exact: true }).click();
   const savedWorkspace = JSON.parse(await readFile((await (await workspaceDownload).path())!, 'utf8'));
+  expect(savedWorkspace.version).toBe(2);
   expect(savedWorkspace.nodes).toHaveLength(2);
+  expect(savedWorkspace.nodes[1].plan.additionalEdits).toEqual(nestedRecord.plan.additionalEdits);
   expect(savedWorkspace.nodes[1].frame).toEqual(nestedRecord.frame);
   await testInfo.attach('hosted-story-workspace', { body: JSON.stringify(savedWorkspace), contentType: 'application/json' });
   await page.getByRole('region', { name: 'Story branch workspace' }).screenshot({ path: testInfo.outputPath('hosted-branch-map.png') });

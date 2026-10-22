@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, useRef, type ReactNode } from 'react';
 import type { ModelManifest } from '../engine/contracts';
+import { forkEditLabel } from '../story-fork';
 import { emptyWorkspace, nodeRoute, parseWorkspace, type StoryWorkspace, type StoryRoot, type StoryNode } from '../story-workspace';
 interface Store { data: StoryWorkspace; saveRoot: (root: StoryRoot) => void; saveNode: (node: StoryNode) => void; navigate: (id: string) => void; focus: (id: string) => void; reset: (remount?: boolean) => void }
 const Context = createContext<Store | null>(null);
@@ -39,7 +40,7 @@ export function StoryWorkspaceProvider({ manifest, inputKey, children }: { manif
       {error && <p role="alert" className="error">{error}</p>}
       {data.root && <nav aria-label="Story branch map"><button type="button" aria-current={data.route.length === 0 ? 'location' : undefined} onClick={() => navigate('')}>Source story</button>
         {data.nodes.map((node, index) => <button type="button" key={node.id} style={{ marginLeft: `${Math.min(nodeRoute(data.nodes, node.id).length, 6) * 12}px` }} aria-current={data.route.at(-1) === node.id ? 'location' : undefined} onClick={() => navigate(node.id)}>
-          <strong>Comparison {index + 1}</strong><span>Step {node.plan.source.step} · Layer {node.plan.edit.layer + 1}, Head {node.plan.edit.head + 1} · {node.plan.edit.factor.toFixed(2)}× · {node.plan.duration === 'prediction' ? 'once' : 'onward'}</span><small>{node.parentId ? `From comparison ${data.nodes.findIndex(n => n.id === node.parentId) + 1}` : 'From source story'} · {node.plan.source.branch === 'original' ? 'source settings' : 'changed path'}</small>
+          <strong>Comparison {index + 1}</strong><span>Step {node.plan.source.step} · {forkEditLabel(node.plan)} · {node.plan.duration === 'prediction' ? 'once' : 'onward'}</span><small>{node.parentId ? `From comparison ${data.nodes.findIndex(n => n.id === node.parentId) + 1}` : 'From source story'} · {node.plan.source.branch === 'original' ? 'source settings' : 'changed path'}</small>
         </button>)}
       </nav>}
     </section>

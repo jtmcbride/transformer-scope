@@ -6,17 +6,23 @@ import { tokenLabel } from '../engine/tokenizer';
 import { scanStoryHeads, rankHeadScan, type HeadScanRow, type ScanOrder } from '../story-head-scan';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
-interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onStart: () => void; onChoose: (edit: HeadScaleIntervention) => void; onBusy: (busy: boolean) => void }
+interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onStart: () => void; onChoose: (edits: HeadScaleIntervention[]) => void; onBusy: (busy: boolean) => void }
 export function StoryHeadScan(props: Props) {
   const [rows, setRows] = useState<HeadScanRow[]>([]), [busy, setBusy] = useState(false), [status, setStatus] = useState('Ready to scan.'), [error, setError] = useState('');
   const [order, setOrder] = useState<ScanOrder>('absolute'), [all, setAll] = useState(false);
+  const [selected, setSelected] = useState<HeadScaleIntervention[]>([]);
+  const sameHead = (a: HeadScaleIntervention, b: HeadScaleIntervention) => a.layer === b.layer && a.head === b.head;
+  function toggle(edit: HeadScaleIntervention) {
+    setSelected(old => old.some(item => sameHead(item, edit) && item.factor === edit.factor)
+      ? old.filter(item => !sameHead(item, edit)) : [...old.filter(item => !sameHead(item, edit)), edit].slice(0, 2));
+  }
   const worker = useRef<ModelClient | null>(null), epoch = useRef(0);
   const total = props.manifest.config.layers * props.manifest.config.heads * 3;
   useEffect(() => () => { ++epoch.current; worker.current?.dispose(); }, []);
   function stop() { ++epoch.current; worker.current?.dispose(); worker.current = null; setBusy(false); props.onBusy(false); setStatus('Scan stopped. Results below are partial.'); }
   async function scan() {
     if (busy || props.disabled) return;
-    props.onStart(); setRows([]); setAll(false); setError(''); setBusy(true); props.onBusy(true); setStatus('Scanning…');
+    props.onStart(); setRows([]); setSelected([]); setAll(false); setError(''); setBusy(true); props.onBusy(true); setStatus('Scanning…');
     const generation = ++epoch.current, current = () => generation === epoch.current;
     const owner = new ModelClient(); worker.current = owner;
     try {
@@ -37,11 +43,17 @@ export function StoryHeadScan(props: Props) {
     {busy && <progress value={rows.length} max={total} aria-label="Head scan progress" />}
     {error && <p role="alert" className="error">Could not finish the scan: {error}</p>}
     {!!rows.length && <><p>Selected token: <strong>{tokenLabel(props.tokenizer, props.source.choice.tokenId)}</strong> · Source probability {(rows[0].before * 100).toFixed(4)}%.</p>
+      <div className="head-pair-selection" aria-label="Two-head selection"><strong>{selected.length} / 2 heads selected</strong>
+        <p>Choose two different heads below. Choosing another strength for a selected head replaces its strength.</p>
+        {selected.map(edit => <button key={`${edit.layer}:${edit.head}`} type="button" disabled={busy || props.disabled} onClick={() => toggle(edit)} aria-label={`Remove layer ${edit.layer+1} head ${edit.head+1} from pair`}>Layer {edit.layer+1} · Head {edit.head+1} · {edit.factor}× · Remove</button>)}
+        <button type="button" className="primary" disabled={selected.length !== 2 || busy || props.disabled} onClick={() => props.onChoose(selected)}>Compare selected heads</button>
+      </div>
       <ol className="head-scan-results" aria-label="Ranked head changes">{visible.map(row => <li key={`${row.edit.layer}:${row.edit.head}:${row.edit.factor}`} data-scan-layer={row.edit.layer} data-scan-head={row.edit.head} data-scan-factor={row.edit.factor}>
         <div><strong>Layer {row.edit.layer+1} · Head {row.edit.head+1} · {row.edit.factor === 0 ? 'Mute' : row.edit.factor === 1 ? 'Normal' : 'Amplify'}</strong><p><span data-testid="scan-after">{(row.after*100).toFixed(4)}%</span> · <b data-testid="scan-delta">{row.delta > 0 ? '+' : ''}{(row.delta*100).toFixed(4)} percentage points</b> · rank {row.rank}</p><small>{row.choice === props.source.choice.tokenId ? 'Same next token' : `Different next token: ${tokenLabel(props.tokenizer, row.choice)}`}</small></div>
-        <button type="button" disabled={busy || props.disabled} onClick={() => props.onChoose(row.edit)} aria-label={`Use layer ${row.edit.layer+1} head ${row.edit.head+1} strength ${row.edit.factor}`}>Use this change</button>
+        <label><input type="checkbox" checked={selected.some(edit => sameHead(edit, row.edit) && edit.factor === row.edit.factor)} disabled={busy || props.disabled || selected.length === 2 && !selected.some(edit => sameHead(edit, row.edit))} onChange={() => toggle(row.edit)} aria-label={`Pair layer ${row.edit.layer+1} head ${row.edit.head+1} strength ${row.edit.factor}`} />Select for pair</label>
+        <button type="button" disabled={busy || props.disabled} onClick={() => props.onChoose([row.edit])} aria-label={`Use layer ${row.edit.layer+1} head ${row.edit.head+1} strength ${row.edit.factor}`}>Use this change</button>
       </li>)}</ol>
       {rows.length > 8 && <button type="button" onClick={() => setAll(!all)}>{all ? 'Show strongest eight' : `Show all ${rows.length} results`}</button>}
-      <p className="hint">Raw model probability changes before sampling. These are individual trials relative to the source; head effects can interact and need not add up. Partial results cannot establish the strongest change among unmeasured heads. Normal may restore a previously changed head. Choosing a result fills the draft below; choose its duration and token limit, then Compare from this token.</p></>}
+      <p className="hint">Raw model probability changes before sampling. These are individual trials relative to the source; head effects can interact and need not add up. Partial results cannot establish the strongest change among unmeasured heads. Normal may restore a previously changed head. Use one result or compare two selected heads to fill the draft below; choose its duration and token limit, then Compare from this token.</p></>}
   </section>;
 }

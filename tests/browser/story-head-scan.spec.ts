@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import reference from '../fixtures/story-head-scan-reference.json' with { type: 'json' };
+import pairs from '../fixtures/story-head-pairs-reference.json' with { type: 'json' };
 import forks from '../fixtures/story-forks-reference.json' with { type: 'json' };
 import probabilities from '../fixtures/branch-probabilities-reference.json' with { type: 'json' };
 async function ready(page: Page, edited=false) {
@@ -81,4 +82,88 @@ test('scan cancellation and navigation discard late results, and scans retain an
   await page.getByRole('button',{name:'Next token →',exact:true}).click();
   await expect(page.getByTestId('selected-token-result')).toBeVisible({timeout:60000}); await page.waitForTimeout(400);
   await expect(scan.getByTestId('head-scan-status')).toHaveText('Ready to scan. 0 / 48 changes measured.'); await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+for (const [index, duration] of ['continuation', 'prediction'].entries()) test(`two scanned heads compare real joint effects and persist a ${duration} branch`, async ({ page }, info) => {
+  test.setTimeout(180000); await ready(page);
+  const example = pairs.cases[index];
+  const scan = page.getByRole('region', { name: 'Scan heads at selected token', exact: true });
+  await scan.getByRole('button', { name: 'Scan all heads', exact: true }).click();
+  await expect(scan.getByTestId('head-scan-status')).toContainText('Scan complete. 48 / 48', { timeout: 90000 });
+  await scan.getByRole('button', { name: 'Show all 48 results', exact: true }).click();
+  const pairButton = scan.getByRole('button', { name: 'Compare selected heads', exact: true });
+  await expect(pairButton).toBeDisabled();
+  await scan.getByLabel('Pair layer 1 head 1 strength 0', { exact: true }).check();
+  await scan.getByLabel('Pair layer 1 head 1 strength 2', { exact: true }).check();
+  await expect(scan.getByLabel('Pair layer 1 head 1 strength 0', { exact: true })).not.toBeChecked();
+  await expect(pairButton).toBeDisabled();
+  await scan.getByLabel('Pair layer 1 head 1 strength 0', { exact: true }).check();
+  await scan.getByLabel('Pair layer 2 head 2 strength 0', { exact: true }).focus(); await page.keyboard.press('Space');
+  await expect(pairButton).toBeEnabled();
+  await scan.getByRole('button', { name: 'Remove layer 2 head 2 from pair', exact: true }).click();
+  await expect(pairButton).toBeDisabled();
+  await scan.getByLabel('Pair layer 2 head 2 strength 0', { exact: true }).check();
+  await expect(scan.getByLabel('Pair layer 3 head 3 strength 0', { exact: true })).toBeDisabled();
+  await scan.getByRole('button', { name: 'Show strongest eight', exact: true }).click();
+  await expect(scan.getByLabel('Two-head selection', { exact: true })).toContainText('2 / 2 heads selected');
+  await pairButton.click();
+  const preview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
+  await expect(preview.getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60000 });
+  for (const row of example.report.individuals) {
+    const measured = preview.locator(`li[data-pair-layer="${row.edit.layer}"][data-pair-head="${row.edit.head}"]`);
+    expect(parseFloat(await measured.getByTestId('individual-probability').innerText())/100).toBeCloseTo(row.probability, 5);
+    expect(parseFloat(await measured.getByTestId('individual-delta').innerText())/100).toBeCloseTo(row.delta, 5);
+  }
+  expect(parseFloat(await preview.getByTestId('sum-individual-deltas').innerText())/100).toBeCloseTo(example.report.individuals.reduce((sum, row) => sum + row.delta, 0), 5);
+  const selected = example.report.rows.find(row => row.tokenId === example.plan.source.choice.tokenId)!;
+  expect(parseFloat(await preview.getByTestId('combined-probability').innerText())/100).toBeCloseTo(selected.after, 5);
+  expect(parseFloat((await preview.getByTestId('head-interaction').locator('strong').innerText()))/100).toBeCloseTo(example.report.interaction, 5);
+  for (const expected of example.report.rows) {
+    const row = preview.locator(`li[data-token-id="${expected.tokenId}"]`);
+    expect(parseFloat(await row.getByTestId('probability-after').innerText())/100).toBeCloseTo(expected.after, 5);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await preview.evaluate(el => el.scrollWidth <= el.clientWidth+1 && el.getBoundingClientRect().right <= innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  if (!index) await preview.screenshot({ path: info.outputPath('two-head-probabilities.png') });
+  await page.getByLabel('Branch edit duration').selectOption(duration);
+  await page.getByLabel('Branch new-token limit').fill('6');
+  await page.getByRole('button', { name: 'Compare from this token', exact: true }).click();
+  await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60000 });
+  let wait = page.waitForEvent('download'); await page.getByRole('button', { name: 'Download branch comparison', exact: true }).click();
+  const saved = JSON.parse(await readFile((await (await wait).path())!, 'utf8'));
+  expect(saved.schemaVersion).toBe(3);
+  expect(saved.plan).toMatchObject({ edit: example.plan.edit, additionalEdits: example.plan.additionalEdits, duration, maxTokens: 6 });
+  expect(saved.plan.source.prefix).toEqual(example.plan.source.prefix);
+  expect(saved.plan.source.choice.tokenId).toBe(example.plan.source.choice.tokenId);
+  expect(saved.plan.source.choice.probability).toBeCloseTo(example.plan.source.choice.probability, 5);
+  expect(saved.plan.source.settings).toEqual({ ...example.plan.source.settings, maxTokens: 8 });
+  for (const branch of ['original', 'edited'] as const) {
+    expect(saved.frame[branch].tokenIds).toEqual(example[branch].tokenIds);
+    saved.frame[branch].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(example[branch].choices[i].probability, 5));
+  }
+  await page.getByRole('button', { name: 'Use one head instead', exact: true }).click();
+  await expect(page.getByTestId('fork-captured-edit')).toContainText('Layer 1 · Head 1 · 0.00× + Layer 2 · Head 2 · 0.00×');
+  await page.getByRole('button', { name: /^Inspect with head change token 7:/ }).click();
+  await expect(page.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60000 });
+  await page.getByLabel('Branch new-token limit').fill('1');
+  await page.getByRole('button', { name: 'Compare from this token', exact: true }).click();
+  await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60000 });
+  wait = page.waitForEvent('download'); await page.getByRole('button', { name: 'Download branch comparison', exact: true }).click();
+  const nested = JSON.parse(await readFile((await (await wait).path())!, 'utf8'));
+  expect(nested.plan.source.edits).toEqual(index ? [] : [saved.plan.edit, ...saved.plan.additionalEdits]);
+  expect(nested.plan.source.continuationEdits).toEqual(nested.plan.source.edits);
+  await page.reload(); await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
+  await page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button', { name: /^Comparison 1/ }).click();
+  await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
+  const report = page.getByRole('region', { name: 'Head change probabilities', exact: true });
+  await expect(report.getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60000 });
+  expect(parseFloat(await report.getByTestId('combined-probability').innerText())/100).toBeCloseTo(selected.after, 5);
+  wait = page.waitForEvent('download'); await page.getByRole('button', { name: 'Download workspace', exact: true }).click();
+  const workspace = JSON.parse(await readFile((await (await wait).path())!, 'utf8'));
+  expect(workspace.version).toBe(2); expect(workspace.nodes[0].plan).toEqual(saved.plan); expect(workspace.nodes[0].frame).toEqual(saved.frame);
+  await page.getByLabel('Open story workspace').setInputFiles({ name: 'pair-workspace.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(workspace)) });
+  await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
+  expect(await page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button').count()).toBe(3);
+  await expect(page.getByRole('alert')).toHaveCount(0);
 });

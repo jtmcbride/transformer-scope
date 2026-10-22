@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { branchProbabilities, type BranchProbabilities as Report, type BranchProbabilityRow } from '../branch-probabilities';
-import { forkEdits, type ForkPlan } from '../story-fork';
+import type { BranchProbabilityRow } from '../branch-probabilities';
+import { forkEditLabel, proposedEdits, type ForkPlan } from '../story-fork';
 import { tokenLabel } from '../engine/tokenizer';
 import type { BpeDocument } from '../engine/bpe';
 import type { ModelClient } from '../workers/client';
 import { predictStory } from '../workers/story-runtime';
+import { measureStoryProbabilities, type StoryProbabilities as Report } from '../story-probabilities';
 const percent = (n: number) => `${(n * 100).toFixed(4)}%`;
 const change = (n: number) => `${n > 0 ? '+' : ''}${(n * 100).toFixed(4)} percentage points`;
 export function BranchProbabilities({ plan, tokenizer, client, label: regionLabel = 'Head change probabilities' }: { plan: ForkPlan; tokenizer: BpeDocument; client?: ModelClient; label?: string }) {
@@ -14,12 +15,8 @@ export function BranchProbabilities({ plan, tokenizer, client, label: regionLabe
     let current = true;
     setError('');
     void (async () => {
-      const before = await predictStory(client, plan.source.prefix, forkEdits(plan, false, 0));
-      if (!current) return;
-      const after = await predictStory(client, plan.source.prefix, forkEdits(plan, true, 0));
-      if (!current) return;
-      const value = branchProbabilities(before, after, plan.source.choice.tokenId, plan.source.settings, plan.source.step);
-      if (value.beforeChoice !== plan.source.choice.tokenId || Math.abs(value.selected.before - plan.source.choice.probability) > 1e-6) throw new Error('The source prediction could not be reproduced.');
+      const value = await measureStoryProbabilities(plan, (ids, edits) => predictStory(client, ids, edits), () => !current);
+      if (!current || !value) return;
       setReport({ plan, client, value });
     })().catch(e => { if (current) setError(String(e)); });
     return () => { current = false; };
@@ -34,9 +31,16 @@ export function BranchProbabilities({ plan, tokenizer, client, label: regionLabe
     </li>;
   }
   return <section className="branch-probabilities" aria-label={regionLabel}>
-    <p className="eyebrow">{regionLabel === 'Scanned head probability preview' ? 'Preview for a new comparison' : 'At the point where the story can branch'}</p><h3>How this head change shifts the prediction</h3>
-    <p>Story step {plan.source.step} · Layer {plan.edit.layer + 1}, Head {plan.edit.head + 1} · {plan.edit.factor.toFixed(2)}×. Both predictions use exactly the same starting text. Values run from <strong>Keep source settings</strong> → <strong>With head change</strong>.</p>
+    <p className="eyebrow">{regionLabel === 'Scanned head probability preview' ? 'Preview for a new comparison' : 'At the point where the story can branch'}</p><h3>How {proposedEdits(plan).length === 2 ? 'these two heads shift' : 'this head change shifts'} the prediction</h3>
+    <p>Story step {plan.source.step} · {forkEditLabel(plan)}. Every prediction here uses exactly the same starting text. Values run from <strong>Keep source settings</strong> → <strong>With head change</strong>.</p>
     {error ? <p role="alert">Could not measure this change: {error} <button type="button" onClick={() => setRetry(n => n + 1)}>Retry probability comparison</button></p> : !data ? <p role="status">Measuring the branch-point probabilities…</p> : <>
+      {data.individuals.length === 2 && <div className="head-pair-effects" aria-label="Individual and combined head effects">
+        <p><strong>Probability of {label(data.selected.tokenId)}</strong> · Source: {percent(data.selected.before)}</p>
+        <ul aria-label="Individual head effects">{data.individuals.map(({ edit, probability, delta }) => <li key={`${edit.layer}:${edit.head}`} data-pair-layer={edit.layer} data-pair-head={edit.head}><strong>Layer {edit.layer+1} · Head {edit.head+1} alone ({edit.factor}×)</strong><p><span data-testid="individual-probability">{percent(probability)}</span> · <b data-testid="individual-delta">{change(delta)}</b></p></li>)}</ul>
+        <p><strong>Both together:</strong> <span data-testid="combined-probability">{percent(data.selected.after)}</span> · <b data-testid="combined-delta">{change(data.selected.delta)}</b></p>
+        <p>Sum of individual changes: <span data-testid="sum-individual-deltas">{change(data.individuals.reduce((sum, row) => sum + row.delta, 0))}</span>.</p>
+        <p data-testid="head-interaction">Combined minus that sum: <strong>{change(data.interaction)}</strong>. A positive value means a greater increase (or smaller decrease) than the sum; a negative value means a smaller increase (or greater decrease). This comparison describes this token and starting text.</p>
+      </div>}
       <ul aria-label="Selected token probability">{row(data.selected, true)}</ul>
       <p data-testid="branch-choice-explanation">{plan.source.settings.temperature === 0 ? 'Most-likely-token selection' : 'Seeded sampling with the recorded temperature, top-p and shared draw'} chooses <strong>{label(data.beforeChoice)}</strong> before this change and <strong>{label(data.afterChoice)}</strong> after it. {data.beforeChoice === data.afterChoice ? 'The next token stays the same even though its probability may change.' : 'This change selects a different next token, which becomes input to later predictions.'} {plan.source.settings.temperature === 0 && data.beforeChoice !== data.afterChoice && data.rows.find(r => r.tokenId === data.afterChoice)!.delta < 0 && 'Here, the winning token’s probability also fell, but it overtook the other candidates.'}</p>
       <p className="hint">Strongest alternatives: the top five model predictions from either version, plus any generated choice. Ranks exclude the beginning and padding tokens.</p>

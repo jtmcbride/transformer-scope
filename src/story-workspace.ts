@@ -23,6 +23,7 @@ export function parseWorkspace(value: unknown, manifest: ModelManifest): StoryWo
     validateTokens(w.root.tokens, manifest.config);
     validateInterventions(w.root.edit ? [w.root.edit] : [], manifest.config, w.root.tokens.length);
     new StoryContinuation(w.root.tokens, w.root.settings, manifest.config.contextLength, w.root.edit).restore(w.root.frame);
+    for (const branch of [w.root.frame.original, ...(w.root.frame.edited ? [w.root.frame.edited] : [])]) validateTokens(branch.tokenIds, manifest.config);
   } else requireInput(w.nodes.length === 0, 'Comparisons need a source story.');
   const seen = new Set<string>();
   for (const node of w.nodes) {

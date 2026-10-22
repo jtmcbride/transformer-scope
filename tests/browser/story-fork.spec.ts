@@ -238,7 +238,28 @@ test('either branch opens a replayed flow and supports further head changes with
   expect((await record(page)).frame).toEqual(second.frame);
   await inspection.getByRole('button', { name: 'Back to previous comparison', exact: true }).click();
   expect((await record(page)).frame).toEqual(parent.frame);
-  await expect(page.getByRole('alert')).toHaveCount(0);
+  const map = page.getByRole('navigation', { name: 'Story branch map' });
+  await map.getByRole('button', { name: /^Comparison 3/ }).click();
+  await expect(inspection.getByTestId('selected-token-result')).toBeVisible({ timeout: 60_000 });
+  const deepest = await record(page);
+  matches(deepest, nested.cases[2] as unknown as typeof reference.cases[number]);
+  await page.reload();
+  await expect(inspection.getByTestId('selected-token-result')).toBeVisible({ timeout: 60_000 });
+  expect((await record(page)).frame).toEqual(deepest.frame);
+  await expect.poll(workerCount).toBe(2);
+  const exported = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download workspace', exact: true }).click();
+  const path = (await (await exported).path())!;
+  await page.getByRole('button', { name: 'Reset story', exact: true }).click();
+  await expect(map).toHaveCount(0);
+  await page.getByLabel('Open story workspace').setInputFiles(path);
+  await expect(inspection.getByTestId('selected-token-result')).toBeVisible({ timeout: 60_000 });
+  expect((await record(page)).frame).toEqual(deepest.frame);
+  await map.getByRole('button', { name: /^Comparison 1/ }).click();
+  expect((await record(page)).frame).toEqual(parent.frame);
+  await page.getByLabel('Open story workspace').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{"format":"wrong"}') });
+  await expect(page.getByRole('alert')).toContainText('Could not open this workspace');
+  expect((await record(page)).frame).toEqual(parent.frame);
 });
 
 test('inspecting a one-prediction branch preserves expiry when branching again and restores the parent', async ({ page }) => {

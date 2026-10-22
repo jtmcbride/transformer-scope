@@ -9,9 +9,9 @@ import root from '../fixtures/continuation-reference.json';
 it('round trips a comparison tree and resumes exact prefixes and sampling offsets', async () => {
   const { manifest } = loadShippedArtifact('tinystories');
   const w = emptyWorkspace(manifest);
-  const session = new StoryContinuation(root.promptTokenIds, root.settings, 64, root.edit);
+  const session = new StoryContinuation(root.promptTokenIds, root.settings, 64, root.edit as any);
   session.restore({ step: 16, original: { ...root.original, finish: 'token limit' }, edited: { ...root.edited, finish: 'token limit' } });
-  w.root = { prompt: root.prompt, tokens: root.promptTokenIds, settings: root.settings, edit: root.edit, frame: session.frame };
+  w.root = { prompt: root.prompt, tokens: root.promptTokenIds, settings: root.settings, edit: root.edit as any, frame: session.frame };
   // Original-branch selection is independent of the root's optional edited branch.
   const first = structuredClone(reference.cases[0]);
   const a = new StoryFork(first.plan as any, manifest.config);

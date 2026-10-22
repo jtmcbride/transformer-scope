@@ -559,7 +559,7 @@ export default function App() {
         onChange: factor => schedule({ ...headControls, factor }) } : undefined}
       onReset={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })} />}
     {choice === 'tinystories' && model && display && tokenizer?.kind === 'byte-bpe' && <StoryContinuation
-      key={`${model.runtimeGeneration}:${display.comparison.baselineRunId}`} manifest={model.manifest} tokenizer={tokenizer}
+      key={model.runtimeGeneration} manifest={model.manifest} tokenizer={tokenizer}
       tokens={display.tokens} prompt={completedText} draft={inputDraft} disabled={loading || pending || probing || sessionEnded}
       edit={display.comparison.interventions[0]?.kind === 'head.scale' && display.comparison.interventions[0].tokens.kind === 'all' && display.comparison.interventions[0].factor !== 1 ? display.comparison.interventions[0] : undefined} />}
     <div className="workspace flow-workspace">

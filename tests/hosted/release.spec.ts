@@ -220,6 +220,19 @@ test('hosted continuation generates the independent original and edited story to
   await inspection.getByRole('button', { name: 'Back to previous comparison', exact: true }).click();
   await expect(fork.getByRole('button', { name: /^Inspect with head change token 8:/ })).toBeFocused();
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.');
+  await page.reload();
+  await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
+  const map = page.getByRole('navigation', { name: 'Story branch map' });
+  await expect(map.getByRole('button')).toHaveCount(3);
+  await map.getByRole('button', { name: /^Comparison 2/ }).click();
+  await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
+  const workspaceDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download workspace', exact: true }).click();
+  const savedWorkspace = JSON.parse(await readFile((await (await workspaceDownload).path())!, 'utf8'));
+  expect(savedWorkspace.nodes).toHaveLength(2);
+  expect(savedWorkspace.nodes[1].frame).toEqual(nestedRecord.frame);
+  await testInfo.attach('hosted-story-workspace', { body: JSON.stringify(savedWorkspace), contentType: 'application/json' });
+  await page.getByRole('region', { name: 'Story branch workspace' }).screenshot({ path: testInfo.outputPath('hosted-branch-map.png') });
 });
 
 test('hosted opt-in validation harness identifies the release and passes every supported check', async ({ page }, testInfo) => {

@@ -254,3 +254,8 @@ Three additional engine tests (82 total) cover sampling-counter continuity, exac
 ### Nested story inspection and branching
 
 Two additional engine tests (84 total) verify selecting exact prefixes from either fork, global seeded draw counters, multi-head inheritance, first-prediction expiry across generations of comparisons, and three independent nested PyTorch rollouts without retained tensors. Two additional production cases (64 per browser) cover both paths, two levels of further edits, preserved ancestor records, keyboard navigation/focus, narrow-screen layout, and bounded worker counts. The existing delayed-worker case now also checks sampled branch-token replay and returning while a deeper comparison is in flight. The sixth hosted check inspects a branch result and generates another paired continuation. Local and hosted execution results are reported separately; numerical tolerances, context length, and checkpoint quality gates are unchanged.
+
+
+### Persistent story workspace
+
+A new engine test (85 total) covers whole-tree round trips, parent-source validation, checkpoint mismatch, invalid links/probabilities/routes, and exact paused-fork resume. The existing deep-branch browser case now creates three comparisons, navigates between them, reloads, exports/imports the full workspace, and refuses invalid input without losing results. Two new browser cases (66 per browser) verify seeded root resume after reload and visible storage failure with downloadable state. The hosted continuation case now reloads the deployed workspace and reopens its nested comparison through the map. These checks preserve earlier numerical tolerances and checkpoint quality boundaries; they do not establish cross-tab synchronization or cloud backup.

@@ -5,31 +5,45 @@ import { tokenLabel } from '../engine/tokenizer';
 import { StoryContinuation as Session, selectStoryToken, type Sampling, type StoryBranch, type StoryFrame, type StorySelection } from '../continuation';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
+import { StoryWorkspaceProvider, useStoryWorkspace } from './StoryWorkspace';
 import { StoryTokenInspector } from './StoryTokenInspector';
 
 interface Props { manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
 const defaults: Sampling = { temperature: 0, topP: .9, seed: 42, maxTokens: 24 };
 export function StoryContinuation(props: Props) {
-  const [settings, setSettings] = useState(defaults);
+  return <StoryWorkspaceProvider manifest={props.manifest} inputKey={JSON.stringify(props.tokens)}>{(data, navigation) => <StoryContinuationInner key={navigation} {...props} restored={data.root} />}</StoryWorkspaceProvider>;
+}
+function StoryContinuationInner(props: Props & { restored: import('../story-workspace').StoryRoot | null }) {
+  const workspace = useStoryWorkspace()!;
+  const [root] = useState(props.restored);
+  // The saved story owns its exact prompt, independent of the main diagram's current input.
+  props = root ? { ...props, tokens: root.tokens, prompt: root.prompt } : props;
+  const [settings, setSettings] = useState(root?.settings ?? defaults);
   const [compare, setCompare] = useState(false);
-  const [frame, setFrame] = useState<StoryFrame | null>(null);
-  const [selection, setSelection] = useState<StorySelection | null>(null);
+  const [frame, setFrame] = useState<StoryFrame | null>(root?.frame ?? null);
+  const [selection, setSelection] = useState<StorySelection | null>(() => workspace.data.nodes.find(n => n.id === workspace.data.route[0])?.plan.source ?? null);
   const [busy, setBusy] = useState(false), [playing, setPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const session = useRef<Session | null>(null), worker = useRef<ModelClient | null>(null);
+  const session = useRef<Session | null>(null);
+  const initialized = useRef(false);
+  if (!initialized.current && root) { const restored = new Session(root.tokens, root.settings, props.manifest.config.contextLength, root.edit); restored.restore(root.frame); session.current = restored; }
+  initialized.current = true;
+  const worker = useRef<ModelClient | null>(null);
   const loaded = useRef<ModelClient | null>(null);
   const epoch = useRef(0), flight = useRef(false), autoplay = useRef(false);
   const encoder = useMemo(() => new BpeTokenizer(props.tokenizer), [props.tokenizer]);
+  useEffect(() => { if (frame && session.current) workspace.saveRoot({ prompt: props.prompt, tokens: props.tokens, settings: session.current.settings, edit: session.current.edit, frame }); }, [frame, workspace.saveRoot]);
   function stop() {
     ++epoch.current; autoplay.current = false; flight.current = false;
     worker.current?.dispose(); worker.current = null; setBusy(false); setPlaying(false);
   }
   useEffect(() => () => { ++epoch.current; autoplay.current = false; worker.current?.dispose(); }, []);
-  function reset() { stop(); session.current = null; setFrame(null); setSelection(null); setError(null); }
+  function reset() { stop(); session.current = null; setFrame(null); setSelection(null); setError(null); workspace.reset(false); }
   function inspect(branch: StorySelection['branch'], index: number) {
     if (!frame || !session.current) return;
     stop();
     if (selection?.branch === branch && selection.step === index + 1) return;
+    workspace.focus('');
     setSelection(selectStoryToken(frame, props.tokens.length, branch, index, session.current.settings, session.current.edit));
   }
 
@@ -115,7 +129,7 @@ export function StoryContinuation(props: Props) {
     {!!frame?.original.choices.length && <p className="hint">Select a numbered token to pause generation and inspect the computation that produced it.</p>}
     {selection && <StoryTokenInspector key={`${selection.branch}:${selection.step}`} selection={selection} manifest={props.manifest} tokenizer={props.tokenizer}
       onForkStart={stop}
-      onClose={() => { setSelection(null); document.querySelector<HTMLButtonElement>('.generated-tokens button[aria-pressed=true]')?.focus({ preventScroll: true }); }} onNavigate={index => inspect(selection.branch, index)}
+      onClose={() => { workspace.focus(''); setSelection(null); document.querySelector<HTMLButtonElement>('.generated-tokens button[aria-pressed=true]')?.focus({ preventScroll: true }); }} onNavigate={index => inspect(selection.branch, index)}
       count={frame?.[selection.branch]?.choices.length ?? 0} />}
     <p className="hint">Stops at end-of-story, your new-token limit, or {props.manifest.config.contextLength} total tokens including the beginning token. No text is silently dropped. Tokens can be word pieces; incomplete characters wait for more bytes. Downloaded continuations are records, separate from replayable diagram experiments.</p>
   </section>;

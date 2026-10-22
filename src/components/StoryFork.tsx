@@ -6,19 +6,31 @@ import { selectionEdits, type StoryBranch, type StoryFrame, type StorySelection 
 import { firstForkDifference, selectForkToken, StoryFork as Session, type ForkDuration, type ForkPlan } from '../story-fork';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
+import { useStoryWorkspace } from './StoryWorkspace';
 import { StoryTokenInspector } from './StoryTokenInspector';
 
-interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; head: { layer: number; head: number }; disabled: boolean; onStart: () => void; onInspectChange: (active: boolean) => void; depth: number }
+interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; head: { layer: number; head: number }; disabled: boolean; onStart: () => void; onInspectChange: (active: boolean) => void; depth: number; parentId?: string }
 export function StoryFork(props: Props) {
+  const workspace = useStoryWorkspace();
+  const [savedNode] = useState(() => {
+    const nodes = workspace?.data.nodes ?? [];
+    const match = (n: typeof nodes[number]) => n.parentId === (props.parentId ?? null) && JSON.stringify(n.plan.source) === JSON.stringify(props.source);
+    return nodes.find(n => n.id === workspace?.data.route[props.depth] && match(n)) ?? nodes.filter(match).at(-1);
+  });
+  const nodeId = useRef(savedNode?.id ?? '');
+  const initialChild = workspace?.data.nodes.find(n => savedNode && n.parentId === savedNode.id && n.id === workspace.data.route[props.depth + 1]);
   const [factor, setFactor] = useState(0), [duration, setDuration] = useState<ForkDuration>('continuation');
   const [limit, setLimit] = useState(Math.min(16, props.manifest.config.contextLength - props.source.prefix.length));
-  const [plan, setPlan] = useState<ForkPlan | null>(null), [frame, setFrame] = useState<StoryFrame | null>(null);
+  const [plan, setPlan] = useState<ForkPlan | null>(savedNode?.plan ?? null), [frame, setFrame] = useState<StoryFrame | null>(savedNode?.frame ?? null);
   const [busy, setBusy] = useState(false), [error, setError] = useState<string | null>(null);
-  const [selection, setSelection] = useState<StorySelection | null>(null);
-  const panel = useRef<HTMLElement>(null), returnToken = useRef('');
+  const [selection, setSelection] = useState<StorySelection | null>(initialChild?.plan.source ?? null);
+  const panel = useRef<HTMLElement>(null), returnToken = useRef(initialChild && savedNode ? `${initialChild.plan.source.branch}:${initialChild.plan.source.step - savedNode.plan.source.step}` : '');
   const returning = useRef(false);
   const session = useRef<Session | null>(null), worker = useRef<ModelClient | null>(null), loaded = useRef<ModelClient | null>(null);
   const epoch = useRef(0), flight = useRef(false), autoplay = useRef(false);
+  const initialized = useRef(false);
+  if (!initialized.current && savedNode) { const restored = new Session(savedNode.plan, props.manifest.config); restored.restore(savedNode.frame); session.current = restored; }
+  initialized.current = true;
   const encoder = useMemo(() => new BpeTokenizer(props.tokenizer), [props.tokenizer]);
   const common = encoder.preview(props.source.prefix);
   const finished = !!frame?.original.finish && !!frame?.edited?.finish;
@@ -37,15 +49,16 @@ export function StoryFork(props: Props) {
     stop(); props.onStart(); returnToken.current = `${branch}:${index}`;
     setSelection(selectForkToken(plan, frame, branch, index)); props.onInspectChange(true);
   }
-  function back() { returning.current = true; setSelection(null); props.onInspectChange(false); }
+  function back() { workspace?.focus(nodeId.current); returning.current = true; setSelection(null); props.onInspectChange(false); }
   function clear() { stop(); session.current = null; setPlan(null); setFrame(null); setError(null); }
   async function run(play: boolean, fresh = false) {
     if (flight.current || props.disabled) return;
     setError(null);
     try {
       if (fresh) {
+        if ((workspace?.data.nodes.length ?? 0) >= 500) throw new Error('This workspace has reached 500 comparisons. Download it and reset the story to begin another.');
         const next = new Session({ source: props.source, edit: { id: props.depth ? `fork-${props.depth}-head` : 'fork-head', kind: 'head.scale', ...props.head, factor, tokens: { kind: 'all' } }, duration, maxTokens: limit }, props.manifest.config);
-        stop(); session.current = next; setPlan(next.plan); setFrame(next.frame);
+        stop(); nodeId.current = crypto.randomUUID(); session.current = next; setPlan(next.plan); setFrame(next.frame); workspace?.saveNode({ id: nodeId.current, parentId: props.parentId ?? null, plan: next.plan, frame: next.frame });
       }
     } catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); return; }
     const active = session.current;
@@ -59,7 +72,7 @@ export function StoryFork(props: Props) {
       do {
         const next = await active.step((ids, edits) => predictStory(owner, ids, edits));
         if (!valid()) return;
-        setFrame(next);
+        setFrame(next); workspace?.saveNode({ id: nodeId.current, parentId: props.parentId ?? null, plan: active.plan, frame: next });
         if (!autoplay.current || active.finished) break;
         await new Promise<void>(resolve => setTimeout(resolve, 300));
       } while (valid() && autoplay.current);
@@ -85,7 +98,7 @@ export function StoryFork(props: Props) {
     const link = document.createElement('a'); link.href = url; link.download = 'story-branch-comparison.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 0);
   }
   if (selection && plan && frame) return <StoryTokenInspector key={`${selection.branch}:${selection.step}`} selection={selection}
-    manifest={props.manifest} tokenizer={props.tokenizer} startStep={plan.source.step} depth={props.depth + 1}
+    manifest={props.manifest} tokenizer={props.tokenizer} startStep={plan.source.step} depth={props.depth + 1} parentId={nodeId.current}
     count={frame[selection.branch]!.choices.length} onClose={back} onNavigate={index => inspect(selection.branch, index)} onForkStart={props.onStart} />;
   return <section ref={panel} className="story-fork" aria-label="Branch from selected token">
     <p className="eyebrow">What if this head worked differently?</p><h3>Continue two stories from step {props.source.step}.</h3>
@@ -108,6 +121,6 @@ export function StoryFork(props: Props) {
       <p className="fork-difference" role="status">{difference === null ? frame.step ? 'The generated tokens match so far. A head edit need not change the story.' : 'Waiting for the first pair of tokens.' : `First different token at story step ${plan.source.step + difference}. Highlighted tokens differ at the same generation step.`}</p>
       <div className="continuation-stories paired-stories">{story(frame.original, 'Keep source settings', frame.edited!, 'original')}{story(frame.edited!, 'With head change', frame.original, 'edited')}</div>
     </>}
-    <p className="hint">Select a numbered token in either path to inspect it and make another head change. Back to previous comparison returns here with these results intact. The {props.manifest.config.contextLength}-token context limit still applies. Closing a token inspection discards comparisons created inside it; download each comparison you want to keep.</p>
+    <p className="hint">Select a numbered token in either path to inspect it and make another head change. Back to previous comparison returns here with these results intact. The {props.manifest.config.contextLength}-token context limit still applies. Every comparison stays in the story workspace. Use the branch map to reopen it, or download the workspace to keep a copy.</p>
   </section>;
 }

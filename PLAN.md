@@ -358,3 +358,8 @@ Fork from a selected generated token without replacing its recorded story. Reuse
 ## Recursive story inspection slice
 
 Select tokens from either fork, replay their exact pre-token prefix and effective head edits in the flow, and branch again. Preserve original sampling counters and the expiry of one-prediction edits at every depth. Retain ancestor comparisons while descending, provide previous/next token navigation and Back to previous comparison, and suspend inactive model workers. Version branch downloads with multi-head source and future edit policies. Verify independent nested PyTorch rollouts, browser lifecycle and navigation, and the deployed flow. Saved-tree persistence/import and longer context remain follow-up work.
+
+
+## Persistent story-branch workspace slice
+
+Implemented independent comparison records, a parent-linked branch map, local automatic saving, complete workspace export/import, validated snapshot resume, and direct reopening of deep comparisons. Preserve exact IDs, inherited temporal edit policies, and global sampling counters; load computation only for the active view. Reset and Run input start a new workspace; downloads retain complete experiments. Follow-up: explanations of probability changes at a branch point, educational sessions, and the existing checkpoint-quality and device-validation boundaries.

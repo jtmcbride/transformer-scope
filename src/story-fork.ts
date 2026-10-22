@@ -28,6 +28,7 @@ export class StoryFork {
     this.plan = structuredClone(plan);
     this.session = new StoryContinuation(plan.source.prefix, { ...plan.source.settings, maxTokens: plan.maxTokens }, config.contextLength, plan.edit, plan.source.step - 1);
   }
+  restore(frame: StoryFrame): void { this.session.restore(frame); }
   get frame(): StoryFrame { return this.session.frame; }
   get finished(): boolean { return this.session.finished; }
   step(predict: ForkPredict): Promise<StoryFrame> {

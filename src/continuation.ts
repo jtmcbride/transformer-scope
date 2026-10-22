@@ -77,6 +77,20 @@ export class StoryContinuation {
     const branch = (): StoryBranch => ({ tokenIds: [...prompt], choices: [], ...(prompt.length === contextLength ? { finish: 'context limit' as const } : {}) });
     this.current = { step: 0, original: branch(), ...(edit ? { edited: branch() } : {}) };
   }
+  restore(frame: StoryFrame): void {
+    requireInput(!this.busy && frame && Number.isInteger(frame.step) && frame.step >= 0 && frame.step <= this.settings.maxTokens, 'Invalid saved generation step.');
+    requireInput(!!frame.edited === !!this.edit, 'Saved branch count does not match its settings.');
+    const prompt = this.current.original.tokenIds.slice(0, this.current.original.tokenIds.length - this.current.original.choices.length);
+    for (const branch of [frame.original, ...(frame.edited ? [frame.edited] : [])]) {
+      requireInput(branch && Array.isArray(branch.tokenIds) && Array.isArray(branch.choices) && branch.tokenIds.length === prompt.length + branch.choices.length && branch.tokenIds.length <= this.contextLength, 'Invalid saved token sequence.');
+      requireInput(prompt.every((id, i) => branch.tokenIds[i] === id), 'Saved prefix differs from its source.');
+      requireInput(branch.choices.length <= frame.step && branch.choices.every((choice, i) => Number.isInteger(choice.tokenId) && choice.tokenId !== 0 && choice.tokenId !== 2 && choice.tokenId === branch.tokenIds[prompt.length + i] && Number.isFinite(choice.probability) && choice.probability >= 0 && choice.probability <= 1 && (choice.tokenId !== 1 || i === branch.choices.length - 1)), 'Invalid saved token choices.');
+      const finish = branch.choices.at(-1)?.tokenId === 1 ? 'end of story' : branch.tokenIds.length === this.contextLength ? 'context limit' : branch.choices.length === this.settings.maxTokens ? 'token limit' : undefined;
+      requireInput(branch.finish === finish && (finish || branch.choices.length === frame.step), 'Invalid saved stopping state.');
+    }
+    requireInput(Math.max(frame.original.choices.length, frame.edited?.choices.length ?? 0) === frame.step, 'Saved step count differs from its tokens.');
+    this.current = structuredClone(frame);
+  }
   get frame(): StoryFrame { return structuredClone(this.current); }
   get finished(): boolean { return !!this.current.original.finish && (!this.current.edited || !!this.current.edited.finish); }
   async step(predict: Predict): Promise<StoryFrame> {

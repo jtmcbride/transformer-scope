@@ -259,3 +259,8 @@ Two additional engine tests (84 total) verify selecting exact prefixes from eith
 ### Persistent story workspace
 
 A new engine test (85 total) covers whole-tree round trips, parent-source validation, checkpoint mismatch, invalid links/probabilities/routes, and exact paused-fork resume. The existing deep-branch browser case now creates three comparisons, navigates between them, reloads, exports/imports the full workspace, and refuses invalid input without losing results. Two new browser cases (66 per browser) verify seeded root resume after reload and visible storage failure with downloadable state. The hosted continuation case now reloads the deployed workspace and reopens its nested comparison through the map. These checks preserve earlier numerical tolerances and checkpoint quality boundaries; they do not establish cross-tab synchronization or cloud backup.
+
+
+### Branch-point probability explanations
+
+Two new engine cases (87 total) verify raw softmax versus generation eligibility, stable ranks/ties, selected-token inclusion, seeded choices, identity edits, and seven independent same-prefix PyTorch comparisons with zero retained tensors. `scripts/export_branch_probabilities.py` exports top alternatives, ranks, and raw probability changes for the original, inherited, replaced, nested, and temporary head-edit cases. Existing browser tests now check every displayed reference row, sampled-choice language, and recomputation after workspace reload. The sixth hosted check compares the published before/after values to the independent fixture. Browser case counts remain 66 per browser; existing numerical and model-quality gates are unchanged.

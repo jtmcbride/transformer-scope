@@ -69,3 +69,17 @@
 .workspace-open { display:flex; align-items:center; gap:10px; font-size:12px; flex-wrap:wrap; }
 .workspace-open input { max-width:100%; }
 @media(max-width:700px) { .story-workspace-map { padding:12px; } }
+.branch-probabilities { margin:18px 0; padding:18px; border:1px solid #ddd3f5; border-radius:8px; background:white; }
+.branch-probabilities p { font-size:13px; line-height:1.6; }
+.branch-probabilities ul { list-style:none; margin:14px 0; padding:0; }
+.branch-probabilities li { padding:12px; margin:6px 0; border:1px solid #e5e8ef; border-radius:6px; }
+.branch-probabilities .probability-selected { border-color:#7963cb; background:#fcfbff; }
+.branch-probability-token,.branch-probability-values { display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; font-size:12px; }
+.branch-probability-token strong { font:14px monospace; overflow-wrap:anywhere; }
+.branch-probability-token span { color:#606c82; }
+.branch-probability-values { margin:8px 0; font-variant-numeric:tabular-nums; }
+.branch-probability-values b { font-weight:500; color:#58429a; }
+.branch-probability-bars { background:#f4f5f9; display:grid; gap:3px; }
+.branch-probability-bars i { height:5px; display:block; background:#9ca9bd; }
+.branch-probability-bars i + i { background:#7963cb; }
+@media(max-width:700px) { .branch-probabilities { padding:10px; } }

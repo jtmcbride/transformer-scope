@@ -2,6 +2,19 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import continuation from '../fixtures/continuation-reference.json' with { type: 'json' };
 import reference from '../fixtures/story-forks-reference.json' with { type: 'json' };
+import probabilities from '../fixtures/branch-probabilities-reference.json' with { type: 'json' };
+
+async function probabilityReport(page: Page, example: typeof probabilities.cases[number]) {
+  const report = page.getByRole('region', { name: 'Head change probabilities', exact: true });
+  await expect(report.getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
+  for (const row of example.rows) {
+    const measured = report.locator(`li[data-token-id="${row.tokenId}"]`);
+    expect(parseFloat(await measured.getByTestId('probability-before').innerText()) / 100).toBeCloseTo(row.before, 5);
+    expect(parseFloat(await measured.getByTestId('probability-after').innerText()) / 100).toBeCloseTo(row.after, 5);
+    expect(parseFloat(await measured.getByTestId('probability-change').innerText()) / 100).toBeCloseTo(row.delta, 5);
+    await expect(measured).toContainText(`rank ${row.beforeRank} → ${row.afterRank}`);
+  }
+}
 
 test.use({ actionTimeout: 20_000 });
 
@@ -53,6 +66,8 @@ test('forking an original token preserves its story and matches independent sust
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 90_000 });
   const sustained = await record(page);
   matches(sustained, reference.cases[0]);
+  await probabilityReport(page, probabilities.cases[0]);
+  await expect(fork.getByTestId('branch-choice-explanation')).toContainText('winning token’s probability also fell');
   await page.getByRole('button', { name: /^Inspect original token 6:/ }).click();
   expect((await record(page)).frame).toEqual(sustained.frame);
   expect(sustained.firstDifferenceStep).toBe(6);
@@ -67,6 +82,7 @@ test('forking an original token preserves its story and matches independent sust
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 90_000 });
   const once = await record(page);
   matches(once, reference.cases[1]);
+  await probabilityReport(page, probabilities.cases[1]);
   expect(once.frame.original).toEqual(sustained.frame.original);
   expect(once.frame.edited.tokenIds).not.toEqual(sustained.frame.edited.tokenIds);
   await expect(page.locator('.status')).toHaveText('Showing 1.00×');
@@ -85,6 +101,7 @@ test('forking an edited token retains a different captured head, replaces the sa
   await fork.getByRole('button', { name: 'Compare from this token', exact: true }).click();
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 90_000 });
   matches(await record(page), reference.cases[2]);
+  await probabilityReport(page, probabilities.cases[2]);
   await inspection.getByRole('button', { name: 'Previous model layer', exact: true }).click();
   await inspection.getByRole('button', { name: 'L1 · Head 1', exact: true }).click();
   await fork.getByRole('button', { name: 'Normal branch head', exact: true }).click();
@@ -93,6 +110,7 @@ test('forking an edited token retains a different captured head, replaces the sa
   await fork.getByRole('button', { name: 'Start new branch comparison', exact: true }).click();
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 90_000 });
   matches(await record(page), reference.cases[3]);
+  await probabilityReport(page, probabilities.cases[3]);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await fork.evaluate(node => node.scrollWidth <= node.clientWidth + 1 && node.getBoundingClientRect().right <= innerWidth)).toBe(true);
   await fork.getByRole('button', { name: 'Clear comparison', exact: true }).click();
@@ -141,6 +159,7 @@ test('a sampled identity fork keeps the original draw counter through cancellati
   expect(saved.frame.original.choices).toEqual(source.frame.original.choices.slice(2));
   expect(saved.frame.edited).toEqual(saved.frame.original);
   expect(saved.firstDifferenceStep).toBeNull();
+  await expect(fork.getByTestId('branch-choice-explanation')).toContainText('Seeded sampling', { timeout: 60_000 });
   expect((await record(page, 'Download continuation')).frame).toEqual(source.frame);
   await fork.getByRole('button', { name: /^Inspect with head change token 3:/ }).click();
   await expect(inspection.getByTestId('selected-token-result')).toBeVisible({ timeout: 60_000 });
@@ -212,6 +231,7 @@ test('either branch opens a replayed flow and supports further head changes with
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60_000 });
   const second = await record(page);
   matches(second, nested.cases[0] as unknown as typeof reference.cases[number]);
+  await probabilityReport(page, probabilities.cases[4]);
   expect(second.schemaVersion).toBe(2);
   expect(second.plan.source.edits).toEqual([parent.plan.edit]);
 
@@ -246,6 +266,7 @@ test('either branch opens a replayed flow and supports further head changes with
   await page.reload();
   await expect(inspection.getByTestId('selected-token-result')).toBeVisible({ timeout: 60_000 });
   expect((await record(page)).frame).toEqual(deepest.frame);
+  await probabilityReport(page, probabilities.cases[6]);
   await expect.poll(workerCount).toBe(2);
   const exported = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download workspace', exact: true }).click();
@@ -291,6 +312,7 @@ test('inspecting a one-prediction branch preserves expiry when branching again a
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60_000 });
   const child = await record(page);
   matches(child, nested.cases[1] as unknown as typeof reference.cases[number]);
+  await probabilityReport(page, probabilities.cases[5]);
   expect(child.plan.source.continuationEdits).toEqual([]);
   await inspection.getByRole('button', { name: 'Back to previous comparison', exact: true }).click();
   expect((await record(page)).frame).toEqual(parent.frame);

@@ -363,3 +363,8 @@ Select tokens from either fork, replay their exact pre-token prefix and effectiv
 ## Persistent story-branch workspace slice
 
 Implemented independent comparison records, a parent-linked branch map, local automatic saving, complete workspace export/import, validated snapshot resume, and direct reopening of deep comparisons. Preserve exact IDs, inherited temporal edit policies, and global sampling counters; load computation only for the active view. Reset and Run input start a new workspace; downloads retain complete experiments. Follow-up: explanations of probability changes at a branch point, educational sessions, and the existing checkpoint-quality and device-validation boundaries.
+
+
+## Branch-point probability explanation slice
+
+Implemented the selected token's before/after raw probability, signed percentage-point change, rank movement, strongest alternatives, and actual greedy/seeded choices for each captured head edit. Compare on the shared pre-token prefix with inherited source settings intact. Reuse the active inspection worker and derive reports on saved-workspace reopening. Verify ranks/probabilities against seven independent PyTorch cases. Further educational evaluation and checkpoint-quality work remain follow-up items.

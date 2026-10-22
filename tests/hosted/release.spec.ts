@@ -5,6 +5,7 @@ import type { ValidationReport } from '../../src/validation/report';
 import textFixture from '../fixtures/text-inference.json' with { type: 'json' };
 import continuationFixture from '../fixtures/continuation-reference.json' with { type: 'json' };
 import forkFixture from '../fixtures/story-forks-reference.json' with { type: 'json' };
+import probabilityFixture from '../fixtures/branch-probabilities-reference.json' with { type: 'json' };
 
 interface Release {
   format: string; schemaVersion: number; commit: string; sourceTreeDirty: boolean; basePath: string;
@@ -196,6 +197,13 @@ test('hosted continuation generates the independent original and edited story to
     forkRecord.frame[key].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(example[key].choices[i].probability, 5));
   }
   await testInfo.attach('hosted-fork-record', { body: JSON.stringify(forkRecord, null, 2), contentType: 'application/json' });
+  const probabilityPanel = page.getByRole('region', { name: 'Head change probabilities', exact: true });
+  await expect(probabilityPanel.getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
+  for (const expected of probabilityFixture.cases[3].rows) {
+    const row = probabilityPanel.locator(`li[data-token-id="${expected.tokenId}"]`);
+    expect(parseFloat(await row.getByTestId('probability-before').innerText()) / 100).toBeCloseTo(expected.before, 5);
+    expect(parseFloat(await row.getByTestId('probability-after').innerText()) / 100).toBeCloseTo(expected.after, 5);
+  }
   await fork.screenshot({ path: testInfo.outputPath('hosted-story-fork.png') });
   await fork.getByRole('button', { name: /^Inspect with head change token 8:/ }).click();
   await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });

@@ -1,0 +1,813 @@
+{
+  "modelRevision": "23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6",
+  "cases": [
+    {
+      "plan": {
+        "source": {
+          "branch": "original",
+          "step": 6,
+          "prefix": [
+            0,
+            733,
+            508,
+            261,
+            673,
+            471,
+            49,
+            317,
+            409,
+            268,
+            326,
+            329,
+            312,
+            49,
+            317
+          ],
+          "choice": {
+            "tokenId": 591,
+            "probability": 0.12945398688316345
+          },
+          "settings": {
+            "temperature": 0,
+            "topP": 0.9,
+            "seed": 42,
+            "maxTokens": 16
+          }
+        },
+        "edit": {
+          "id": "fork-head",
+          "kind": "head.scale",
+          "layer": 0,
+          "head": 0,
+          "factor": 0,
+          "tokens": {
+            "kind": "all"
+          }
+        },
+        "duration": "continuation",
+        "maxTokens": 12
+      },
+      "beforeChoice": 591,
+      "afterChoice": 544,
+      "rows": [
+        {
+          "tokenId": 544,
+          "before": 0.09486423432826996,
+          "after": 0.07098884135484695,
+          "delta": -0.023875392973423004,
+          "beforeRank": 3,
+          "afterRank": 1
+        },
+        {
+          "tokenId": 386,
+          "before": 0.01398505736142397,
+          "after": 0.04963666945695877,
+          "delta": 0.0356516120955348,
+          "beforeRank": 18,
+          "afterRank": 5
+        },
+        {
+          "tokenId": 652,
+          "before": 0.07760438323020935,
+          "after": 0.02058333531022072,
+          "delta": -0.05702104791998863,
+          "beforeRank": 5,
+          "afterRank": 15
+        },
+        {
+          "tokenId": 428,
+          "before": 0.02570551261305809,
+          "after": 0.05434039607644081,
+          "delta": 0.02863488346338272,
+          "beforeRank": 12,
+          "afterRank": 4
+        },
+        {
+          "tokenId": 591,
+          "before": 0.12945398688316345,
+          "after": 0.06362622231245041,
+          "delta": -0.06582776457071304,
+          "beforeRank": 1,
+          "afterRank": 3
+        },
+        {
+          "tokenId": 627,
+          "before": 0.09293016791343689,
+          "after": 0.04605713114142418,
+          "delta": -0.04687303677201271,
+          "beforeRank": 4,
+          "afterRank": 7
+        },
+        {
+          "tokenId": 917,
+          "before": 0.09686487168073654,
+          "after": 0.0655335932970047,
+          "delta": -0.03133127838373184,
+          "beforeRank": 2,
+          "afterRank": 2
+        }
+      ]
+    },
+    {
+      "plan": {
+        "source": {
+          "branch": "original",
+          "step": 6,
+          "prefix": [
+            0,
+            733,
+            508,
+            261,
+            673,
+            471,
+            49,
+            317,
+            409,
+            268,
+            326,
+            329,
+            312,
+            49,
+            317
+          ],
+          "choice": {
+            "tokenId": 591,
+            "probability": 0.12945398688316345
+          },
+          "settings": {
+            "temperature": 0,
+            "topP": 0.9,
+            "seed": 42,
+            "maxTokens": 16
+          }
+        },
+        "edit": {
+          "id": "fork-head",
+          "kind": "head.scale",
+          "layer": 0,
+          "head": 0,
+          "factor": 0,
+          "tokens": {
+            "kind": "all"
+          }
+        },
+        "duration": "prediction",
+        "maxTokens": 12
+      },
+      "beforeChoice": 591,
+      "afterChoice": 544,
+      "rows": [
+        {
+          "tokenId": 544,
+          "before": 0.09486423432826996,
+          "after": 0.07098884135484695,
+          "delta": -0.023875392973423004,
+          "beforeRank": 3,
+          "afterRank": 1
+        },
+        {
+          "tokenId": 386,
+          "before": 0.01398505736142397,
+          "after": 0.04963666945695877,
+          "delta": 0.0356516120955348,
+          "beforeRank": 18,
+          "afterRank": 5
+        },
+        {
+          "tokenId": 652,
+          "before": 0.07760438323020935,
+          "after": 0.02058333531022072,
+          "delta": -0.05702104791998863,
+          "beforeRank": 5,
+          "afterRank": 15
+        },
+        {
+          "tokenId": 428,
+          "before": 0.02570551261305809,
+          "after": 0.05434039607644081,
+          "delta": 0.02863488346338272,
+          "beforeRank": 12,
+          "afterRank": 4
+        },
+        {
+          "tokenId": 591,
+          "before": 0.12945398688316345,
+          "after": 0.06362622231245041,
+          "delta": -0.06582776457071304,
+          "beforeRank": 1,
+          "afterRank": 3
+        },
+        {
+          "tokenId": 627,
+          "before": 0.09293016791343689,
+          "after": 0.04605713114142418,
+          "delta": -0.04687303677201271,
+          "beforeRank": 4,
+          "afterRank": 7
+        },
+        {
+          "tokenId": 917,
+          "before": 0.09686487168073654,
+          "after": 0.0655335932970047,
+          "delta": -0.03133127838373184,
+          "beforeRank": 2,
+          "afterRank": 2
+        }
+      ]
+    },
+    {
+      "plan": {
+        "source": {
+          "branch": "edited",
+          "step": 7,
+          "prefix": [
+            0,
+            733,
+            508,
+            261,
+            673,
+            471,
+            49,
+            317,
+            409,
+            268,
+            326,
+            329,
+            312,
+            49,
+            317,
+            544
+          ],
+          "choice": {
+            "tokenId": 343,
+            "probability": 0.91471928358078
+          },
+          "settings": {
+            "temperature": 0,
+            "topP": 0.9,
+            "seed": 42,
+            "maxTokens": 16
+          },
+          "edit": {
+            "id": "continuation-head",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          }
+        },
+        "edit": {
+          "id": "fork-head",
+          "kind": "head.scale",
+          "layer": 1,
+          "head": 1,
+          "factor": 0,
+          "tokens": {
+            "kind": "all"
+          }
+        },
+        "duration": "continuation",
+        "maxTokens": 12
+      },
+      "beforeChoice": 343,
+      "afterChoice": 343,
+      "rows": [
+        {
+          "tokenId": 512,
+          "before": 0.014479110948741436,
+          "after": 0.005599464289844036,
+          "delta": -0.0088796466588974,
+          "beforeRank": 2,
+          "afterRank": 4
+        },
+        {
+          "tokenId": 265,
+          "before": 0.011450730264186859,
+          "after": 0.010336017236113548,
+          "delta": -0.0011147130280733109,
+          "beforeRank": 3,
+          "afterRank": 3
+        },
+        {
+          "tokenId": 557,
+          "before": 0.006105506792664528,
+          "after": 0.0035721545573323965,
+          "delta": -0.0025333522353321314,
+          "beforeRank": 6,
+          "afterRank": 5
+        },
+        {
+          "tokenId": 406,
+          "before": 0.007310172077268362,
+          "after": 0.0033623662311583757,
+          "delta": -0.003947805846109986,
+          "beforeRank": 5,
+          "afterRank": 6
+        },
+        {
+          "tokenId": 343,
+          "before": 0.91471928358078,
+          "after": 0.9394802451133728,
+          "delta": 0.024760961532592773,
+          "beforeRank": 1,
+          "afterRank": 1
+        },
+        {
+          "tokenId": 413,
+          "before": 0.010003088973462582,
+          "after": 0.010508883744478226,
+          "delta": 0.0005057947710156441,
+          "beforeRank": 4,
+          "afterRank": 2
+        }
+      ]
+    },
+    {
+      "plan": {
+        "source": {
+          "branch": "edited",
+          "step": 7,
+          "prefix": [
+            0,
+            733,
+            508,
+            261,
+            673,
+            471,
+            49,
+            317,
+            409,
+            268,
+            326,
+            329,
+            312,
+            49,
+            317,
+            544
+          ],
+          "choice": {
+            "tokenId": 343,
+            "probability": 0.91471928358078
+          },
+          "settings": {
+            "temperature": 0,
+            "topP": 0.9,
+            "seed": 42,
+            "maxTokens": 16
+          },
+          "edit": {
+            "id": "continuation-head",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          }
+        },
+        "edit": {
+          "id": "fork-head",
+          "kind": "head.scale",
+          "layer": 0,
+          "head": 0,
+          "factor": 1,
+          "tokens": {
+            "kind": "all"
+          }
+        },
+        "duration": "continuation",
+        "maxTokens": 12
+      },
+      "beforeChoice": 343,
+      "afterChoice": 343,
+      "rows": [
+        {
+          "tokenId": 512,
+          "before": 0.014479110948741436,
+          "after": 0.0004130590532440692,
+          "delta": -0.014066051895497367,
+          "beforeRank": 2,
+          "afterRank": 4
+        },
+        {
+          "tokenId": 265,
+          "before": 0.011450730264186859,
+          "after": 0.0009971270337700844,
+          "delta": -0.010453603230416775,
+          "beforeRank": 3,
+          "afterRank": 3
+        },
+        {
+          "tokenId": 339,
+          "before": 0.0013478476321324706,
+          "after": 0.0010928460396826267,
+          "delta": -0.0002550015924498439,
+          "beforeRank": 14,
+          "afterRank": 2
+        },
+        {
+          "tokenId": 406,
+          "before": 0.007310172077268362,
+          "after": 0.000297187187243253,
+          "delta": -0.007012984890025109,
+          "beforeRank": 5,
+          "afterRank": 5
+        },
+        {
+          "tokenId": 343,
+          "before": 0.91471928358078,
+          "after": 0.9947056174278259,
+          "delta": 0.0799863338470459,
+          "beforeRank": 1,
+          "afterRank": 1
+        },
+        {
+          "tokenId": 413,
+          "before": 0.010003088973462582,
+          "after": 0.00011486918083392084,
+          "delta": -0.00988821979262866,
+          "beforeRank": 4,
+          "afterRank": 12
+        }
+      ]
+    },
+    {
+      "plan": {
+        "source": {
+          "branch": "edited",
+          "step": 7,
+          "prefix": [
+            0,
+            733,
+            508,
+            261,
+            673,
+            471,
+            49,
+            317,
+            409,
+            268,
+            326,
+            329,
+            312,
+            49,
+            317,
+            544
+          ],
+          "choice": {
+            "tokenId": 343,
+            "probability": 0.91471928358078
+          },
+          "settings": {
+            "temperature": 0,
+            "topP": 0.9,
+            "seed": 42,
+            "maxTokens": 16
+          },
+          "edits": [
+            {
+              "id": "fork-head",
+              "kind": "head.scale",
+              "layer": 0,
+              "head": 0,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "continuationEdits": [
+            {
+              "id": "fork-head",
+              "kind": "head.scale",
+              "layer": 0,
+              "head": 0,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ]
+        },
+        "edit": {
+          "id": "fork-1-head",
+          "kind": "head.scale",
+          "layer": 1,
+          "head": 1,
+          "factor": 0,
+          "tokens": {
+            "kind": "all"
+          }
+        },
+        "duration": "continuation",
+        "maxTokens": 6
+      },
+      "beforeChoice": 343,
+      "afterChoice": 343,
+      "rows": [
+        {
+          "tokenId": 512,
+          "before": 0.014479110948741436,
+          "after": 0.005599464289844036,
+          "delta": -0.0088796466588974,
+          "beforeRank": 2,
+          "afterRank": 4
+        },
+        {
+          "tokenId": 265,
+          "before": 0.011450730264186859,
+          "after": 0.010336017236113548,
+          "delta": -0.0011147130280733109,
+          "beforeRank": 3,
+          "afterRank": 3
+        },
+        {
+          "tokenId": 557,
+          "before": 0.006105506792664528,
+          "after": 0.0035721545573323965,
+          "delta": -0.0025333522353321314,
+          "beforeRank": 6,
+          "afterRank": 5
+        },
+        {
+          "tokenId": 406,
+          "before": 0.007310172077268362,
+          "after": 0.0033623662311583757,
+          "delta": -0.003947805846109986,
+          "beforeRank": 5,
+          "afterRank": 6
+        },
+        {
+          "tokenId": 343,
+          "before": 0.91471928358078,
+          "after": 0.9394802451133728,
+          "delta": 0.024760961532592773,
+          "beforeRank": 1,
+          "afterRank": 1
+        },
+        {
+          "tokenId": 413,
+          "before": 0.010003088973462582,
+          "after": 0.010508883744478226,
+          "delta": 0.0005057947710156441,
+          "beforeRank": 4,
+          "afterRank": 2
+        }
+      ]
+    },
+    {
+      "plan": {
+        "source": {
+          "branch": "edited",
+          "step": 6,
+          "prefix": [
+            0,
+            733,
+            508,
+            261,
+            673,
+            471,
+            49,
+            317,
+            409,
+            268,
+            326,
+            329,
+            312,
+            49,
+            317
+          ],
+          "choice": {
+            "tokenId": 544,
+            "probability": 0.07098884135484695
+          },
+          "settings": {
+            "temperature": 0,
+            "topP": 0.9,
+            "seed": 42,
+            "maxTokens": 16
+          },
+          "edits": [
+            {
+              "id": "fork-head",
+              "kind": "head.scale",
+              "layer": 0,
+              "head": 0,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "continuationEdits": []
+        },
+        "edit": {
+          "id": "fork-1-head",
+          "kind": "head.scale",
+          "layer": 1,
+          "head": 1,
+          "factor": 0,
+          "tokens": {
+            "kind": "all"
+          }
+        },
+        "duration": "prediction",
+        "maxTokens": 6
+      },
+      "beforeChoice": 544,
+      "afterChoice": 386,
+      "rows": [
+        {
+          "tokenId": 544,
+          "before": 0.07098884135484695,
+          "after": 0.06758624315261841,
+          "delta": -0.003402598202228546,
+          "beforeRank": 1,
+          "afterRank": 2
+        },
+        {
+          "tokenId": 386,
+          "before": 0.04963666945695877,
+          "after": 0.07663281261920929,
+          "delta": 0.02699614316225052,
+          "beforeRank": 5,
+          "afterRank": 1
+        },
+        {
+          "tokenId": 428,
+          "before": 0.05434039607644081,
+          "after": 0.04651141166687012,
+          "delta": -0.007828984409570694,
+          "beforeRank": 4,
+          "afterRank": 5
+        },
+        {
+          "tokenId": 591,
+          "before": 0.06362622231245041,
+          "after": 0.055462855845689774,
+          "delta": -0.008163366466760635,
+          "beforeRank": 3,
+          "afterRank": 4
+        },
+        {
+          "tokenId": 917,
+          "before": 0.0655335932970047,
+          "after": 0.06667931377887726,
+          "delta": 0.0011457204818725586,
+          "beforeRank": 2,
+          "afterRank": 3
+        }
+      ]
+    },
+    {
+      "plan": {
+        "source": {
+          "branch": "edited",
+          "step": 9,
+          "prefix": [
+            0,
+            733,
+            508,
+            261,
+            673,
+            471,
+            49,
+            317,
+            409,
+            268,
+            326,
+            329,
+            312,
+            49,
+            317,
+            544,
+            343,
+            360
+          ],
+          "choice": {
+            "tokenId": 47,
+            "probability": 0.7070088982582092
+          },
+          "settings": {
+            "temperature": 0,
+            "topP": 0.9,
+            "seed": 42,
+            "maxTokens": 16
+          },
+          "edits": [
+            {
+              "id": "fork-head",
+              "kind": "head.scale",
+              "layer": 0,
+              "head": 0,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            },
+            {
+              "id": "fork-1-head",
+              "kind": "head.scale",
+              "layer": 1,
+              "head": 1,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "continuationEdits": [
+            {
+              "id": "fork-head",
+              "kind": "head.scale",
+              "layer": 0,
+              "head": 0,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            },
+            {
+              "id": "fork-1-head",
+              "kind": "head.scale",
+              "layer": 1,
+              "head": 1,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ]
+        },
+        "edit": {
+          "id": "fork-2-head",
+          "kind": "head.scale",
+          "layer": 2,
+          "head": 2,
+          "factor": 0,
+          "tokens": {
+            "kind": "all"
+          }
+        },
+        "duration": "continuation",
+        "maxTokens": 6
+      },
+      "beforeChoice": 47,
+      "afterChoice": 47,
+      "rows": [
+        {
+          "tokenId": 512,
+          "before": 0.021353544667363167,
+          "after": 0.021767687052488327,
+          "delta": 0.0004141423851251602,
+          "beforeRank": 4,
+          "afterRank": 5
+        },
+        {
+          "tokenId": 268,
+          "before": 0.006437873467803001,
+          "after": 0.11827636510133743,
+          "delta": 0.11183849163353443,
+          "beforeRank": 9,
+          "afterRank": 3
+        },
+        {
+          "tokenId": 557,
+          "before": 0.13937652111053467,
+          "after": 0.21928510069847107,
+          "delta": 0.0799085795879364,
+          "beforeRank": 2,
+          "afterRank": 2
+        },
+        {
+          "tokenId": 47,
+          "before": 0.7070088982582092,
+          "after": 0.38733646273612976,
+          "delta": -0.31967243552207947,
+          "beforeRank": 1,
+          "afterRank": 1
+        },
+        {
+          "tokenId": 406,
+          "before": 0.017694272100925446,
+          "after": 0.018657851964235306,
+          "delta": 0.0009635798633098602,
+          "beforeRank": 5,
+          "afterRank": 6
+        },
+        {
+          "tokenId": 413,
+          "before": 0.030230436474084854,
+          "after": 0.04559547081589699,
+          "delta": 0.015365034341812134,
+          "beforeRank": 3,
+          "afterRank": 4
+        }
+      ]
+    }
+  ]
+}

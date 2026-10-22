@@ -7,9 +7,11 @@ import { firstForkDifference, selectForkToken, StoryFork as Session, type ForkDu
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import { useStoryWorkspace } from './StoryWorkspace';
+import type { ModelClient as AnalysisClient } from '../workers/client';
+import { BranchProbabilities } from './BranchProbabilities';
 import { StoryTokenInspector } from './StoryTokenInspector';
 
-interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; head: { layer: number; head: number }; disabled: boolean; onStart: () => void; onInspectChange: (active: boolean) => void; depth: number; parentId?: string }
+interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; head: { layer: number; head: number }; disabled: boolean; onStart: () => void; onInspectChange: (active: boolean) => void; depth: number; parentId?: string; analysisClient?: AnalysisClient }
 export function StoryFork(props: Props) {
   const workspace = useStoryWorkspace();
   const [savedNode] = useState(() => {
@@ -117,6 +119,7 @@ export function StoryFork(props: Props) {
     {error && <p role="alert" className="error">{error}</p>}
     {plan && frame && <>
       <p className="hint" data-testid="fork-captured-edit">Comparing Layer {plan.edit.layer + 1} · Head {plan.edit.head + 1} · {plan.edit.factor.toFixed(2)}× · {plan.duration === 'prediction' ? 'selected prediction only' : 'every prediction from this point'}. Source: {plan.source.branch} story, step {plan.source.step}.</p>
+      <BranchProbabilities plan={plan} tokenizer={props.tokenizer} client={props.analysisClient} />
       <p className="fork-status" role="status">{busy ? 'Comparing · one token at a time…' : finished ? 'Branch comparison complete.' : `Comparison paused after ${frame.step} ${frame.step === 1 ? 'step' : 'steps'}.`}</p>
       <p className="fork-difference" role="status">{difference === null ? frame.step ? 'The generated tokens match so far. A head edit need not change the story.' : 'Waiting for the first pair of tokens.' : `First different token at story step ${plan.source.step + difference}. Highlighted tokens differ at the same generation step.`}</p>
       <div className="continuation-stories paired-stories">{story(frame.original, 'Keep source settings', frame.edited!, 'original')}{story(frame.edited!, 'With head change', frame.original, 'edited')}</div>

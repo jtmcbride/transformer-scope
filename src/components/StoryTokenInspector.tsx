@@ -99,7 +99,7 @@ export function StoryTokenInspector({ selection, manifest, tokenizer, count, onC
         onSelect={setNode} history={{ edited: edits.length > 0 }} />
     </>}
     </>}
-    <StoryFork source={selection} manifest={manifest} tokenizer={tokenizer} head={{ layer, head }} disabled={!result || childActive} onStart={onForkStart} onInspectChange={setChildActive} depth={depth} parentId={parentId} />
+    <StoryFork source={selection} manifest={manifest} tokenizer={tokenizer} head={{ layer, head }} disabled={!result || childActive} onStart={onForkStart} onInspectChange={setChildActive} depth={depth} parentId={parentId} analysisClient={result?.client} />
     {!childActive && result && <>
       {weights?.error && <p role="alert" className="error">Could not read attention: {weights.error}</p>}
       <div className="historical-node"><p className="eyebrow">Inside the selected stage</p>

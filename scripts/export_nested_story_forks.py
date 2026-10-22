@@ -15,8 +15,9 @@ def edits_at(plan, changed, index):
         inherited = source.get('edits', [source['edit']] if 'edit' in source else [])
     if not changed or plan['duration'] == 'prediction' and index > 0:
         return copy.deepcopy(inherited)
-    edit = plan['edit']
-    return copy.deepcopy([item for item in inherited if (item['layer'], item['head']) != (edit['layer'], edit['head'])] + [edit])
+    edits = [plan['edit']] + plan.get('additionalEdits', [])
+    keys = {(edit['layer'], edit['head']) for edit in edits}
+    return copy.deepcopy([item for item in inherited if (item['layer'], item['head']) not in keys] + edits)
 
 
 def main():

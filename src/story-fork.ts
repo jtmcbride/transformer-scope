@@ -2,14 +2,28 @@ import { StoryContinuation, selectionEdits, type StorySelection, type StoryFrame
 import { requireInput, validateInterventions, validateTokens, type HeadScaleIntervention, type ModelConfig } from './engine/contracts';
 
 export type ForkDuration = 'continuation' | 'prediction';
-export interface ForkPlan { source: StorySelection; edit: HeadScaleIntervention; duration: ForkDuration; maxTokens: number }
+export interface ForkPlan { source: StorySelection; edit: HeadScaleIntervention; additionalEdits?: HeadScaleIntervention[]; duration: ForkDuration; maxTokens: number }
 export type ForkPredict = (tokens: number[], edits: HeadScaleIntervention[]) => Promise<ArrayLike<number>>;
+
+/** The primary edit remains the marker for a paired continuation and supports older records. */
+export function proposedEdits(plan: ForkPlan): HeadScaleIntervention[] {
+  requireInput(plan.additionalEdits === undefined || Array.isArray(plan.additionalEdits) && plan.additionalEdits.length <= 1, 'Choose at most two different heads.');
+  const edits = [plan.edit, ...(plan.additionalEdits ?? [])];
+  requireInput(edits.every(edit => edit?.kind === 'head.scale' && edit.tokens?.kind === 'all'), 'Forks use all-position head edits.');
+  requireInput(new Set(edits.map(edit => `${edit.layer}:${edit.head}`)).size === edits.length, 'Choose two different heads, with one strength per head.');
+  return edits;
+}
+
+export function forkEditLabel(plan: ForkPlan): string {
+  return proposedEdits(plan).map(edit => `Layer ${edit.layer + 1} · Head ${edit.head + 1} · ${edit.factor.toFixed(2)}×`).join(' + ');
+}
 
 /** Replace a captured edit on the same head; retain edits on other heads. Never multiply overlapping edits. */
 export function forkEdits(plan: ForkPlan, changed: boolean, step: number): HeadScaleIntervention[] {
   const inherited = selectionEdits(plan.source, step > 0);
   if (!changed || plan.duration === 'prediction' && step > 0) return structuredClone(inherited);
-  return structuredClone([...inherited.filter(edit => edit.layer !== plan.edit.layer || edit.head !== plan.edit.head), plan.edit]);
+  const proposed = proposedEdits(plan);
+  return structuredClone([...inherited.filter(edit => !proposed.some(next => edit.layer === next.layer && edit.head === next.head)), ...proposed]);
 }
 
 /** Both continuations start before the selected output, with the original sampling counter. */

@@ -8,10 +8,12 @@ import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import { useStoryWorkspace } from './StoryWorkspace';
 import type { ModelClient as AnalysisClient } from '../workers/client';
+import { StoryHeadScan } from './StoryHeadScan';
+import type { HeadScaleIntervention } from '../engine/contracts';
 import { BranchProbabilities } from './BranchProbabilities';
 import { StoryTokenInspector } from './StoryTokenInspector';
 
-interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; head: { layer: number; head: number }; disabled: boolean; onStart: () => void; onInspectChange: (active: boolean) => void; depth: number; parentId?: string; analysisClient?: AnalysisClient }
+interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; head: { layer: number; head: number }; disabled: boolean; onStart: () => void; onInspectChange: (active: boolean) => void; depth: number; parentId?: string; analysisClient?: AnalysisClient; onChooseHead: (head: { layer: number; head: number }) => void }
 export function StoryFork(props: Props) {
   const workspace = useStoryWorkspace();
   const [savedNode] = useState(() => {
@@ -21,11 +23,14 @@ export function StoryFork(props: Props) {
   });
   const nodeId = useRef(savedNode?.id ?? '');
   const initialChild = workspace?.data.nodes.find(n => savedNode && n.parentId === savedNode.id && n.id === workspace.data.route[props.depth + 1]);
+  const [scanning, setScanning] = useState(false), [preview, setPreview] = useState<ForkPlan | null>(null);
   const [factor, setFactor] = useState(0), [duration, setDuration] = useState<ForkDuration>('continuation');
   const [limit, setLimit] = useState(Math.min(16, props.manifest.config.contextLength - props.source.prefix.length));
   const [plan, setPlan] = useState<ForkPlan | null>(savedNode?.plan ?? null), [frame, setFrame] = useState<StoryFrame | null>(savedNode?.frame ?? null);
   const [busy, setBusy] = useState(false), [error, setError] = useState<string | null>(null);
   const [selection, setSelection] = useState<StorySelection | null>(initialChild?.plan.source ?? null);
+  const draftHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { if (preview) { draftHeading.current?.focus({ preventScroll: true }); draftHeading.current?.scrollIntoView({ block: 'start' }); } }, [preview]);
   const panel = useRef<HTMLElement>(null), returnToken = useRef(initialChild && savedNode ? `${initialChild.plan.source.branch}:${initialChild.plan.source.step - savedNode.plan.source.step}` : '');
   const returning = useRef(false);
   const session = useRef<Session | null>(null), worker = useRef<ModelClient | null>(null), loaded = useRef<ModelClient | null>(null);
@@ -48,19 +53,19 @@ export function StoryFork(props: Props) {
   }, [selection]);
   function inspect(branch: StorySelection['branch'], index: number) {
     if (!frame || !plan) return;
-    stop(); props.onStart(); returnToken.current = `${branch}:${index}`;
+    stop(); setScanning(false); props.onStart(); returnToken.current = `${branch}:${index}`;
     setSelection(selectForkToken(plan, frame, branch, index)); props.onInspectChange(true);
   }
   function back() { workspace?.focus(nodeId.current); returning.current = true; setSelection(null); props.onInspectChange(false); }
   function clear() { stop(); session.current = null; setPlan(null); setFrame(null); setError(null); }
   async function run(play: boolean, fresh = false) {
-    if (flight.current || props.disabled) return;
+    if (flight.current || props.disabled || scanning) return;
     setError(null);
     try {
       if (fresh) {
         if ((workspace?.data.nodes.length ?? 0) >= 500) throw new Error('This workspace has reached 500 comparisons. Download it and reset the story to begin another.');
         const next = new Session({ source: props.source, edit: { id: props.depth ? `fork-${props.depth}-head` : 'fork-head', kind: 'head.scale', ...props.head, factor, tokens: { kind: 'all' } }, duration, maxTokens: limit }, props.manifest.config);
-        stop(); nodeId.current = crypto.randomUUID(); session.current = next; setPlan(next.plan); setFrame(next.frame); workspace?.saveNode({ id: nodeId.current, parentId: props.parentId ?? null, plan: next.plan, frame: next.frame });
+        setPreview(null); stop(); nodeId.current = crypto.randomUUID(); session.current = next; setPlan(next.plan); setFrame(next.frame); workspace?.saveNode({ id: nodeId.current, parentId: props.parentId ?? null, plan: next.plan, frame: next.frame });
       }
     } catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)); return; }
     const active = session.current;
@@ -102,8 +107,13 @@ export function StoryFork(props: Props) {
   if (selection && plan && frame) return <StoryTokenInspector key={`${selection.branch}:${selection.step}`} selection={selection}
     manifest={props.manifest} tokenizer={props.tokenizer} startStep={plan.source.step} depth={props.depth + 1} parentId={nodeId.current}
     count={frame[selection.branch]!.choices.length} onClose={back} onNavigate={index => inspect(selection.branch, index)} onForkStart={props.onStart} />;
+  function chooseScan(edit: HeadScaleIntervention) {
+    props.onChooseHead({ layer: edit.layer, head: edit.head }); setFactor(edit.factor);
+    setPreview({ source: props.source, edit, duration, maxTokens: limit });
+  }
   return <section ref={panel} className="story-fork" aria-label="Branch from selected token">
-    <p className="eyebrow">What if this head worked differently?</p><h3>Continue two stories from step {props.source.step}.</h3>
+    <StoryHeadScan source={props.source} manifest={props.manifest} tokenizer={props.tokenizer} disabled={busy || props.disabled} onStart={() => { stop(); props.onStart(); }} onChoose={chooseScan} onBusy={setScanning} />
+    <p className="eyebrow">What if this head worked differently?</p><h3 ref={draftHeading} tabIndex={-1}>Continue two stories from step {props.source.step}.</h3>
     <p>Both paths start with the same text above and regenerate the selected token. Your existing story stays intact. Choose a head in the flow, then set its strength here.</p>
     <div className="fork-head-heading"><strong>Layer {props.head.layer + 1} · Head {props.head.head + 1}</strong><span>Draft change for a new comparison</span></div>
     <div className="continuation-settings">
@@ -113,9 +123,10 @@ export function StoryFork(props: Props) {
       <label>New tokens<input aria-label="Branch new-token limit" type="number" min="1" max={props.manifest.config.contextLength - props.source.prefix.length} value={limit} disabled={busy} onChange={event => setLimit(Number(event.target.value))} /></label>
     </div>
     <p className="hint">Scales this head at all input positions {duration === 'prediction' ? 'for the selected prediction, then restores the source settings.' : 'for each prediction from here onward.'} Both paths keep the recorded sampling settings and step-by-step draws.{selectionEdits(props.source).length > 0 && ' The reference keeps the captured edits and their expiry. Your change replaces the same head or adds another head.'}</p>
-    <div className="continuation-actions"><button type="button" className="primary" disabled={busy || props.disabled} onClick={() => void run(true, true)}>{plan ? 'Start new branch comparison' : 'Compare from this token'}</button>
-      {plan && <><button type="button" disabled={busy || finished || props.disabled} onClick={() => void run(false)}>Step comparison</button><button type="button" disabled={busy || finished || props.disabled} onClick={() => void run(true)}>Play comparison</button><button type="button" disabled={!busy} onClick={stop}>Stop comparison</button><button type="button" onClick={clear}>Clear comparison</button><button type="button" disabled={busy} onClick={download}>Download branch comparison</button></>}
+    <div className="continuation-actions"><button type="button" className="primary" disabled={busy || scanning || props.disabled} onClick={() => void run(true, true)}>{plan ? 'Start new branch comparison' : 'Compare from this token'}</button>
+      {plan && <><button type="button" disabled={busy || scanning || finished || props.disabled} onClick={() => void run(false)}>Step comparison</button><button type="button" disabled={busy || scanning || finished || props.disabled} onClick={() => void run(true)}>Play comparison</button><button type="button" disabled={!busy} onClick={stop}>Stop comparison</button><button type="button" onClick={clear}>Clear comparison</button><button type="button" disabled={busy} onClick={download}>Download branch comparison</button></>}
     </div>
+    {preview && preview.edit.layer === props.head.layer && preview.edit.head === props.head.head && preview.edit.factor === factor && <BranchProbabilities plan={preview} tokenizer={props.tokenizer} client={props.analysisClient} label="Scanned head probability preview" />}
     {error && <p role="alert" className="error">{error}</p>}
     {plan && frame && <>
       <p className="hint" data-testid="fork-captured-edit">Comparing Layer {plan.edit.layer + 1} · Head {plan.edit.head + 1} · {plan.edit.factor.toFixed(2)}× · {plan.duration === 'prediction' ? 'selected prediction only' : 'every prediction from this point'}. Source: {plan.source.branch} story, step {plan.source.step}.</p>

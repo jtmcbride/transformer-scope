@@ -83,3 +83,15 @@
 .branch-probability-bars i { height:5px; display:block; background:#9ca9bd; }
 .branch-probability-bars i + i { background:#7963cb; }
 @media(max-width:700px) { .branch-probabilities { padding:10px; } }
+.story-head-scan { margin:0 0 24px; padding-bottom:22px; border-bottom:1px solid #ddd3f5; }
+.story-head-scan p { font-size:13px; line-height:1.6; }
+.story-head-scan select { max-width:100%; padding:8px; border:1px solid #dfe4ee; border-radius:6px; background:white; }
+.story-head-scan label { display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; }
+.head-scan-results { padding-left:24px; }
+.head-scan-results li { padding:12px; border-bottom:1px solid #e5e8ef; font-size:12px; }
+.head-scan-results li > div { display:inline-block; min-width:65%; vertical-align:middle; }
+.head-scan-results strong { font-size:13px; }
+.head-scan-results p { margin:6px 0; }
+.head-scan-results small { color:#606c82; }
+.head-scan-results button { margin:8px 0; padding:9px; }
+.story-head-scan progress { width:100%; accent-color:#7963cb; }

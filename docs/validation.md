@@ -264,3 +264,8 @@ A new engine test (85 total) covers whole-tree round trips, parent-source valida
 ### Branch-point probability explanations
 
 Two new engine cases (87 total) verify raw softmax versus generation eligibility, stable ranks/ties, selected-token inclusion, seeded choices, identity edits, and seven independent same-prefix PyTorch comparisons with zero retained tensors. `scripts/export_branch_probabilities.py` exports top alternatives, ranks, and raw probability changes for the original, inherited, replaced, nested, and temporary head-edit cases. Existing browser tests now check every displayed reference row, sampled-choice language, and recomputation after workspace reload. The sixth hosted check compares the published before/after values to the independent fixture. Browser case counts remain 66 per browser; existing numerical and model-quality gates are unchanged.
+
+
+### Selected-token head scan
+
+Two new engine cases (89 total) compare all 48 trials in two independent PyTorch contexts (unedited and two inherited head edits), including probabilities, ranks, choices, tensor cleanup, deterministic sorting, source immutability, and cancellation before late publication. Two browser cases (68 per browser) verify all original-context rows, sorting, flow/draft selection, probability preview, branch choices, mobile containment, immediate cancellation, inherited edits, and navigation cleanup. The sixth hosted check scans a nested token, verifies the captured-head Normal result, selects it, and branches through the existing saved-workspace flow. No numerical tolerances or checkpoint-quality criteria change.

@@ -1,0 +1,1562 @@
+{
+  "modelRevision": "23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6",
+  "cases": [
+    {
+      "source": {
+        "branch": "original",
+        "step": 6,
+        "prefix": [
+          0,
+          733,
+          508,
+          261,
+          673,
+          471,
+          49,
+          317,
+          409,
+          268,
+          326,
+          329,
+          312,
+          49,
+          317
+        ],
+        "choice": {
+          "tokenId": 591,
+          "probability": 0.12945398688316345
+        },
+        "settings": {
+          "temperature": 0,
+          "topP": 0.9,
+          "seed": 42,
+          "maxTokens": 16
+        }
+      },
+      "rows": [
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.06362622231245041,
+          "rank": 3,
+          "choice": 544
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.05876309797167778,
+          "rank": 5,
+          "choice": 917
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.03728511556982994,
+          "rank": 10,
+          "choice": 544
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 1,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 1,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.21204738318920135,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.0003422234149184078,
+          "rank": 44,
+          "choice": 366
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.04780161380767822,
+          "rank": 6,
+          "choice": 917
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 3,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.14219000935554504,
+          "rank": 2,
+          "choice": 917
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 3,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 3,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.048321813344955444,
+          "rank": 9,
+          "choice": 583
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.19386444985866547,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 0,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.05537537857890129,
+          "rank": 5,
+          "choice": 1527
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.09928657114505768,
+          "rank": 4,
+          "choice": 917
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 1,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 1,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.1669769287109375,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.1617545485496521,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 2,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 2,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.06324043869972229,
+          "rank": 4,
+          "choice": 583
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 3,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12004858255386353,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 3,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 3,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.13052710890769958,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.10168221592903137,
+          "rank": 2,
+          "choice": 583
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 0,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.11283250898122787,
+          "rank": 4,
+          "choice": 652
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.22114557027816772,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 1,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 1,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.04698962718248367,
+          "rank": 6,
+          "choice": 544
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.11794338375329971,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 2,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 2,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.11782415211200714,
+          "rank": 2,
+          "choice": 544
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 3,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.07646220177412033,
+          "rank": 4,
+          "choice": 652
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 3,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 3,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.1749124377965927,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12879595160484314,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 0,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.1240612342953682,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.09828221052885056,
+          "rank": 2,
+          "choice": 627
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 1,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 1,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.14972160756587982,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.07517136633396149,
+          "rank": 3,
+          "choice": 544
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 2,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 2,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.19223922491073608,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 3,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.13687804341316223,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 3,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.12945398688316345,
+          "rank": 1,
+          "choice": 591
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 3,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.1076468825340271,
+          "rank": 1,
+          "choice": 591
+        }
+      ]
+    },
+    {
+      "source": {
+        "branch": "edited",
+        "step": 9,
+        "prefix": [
+          0,
+          733,
+          508,
+          261,
+          673,
+          471,
+          49,
+          317,
+          409,
+          268,
+          326,
+          329,
+          312,
+          49,
+          317,
+          544,
+          343,
+          360
+        ],
+        "choice": {
+          "tokenId": 47,
+          "probability": 0.7070088982582092
+        },
+        "settings": {
+          "temperature": 0,
+          "topP": 0.9,
+          "seed": 42,
+          "maxTokens": 16
+        },
+        "edits": [
+          {
+            "id": "fork-head",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          {
+            "id": "fork-1-head",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          }
+        ],
+        "continuationEdits": [
+          {
+            "id": "fork-head",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          {
+            "id": "fork-1-head",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          }
+        ]
+      },
+      "rows": [
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.8987282514572144,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.9640234112739563,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.5860211253166199,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 1,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 1,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.8182424902915955,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6192114353179932,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6643292903900146,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 3,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6641080975532532,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 3,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 3,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6193342208862305,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.5361795425415039,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 0,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7860064506530762,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 1,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7217422723770142,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 1,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7108187079429626,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.8464056849479675,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 2,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 2,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.4997836649417877,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 3,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6576821804046631,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 3,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 1,
+            "head": 3,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7278290390968323,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6392925977706909,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 0,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7640423774719238,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7871887683868408,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 1,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 1,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6196205019950867,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.38733646273612976,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 2,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 2,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.8489100933074951,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 3,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6808957457542419,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 3,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 2,
+            "head": 3,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.710787296295166,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 0,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.8402680158615112,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 0,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.5627868175506592,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 1,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.733165979385376,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 1,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 1,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6770835518836975,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.5801473259925842,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 2,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 2,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.741723895072937,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 3,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6917275786399841,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 3,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.7070088982582092,
+          "rank": 1,
+          "choice": 47
+        },
+        {
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 3,
+            "head": 3,
+            "factor": 2,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "after": 0.6879163980484009,
+          "rank": 1,
+          "choice": 47
+        }
+      ]
+    }
+  ]
+}

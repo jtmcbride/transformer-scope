@@ -208,6 +208,16 @@ test('hosted continuation generates the independent original and edited story to
   await fork.getByRole('button', { name: /^Inspect with head change token 8:/ }).click();
   await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
   await expect(inspection).toContainText('Comparison 1 · With head change story · step 8');
+  const scan = page.getByRole('region', { name: 'Scan heads at selected token', exact: true });
+  await scan.getByRole('button', { name: 'Scan all heads', exact: true }).click();
+  await expect(scan.getByTestId('head-scan-status')).toHaveText('Scan complete. 48 / 48 changes measured.', { timeout: 60_000 });
+  await scan.getByRole('button', { name: 'Show all 48 results', exact: true }).click();
+  const identityRow = scan.locator('li[data-scan-layer="0"][data-scan-head="0"][data-scan-factor="1"]');
+  expect(parseFloat(await identityRow.getByTestId('scan-after').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
+  await scan.getByRole('button', { name: 'Use layer 1 head 1 strength 1', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Scanned head probability preview', exact: true }).getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
+  await scan.getByRole('button', { name: 'Show strongest eight', exact: true }).click();
+  await scan.screenshot({ path: testInfo.outputPath('hosted-head-scan.png') });
   expect(parseFloat(await inspection.getByTestId('selected-token-probability').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
   await fork.getByRole('button', { name: 'Normal branch head', exact: true }).click();
   await fork.getByLabel('Branch new-token limit').fill('3');

@@ -368,3 +368,8 @@ Implemented independent comparison records, a parent-linked branch map, local au
 ## Branch-point probability explanation slice
 
 Implemented the selected token's before/after raw probability, signed percentage-point change, rank movement, strongest alternatives, and actual greedy/seeded choices for each captured head edit. Compare on the shared pre-token prefix with inherited source settings intact. Reuse the active inspection worker and derive reports on saved-workspace reopening. Verify ranks/probabilities against seven independent PyTorch cases. Further educational evaluation and checkpoint-quality work remain follow-up items.
+
+
+## Selected-token head scan slice
+
+Implemented 48 mute/normal/amplify trials on the selected token's shared prefix, ranked by raw probability effect. Preserve inherited source edits, reuse the recorded sampling draw, show progress/partial results, and terminate scan work on cancellation or navigation. Selecting a result fills the head-strength draft, highlights the head in the flow, and opens the probability preview before branching. Independent PyTorch scans cover original and multiple-inherited-head contexts; browser and hosted checks verify scan-to-branch behavior. Scan result persistence and broader checkpoint quality evaluation remain separate follow-up work.

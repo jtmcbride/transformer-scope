@@ -7,7 +7,7 @@ import type { ModelClient } from '../workers/client';
 import { predictStory } from '../workers/story-runtime';
 const percent = (n: number) => `${(n * 100).toFixed(4)}%`;
 const change = (n: number) => `${n > 0 ? '+' : ''}${(n * 100).toFixed(4)} percentage points`;
-export function BranchProbabilities({ plan, tokenizer, client }: { plan: ForkPlan; tokenizer: BpeDocument; client?: ModelClient }) {
+export function BranchProbabilities({ plan, tokenizer, client, label: regionLabel = 'Head change probabilities' }: { plan: ForkPlan; tokenizer: BpeDocument; client?: ModelClient; label?: string }) {
   const [report, setReport] = useState<{ plan: ForkPlan; client: ModelClient; value: Report } | null>(null), [error, setError] = useState(''), [retry, setRetry] = useState(0);
   useEffect(() => {
     if (!client) return;
@@ -33,8 +33,8 @@ export function BranchProbabilities({ plan, tokenizer, client }: { plan: ForkPla
       <div className="branch-probability-bars" aria-hidden="true"><i style={{ width: percent(r.before) }} /><i style={{ width: percent(r.after) }} /></div>
     </li>;
   }
-  return <section className="branch-probabilities" aria-label="Head change probabilities">
-    <p className="eyebrow">At the point where the story can branch</p><h3>How this head change shifts the prediction</h3>
+  return <section className="branch-probabilities" aria-label={regionLabel}>
+    <p className="eyebrow">{regionLabel === 'Scanned head probability preview' ? 'Preview for a new comparison' : 'At the point where the story can branch'}</p><h3>How this head change shifts the prediction</h3>
     <p>Story step {plan.source.step} · Layer {plan.edit.layer + 1}, Head {plan.edit.head + 1} · {plan.edit.factor.toFixed(2)}×. Both predictions use exactly the same starting text. Values run from <strong>Keep source settings</strong> → <strong>With head change</strong>.</p>
     {error ? <p role="alert">Could not measure this change: {error} <button type="button" onClick={() => setRetry(n => n + 1)}>Retry probability comparison</button></p> : !data ? <p role="status">Measuring the branch-point probabilities…</p> : <>
       <ul aria-label="Selected token probability">{row(data.selected, true)}</ul>

@@ -98,3 +98,14 @@ The selected source token is always shown with raw before/after probabilities, s
 Only the first prediction uses the shared starting context. If it stays unchanged, the report says so. Later differences can arise from continued head edits and eventually different text inputs, so the initial probability change is not a token-by-token attribution for the rest of the story. This display describes measured changes in prediction, not a general semantic role for a head.
 
 The active historical inspection worker computes the two predictions and releases its temporary runs. No additional model worker is loaded. Reports are derived from the frozen plan, not draft controls, and recompute when a saved comparison is reopened. No workspace-file migration is needed; existing records already preserve the exact source and policy. Closing/navigation ignores stale responses, while normal shared-worker cleanup releases their tensors.
+
+
+## Scan all heads at a selected token
+
+**Scan all heads** tests Mute (0×), Normal (1×), and Amplify (2×) at every layer/head: 48 independent trials for this model's 16 heads. Every trial uses the exact same pre-token prefix, source edits, and sampling counter. Changing the same head replaces its captured strength; other captured heads stay in place. Normal can therefore restore an inherited edit rather than being a universal no-op. Each edit scales head output at all input positions for this prediction.
+
+Results show the selected token's raw probability, signed percentage-point change, rank, and whether the recorded sampler would choose a different next token. Sort by absolute change, increase, or decrease; eight results are shown initially, with an option to show all. Rankings use unrounded probability differences, then layer, head, and factor as deterministic tie-breakers. Tiny differences can round to zero. These are prompt-specific individual effects, not a decomposition into additive head contributions.
+
+The scan runs sequentially in a temporary CPU worker with the same hash-checked checkpoint. Progress counts completed trials. Stop terminates that worker immediately and keeps only completed results, clearly marked partial. Navigation/unmount terminates the worker and ignores late responses. A scan never silently starts story generation. Generation controls are blocked while scanning; starting a scan pauses parent generation.
+
+**Use this change** selects that head in the flow, fills the branch strength, focuses the branch controls, and shows the existing before/after probability preview. Choose the duration and token budget, then **Compare from this token** captures the proposed edit and generates both paths using the normal workspace machinery. Saved comparisons retain the chosen edit and source; scan rankings are derived exploration results and are recomputed rather than saved in workspace files. Partial results cannot establish the strongest effect among unmeasured heads.

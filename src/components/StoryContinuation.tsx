@@ -8,10 +8,10 @@ import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import { StoryWorkspaceProvider, useStoryWorkspace } from './StoryWorkspace';
 import { StoryTokenInspector } from './StoryTokenInspector';
 
-interface Props { manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
+interface Props { inputKey?: string; manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
 const defaults: Sampling = { temperature: 0, topP: .9, seed: 42, maxTokens: 24 };
 export function StoryContinuation(props: Props) {
-  return <StoryWorkspaceProvider manifest={props.manifest} inputKey={JSON.stringify(props.tokens)}>{(data, navigation) => <StoryContinuationInner key={navigation} {...props} restored={data.root} />}</StoryWorkspaceProvider>;
+  return <StoryWorkspaceProvider manifest={props.manifest} inputKey={props.inputKey ?? JSON.stringify(props.tokens)}>{(data, navigation) => <StoryContinuationInner key={navigation} {...props} restored={data.root} />}</StoryWorkspaceProvider>;
 }
 function StoryContinuationInner(props: Props & { restored: import('../story-workspace').StoryRoot | null }) {
   const workspace = useStoryWorkspace()!;

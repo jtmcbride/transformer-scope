@@ -21,6 +21,8 @@ test('a partially generated saved story resumes its exact sampling sequence afte
   await page.getByRole('button', { name: 'Play story', exact: true }).click();
   await expect(page.locator('.continuation-status')).toHaveText('Continuation complete.', { timeout: 60_000 });
   expect((await download(page)).root.frame).toEqual(resumed.root.frame);
+  await page.getByRole('button', { name: 'Run input', exact: true }).click();
+  await expect(page.locator('.continuation-status')).toHaveText('Ready to continue the completed prompt.');
 });
 test('storage failure is visible and the complete workspace remains downloadable', async ({ page }) => {
   await page.addInitScript(() => {

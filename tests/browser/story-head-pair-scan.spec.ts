@@ -14,7 +14,7 @@ async function ready(page: Page, edited = false) {
 }
 const pairName = (edits: { layer: number; head: number; factor: number }[]) => `Use pair layer ${edits[0].layer+1} head ${edits[0].head+1} strength ${edits[0].factor} and layer ${edits[1].layer+1} head ${edits[1].head+1} strength ${edits[1].factor}`;
 const pairKey = (edit: { layer: number; head: number; factor: number }) => `${edit.layer}:${edit.head}:${edit.factor}`;
-test('full pair scan ranks real joint effects, selects the strongest pair, and saves its verified story branch', async ({ page }, info) => {
+test('full pair scan ranks interactions and joint effects, then saves the strongest interaction story branch', async ({ page }, info) => {
   test.setTimeout(240000); await ready(page);
   const scan = page.getByRole('region', { name: 'Scan head pairs at selected token', exact: true });
   for (const [mode, total] of [['all',1080],['opposite',240],['normal',120],['amplify',120],['mute-normal',240],['normal-amplify',240],['mute',120]] as const) {
@@ -26,7 +26,8 @@ test('full pair scan ranks real joint effects, selects the strongest pair, and s
   await expect(page.getByRole('button', { name: 'Compare from this token', exact: true })).toBeDisabled();
   await expect(scan.getByLabel('Pair scan strengths')).toBeDisabled();
   await expect(scan.getByTestId('pair-scan-status')).toHaveText('Pair scan complete. 120 / 120 combinations measured.', { timeout: 150000 });
-  const expected = reference.cases[0], sorted = [...expected.rows].sort((a,b) => Math.abs(b.after-expected.source.choice.probability)-Math.abs(a.after-expected.source.choice.probability));
+  const expected = reference.cases[0], sorted = [...expected.rows].sort((a,b) => Math.abs(b.interaction)-Math.abs(a.interaction));
+  await expect(scan.getByLabel('Sort pair scan results')).toHaveValue('interaction-absolute');
   const list = scan.getByRole('list', { name: 'Ranked head pair changes' });
   for (let i=0; i<8; i++) { await expect(list.locator('li').nth(i)).toHaveAttribute('data-pair-first', pairKey(sorted[i].edits[0])); await expect(list.locator('li').nth(i)).toHaveAttribute('data-pair-second', pairKey(sorted[i].edits[1])); }
   await page.setViewportSize({ width:390, height:844 });
@@ -38,23 +39,31 @@ test('full pair scan ranks real joint effects, selects the strongest pair, and s
     const actual = list.locator(`li[data-pair-first="${pairKey(row.edits[0])}"][data-pair-second="${pairKey(row.edits[1])}"]`);
     expect(parseFloat(await actual.getByTestId('pair-scan-after').innerText())/100).toBeCloseTo(row.after, 5);
     expect(parseFloat(await actual.getByTestId('pair-scan-delta').innerText())/100).toBeCloseTo(row.after-expected.source.choice.probability, 5);
+    expect(parseFloat(await actual.getByTestId('pair-scan-sum').innerText())/100).toBeCloseTo(row.sumDelta,5);
+    expect(parseFloat(await actual.getByTestId('pair-scan-first-delta').innerText())/100).toBeCloseTo(row.individualProbabilities[0]-expected.source.choice.probability,5);
+    expect(parseFloat(await actual.getByTestId('pair-scan-second-delta').innerText())/100).toBeCloseTo(row.individualProbabilities[1]-expected.source.choice.probability,5);
+    // Four measured probabilities contribute to I; each keeps its five-decimal parity check.
+    expect(Math.abs(parseFloat(await actual.getByTestId('pair-scan-interaction').innerText())/100-row.interaction)).toBeLessThanOrEqual(4*5e-6+0.5e-6);
   }
-  for (const mode of ['increase','decrease']) {
+  for (const mode of ['absolute','increase','decrease','interaction-absolute','interaction-positive','interaction-negative']) {
     await scan.getByLabel('Sort pair scan results').selectOption(mode);
-    const values = (await list.getByTestId('pair-scan-delta').allTextContents()).map(parseFloat);
-    expect(values.every((n,i) => !i || (mode === 'increase' ? n <= values[i-1] : n >= values[i-1]))).toBe(true);
+    const interaction = mode.startsWith('interaction-');
+    const values = (await list.getByTestId(interaction ? 'pair-scan-interaction' : 'pair-scan-delta').allTextContents()).map(parseFloat);
+    const scores = values.map(n => mode.endsWith('absolute') ? Math.abs(n) : mode === 'decrease' || mode === 'interaction-negative' ? -n : n);
+    expect(scores.every((n,i) => !i || n <= scores[i-1]+1e-10)).toBe(true);
   }
   await scan.getByRole('button', { name: pairName(sorted[0].edits), exact: true }).focus(); await page.keyboard.press('Enter');
   const preview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
   await expect(preview.getByTestId('combined-probability')).toBeVisible({ timeout: 60000 });
   expect(parseFloat(await preview.getByTestId('combined-probability').innerText())/100).toBeCloseTo(sorted[0].after, 5);
+  expect(Math.abs(parseFloat(await preview.getByTestId('head-interaction').locator('strong').innerText())/100-sorted[0].interaction)).toBeLessThanOrEqual(4*5e-6+0.5e-6);
   await page.getByLabel('Branch new-token limit').fill('6');
   await page.getByRole('button', { name: 'Compare from this token', exact: true }).click();
   await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60000 });
   const wait = page.waitForEvent('download'); await page.getByRole('button', { name: 'Download branch comparison', exact: true }).click();
   const saved = JSON.parse(await readFile((await (await wait).path())!, 'utf8'));
-  expect(saved.schemaVersion).toBe(3); expect(saved.plan.edit).toEqual(expected.best.plan.edit); expect(saved.plan.additionalEdits).toEqual(expected.best.plan.additionalEdits);
-  for (const branch of ['original','edited'] as const) { expect(saved.frame[branch].tokenIds).toEqual(expected.best[branch].tokenIds); saved.frame[branch].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(expected.best[branch].choices[i].probability,5)); }
+  expect(saved.schemaVersion).toBe(3); expect(saved.plan.edit).toEqual(expected.bestInteraction.plan.edit); expect(saved.plan.additionalEdits).toEqual(expected.bestInteraction.plan.additionalEdits);
+  for (const branch of ['original','edited'] as const) { expect(saved.frame[branch].tokenIds).toEqual(expected.bestInteraction[branch].tokenIds); saved.frame[branch].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(expected.bestInteraction[branch].choices[i].probability,5)); }
   await page.reload(); await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
   const report = page.getByRole('region', { name: 'Head change probabilities', exact: true });
   await expect(report.getByTestId('combined-probability')).toBeVisible({ timeout: 60000 });
@@ -83,10 +92,13 @@ test('partial mixed pair results retain inherited edits, exclude competing scans
   const a = await firstRow.getAttribute('data-pair-first'), b = await firstRow.getAttribute('data-pair-second');
   const expected = rows.find(row => pairKey(row.edits[0]) === a && pairKey(row.edits[1]) === b)!;
   expect(parseFloat(await firstRow.getByTestId('pair-scan-after').innerText())/100).toBeCloseTo(expected.after,5);
+  const scannedInteraction = parseFloat(await firstRow.getByTestId('pair-scan-interaction').innerText());
+  expect(Math.abs(scannedInteraction/100-expected.interaction)).toBeLessThanOrEqual(4*5e-6+0.5e-6);
   await firstRow.getByRole('button', { name: pairName(expected.edits), exact: true }).click();
   const preview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
   await expect(preview.getByTestId('combined-probability')).toBeVisible({ timeout: 60000 });
   expect(parseFloat(await preview.getByTestId('combined-probability').innerText())/100).toBeCloseTo(expected.after,5);
+  expect(parseFloat(await preview.getByTestId('head-interaction').locator('strong').innerText())).toBeCloseTo(scannedInteraction,4);
   await page.getByLabel('Branch new-token limit').fill('1'); await page.getByRole('button', { name: 'Compare from this token', exact: true }).click();
   await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 60000 });
   let pending = page.waitForEvent('console', message => message.text() === 'pair-compare');

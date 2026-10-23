@@ -107,3 +107,5 @@
 .story-head-pair-scan .continuation-actions label { max-width:100%; min-width:0; }
 .story-head-pair-scan select { max-width:100%; }
 .story-head-pair-scan .continuation-actions { align-items:flex-end; }
+
+.pair-scan-interaction strong { color:#58429a; }

@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import type { StoryScanProps } from './StoryHeadScan';
-import type { ScanOrder } from '../story-head-scan';
-import { pairStrengthOptions, pairScanTotal, rankHeadPairScan, scanStoryHeadPairs, type PairStrengths, type HeadPairScanRow } from '../story-head-pair-scan';
+import { pairStrengthOptions, pairScanTotal, rankHeadPairScan, scanStoryHeadPairs, type PairStrengths, type PairScanOrder, type HeadPairScanRow } from '../story-head-pair-scan';
 import { tokenLabel } from '../engine/tokenizer';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, withStoryPrefix } from '../workers/story-runtime';
+const points = (n: number) => `${n > 0 ? '+' : ''}${(n*100).toFixed(4)} percentage points`;
 const name = (edit: HeadPairScanRow['edits'][number]) => `Layer ${edit.layer+1} · Head ${edit.head+1} · ${edit.factor}×`;
 const key = (edit: HeadPairScanRow['edits'][number]) => `${edit.layer}:${edit.head}:${edit.factor}`;
 export function StoryHeadPairScan(props: StoryScanProps) {
-  const [strengths, setStrengths] = useState<PairStrengths>('mute'), [order, setOrder] = useState<ScanOrder>('absolute');
+  const [strengths, setStrengths] = useState<PairStrengths>('mute'), [order, setOrder] = useState<PairScanOrder>('interaction-absolute');
   const [rows, setRows] = useState<HeadPairScanRow[]>([]), [all, setAll] = useState(false);
   const [busy, setBusy] = useState(false), [status, setStatus] = useState('Ready to scan.'), [error, setError] = useState('');
   const worker = useRef<ModelClient | null>(null), epoch = useRef(0);
@@ -30,21 +30,24 @@ export function StoryHeadPairScan(props: StoryScanProps) {
   }
   const sorted = rankHeadPairScan(rows, order), visible = all ? sorted : sorted.slice(0, 8);
   return <section className="story-head-scan story-head-pair-scan" aria-label="Scan head pairs at selected token">
-    <p className="eyebrow">Find a combination worth exploring</p><h3>Which pairs affect this token most?</h3>
-    <p>Measure two heads together at story step {props.source.step}, using the same starting text and captured source settings. This ranks actual combined probability changes, including interactions.</p>
+    <p className="eyebrow">Find a combination worth exploring</p><h3>Which heads interact most at this token?</h3>
+    <p>Measure each pair and both heads alone at story step {props.source.step}, using the same starting text and captured settings. Rank the interaction gap or the combined probability change.</p>
     <div className="continuation-actions"><label>Pair strengths<select aria-label="Pair scan strengths" value={strengths} disabled={busy || props.disabled} onChange={event => { setStrengths(event.target.value as PairStrengths); setRows([]); setAll(false); setError(''); setStatus('Ready to scan.'); }}>{pairStrengthOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
       <button type="button" disabled={busy || props.disabled} onClick={() => void scan()}>Scan head pairs</button><button type="button" disabled={!busy} onClick={stop}>Stop pair scan</button>
-      <label>Sort pairs<select aria-label="Sort pair scan results" value={order} onChange={event => setOrder(event.target.value as ScanOrder)}><option value="absolute">Largest absolute change</option><option value="increase">Largest increase</option><option value="decrease">Largest decrease</option></select></label></div>
-    <p className="hint">{total} combinations in this scope. Mixed strengths test both assignments. All strengths test all nine strength assignments per distinct head pair and take longer. Normal may restore a changed head.</p>
+      <label>Sort pairs<select aria-label="Sort pair scan results" value={order} onChange={event => setOrder(event.target.value as PairScanOrder)}><option value="interaction-absolute">Strongest interaction (absolute)</option><option value="interaction-positive">Most positive interaction</option><option value="interaction-negative">Most negative interaction</option><option value="absolute">Largest absolute change</option><option value="increase">Largest increase</option><option value="decrease">Largest decrease</option></select></label></div>
+    <p className="hint">Interaction = combined change − sum of individual changes. Positive means a greater increase (or smaller decrease) than the sum; negative means a smaller increase (or greater decrease). A strong interaction can accompany a small net change.</p>
+    <p className="hint">{total} combinations in this scope. Mixed strengths test both assignments. All strengths test all nine strength assignments per distinct head pair and take longer. Normal may restore a changed head. Individual head/strength trials are reused within this scan.</p>
     <p role="status" data-testid="pair-scan-status">{status} {rows.length} / {total} combinations measured.</p>
     {busy && <progress value={rows.length} max={total} aria-label="Head pair scan progress" />}
     {error && <p role="alert" className="error">Could not finish the pair scan: {error}</p>}
     {!!rows.length && <><p>Selected token: <strong>{tokenLabel(props.tokenizer, props.source.choice.tokenId)}</strong> · Source probability {(rows[0].before*100).toFixed(4)}%.</p>
       <ol className="head-scan-results" aria-label="Ranked head pair changes">{visible.map(row => <li key={`${key(row.edits[0])}|${key(row.edits[1])}`} data-pair-first={key(row.edits[0])} data-pair-second={key(row.edits[1])}>
-        <div><strong>{name(row.edits[0])} + {name(row.edits[1])}</strong><p><span data-testid="pair-scan-after">{(row.after*100).toFixed(4)}%</span> · <b data-testid="pair-scan-delta">{row.delta > 0 ? '+' : ''}{(row.delta*100).toFixed(4)} percentage points</b> · rank {row.rank}</p><small>{row.choice === props.source.choice.tokenId ? 'Same next token' : `Different next token: ${tokenLabel(props.tokenizer, row.choice)}`}</small></div>
+        <div><strong>{name(row.edits[0])} + {name(row.edits[1])}</strong><p>Both together: <span data-testid="pair-scan-after">{(row.after*100).toFixed(4)}%</span> · <b data-testid="pair-scan-delta">{points(row.delta)}</b> · rank {row.rank}</p>
+          <p className="pair-scan-interaction">Interaction: <strong data-testid="pair-scan-interaction">{points(row.interaction)}</strong> · Sum of individual changes: <span data-testid="pair-scan-sum">{points(row.sumDelta)}</span></p>
+          <p className="hint">First head alone: <span data-testid="pair-scan-first-delta">{points(row.individualProbabilities[0]-row.before)}</span> · Second head alone: <span data-testid="pair-scan-second-delta">{points(row.individualProbabilities[1]-row.before)}</span></p><small>{row.choice === props.source.choice.tokenId ? 'Same next token' : `Different next token: ${tokenLabel(props.tokenizer, row.choice)}`}</small></div>
         <button type="button" disabled={busy || props.disabled} onClick={() => props.onChoose(row.edits)} aria-label={`Use pair layer ${row.edits[0].layer+1} head ${row.edits[0].head+1} strength ${row.edits[0].factor} and layer ${row.edits[1].layer+1} head ${row.edits[1].head+1} strength ${row.edits[1].factor}`}>Use this pair</button>
       </li>)}</ol>
       {rows.length > 8 && <div className="continuation-actions"><button type="button" disabled={busy} onClick={() => setAll(!all)}>{all ? 'Show strongest eight pairs' : `Show all ${rows.length} pairs`}</button></div>}
-      <p className="hint">Raw model probability changes before sampling, relative to the captured source. Rankings cover only the chosen strengths and completed trials; partial results cannot establish the strongest unmeasured pair. Use a pair to preview its individual and combined effects below, choose duration and token limit, then Compare from this token.</p></>}
+      <p className="hint">Raw model probability changes before sampling, relative to the captured source. Interaction measures non-additivity for this token and input, including the probability read-out. It does not establish a general head role. Rankings cover only the chosen strengths and completed trials; partial results cannot establish the strongest unmeasured pair. Use a pair to preview its individual and combined effects below, choose duration and token limit, then Compare from this token.</p></>}
   </section>;
 }

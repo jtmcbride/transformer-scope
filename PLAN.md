@@ -383,3 +383,8 @@ Select two different heads and strengths from a completed or stopped scan, measu
 ## Pair-scan story exploration slice
 
 Measure every distinct pair of heads on the selected token's captured prefix. Offer explicit mute, amplify, normal, mixed-strength (both assignments), and all-strength scopes; rank actual joint probability changes without shortlisting from individual effects. Reuse one immutable baseline per scan, release per-trial descriptors, support progress/stop/partial results, and exclude concurrent scans/generation. Selecting a result fills the existing pair preview and persistent story-branch workflow. Validate complete scopes and strongest-pair rollouts against independent PyTorch, plus browser lifecycle, saved branching, and the hosted release. Scan persistence, longer context, larger models, and existing quality/educational gates remain follow-up work.
+
+
+## Head-pair interaction ranking slice
+
+Rank completed pairs by absolute, positive, or negative non-additivity: the combined selected-token probability change minus the sum of both individual changes, all relative to the exact captured source. Default to absolute interaction and retain all joint-change sorts. Show the two individual effects, their sum, joint change, and signed interaction; explain token dependence and probability-scale nonlinearity. Cache individual head/strength measurements only within a scan, publish only complete measurements, and preserve cancellation, inherited edits, preview, saved branches, and subsequent inspection/forks. Validate all 720 independent reference rows and strongest-interaction rollouts, all six browser sorting modes, and the hosted scan-to-branch flow. Scan persistence and broader model-quality gates remain separate work.

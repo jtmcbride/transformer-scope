@@ -217,6 +217,7 @@ test('hosted continuation generates the independent original and edited story to
   await scan.getByRole('button', { name: 'Use layer 1 head 1 strength 1', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Scanned head probability preview', exact: true }).getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
   const pairScan = page.getByRole('region', { name: 'Scan head pairs at selected token', exact: true });
+  await expect(pairScan.getByLabel('Sort pair scan results')).toHaveValue('interaction-absolute');
   await pairScan.getByLabel('Pair scan strengths').selectOption('normal');
   await pairScan.getByRole('button', { name: 'Scan head pairs', exact: true }).click();
   await expect(pairScan.getByTestId('pair-scan-status')).toHaveText('Pair scan complete. 120 / 120 combinations measured.', { timeout: 90_000 });
@@ -224,6 +225,8 @@ test('hosted continuation generates the independent original and edited story to
   await pairScan.getByRole('button', { name: 'Show all 120 pairs', exact: true }).click();
   const identityPair = pairScan.locator('li[data-pair-first="0:0:1"][data-pair-second="1:1:1"]');
   expect(parseFloat(await identityPair.getByTestId('pair-scan-after').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
+  expect(parseFloat(await identityPair.getByTestId('pair-scan-interaction').innerText())).toBeCloseTo(0,4);
+  await pairScan.getByLabel('Sort pair scan results').selectOption('interaction-negative');
   await identityPair.getByRole('button', { name: 'Use pair layer 1 head 1 strength 1 and layer 2 head 2 strength 1', exact: true }).click();
   const pairPreview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
   await expect(pairPreview.getByTestId('combined-probability')).toBeVisible({ timeout: 60_000 });

@@ -30,6 +30,11 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run check:artifacts
+      - name: Prefer the Ubuntu archive for browser dependencies
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            printf 'https://archive.ubuntu.com/ubuntu/\tpriority:1\nhttps://security.ubuntu.com/ubuntu/\tpriority:2\nhttp://azure.archive.ubuntu.com/ubuntu/\tpriority:3\n' | sudo tee /etc/apt/apt-mirrors.txt
+          fi
       - run: npx playwright install --with-deps chromium firefox
       - run: npm run test:browser -- --project=chromium --project=firefox
       - name: Package verified Pages build
@@ -83,6 +88,11 @@ jobs:
           node-version: 24.18.0
           cache: npm
       - run: npm ci
+      - name: Prefer the Ubuntu archive for browser dependencies
+        run: |
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            printf 'https://archive.ubuntu.com/ubuntu/\tpriority:1\nhttps://security.ubuntu.com/ubuntu/\tpriority:2\nhttp://azure.archive.ubuntu.com/ubuntu/\tpriority:3\n' | sudo tee /etc/apt/apt-mirrors.txt
+          fi
       - run: npx playwright install --with-deps chromium
       - name: Check the deployed release
         run: npm run test:hosted

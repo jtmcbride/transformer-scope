@@ -53,3 +53,28 @@ it('migrates legacy workspaces and preserves validated two-head plans in version
   w.nodes[0].plan.additionalEdits![0].layer = w.nodes[0].plan.edit.layer;
   expect(() => parseWorkspace(w, manifest)).toThrow('different heads');
 });
+
+it('migrates version 2 files and round trips linked shared continuations with validated pairs, membership and atomic frames',async()=>{
+  const {manifest}=loadShippedArtifact('tinystories'),w=emptyWorkspace(manifest);
+  w.root={prompt:root.prompt,tokens:root.promptTokenIds,settings:root.settings,edit:root.edit as any,frame:{step:16,original:{...root.original,finish:'token limit'},edited:{...root.edited,finish:'token limit'}}};
+  const parent=new StoryFork(reference.cases[0].plan as any,manifest.config);
+  parent.restore({step:12,original:{...reference.cases[0].original,finish:'token limit'},edited:{...reference.cases[0].edited,finish:'token limit'}});
+  w.nodes.push({id:'parent',parentId:null,plan:parent.plan,frame:parent.frame});
+  const legacy={...structuredClone(w),version:2 as const};delete legacy.sharedForks;
+  expect(parseWorkspace(legacy,manifest)).toEqual(w);
+  const {default:shared}=await import('../fixtures/story-shared-forks-reference.json');
+  shared.cases[0].plans.forEach((plan,i)=>w.nodes.push({id:`side-${i}`,parentId:'parent',plan:plan as any,frame:shared.cases[0].frames[i] as any}));
+  w.sharedForks=[{id:'shared',nodeIds:['side-0','side-1'],labels:['Original path','Changed path']}];w.route=nodeRoute(w.nodes,'side-1');
+  expect(parseWorkspace(JSON.parse(JSON.stringify(w)),manifest)).toEqual(w);
+  expect(()=>parseWorkspace({...w,version:2},manifest)).toThrow('version 3');
+  const corruptions=[
+    (x:StoryWorkspace)=>x.sharedForks![0].nodeIds[1]='missing',
+    (x:StoryWorkspace)=>x.sharedForks![0].nodeIds[1]='side-0',
+    (x:StoryWorkspace)=>x.sharedForks!.push({...x.sharedForks![0],id:'other'}),
+    (x:StoryWorkspace)=>x.nodes[2].plan.edit.factor=2,
+    (x:StoryWorkspace)=>x.nodes[2].plan.duration='prediction',
+    (x:StoryWorkspace)=>x.nodes[2].frame=new StoryFork(x.nodes[2].plan,manifest.config).frame,
+    (x:StoryWorkspace)=>x.sharedForks=null as any,
+  ];
+  for(const corrupt of corruptions){const copy=structuredClone(w);corrupt(copy);expect(()=>parseWorkspace(copy,manifest)).toThrow();}
+});

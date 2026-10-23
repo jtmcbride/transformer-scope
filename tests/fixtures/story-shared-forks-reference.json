@@ -1,0 +1,1441 @@
+{
+  "modelRevision": "23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6",
+  "cases": [
+    {
+      "plans": [
+        {
+          "source": {
+            "branch": "original",
+            "step": 7,
+            "prefix": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591
+            ],
+            "choice": {
+              "tokenId": 268,
+              "probability": 0.5236368775367737
+            },
+            "settings": {
+              "temperature": 0,
+              "topP": 0.9,
+              "seed": 42,
+              "maxTokens": 16
+            },
+            "edits": [],
+            "continuationEdits": []
+          },
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "additionalEdits": [
+            {
+              "id": "head-scan",
+              "kind": "head.scale",
+              "layer": 2,
+              "head": 3,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "duration": "continuation",
+          "maxTokens": 6
+        },
+        {
+          "source": {
+            "branch": "edited",
+            "step": 7,
+            "prefix": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544
+            ],
+            "choice": {
+              "tokenId": 343,
+              "probability": 0.91471928358078
+            },
+            "settings": {
+              "temperature": 0,
+              "topP": 0.9,
+              "seed": 42,
+              "maxTokens": 16
+            },
+            "edits": [
+              {
+                "id": "fork-head",
+                "kind": "head.scale",
+                "layer": 0,
+                "head": 0,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              }
+            ],
+            "continuationEdits": [
+              {
+                "id": "fork-head",
+                "kind": "head.scale",
+                "layer": 0,
+                "head": 0,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              }
+            ]
+          },
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "additionalEdits": [
+            {
+              "id": "head-scan",
+              "kind": "head.scale",
+              "layer": 2,
+              "head": 3,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "duration": "continuation",
+          "maxTokens": 6
+        }
+      ],
+      "frames": [
+        {
+          "step": 6,
+          "original": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591,
+              268,
+              343,
+              360,
+              47,
+              557,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 268,
+                "probability": 0.5236368775367737
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.5753060579299927
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.5672256946563721
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.765595018863678
+              },
+              {
+                "tokenId": 557,
+                "probability": 0.39553403854370117
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.8741061687469482
+              }
+            ],
+            "finish": "token limit"
+          },
+          "edited": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591,
+              268,
+              265,
+              556,
+              1006,
+              47,
+              408
+            ],
+            "choices": [
+              {
+                "tokenId": 268,
+                "probability": 0.6156371831893921
+              },
+              {
+                "tokenId": 265,
+                "probability": 0.43431323766708374
+              },
+              {
+                "tokenId": 556,
+                "probability": 0.20057760179042816
+              },
+              {
+                "tokenId": 1006,
+                "probability": 0.58660888671875
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.3565099537372589
+              },
+              {
+                "tokenId": 408,
+                "probability": 0.4423704147338867
+              }
+            ],
+            "finish": "token limit"
+          }
+        },
+        {
+          "step": 6,
+          "original": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              343,
+              360,
+              47,
+              265,
+              471,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 343,
+                "probability": 0.91471928358078
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.3710586726665497
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.7217422723770142
+              },
+              {
+                "tokenId": 265,
+                "probability": 0.36039212346076965
+              },
+              {
+                "tokenId": 471,
+                "probability": 0.21234947443008423
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.2601844072341919
+              }
+            ],
+            "finish": "token limit"
+          },
+          "edited": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              265,
+              471,
+              268,
+              265,
+              471,
+              269
+            ],
+            "choices": [
+              {
+                "tokenId": 265,
+                "probability": 0.33802011609077454
+              },
+              {
+                "tokenId": 471,
+                "probability": 0.6849777698516846
+              },
+              {
+                "tokenId": 268,
+                "probability": 0.17329975962638855
+              },
+              {
+                "tokenId": 265,
+                "probability": 0.09812537580728531
+              },
+              {
+                "tokenId": 471,
+                "probability": 0.8002865314483643
+              },
+              {
+                "tokenId": 269,
+                "probability": 0.23122836649417877
+              }
+            ],
+            "finish": "token limit"
+          }
+        }
+      ]
+    },
+    {
+      "plans": [
+        {
+          "source": {
+            "branch": "original",
+            "step": 7,
+            "prefix": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591
+            ],
+            "choice": {
+              "tokenId": 268,
+              "probability": 0.5236368775367737
+            },
+            "settings": {
+              "temperature": 0,
+              "topP": 0.9,
+              "seed": 42,
+              "maxTokens": 16
+            },
+            "edits": [],
+            "continuationEdits": []
+          },
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "additionalEdits": [
+            {
+              "id": "head-scan",
+              "kind": "head.scale",
+              "layer": 2,
+              "head": 3,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "duration": "prediction",
+          "maxTokens": 6
+        },
+        {
+          "source": {
+            "branch": "edited",
+            "step": 7,
+            "prefix": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544
+            ],
+            "choice": {
+              "tokenId": 343,
+              "probability": 0.91471928358078
+            },
+            "settings": {
+              "temperature": 0,
+              "topP": 0.9,
+              "seed": 42,
+              "maxTokens": 16
+            },
+            "edits": [
+              {
+                "id": "fork-head",
+                "kind": "head.scale",
+                "layer": 0,
+                "head": 0,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              }
+            ],
+            "continuationEdits": [
+              {
+                "id": "fork-head",
+                "kind": "head.scale",
+                "layer": 0,
+                "head": 0,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              }
+            ]
+          },
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 2,
+            "factor": 0,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "additionalEdits": [
+            {
+              "id": "head-scan",
+              "kind": "head.scale",
+              "layer": 2,
+              "head": 3,
+              "factor": 0,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "duration": "prediction",
+          "maxTokens": 6
+        }
+      ],
+      "frames": [
+        {
+          "step": 6,
+          "original": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591,
+              268,
+              343,
+              360,
+              47,
+              557,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 268,
+                "probability": 0.5236368775367737
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.5753060579299927
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.5672256946563721
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.765595018863678
+              },
+              {
+                "tokenId": 557,
+                "probability": 0.39553403854370117
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.8741061687469482
+              }
+            ],
+            "finish": "token limit"
+          },
+          "edited": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591,
+              268,
+              343,
+              360,
+              47,
+              557,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 268,
+                "probability": 0.6156371831893921
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.5753060579299927
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.5672256946563721
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.765595018863678
+              },
+              {
+                "tokenId": 557,
+                "probability": 0.39553403854370117
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.8741061687469482
+              }
+            ],
+            "finish": "token limit"
+          }
+        },
+        {
+          "step": 6,
+          "original": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              343,
+              360,
+              47,
+              265,
+              471,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 343,
+                "probability": 0.91471928358078
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.3710586726665497
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.7217422723770142
+              },
+              {
+                "tokenId": 265,
+                "probability": 0.36039212346076965
+              },
+              {
+                "tokenId": 471,
+                "probability": 0.21234947443008423
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.2601844072341919
+              }
+            ],
+            "finish": "token limit"
+          },
+          "edited": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              265,
+              471,
+              268,
+              326,
+              329,
+              312
+            ],
+            "choices": [
+              {
+                "tokenId": 265,
+                "probability": 0.33802011609077454
+              },
+              {
+                "tokenId": 471,
+                "probability": 0.7122601866722107
+              },
+              {
+                "tokenId": 268,
+                "probability": 0.43951115012168884
+              },
+              {
+                "tokenId": 326,
+                "probability": 0.08606687933206558
+              },
+              {
+                "tokenId": 329,
+                "probability": 0.920093834400177
+              },
+              {
+                "tokenId": 312,
+                "probability": 0.5032509565353394
+              }
+            ],
+            "finish": "token limit"
+          }
+        }
+      ]
+    },
+    {
+      "plans": [
+        {
+          "source": {
+            "branch": "edited",
+            "step": 6,
+            "prefix": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317
+            ],
+            "choice": {
+              "tokenId": 544,
+              "probability": 0.07098884135484695
+            },
+            "settings": {
+              "temperature": 0,
+              "topP": 0.9,
+              "seed": 42,
+              "maxTokens": 16
+            },
+            "edits": [
+              {
+                "id": "fork-head",
+                "kind": "head.scale",
+                "layer": 0,
+                "head": 0,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              }
+            ],
+            "continuationEdits": []
+          },
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "additionalEdits": [
+            {
+              "id": "head-scan",
+              "kind": "head.scale",
+              "layer": 2,
+              "head": 2,
+              "factor": 2,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "duration": "continuation",
+          "maxTokens": 4
+        },
+        {
+          "source": {
+            "branch": "edited",
+            "step": 9,
+            "prefix": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              343,
+              360
+            ],
+            "choice": {
+              "tokenId": 47,
+              "probability": 0.7070088982582092
+            },
+            "settings": {
+              "temperature": 0,
+              "topP": 0.9,
+              "seed": 42,
+              "maxTokens": 16
+            },
+            "edits": [
+              {
+                "id": "fork-head",
+                "kind": "head.scale",
+                "layer": 0,
+                "head": 0,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              },
+              {
+                "id": "fork-1-head",
+                "kind": "head.scale",
+                "layer": 1,
+                "head": 1,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              }
+            ],
+            "continuationEdits": [
+              {
+                "id": "fork-head",
+                "kind": "head.scale",
+                "layer": 0,
+                "head": 0,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              },
+              {
+                "id": "fork-1-head",
+                "kind": "head.scale",
+                "layer": 1,
+                "head": 1,
+                "factor": 0,
+                "tokens": {
+                  "kind": "all"
+                }
+              }
+            ]
+          },
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "additionalEdits": [
+            {
+              "id": "head-scan",
+              "kind": "head.scale",
+              "layer": 2,
+              "head": 2,
+              "factor": 2,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "duration": "continuation",
+          "maxTokens": 4
+        }
+      ],
+      "frames": [
+        {
+          "step": 4,
+          "original": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              343,
+              388,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 544,
+                "probability": 0.07098884135484695
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.9947056174278259
+              },
+              {
+                "tokenId": 388,
+                "probability": 0.503538191318512
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.3847779631614685
+              }
+            ],
+            "finish": "token limit"
+          },
+          "edited": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              343,
+              360,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 544,
+                "probability": 0.12766245007514954
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.9895312786102295
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.4183031916618347
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.9020093679428101
+              }
+            ],
+            "finish": "token limit"
+          }
+        },
+        {
+          "step": 4,
+          "original": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              343,
+              360,
+              47,
+              265,
+              471,
+              268
+            ],
+            "choices": [
+              {
+                "tokenId": 47,
+                "probability": 0.7070088982582092
+              },
+              {
+                "tokenId": 265,
+                "probability": 0.2905227243900299
+              },
+              {
+                "tokenId": 471,
+                "probability": 0.33496275544166565
+              },
+              {
+                "tokenId": 268,
+                "probability": 0.2899411618709564
+              }
+            ],
+            "finish": "token limit"
+          },
+          "edited": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              544,
+              343,
+              360,
+              47,
+              557,
+              47,
+              268
+            ],
+            "choices": [
+              {
+                "tokenId": 47,
+                "probability": 0.9352989196777344
+              },
+              {
+                "tokenId": 557,
+                "probability": 0.353495329618454
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.9858221411705017
+              },
+              {
+                "tokenId": 268,
+                "probability": 0.44414687156677246
+              }
+            ],
+            "finish": "token limit"
+          }
+        }
+      ]
+    },
+    {
+      "plans": [
+        {
+          "source": {
+            "branch": "original",
+            "step": 7,
+            "prefix": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591
+            ],
+            "choice": {
+              "tokenId": 268,
+              "probability": 0.5236368775367737
+            },
+            "settings": {
+              "temperature": 0,
+              "topP": 0.9,
+              "seed": 42,
+              "maxTokens": 16
+            },
+            "edits": [],
+            "continuationEdits": []
+          },
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "additionalEdits": [
+            {
+              "id": "head-scan",
+              "kind": "head.scale",
+              "layer": 2,
+              "head": 2,
+              "factor": 1,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "duration": "continuation",
+          "maxTokens": 6
+        },
+        {
+          "source": {
+            "branch": "original",
+            "step": 7,
+            "prefix": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591
+            ],
+            "choice": {
+              "tokenId": 268,
+              "probability": 0.5236368775367737
+            },
+            "settings": {
+              "temperature": 0,
+              "topP": 0.9,
+              "seed": 42,
+              "maxTokens": 16
+            },
+            "edits": [],
+            "continuationEdits": []
+          },
+          "edit": {
+            "id": "head-scan",
+            "kind": "head.scale",
+            "layer": 0,
+            "head": 0,
+            "factor": 1,
+            "tokens": {
+              "kind": "all"
+            }
+          },
+          "additionalEdits": [
+            {
+              "id": "head-scan",
+              "kind": "head.scale",
+              "layer": 2,
+              "head": 2,
+              "factor": 1,
+              "tokens": {
+                "kind": "all"
+              }
+            }
+          ],
+          "duration": "continuation",
+          "maxTokens": 6
+        }
+      ],
+      "frames": [
+        {
+          "step": 6,
+          "original": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591,
+              268,
+              343,
+              360,
+              47,
+              557,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 268,
+                "probability": 0.5236368775367737
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.5753060579299927
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.5672256946563721
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.765595018863678
+              },
+              {
+                "tokenId": 557,
+                "probability": 0.39553403854370117
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.8741061687469482
+              }
+            ],
+            "finish": "token limit"
+          },
+          "edited": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591,
+              268,
+              343,
+              360,
+              47,
+              557,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 268,
+                "probability": 0.5236368775367737
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.5753060579299927
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.5672256946563721
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.765595018863678
+              },
+              {
+                "tokenId": 557,
+                "probability": 0.39553403854370117
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.8741061687469482
+              }
+            ],
+            "finish": "token limit"
+          }
+        },
+        {
+          "step": 6,
+          "original": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591,
+              268,
+              343,
+              360,
+              47,
+              557,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 268,
+                "probability": 0.5236368775367737
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.5753060579299927
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.5672256946563721
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.765595018863678
+              },
+              {
+                "tokenId": 557,
+                "probability": 0.39553403854370117
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.8741061687469482
+              }
+            ],
+            "finish": "token limit"
+          },
+          "edited": {
+            "tokenIds": [
+              0,
+              733,
+              508,
+              261,
+              673,
+              471,
+              49,
+              317,
+              409,
+              268,
+              326,
+              329,
+              312,
+              49,
+              317,
+              591,
+              268,
+              343,
+              360,
+              47,
+              557,
+              47
+            ],
+            "choices": [
+              {
+                "tokenId": 268,
+                "probability": 0.5236368775367737
+              },
+              {
+                "tokenId": 343,
+                "probability": 0.5753060579299927
+              },
+              {
+                "tokenId": 360,
+                "probability": 0.5672256946563721
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.765595018863678
+              },
+              {
+                "tokenId": 557,
+                "probability": 0.39553403854370117
+              },
+              {
+                "tokenId": 47,
+                "probability": 0.8741061687469482
+              }
+            ],
+            "finish": "token limit"
+          }
+        }
+      ]
+    }
+  ]
+}

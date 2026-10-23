@@ -1,11 +1,13 @@
 import { StoryContinuation, selectStoryToken, type StoryFrame, type Sampling } from './continuation';
 import { StoryFork, selectForkToken, type ForkPlan } from './story-fork';
 import { requireInput, validateTokens, validateInterventions, type HeadScaleIntervention, type ModelManifest } from './engine/contracts';
+import { SharedStoryFork } from './story-shared-fork';
 export interface StoryRoot { prompt: string; tokens: number[]; settings: Sampling; edit?: HeadScaleIntervention; frame: StoryFrame }
 export interface StoryNode { id: string; parentId: string | null; plan: ForkPlan; frame: StoryFrame }
-export interface StoryWorkspace { format: 'transformer-story-workspace'; version: 1 | 2; checkpoint: string; root: StoryRoot | null; nodes: StoryNode[]; route: string[] }
+export interface SharedStoryGroup { id: string; nodeIds: [string, string]; labels: [string, string] }
+export interface StoryWorkspace { format: 'transformer-story-workspace'; version: 1 | 2 | 3; checkpoint: string; root: StoryRoot | null; nodes: StoryNode[]; route: string[]; sharedForks?: SharedStoryGroup[] }
 export function checkpointKey(m: ModelManifest) { return [m.modelId, m.modelRevision, m.weightsSha256, m.tokenizerSha256].join(':'); }
-export function emptyWorkspace(m: ModelManifest): StoryWorkspace { return { format: 'transformer-story-workspace', version: 2, checkpoint: checkpointKey(m), root: null, nodes: [], route: [] }; }
+export function emptyWorkspace(m: ModelManifest): StoryWorkspace { return { format: 'transformer-story-workspace', version: 3, checkpoint: checkpointKey(m), root: null, nodes: [], route: [], sharedForks: [] }; }
 export function nodeRoute(nodes: StoryNode[], id: string): string[] {
   const route: string[] = [];
   let node = nodes.find(n => n.id === id);
@@ -15,7 +17,7 @@ export function nodeRoute(nodes: StoryNode[], id: string): string[] {
 /** Validate before replacing any saved state. Restored computation is separately replay-checked by the inspector. */
 export function parseWorkspace(value: unknown, manifest: ModelManifest): StoryWorkspace {
   const w = value as StoryWorkspace;
-  requireInput(!!w && w.format === 'transformer-story-workspace' && (w.version === 1 || w.version === 2), 'Unsupported story workspace file.');
+  requireInput(!!w && w.format === 'transformer-story-workspace' && [1,2,3].includes(w.version), 'Unsupported story workspace file.');
   requireInput(w.checkpoint === checkpointKey(manifest), 'This workspace uses a different checkpoint.');
   requireInput(Array.isArray(w.nodes) && w.nodes.length <= 500 && Array.isArray(w.route), 'Invalid or oversized workspace.');
   if (w.root) {
@@ -27,7 +29,7 @@ export function parseWorkspace(value: unknown, manifest: ModelManifest): StoryWo
   } else requireInput(w.nodes.length === 0, 'Comparisons need a source story.');
   const seen = new Set<string>();
   for (const node of w.nodes) {
-    requireInput(w.version === 2 || node.plan.additionalEdits === undefined, 'Two-head comparisons need workspace version 2.');
+    requireInput(w.version >= 2 || node.plan.additionalEdits === undefined, 'Two-head comparisons need workspace version 2 or later.');
     requireInput(typeof node.id === 'string' && node.id.length <= 100 && !seen.has(node.id), 'Invalid or duplicate comparison ID.');
     requireInput(node.parentId === null || seen.has(node.parentId), 'A comparison must follow its parent.');
     const parent = w.nodes.find(n => n.id === node.parentId);
@@ -39,6 +41,18 @@ export function parseWorkspace(value: unknown, manifest: ModelManifest): StoryWo
     for (const branch of [node.frame.original, node.frame.edited!]) validateTokens(branch.tokenIds, manifest.config);
     seen.add(node.id);
   }
+  const groups = w.sharedForks === undefined ? [] : w.sharedForks;
+  requireInput(Array.isArray(groups) && groups.length <= 250 && (w.version === 3 || groups.length === 0), 'Shared story comparisons need workspace version 3.');
+  const groupIds = new Set<string>(), members = new Set<string>();
+  for (const group of groups) {
+    requireInput(!!group && typeof group.id === 'string' && group.id.length > 0 && group.id.length <= 100 && !groupIds.has(group.id), 'Invalid shared comparison ID.');
+    requireInput(Array.isArray(group.nodeIds) && group.nodeIds.length === 2 && group.nodeIds.every(id => typeof id === 'string' && seen.has(id) && !members.has(id)) && group.nodeIds[0] !== group.nodeIds[1], 'Invalid shared comparison links.');
+    requireInput(Array.isArray(group.labels) && group.labels.length === 2 && group.labels.every(label => typeof label === 'string' && label.length <= 200), 'Invalid shared comparison labels.');
+    const nodes = group.nodeIds.map(id => w.nodes.find(node => node.id === id)!);
+    const shared = new SharedStoryFork([nodes[0].plan,nodes[1].plan], manifest.config);
+    shared.restore([nodes[0].frame,nodes[1].frame]);
+    groupIds.add(group.id); group.nodeIds.forEach(id => members.add(id));
+  }
   requireInput(w.route.every(id => typeof id === 'string') && (w.route.length === 0 || JSON.stringify(nodeRoute(w.nodes, w.route.at(-1)!)) === JSON.stringify(w.route)), 'Invalid selected comparison path.');
-  return structuredClone({ ...w, version: 2 });
+  return structuredClone({ ...w, version: 3, sharedForks: groups });
 }

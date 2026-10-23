@@ -26,11 +26,13 @@ export function workspaceStoryPaths(workspace: StoryWorkspace) {
   });
   return paths;
 }
+export type PairEffectMetric = 'interaction' | 'probability';
+export const pairEffect = (row: HeadPairScanRow, metric: PairEffectMetric) => metric === 'probability' ? row.delta : row.interaction;
 export interface InteractionChange { key: string; a: HeadPairScanRow; b: HeadPairScanRow; difference: number }
 /** Only compare completed matching head/strength assignments. Missing never means zero. */
-export function compareInteractions(a: HeadPairScanRow[], b: HeadPairScanRow[]): InteractionChange[] {
+export function compareInteractions(a: HeadPairScanRow[], b: HeadPairScanRow[], metric: PairEffectMetric = 'interaction'): InteractionChange[] {
   const byKey = new Map(b.map(row => [headPairKey(row.edits),row]));
-  return a.flatMap(row => { const key = headPairKey(row.edits), other = byKey.get(key); return other ? [{ key, a: row, b: other, difference: other.interaction-row.interaction }] : []; });
+  return a.flatMap(row => { const key = headPairKey(row.edits), other = byKey.get(key); return other ? [{ key, a: row, b: other, difference: pairEffect(other,metric)-pairEffect(row,metric) }] : []; });
 }
 export function rankInteractionChanges(rows: InteractionChange[], order: 'absolute' | 'increase' | 'decrease') {
   const score = (row: InteractionChange) => order === 'absolute' ? Math.abs(row.difference) : order === 'increase' ? row.difference : -row.difference;
@@ -39,10 +41,10 @@ export function rankInteractionChanges(rows: InteractionChange[], order: 'absolu
 export type WithSource = (source: StorySelection, use: (predict: ForkPredict) => Promise<void>) => Promise<void>;
 /** Each source retains its own prefix, replay check, inherited edits, and global sampling counter. */
 export async function scanStoryHeatmaps(sources: [StorySelection,StorySelection], config: ModelConfig, strengths: PairStrengths, withSource: WithSource,
-  emit: (side: 0 | 1, row: HeadPairScanRow) => void, cancelled: () => boolean) {
+  emit: (side: 0 | 1, row: HeadPairScanRow) => void, cancelled: () => boolean, targetTokenId?: number) {
   const captured = structuredClone(sources);
   for (const side of [0,1] as const) {
     if (cancelled()) return;
-    await withSource(captured[side],predict => scanStoryHeadPairs(captured[side],config,strengths,predict,row => { if (!cancelled()) emit(side,row); },cancelled));
+    await withSource(captured[side],predict => scanStoryHeadPairs(captured[side],config,strengths,predict,row => { if (!cancelled()) emit(side,row); },cancelled,targetTokenId));
   }
 }

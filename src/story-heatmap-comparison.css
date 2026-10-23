@@ -27,3 +27,21 @@
 @media(max-width:1100px) { .story-map-picks,.story-comparison-maps,.story-comparison-difference { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:700px) { .story-map-comparison { padding:12px; } .story-map-comparison .pair-map-scroll { max-height:70vh; } }
 @media(pointer:coarse) { .story-map-comparison .pair-map-cell,.story-map-comparison .pair-map-pending,.story-map-comparison .pair-map-diagonal { min-width:44px; height:44px; } .story-map-comparison .pair-map-table { min-width:848px; } }
+.shared-story-branches { margin:24px 0; padding:20px 0; border-top:2px solid #8998af; border-bottom:1px solid #d5dce8; }
+.shared-story-branches h3 { margin:6px 0 12px; }
+.shared-pair-label,.shared-captured-settings { font-variant-numeric:tabular-nums; }
+.shared-story-branches input { width:76px; padding:8px; }
+.shared-story-results { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:20px; }
+.shared-story-results > article { min-width:0; padding:16px; border-top:3px solid #8998af; background:#f6f7fa; }
+.shared-story-path { padding:14px 0; border-top:1px solid #d5dce8; }
+.shared-story-path h5 { margin:0; font-size:14px; }
+.shared-story-path .story-prose { overflow-wrap:anywhere; }
+.shared-branch-tokens { display:flex; flex-wrap:wrap; gap:5px; }
+.shared-branch-tokens > span { display:inline-flex; gap:5px; padding:5px; background:white; border:1px solid #d5dce8; border-radius:3px; font-size:12px; }
+.shared-branch-tokens > .fork-different { background:#fff3e7; border-color:#c68b53; }
+.shared-branch-tokens small { color:#606c82; }
+@media(max-width:1100px) { .shared-story-results { grid-template-columns:minmax(0,1fr); } }
+.shared-story-branches .continuation-actions { align-items:flex-end; }
+.shared-story-results > article > button { padding:8px 12px; min-height:38px; font-size:12px; }
+.shared-story-path .story-prose { font:18px/1.75 Georgia,serif; min-height:72px; }
+@media(pointer:coarse) { .story-map-comparison .shared-story-branches button,.story-map-comparison .shared-story-branches select,.story-map-comparison .shared-story-branches input { min-height:44px; } }

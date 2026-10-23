@@ -24,6 +24,7 @@ export function StoryFork(props: Props) {
     return nodes.find(n => n.id === workspace?.data.route[props.depth] && match(n)) ?? nodes.filter(match).at(-1);
   });
   const nodeId = useRef(savedNode?.id ?? '');
+  const linked = workspace?.data.sharedForks?.some(group => group.nodeIds.includes(nodeId.current));
   const initialChild = workspace?.data.nodes.find(n => savedNode && n.parentId === savedNode.id && n.id === workspace.data.route[props.depth + 1]);
   const [scanning, setScanning] = useState(false), [preview, setPreview] = useState<ForkPlan | null>(null);
   const [pair, setPair] = useState<HeadScaleIntervention[] | null>(null);
@@ -45,6 +46,10 @@ export function StoryFork(props: Props) {
   const common = encoder.preview(props.source.prefix);
   const finished = !!frame?.original.finish && !!frame?.edited?.finish;
   const difference = frame ? firstForkDifference(frame) : null;
+  const sharedFrame = linked ? workspace?.data.nodes.find(node => node.id === nodeId.current)?.frame : undefined;
+  useEffect(() => {
+    if (sharedFrame) { session.current?.restore(sharedFrame); setFrame(sharedFrame); }
+  },[sharedFrame]);
   function stop() { ++epoch.current; autoplay.current = false; flight.current = false; worker.current?.dispose(); worker.current = null; setBusy(false); }
   useEffect(() => { if (workspace?.heatmapBusy) stop(); },[workspace?.heatmapBusy]);
   useEffect(() => () => workspace?.setInspectorScanning(false),[workspace?.setInspectorScanning]);
@@ -64,7 +69,7 @@ export function StoryFork(props: Props) {
   function back() { workspace?.focus(nodeId.current); returning.current = true; setSelection(null); props.onInspectChange(false); }
   function clear() { stop(); session.current = null; setPlan(null); setFrame(null); setError(null); }
   async function run(play: boolean, fresh = false) {
-    if (flight.current || props.disabled || scanning) return;
+    if (flight.current || props.disabled || scanning || linked && !fresh) return;
     setError(null);
     try {
       if (fresh) {
@@ -131,8 +136,9 @@ export function StoryFork(props: Props) {
     </div>
     <p className="hint">Scales {pair ? 'both heads' : 'this head'} at all input positions {duration === 'prediction' ? 'for the selected prediction, then restores the source settings.' : 'for each prediction from here onward.'} Both paths keep the recorded sampling settings and step-by-step draws.{selectionEdits(props.source).length > 0 && ' The reference keeps the captured edits and their expiry. Your change replaces the same head or adds another head.'}</p>
     <div className="continuation-actions"><button type="button" className="primary" disabled={busy || scanning || props.disabled} onClick={() => void run(true, true)}>{plan ? 'Start new branch comparison' : 'Compare from this token'}</button>
-      {plan && <><button type="button" disabled={busy || scanning || finished || props.disabled} onClick={() => void run(false)}>Step comparison</button><button type="button" disabled={busy || scanning || finished || props.disabled} onClick={() => void run(true)}>Play comparison</button><button type="button" disabled={!busy} onClick={stop}>Stop comparison</button><button type="button" onClick={clear}>Clear comparison</button><button type="button" disabled={busy} onClick={download}>Download branch comparison</button></>}
+      {plan && <><button type="button" disabled={busy || scanning || finished || props.disabled || linked} onClick={() => void run(false)}>Step comparison</button><button type="button" disabled={busy || scanning || finished || props.disabled || linked} onClick={() => void run(true)}>Play comparison</button><button type="button" disabled={!busy} onClick={stop}>Stop comparison</button><button type="button" onClick={clear}>Clear comparison</button><button type="button" disabled={busy} onClick={download}>Download branch comparison</button></>}
     </div>
+    {linked && !finished && <p className="hint">These paths belong to a shared story comparison. Resume both together in Compare interaction maps across story tokens above.</p>}
     {preview && (pair || preview.edit.layer === props.head.layer && preview.edit.head === props.head.head && preview.edit.factor === factor) && <BranchProbabilities plan={preview} tokenizer={props.tokenizer} client={props.analysisClient} label="Scanned head probability preview" />}
     {error && <p role="alert" className="error">{error}</p>}
     {plan && frame && <>

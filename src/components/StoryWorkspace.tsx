@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, useRef, type ReactNode } from 'react';
 import type { ModelManifest } from '../engine/contracts';
 import { forkEditLabel } from '../story-fork';
-import { emptyWorkspace, nodeRoute, parseWorkspace, type StoryWorkspace, type StoryRoot, type StoryNode } from '../story-workspace';
+import { emptyWorkspace, nodeRoute, parseWorkspace, type StoryWorkspace, type StoryRoot, type StoryNode, type SharedStoryGroup } from '../story-workspace';
 import type { BpeDocument } from '../engine/bpe';
 import { StoryHeatmapComparison } from './StoryHeatmapComparison';
 interface Store { data: StoryWorkspace; saveRoot: (root: StoryRoot) => void; saveNode: (node: StoryNode) => void; navigate: (id: string) => void; focus: (id: string) => void; reset: (remount?: boolean) => void; heatmapBusy: boolean; setInspectorScanning: (value: boolean) => void }
@@ -17,6 +17,11 @@ export function StoryWorkspaceProvider({ manifest, tokenizer, inputKey, children
   useEffect(() => { if (input.current !== inputKey) { input.current = inputKey; reset(); } }, [inputKey]);
   const saveRoot = useCallback((root: StoryRoot) => setData(old => ({ ...old, root })), []);
   const saveNode = useCallback((node: StoryNode) => setData(old => ({ ...old, nodes: old.nodes.some(n => n.id === node.id) ? old.nodes.map(n => n.id === node.id ? node : n) : [...old.nodes, node], route: [...nodeRoute(old.nodes, node.parentId ?? ''), node.id] })), []);
+  const saveShared = useCallback((group: SharedStoryGroup, nodes: [StoryNode,StoryNode]) => setData(old => {
+    const byId = new Map(nodes.map(node => [node.id,node]));
+    return { ...old, nodes:[...old.nodes.map(node => byId.get(node.id) ?? node),...nodes.filter(node => !old.nodes.some(saved => saved.id === node.id))],
+      sharedForks:old.sharedForks?.some(saved => saved.id === group.id) ? old.sharedForks.map(saved => saved.id === group.id ? group : saved) : [...(old.sharedForks ?? []),group] };
+  }),[]);
   function focus(id: string) { setData(old => ({ ...old, route: nodeRoute(old.nodes, id) })); }
   function navigate(id: string) { setData(old => ({ ...old, route: nodeRoute(old.nodes, id) })); setNavigation(n => n + 1); }
   useEffect(() => {
@@ -43,11 +48,11 @@ export function StoryWorkspaceProvider({ manifest, tokenizer, inputKey, children
       {error && <p role="alert" className="error">{error}</p>}
       {data.root && <nav aria-label="Story branch map"><button type="button" aria-current={data.route.length === 0 ? 'location' : undefined} onClick={() => navigate('')}>Source story</button>
         {data.nodes.map((node, index) => <button type="button" key={node.id} style={{ marginLeft: `${Math.min(nodeRoute(data.nodes, node.id).length, 6) * 12}px` }} aria-current={data.route.at(-1) === node.id ? 'location' : undefined} onClick={() => navigate(node.id)}>
-          <strong>Comparison {index + 1}</strong><span>Step {node.plan.source.step} · {forkEditLabel(node.plan)} · {node.plan.duration === 'prediction' ? 'once' : 'onward'}</span><small>{node.parentId ? `From comparison ${data.nodes.findIndex(n => n.id === node.parentId) + 1}` : 'From source story'} · {node.plan.source.branch === 'original' ? 'source settings' : 'changed path'}</small>
+          <strong>Comparison {index + 1}</strong><span>Step {node.plan.source.step} · {forkEditLabel(node.plan)} · {node.plan.duration === 'prediction' ? 'once' : 'onward'}</span><small>{node.parentId ? `From comparison ${data.nodes.findIndex(n => n.id === node.parentId) + 1}` : 'From source story'} · {node.plan.source.branch === 'original' ? 'source settings' : 'changed path'}{data.sharedForks?.flatMap((group,i) => group.nodeIds.includes(node.id) ? [` · Shared ${i+1} · ${group.nodeIds[0] === node.id ? 'A' : 'B'}`] : [])}</small>
         </button>)}
       </nav>}
     </section>
-    {data.root && <StoryHeatmapComparison workspace={data} manifest={manifest} tokenizer={tokenizer} disabled={inspectorScanning} onBusy={setHeatmapBusy} onOpenStory={navigate} />}
+    {data.root && <StoryHeatmapComparison workspace={data} manifest={manifest} tokenizer={tokenizer} disabled={inspectorScanning} onBusy={setHeatmapBusy} onOpenStory={navigate} onSaveShared={saveShared} />}
     {children(data, navigation)}
   </Context.Provider>;
 }

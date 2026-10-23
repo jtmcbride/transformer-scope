@@ -276,7 +276,7 @@ test('hosted continuation generates the independent original and edited story to
   const workspaceDownload = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download workspace', exact: true }).click();
   const savedWorkspace = JSON.parse(await readFile((await (await workspaceDownload).path())!, 'utf8'));
-  expect(savedWorkspace.version).toBe(2);
+  expect(savedWorkspace.version).toBe(3);
   expect(savedWorkspace.nodes).toHaveLength(2);
   expect(savedWorkspace.nodes[1].plan.additionalEdits).toEqual(nestedRecord.plan.additionalEdits);
   expect(savedWorkspace.nodes[1].frame).toEqual(nestedRecord.frame);
@@ -293,6 +293,31 @@ test('hosted continuation generates the independent original and edited story to
   await differenceMap.locator('.pair-map-cell').first().click();
   await expect(mapComparison.getByTestId('compared-interaction-difference')).toHaveText('0.0000 pp');
   await mapComparison.screenshot({ path: testInfo.outputPath('hosted-compared-story-heatmaps.png') });
+  await differenceMap.locator('button[data-map-row="4"][data-map-column="5"]').click();
+  const shared = mapComparison.getByRole('region', { name: 'Shared story continuations', exact: true });
+  await shared.getByLabel('Shared continuation token limit').fill('2');
+  await shared.getByRole('button', { name: 'Branch both stories with this pair', exact: true }).click();
+  await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.', { timeout: 60000 });
+  const sharedDownload = page.waitForEvent('download');
+  await shared.getByRole('button', { name: 'Download shared comparison', exact: true }).click();
+  const sharedRecord = JSON.parse(await readFile((await (await sharedDownload).path())!, 'utf8'));
+  expect(sharedRecord.complete).toBe(true);
+  sharedRecord.nodes.forEach((node: any) => {
+    expect(node.parentId).toBe(savedWorkspace.nodes[1].id);
+    expect([node.plan.edit, ...node.plan.additionalEdits].map((edit: any) => [edit.layer, edit.head, edit.factor])).toEqual([[1,0,1],[1,1,1]]);
+    for (const branch of ['original','edited']) {
+      expect(node.frame[branch].choices.map((choice: any) => choice.tokenId)).toEqual(example.edited.choices.slice(1,3).map(choice => choice.tokenId));
+      node.frame[branch].choices.forEach((choice: any, i: number) => expect(choice.probability).toBeCloseTo(example.edited.choices[i+1].probability,5));
+    }
+  });
+  await testInfo.attach('hosted-shared-story-comparison', { body: JSON.stringify(sharedRecord), contentType: 'application/json' });
+  await shared.screenshot({ path: testInfo.outputPath('hosted-shared-continuations.png') });
+  await page.reload(); await page.locator('.story-map-comparison > summary').click();
+  await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.');
+  await shared.getByRole('button', { name: 'Open B comparison', exact: true }).click();
+  await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.');
+  await fork.getByRole('button', { name: /^Inspect with head change token 8:/ }).click();
+  await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60000 });
   await page.getByRole('region', { name: 'Story branch workspace' }).screenshot({ path: testInfo.outputPath('hosted-branch-map.png') });
 });
 

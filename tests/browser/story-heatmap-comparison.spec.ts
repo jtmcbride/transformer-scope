@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import reference from '../fixtures/story-heatmap-comparison-reference.json' with { type:'json' };
+import sharedReference from '../fixtures/story-shared-forks-reference.json' with { type:'json' };
 const key = (edits:{layer:number;head:number;factor:number}[]) => edits.map(e=>`${e.layer}:${e.head}:${e.factor}`).join('|');
 async function download(page:Page,name:string) {
   const waiting=page.waitForEvent('download');await page.getByRole('button',{name,exact:true}).click();
@@ -64,8 +65,40 @@ test('compares real branched-token maps and differences against PyTorch, with sy
   await panel.getByRole('button',{name:'Open story A',exact:true}).click();await expect(page.getByTestId('selected-token-result')).toBeVisible({timeout:60000});
   await expect(panel.getByTestId('comparison-map-status')).toContainText('120 matching combinations');
   const after=await download(page,'Download workspace');expect(after.root).toEqual(before.root);expect(after.nodes).toEqual(before.nodes);
-  await expect(page.getByRole('alert')).toHaveCount(0);
+  await panel.getByRole('button',{name:'Swap A and B',exact:true}).click();
+  const shared=panel.getByRole('region',{name:'Shared story continuations',exact:true});
+  await panel.getByRole('button',{name:'Set up both continuations',exact:true}).click();await expect(shared.getByLabel('Shared head-change duration')).toBeFocused();
+  const records=[];
+  for(const [i,duration] of ['continuation','prediction'].entries()){
+    await shared.getByLabel('Shared head-change duration').selectOption(duration);await shared.getByLabel('Shared continuation token limit').fill('6');
+    await shared.getByRole('button',{name:'Branch both stories with this pair',exact:true}).click();
+    await expect(panel.getByRole('button',{name:'Scan both tokens',exact:true})).toBeDisabled();await expect(panel.getByLabel('Token A position')).toBeDisabled();
+    await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.',{timeout:60000});
+    const record=await download(page,'Download shared comparison');records.push(record);expect(record.complete).toBe(true);expect(record.nodes).toHaveLength(2);
+    record.nodes.forEach((node:any,side:number)=>{const expected=sharedReference.cases[i];expect(node.parentId).toBe(before.nodes[0].id);expect(node.plan.source.prefix).toEqual(expected.plans[side].source.prefix);expect([node.plan.edit,...node.plan.additionalEdits]).toEqual(strongest.edits);expect(node.plan.duration).toBe(duration);assertSharedFrame(node.frame,expected.frames[side]);});
+  }
+  await shared.screenshot({path:info.outputPath('shared-story-continuations.png')});
+  await page.setViewportSize({width:390,height:844});expect(await shared.evaluate(el=>el.scrollWidth<=el.clientWidth+1&&el.getBoundingClientRect().right<=innerWidth)).toBe(true);
+  if(info.project.use.hasTouch){for(const control of [shared.getByLabel('Shared head-change duration'),shared.getByRole('button',{name:'Branch both stories with this pair',exact:true})])expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);}
+  await shared.screenshot({path:info.outputPath('shared-story-continuations-mobile.png')});
+  await page.setViewportSize({width:1440,height:1100});
+  const workspace=await download(page,'Download workspace');expect(workspace.version).toBe(3);expect(workspace.nodes).toHaveLength(5);expect(workspace.sharedForks).toHaveLength(2);expect(workspace.root).toEqual(before.root);expect(workspace.nodes[0]).toEqual(before.nodes[0]);
+  expect(workspace.sharedForks[0]).toEqual(records[0].group);expect(workspace.sharedForks[1]).toEqual(records[1].group);
+  await page.reload();await page.locator('.story-map-comparison > summary').click();await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.');
+  await shared.getByLabel('Saved shared continuation').selectOption(records[0].group.id);expect((await download(page,'Download shared comparison')).nodes).toEqual(records[0].nodes);
+  await shared.getByRole('button',{name:'Open A comparison',exact:true}).click();
+  await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.');
+  await page.getByRole('button',{name:/^Inspect with head change token 8:/}).click();
+  await expect(page.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced',{timeout:60000});
+  expect(parseFloat(await page.getByTestId('selected-token-probability').innerText())/100).toBeCloseTo(sharedReference.cases[0].frames[0].edited.choices[1].probability,5);
+  await page.getByLabel('Branch new-token limit').fill('1');await page.getByRole('button',{name:'Compare from this token',exact:true}).click();await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.',{timeout:60000});
+  const nested=await download(page,'Download workspace');expect(nested.nodes.at(-1).parentId).toBe(records[0].nodes[0].id);expect(nested.sharedForks).toEqual(workspace.sharedForks);
+  await page.getByLabel('Open story workspace').setInputFiles({name:'shared-workspace.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(workspace))});
+  expect((await download(page,'Download workspace')).sharedForks).toEqual(workspace.sharedForks);
+  const invalid=structuredClone(workspace);invalid.sharedForks[0].nodeIds[1]='missing';await page.getByLabel('Open story workspace').setInputFiles({name:'bad-shared-workspace.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(invalid))});
+  await expect(page.getByRole('alert')).toContainText('Invalid shared comparison links');expect((await download(page,'Download workspace')).nodes).toEqual(workspace.nodes);
 });
+function assertSharedFrame(actual:any,expected:any){expect(actual.step).toBe(expected.step);for(const branch of ['original','edited']){expect(actual[branch].tokenIds).toEqual(expected[branch].tokenIds);expect(actual[branch].finish).toBe(expected[branch].finish);actual[branch].choices.forEach((choice:any,i:number)=>expect(choice.probability).toBeCloseTo(expected[branch].choices[i].probability,5));}}
 test('partial comparisons keep unmatched cells missing, cancel on source changes, and exclude competing scans',async({page})=>{
   test.setTimeout(240000);
   await page.route('**/model.worker-*.js',async route=>{const response=await route.fetch();await route.fulfill({response,body:`${await response.text()}\n{const dispatch=self.onmessage;self.onmessage=e=>{if(e.data?.command==='BASELINE'){console.info('comparison-baseline');setTimeout(()=>dispatch.call(self,e),600);}else dispatch.call(self,e);};}`});});
@@ -93,4 +126,36 @@ test('partial comparisons keep unmatched cells missing, cancel on source changes
   await expect(page.locator('.fork-status')).toContainText('Comparison paused after');
   await panel.getByRole('button',{name:'Stop map comparison',exact:true}).click();
   await page.getByRole('button',{name:'Reset story',exact:true}).click();await expect(page.locator('.story-map-comparison')).toHaveCount(0);await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+test('shared branching keeps atomic steps on worker failure, stop, close, reload and resume',async({page})=>{
+  test.setTimeout(240000);const panel=await ready(page);
+  await panel.getByRole('button',{name:'Scan both tokens',exact:true}).click();await expect(panel.getByTestId('comparison-map-status')).toContainText('120 matching combinations',{timeout:180000});
+  const strongest=[...reference.differences].sort((a,b)=>Math.abs(b.difference)-Math.abs(a.difference))[0];
+  await panel.getByRole('article',{name:'Interaction difference map',exact:true}).locator(`button[data-pair-key="${key(strongest.edits)}"]`).first().click();
+  const shared=panel.getByRole('region',{name:'Shared story continuations',exact:true});let fail=true;
+  await page.route('**/model.worker-*.js',async route=>{const response=await route.fetch();await route.fulfill({response,body:`${await response.text()}\n{let n=0;const dispatch=self.onmessage;self.onmessage=e=>{if(e.data?.command==='BASELINE'){const count=++n;console.info('shared-baseline-'+count);setTimeout(()=>{if(${fail}&&count===4)throw new Error('Shared B failure');dispatch.call(self,e);},600);}else dispatch.call(self,e);};}`});});
+  await shared.getByRole('button',{name:'Branch both stories with this pair',exact:true}).click();await expect(shared.getByRole('alert')).toContainText('Shared B failure',{timeout:60000});
+  let record=await download(page,'Download shared comparison');expect(record.complete).toBe(false);expect(record.nodes.map((n:any)=>n.frame.step)).toEqual([0,0]);
+  fail=false;await shared.getByRole('button',{name:'Step both comparisons',exact:true}).click();await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations paused after 1 step.',{timeout:60000});
+  record=await download(page,'Download shared comparison');expect(record.nodes.map((n:any)=>n.frame.step)).toEqual([1,1]);
+  let pending=page.waitForEvent('console',m=>m.text()==='shared-baseline-3');await shared.getByRole('button',{name:'Play both comparisons',exact:true}).click();await pending;
+  await shared.getByRole('button',{name:'Stop shared continuations',exact:true}).click();expect((await download(page,'Download shared comparison')).nodes).toEqual(record.nodes);
+  pending=page.waitForEvent('console',m=>m.text()==='shared-baseline-3');await shared.getByRole('button',{name:'Play both comparisons',exact:true}).click();await pending;
+  await page.locator('.story-map-comparison > summary').click();await expect(page.getByRole('button',{name:'Scan head pairs',exact:true})).toBeEnabled();
+  await page.locator('.story-map-comparison > summary').click();expect((await download(page,'Download shared comparison')).nodes).toEqual(record.nodes);
+  await page.reload();await page.locator('.story-map-comparison > summary').click();await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations paused after 1 step.');
+  const pausedWorkspace=await download(page,'Download workspace');
+  pending=page.waitForEvent('console',m=>m.text()==='shared-baseline-3');await shared.getByRole('button',{name:'Play both comparisons',exact:true}).click();await pending;
+  await page.getByRole('button',{name:'Reset story',exact:true}).click();await expect(panel).toHaveCount(0);
+  await page.getByLabel('Open story workspace').setInputFiles({name:'paused-shared.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(pausedWorkspace))});
+  await page.locator('.story-map-comparison > summary').click();await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations paused after 1 step.');
+  await shared.getByRole('button',{name:'Open A comparison',exact:true}).click();await expect(page.getByRole('button',{name:'Play comparison',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Step comparison',exact:true})).toBeDisabled();
+  await shared.getByRole('button',{name:'Play both comparisons',exact:true}).click();await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.',{timeout:60000});await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.');
+  record=await download(page,'Download shared comparison');record.nodes.forEach((n:any,i:number)=>assertSharedFrame(n.frame,sharedReference.cases[0].frames[i]));
+  const workspace=await download(page,'Download workspace');expect(workspace.nodes).toHaveLength(3);expect(workspace.sharedForks).toEqual([record.group]);
+  await panel.getByRole('button',{name:'Scan both tokens',exact:true}).click();await shared.getByRole('button',{name:'Open A comparison',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Scan head pairs',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Start new branch comparison',exact:true})).toBeDisabled();
+  await panel.getByRole('button',{name:'Stop map comparison',exact:true}).click();await expect(page.getByRole('button',{name:'Scan head pairs',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:'Reset story',exact:true}).click();await expect(panel).toHaveCount(0);await expect(page.getByRole('alert')).toHaveCount(0);
 });

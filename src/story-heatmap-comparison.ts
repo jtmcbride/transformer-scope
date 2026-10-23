@@ -15,8 +15,11 @@ export function workspaceStoryPaths(workspace: StoryWorkspace) {
     select: index => selectStoryToken(root.frame,root.tokens.length,branch,index,root.settings,root.edit),
   });
   workspace.nodes.forEach((node,i) => {
+    const groupIndex = workspace.sharedForks?.findIndex(group => group.nodeIds.includes(node.id)) ?? -1;
+    const group = workspace.sharedForks?.[groupIndex];
+    const sharedLabel = group ? ` · Shared ${groupIndex+1} ${group.nodeIds[0] === node.id ? 'A' : 'B'}` : '';
     for (const branch of ['original','edited'] as const) if (node.frame[branch]?.choices.length) paths.push({
-      id: JSON.stringify([node.id,branch]), label: `Comparison ${i+1} · ${branch === 'original' ? 'Keep source settings' : 'With head change'}`, nodeId: node.id,
+      id: JSON.stringify([node.id,branch]), label: `Comparison ${i+1}${sharedLabel} · ${branch === 'original' ? 'Keep source settings' : 'With head change'}`, nodeId: node.id,
       count: node.frame[branch]!.choices.length, start: node.plan.source.step,
       select: index => selectForkToken(node.plan,node.frame,branch,index),
     });

@@ -161,7 +161,7 @@ for (const [index, duration] of ['continuation', 'prediction'].entries()) test(`
   expect(parseFloat(await report.getByTestId('combined-probability').innerText())/100).toBeCloseTo(selected.after, 5);
   wait = page.waitForEvent('download'); await page.getByRole('button', { name: 'Download workspace', exact: true }).click();
   const workspace = JSON.parse(await readFile((await (await wait).path())!, 'utf8'));
-  expect(workspace.version).toBe(2); expect(workspace.nodes[0].plan).toEqual(saved.plan); expect(workspace.nodes[0].frame).toEqual(saved.frame);
+  expect(workspace.version).toBe(3); expect(workspace.nodes[0].plan).toEqual(saved.plan); expect(workspace.nodes[0].frame).toEqual(saved.frame);
   await page.getByLabel('Open story workspace').setInputFiles({ name: 'pair-workspace.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(workspace)) });
   await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
   expect(await page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button').count()).toBe(3);

@@ -11,7 +11,7 @@ beforeAll(async () => {await tf.setBackend('cpu');await tf.ready();});
 const config = loadShippedArtifact('tinystories').manifest.config;
 function synthetic() {
   const plans=structuredClone(reference.cases[0].plans) as [ForkPlan,ForkPlan],logits=[-99,-99,-99,0,.1,.2];
-  for(const plan of plans) {plan.source.settings={temperature:.8,topP:.9,seed:23,maxTokens:6};plan.source.choice=chooseToken(logits,plan.source.settings,drawAt(23,plan.source.step-1));}
+  plans.forEach((plan,i)=>{plan.source.step+=i*2;plan.source.settings={temperature:.8,topP:.9,seed:i?97:23,maxTokens:6};plan.source.choice=chooseToken(logits,plan.source.settings,drawAt(plan.source.settings.seed,plan.source.step-1));});
   return {plans,logits};
 }
 it('reproduces four independent PyTorch continuations for sustained, temporary, inherited and identity pairs without retained tensors',async()=>{
@@ -53,7 +53,7 @@ it('publishes neither source on second-source failure, cancellation, or replay m
   await shared.step(async()=>logits);const resumed=new SharedStoryFork(plans,config);resumed.restore(shared.frames);
   while(!shared.finished){await shared.step(async()=>logits);await resumed.step(async()=>logits);}
   expect(resumed.frames).toEqual(shared.frames);
-  shared.frames.forEach((frame,side)=>{expect(frame.edited).toEqual(frame.original);expect(frame.original.choices[0]).toEqual(plans[side].source.choice);expect(proposedEdits(shared.plans[side])).toEqual(proposedEdits(plans[0]));});
+  shared.frames.forEach((frame,side)=>{expect(frame.edited).toEqual(frame.original);frame.original.choices.forEach((choice,i)=>expect(choice).toEqual(chooseToken(logits,plans[side].source.settings,drawAt(plans[side].source.settings.seed,plans[side].source.step-1+i))));expect(frame.original.choices[0]).toEqual(plans[side].source.choice);expect(proposedEdits(shared.plans[side])).toEqual(proposedEdits(plans[0]));});
 });
 it('retains an ended source while the other continues, and rejects mismatched paused shared frames',async()=>{
   const {plans,logits}=synthetic();plans[0].source.choice=chooseToken([-99,4,-99,0,.1,.2],plans[0].source.settings,drawAt(23,plans[0].source.step-1));

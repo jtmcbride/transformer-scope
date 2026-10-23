@@ -14,9 +14,9 @@ import { StoryFork } from './StoryFork';
 interface Props {
   selection: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; count: number;
   onClose: () => void; onNavigate: (index: number) => void; onForkStart: () => void;
-  startStep?: number; depth?: number; parentId?: string;
+  initialTargetTokenId?: number; startStep?: number; depth?: number; parentId?: string;
 }
-export function StoryTokenInspector({ selection, manifest, tokenizer, count, onClose, onNavigate, onForkStart, startStep = 1, depth = 0, parentId }: Props) {
+export function StoryTokenInspector({ selection, manifest, tokenizer, count, onClose, onNavigate, onForkStart, startStep = 1, depth = 0, parentId, initialTargetTokenId }: Props) {
   const workspace = useStoryWorkspace();
   const currentNode = workspace?.data.nodes.find(n => n.id === workspace.data.route[depth]);
   const initialChild = JSON.stringify(currentNode?.plan.source) === JSON.stringify(selection) && workspace?.data.route[depth + 1];
@@ -99,7 +99,7 @@ export function StoryTokenInspector({ selection, manifest, tokenizer, count, onC
         onSelect={setNode} history={{ edited: edits.length > 0 }} />
     </>}
     </>}
-    <StoryFork source={selection} manifest={manifest} tokenizer={tokenizer} head={{ layer, head }} disabled={!result || childActive} onStart={onForkStart} onInspectChange={setChildActive} depth={depth} parentId={parentId} analysisClient={result?.client} onChooseHead={head => setNode({ kind: 'head', ...head })} />
+    <StoryFork initialTargetTokenId={initialTargetTokenId} source={selection} manifest={manifest} tokenizer={tokenizer} head={{ layer, head }} disabled={!result || childActive} onStart={onForkStart} onInspectChange={setChildActive} depth={depth} parentId={parentId} analysisClient={result?.client} onChooseHead={head => setNode({ kind: 'head', ...head })} />
     {!childActive && result && <>
       {weights?.error && <p role="alert" className="error">Could not read attention: {weights.error}</p>}
       <div className="historical-node"><p className="eyebrow">Inside the selected stage</p>

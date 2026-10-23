@@ -9,6 +9,7 @@ import { interactionFill } from '../head-pair-heatmap';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, withStoryPrefix } from '../workers/story-runtime';
 import '../story-interaction-trace.css';
+import { useStoryWorkspace } from './StoryWorkspace';
 
 interface Props {group:SharedStoryGroup;nodes:[StoryNode,StoryNode];manifest:ModelManifest;tokenizer:BpeDocument;disabled:boolean;onBusy:(value:boolean)=>void;onOpenStory:(id:string)=>void}
 type Trace = {key:string;rows:InteractionTracks;busy:boolean;status:string;error:string;complete:boolean};
@@ -16,6 +17,7 @@ const EMPTY:InteractionTracks=[[],[]];
 const points=(n:number)=>{const value=Number((n*100).toFixed(4));return `${value>0?'+':''}${value.toFixed(4)} pp`;};
 const probability=(n:number)=>`${(n*100).toFixed(4)}%`;
 export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,onBusy,onOpenStory}:Props){
+  const workspace = useStoryWorkspace();
   const [branch,setBranch]=useState<'original'|'edited'>('edited'),[trace,setTrace]=useState<Trace|null>(null),[selected,setSelected]=useState(0),[focused,setFocused]=useState('');
   const [mode,setMode]=useState<'generated'|'fixed'>('generated'),[chosenToken,setChosenToken]=useState(()=>nodes[0].frame.edited?.choices[0]?.tokenId??nodes[0].plan.source.choice.tokenId);
   const [metric,setMetric]=useState<'interaction'|'probability'>('interaction');
@@ -118,6 +120,7 @@ export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,o
             <button type="button" disabled={busy} onClick={()=>pin(point.tokenId)}>Track generated token {tokenLabel(tokenizer,point.tokenId)} from {letter}</button>
             <ul aria-label={`Story ${letter} prediction alternatives`}>{point.alternatives.map(candidate=><li key={candidate.tokenId}><button type="button" disabled={busy} onClick={()=>pin(candidate.tokenId)} aria-label={`Track alternative ${tokenLabel(tokenizer,candidate.tokenId)}, token ${candidate.tokenId} from ${letter}`}>{tokenLabel(tokenizer,candidate.tokenId)} · {probability(candidate.probability)}</button></li>)}</ul>
           </div>
+          <button type="button" disabled={busy || disabled} onClick={()=>{stop();workspace?.openPairScan({nodeId:node.id,branch,index:point.index,targetTokenId:point.targetTokenId});}}>Scan head pairs for {letter}’s chosen token</button>
           <button type="button" disabled={busy} onClick={()=>{stop();onOpenStory(node.id);}}>Open {letter} comparison to inspect step {point.step}</button>
         </article>;
       })}</div>

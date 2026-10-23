@@ -8,20 +8,20 @@ import { predictStory } from '../workers/story-runtime';
 import { measureStoryProbabilities, type StoryProbabilities as Report } from '../story-probabilities';
 const percent = (n: number) => `${(n * 100).toFixed(4)}%`;
 const change = (n: number) => `${n > 0 ? '+' : ''}${(n * 100).toFixed(4)} percentage points`;
-export function BranchProbabilities({ plan, tokenizer, client, label: regionLabel = 'Head change probabilities' }: { plan: ForkPlan; tokenizer: BpeDocument; client?: ModelClient; label?: string }) {
-  const [report, setReport] = useState<{ plan: ForkPlan; client: ModelClient; value: Report } | null>(null), [error, setError] = useState(''), [retry, setRetry] = useState(0);
+export function BranchProbabilities({ plan, tokenizer, client, label: regionLabel = 'Head change probabilities', targetTokenId = plan.source.choice.tokenId }: { plan: ForkPlan; tokenizer: BpeDocument; client?: ModelClient; label?: string; targetTokenId?: number }) {
+  const [report, setReport] = useState<{ plan: ForkPlan; client: ModelClient; targetTokenId: number; value: Report } | null>(null), [error, setError] = useState(''), [retry, setRetry] = useState(0);
   useEffect(() => {
     if (!client) return;
     let current = true;
     setError('');
     void (async () => {
-      const value = await measureStoryProbabilities(plan, (ids, edits) => predictStory(client, ids, edits), () => !current);
+      const value = await measureStoryProbabilities(plan, (ids, edits) => predictStory(client, ids, edits), () => !current, targetTokenId);
       if (!current || !value) return;
-      setReport({ plan, client, value });
+      setReport({ plan, client, targetTokenId, value });
     })().catch(e => { if (current) setError(String(e)); });
     return () => { current = false; };
-  }, [plan, client, retry]);
-  const data = report?.plan === plan && report.client === client ? report.value : null;
+  }, [plan, client, retry, targetTokenId]);
+  const data = report?.plan === plan && report.client === client && report.targetTokenId === targetTokenId ? report.value : null;
   const label = (id: number) => tokenLabel(tokenizer, id);
   function row(r: BranchProbabilityRow, selected = false) {
     return <li key={r.tokenId} className={selected ? 'probability-selected' : ''} data-token-id={r.tokenId}>

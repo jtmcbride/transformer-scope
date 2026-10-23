@@ -1,0 +1,26 @@
+import { expect, test } from '@playwright/test';
+import { chosenComparisonWorkflow, openChosenComparison } from '../support/chosen-token-scan-comparison';
+test('same-token pair scans rank probability-effect gaps and branch both stories with the selected pair',async({page},info)=>{test.setTimeout(360000);await chosenComparisonWorkflow(page,info);});
+test('fixed-target comparison cancels stale scans, retains only matched pairs, and clears branch drafts on target change',async({page})=>{
+  test.setTimeout(180000);
+  await page.route('**/model.worker-*.js',async route=>{const response=await route.fetch();await route.fulfill({response,body:`${await response.text()}\n{const dispatch=self.onmessage;self.onmessage=e=>{if(e.data?.command==='COMPARE'){console.info('paired-target-compare');setTimeout(()=>dispatch.call(self,e),80);}else dispatch.call(self,e);};}`});});
+  const panel=await openChosenComparison(page);
+  await panel.getByRole('button',{name:'Scan both tokens',exact:true}).click();
+  await expect(panel.getByTestId('comparison-map-status')).toContainText('B: 0 / 120',{timeout:60000});
+  const map=panel.getByRole('article',{name:'Token A probability change map',exact:true});
+  await expect(map.locator('.pair-map-cell').first()).toBeVisible({timeout:60000});
+  await panel.getByRole('button',{name:'Stop map comparison',exact:true}).click();
+  await map.locator('.pair-map-cell').first().click();
+  await expect(panel.getByRole('button',{name:'Set up both continuations',exact:true})).toBeDisabled();
+  await expect(panel.getByRole('article',{name:'Probability effect difference map',exact:true}).locator('.pair-map-cell')).toHaveCount(0);
+  const pending=page.waitForEvent('console',m=>m.text()==='paired-target-compare');await panel.getByRole('button',{name:'Scan both tokens',exact:true}).click();await pending;
+  await panel.getByLabel('Shared scan target token').selectOption('1');
+  await expect(panel.getByTestId('comparison-map-status')).toHaveText('Ready to compare maps. A: 0 / 120 · B: 0 / 120 · 0 matching combinations.');
+  await expect(panel.getByRole('button',{name:'Download heatmap comparison',exact:true})).toBeDisabled();
+  await expect(panel.getByRole('button',{name:'Set up both continuations',exact:true})).toHaveCount(0);
+  await panel.getByRole('button',{name:'Scan both tokens',exact:true}).click();
+  await panel.getByLabel('Comparison target mode').selectOption('generated');
+  await expect(panel.getByTestId('comparison-map-status')).toContainText('0 matching combinations.');
+  await page.locator('.story-map-comparison > summary').click();await page.locator('.story-map-comparison > summary').click();
+  await expect(panel.getByRole('button',{name:'Scan both tokens',exact:true})).toBeEnabled();await expect(page.getByRole('alert')).toHaveCount(0);
+});

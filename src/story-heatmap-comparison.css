@@ -45,3 +45,8 @@
 .shared-story-results > article > button { padding:8px 12px; min-height:38px; font-size:12px; }
 .shared-story-path .story-prose { font:18px/1.75 Georgia,serif; min-height:72px; }
 @media(pointer:coarse) { .story-map-comparison .shared-story-branches button,.story-map-comparison .shared-story-branches select,.story-map-comparison .shared-story-branches input { min-height:44px; } }
+.shared-pair-preview { margin:16px 0; padding:16px; background:#f6f7fa; border-left:3px solid #7963cb; }
+.shared-pair-preview dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; font-size:13px; }
+.shared-pair-preview dd { margin:8px 0 0; font-variant-numeric:tabular-nums; }
+@media(max-width:700px) { .shared-pair-preview dl { grid-template-columns:minmax(0,1fr); } }
+@media(pointer:coarse) { .story-map-comparison .continuation-actions select,.story-map-comparison .continuation-actions button { min-height:44px; } }

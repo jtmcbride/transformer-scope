@@ -8,9 +8,10 @@ import { checkpointKey, type SharedStoryGroup, type StoryNode, type StoryWorkspa
 import { tokenLabel } from '../engine/tokenizer';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
+import type { HeadPairScanRow } from '../story-head-pair-scan';
 import { StoryInteractionTrace } from './StoryInteractionTrace';
 
-export interface SharedBranchDraft { sources: [StorySelection,StorySelection]; parents: [string|null,string|null]; labels: [string,string]; edits: [HeadScaleIntervention,HeadScaleIntervention] }
+export interface SharedBranchDraft { targetTokenId?: number; effects?: [HeadPairScanRow,HeadPairScanRow]; sources: [StorySelection,StorySelection]; parents: [string|null,string|null]; labels: [string,string]; edits: [HeadScaleIntervention,HeadScaleIntervention] }
 interface Props { workspace: StoryWorkspace; draft?: SharedBranchDraft; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onBusy: (value:boolean)=>void; onSave: (group:SharedStoryGroup,nodes:[StoryNode,StoryNode])=>void; onOpenStory:(id:string)=>void }
 export function SharedStoryBranches({workspace,draft,manifest,tokenizer,disabled,onBusy,onSave,onOpenStory}:Props) {
   const [selected,setSelected]=useState(''),[duration,setDuration]=useState<ForkDuration>('continuation'),[limit,setLimit]=useState(6);
@@ -68,6 +69,7 @@ export function SharedStoryBranches({workspace,draft,manifest,tokenizer,disabled
   return <section className="shared-story-branches" aria-label="Shared story continuations">
     <p className="eyebrow">Try the same change in both contexts</p><h3>Branch both stories with one pair</h3>
     {draft?<><p className="shared-pair-label">{forkEditLabel({source:draft.sources[0],edit:draft.edits[0],additionalEdits:[draft.edits[1]],duration,maxTokens:budget})}</p>
+      {draft.targetTokenId !== undefined && draft.effects && <div className="shared-pair-preview" role="group" aria-label="Chosen-token shared pair preview" data-target-token={draft.targetTokenId}><p><strong>Probability of {tokenLabel(tokenizer,draft.targetTokenId)}</strong> with this pair. The model still chooses the generated tokens normally.</p><dl>{draft.effects.map((row,i) => <div key={i} data-testid={`shared-target-preview-${i}`}><dt>Story {i === 0 ? 'A' : 'B'} · source → with pair</dt><dd>{(row.before*100).toFixed(4)}% → {(row.after*100).toFixed(4)}% · {row.delta>0?'+':''}{(row.delta*100).toFixed(4)} pp</dd></div>)}</dl></div>}
       <div className="continuation-actions"><label>Apply both changes<select aria-label="Shared head-change duration" value={duration} disabled={working||disabled} onChange={event=>setDuration(event.target.value as ForkDuration)}><option value="continuation">From each selected token onward</option><option value="prediction">Only each selected prediction</option></select></label>
         <label>New tokens per path<input aria-label="Shared continuation token limit" type="number" min="1" max={max} value={budget} disabled={working||disabled} onChange={event=>setLimit(Number(event.target.value))}/></label>
         <button type="button" className="primary" disabled={working||disabled||max<1} onClick={()=>void run(true,true)}>Branch both stories with this pair</button></div>

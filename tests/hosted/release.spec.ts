@@ -330,6 +330,23 @@ test('hosted continuation generates the independent original and edited story to
   await expect(trace.getByRole('article', { name: 'Story B selected interaction', exact: true })).toContainText(`story step ${traceRecord.nodes[1].plan.source.step+1}`);
   await testInfo.attach('hosted-token-interactions', { body: JSON.stringify(traceRecord), contentType: 'application/json' });
   await trace.screenshot({ path: testInfo.outputPath('hosted-interaction-tracks.png') });
+  const fixedToken=traceRecord.rows[0][0].tokenId;
+  await trace.getByLabel('Interaction trajectory target mode').selectOption('fixed');
+  await trace.getByLabel('Chosen next token').selectOption(String(fixedToken));
+  await trace.getByRole('button', { name: 'Measure token-by-token interactions', exact: true }).click();
+  await expect(trace.getByTestId('trajectory-status')).toHaveText('Token interactions complete. 4 / 4 tokens measured.', { timeout: 60000 });
+  const fixedDownload=page.waitForEvent('download'); await trace.getByRole('button',{name:'Download token interactions',exact:true}).click();
+  const fixedRecord=JSON.parse(await readFile((await (await fixedDownload).path())!,'utf8'));
+  expect(fixedRecord.version).toBe(2);expect(fixedRecord.target).toEqual({kind:'fixed',tokenId:fixedToken});expect(fixedRecord.complete).toBe(true);
+  fixedRecord.rows.forEach((rows:any[],side:number)=>rows.forEach((row:any,i:number)=>{
+    expect(row.targetTokenId).toBe(fixedToken);expect(row.tokenId).toBe(traceRecord.rows[side][i].tokenId);expect(Math.abs(row.interaction)).toBeLessThan(1e-12);
+    for(const p of [row.after,...row.individualProbabilities])expect(p).toBeCloseTo(row.before,12);
+    if(i===0)expect(row.before).toBeCloseTo(example.edited.choices[1].probability,5);
+  }));
+  expect(fixedRecord.rows.flat().some((row:any)=>row.tokenId!==row.targetTokenId)).toBe(true);
+  await trace.getByLabel('Interaction trajectory display').selectOption('probability');await expect(trace.locator('.trajectory-probability')).toHaveCount(4);
+  await testInfo.attach('hosted-chosen-token-interactions',{body:JSON.stringify(fixedRecord),contentType:'application/json'});
+  await trace.screenshot({path:testInfo.outputPath('hosted-chosen-token-probabilities.png')});
   await shared.getByRole('button', { name: 'Open B comparison', exact: true }).click();
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.');
   await fork.getByRole('button', { name: /^Inspect with head change token 8:/ }).click();

@@ -1,5 +1,6 @@
 .story-interaction-trace { margin-top:24px; padding:20px 0; border-top:2px solid #8998af; min-width:0; }
 .story-interaction-trace h4 { margin:6px 0 12px; }
+.story-map-comparison .story-interaction-trace select { appearance:none; min-height:44px; padding:8px 28px 8px 10px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%2334425d' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 9px center; }
 .trajectory-scroll { overflow:auto; max-width:100%; padding:4px 2px 12px; border:1px solid #d5dce8; border-radius:5px; scroll-padding:12px; }
 .trajectory-track { padding:12px; }
 .trajectory-track + .trajectory-track { border-top:1px solid #d5dce8; }
@@ -27,3 +28,10 @@
 .trajectory-details dd { font-size:13px; margin:4px 0 0; font-variant-numeric:tabular-nums; }
 .trajectory-details button { padding:9px; margin-top:12px; }
 @media(max-width:700px) { .trajectory-details { grid-template-columns:minmax(0,1fr); } }
+.trajectory-probability { background:linear-gradient(#f7f9fc 99%,#8998af 99%); }
+.trajectory-probability > i { bottom:0; width:28%; }
+.trajectory-probability .trajectory-source-bar { left:16%; background:#c3cbd6; }
+.trajectory-probability .trajectory-pair-bar { left:54%; background:#7965a9; }
+.trajectory-candidates { margin-top:14px; border-top:1px solid #d5dce8; }
+.trajectory-candidates ul { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:6px; }
+.trajectory-candidates button { margin-top:0; font-size:12px; }

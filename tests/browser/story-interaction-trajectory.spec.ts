@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import input from '../fixtures/story-trajectory-workspace.json' with {type:'json'};
 import reference from '../fixtures/story-interaction-trajectories-reference.json' with {type:'json'};
+import fixed from '../fixtures/story-fixed-token-trajectories-reference.json' with {type:'json'};
 
 async function download(page:Page,name:string){
   const waiting=page.waitForEvent('download');await page.getByRole('button',{name,exact:true}).click();
@@ -72,6 +73,14 @@ test('partial traces exclude competing work, keep unmeasured tokens missing, and
   await expect(trace.getByTestId('trajectory-status')).toContainText('1 / 4 tokens measured.',{timeout:60000});
   await trace.getByRole('button',{name:'Stop token trace',exact:true}).click();const partial=await download(page,'Download token interactions');expect(partial.complete).toBe(false);expect(partial.rows.map((r:any[])=>r.length)).toEqual([1,0]);
   await expect(trace.locator('.trajectory-pending')).toHaveCount(3);await expect(trace.getByTestId('trajectory-status')).toContainText('Results are partial.');
+  await trace.getByLabel('Interaction trajectory target mode').selectOption('fixed');
+  await trace.getByLabel('Chosen next token').selectOption(String(fixed.targets[0].tokenId));
+  for(const change of ['token','mode']){
+    const pending=page.waitForEvent('console',m=>m.text()==='trajectory-prefix-1');await trace.getByRole('button',{name:'Measure token-by-token interactions',exact:true}).click();await pending;
+    if(change==='token')await trace.getByLabel('Chosen next token').selectOption(String(workspace.nodes[1].frame.edited.choices[0].tokenId));
+    else await trace.getByLabel('Interaction trajectory target mode').selectOption('generated');
+    await expect(trace.locator('.trajectory-point')).toHaveCount(0);await expect(trace.getByRole('button',{name:'Download token interactions',exact:true})).toBeDisabled();await expect(shared.getByRole('button',{name:'Play both comparisons',exact:true})).toBeEnabled();
+  }
   await shared.getByRole('button',{name:'Play both comparisons',exact:true}).click();await expect(trace.getByRole('button',{name:'Measure token-by-token interactions',exact:true})).toBeDisabled();await expect(trace.locator('.trajectory-point')).toHaveCount(0);
   await expect(trace.getByRole('button',{name:'Download token interactions',exact:true})).toBeDisabled();
   await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.',{timeout:60000});
@@ -83,4 +92,41 @@ test('partial traces exclude competing work, keep unmeasured tokens missing, and
     await expect(trace.getByTestId('trajectory-status')).toHaveText('Ready to measure token interactions. 0 / 12 tokens measured.');await expect(page.getByRole('button',{name:'Scan both tokens',exact:true})).toBeEnabled();
   }
   await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+test('pins a token across both stories with shared probability scales and measurable prediction alternatives',async({page},info)=>{
+  test.setTimeout(240000);let calls=0;page.on('console',m=>{if(m.text()==='fixed-prefix')calls++;});
+  await page.route('**/model.worker-*.js',async route=>{const response=await route.fetch();await route.fulfill({response,body:`${await response.text()}\n{const dispatch=self.onmessage;self.onmessage=e=>{if(e.data?.command==='BASELINE')console.info('fixed-prefix');dispatch.call(self,e);};}`});});
+  const {shared,trace}=await open(page),before=await download(page,'Download workspace'),target=fixed.targets[0];
+  await trace.getByLabel('Interaction trajectory target mode').selectOption('fixed');
+  const generated=new Set(before.nodes.flatMap((node:any)=>[...node.frame.original.choices,...node.frame.edited.choices].map((choice:any)=>choice.tokenId)));
+  const promptOnly=before.root.tokens.find((id:number)=>id!==0&&id!==2&&!generated.has(id));expect(promptOnly).toBeDefined();
+  await trace.getByLabel('Chosen next token').selectOption(String(promptOnly));await expect(trace.getByLabel('Chosen next token')).toHaveValue(String(promptOnly));
+  await trace.getByLabel('Chosen next token').selectOption(String(target.tokenId));
+  async function measure(caseIndex:number,branch:'original'|'edited'){
+    await trace.getByRole('button',{name:'Measure token-by-token interactions',exact:true}).click();await expect(trace.getByTestId('trajectory-status')).toHaveText('Token interactions complete. 12 / 12 tokens measured.',{timeout:60000});
+    const record=await download(page,'Download token interactions');expect(record.version).toBe(2);expect(record.target).toEqual({kind:'fixed',tokenId:target.tokenId});expect(record.complete).toBe(true);
+    for(const side of [0,1])record.rows[side].forEach((point:any,i:number)=>{const r=target.cases[caseIndex][branch][side][i];expect(point.targetTokenId).toBe(target.tokenId);expect(point.tokenId).toBe(r.tokenId);
+      expect(point.recordedProbability).toBe(record.nodes[side].frame[branch].choices[i].probability);
+      for(const field of ['before','after'])expect(point[field]).toBeCloseTo((r as any)[field],5);point.individualProbabilities.forEach((p:number,j:number)=>expect(p).toBeCloseTo(r.individualProbabilities[j],5));expect(Math.abs(point.interaction-r.interaction)).toBeLessThanOrEqual(4*5e-6);
+    });
+    expect(record.rows.flat().some((point:any)=>point.tokenId!==point.targetTokenId)).toBe(true);return record;
+  }
+  const edited=await measure(0,'edited'),count=calls;
+  await trace.getByLabel('Interaction trajectory display').selectOption('probability');const chart=trace.getByRole('region',{name:'Scrollable token interaction tracks',exact:true});await expect(chart).toHaveAttribute('data-metric','probability');
+  const limit=Math.max(...edited.rows.flat().flatMap((p:any)=>[p.before,p.after]));expect(Number(await chart.getAttribute('data-probability-limit'))).toBe(limit);await expect(trace.locator('.trajectory-probability')).toHaveCount(12);
+  await trace.locator('.trajectory-point[data-track="0"][data-offset="1"]').focus();await page.keyboard.press('Enter');await expect(trace.getByRole('button',{pressed:true})).toHaveCount(2);
+  await expect(trace.getByTestId('trajectory-generated-0')).toContainText('Actually generated:');expect(parseFloat(await trace.getByTestId('trajectory-after-0').innerText())/100).toBeCloseTo(edited.rows[0][1].after,6);
+  await trace.screenshot({path:info.outputPath('chosen-token-probabilities.png')});await page.setViewportSize({width:390,height:844});expect(await trace.evaluate(el=>el.scrollWidth<=el.clientWidth+1&&el.getBoundingClientRect().right<=innerWidth)).toBe(true);expect(await chart.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
+  for(const name of ['Chosen next token','Interaction trajectory target mode'])expect((await trace.getByLabel(name).boundingBox())!.height).toBeGreaterThanOrEqual(44- (info.project.use.hasTouch?0:10));
+  await trace.screenshot({path:info.outputPath('chosen-token-mobile.png')});await page.setViewportSize({width:1440,height:1100});
+  await trace.getByLabel('Interaction trajectory display').selectOption('interaction');expect((await download(page,'Download token interactions')).rows).toEqual(edited.rows);expect(calls).toBe(count);
+  await trace.getByLabel('Interaction trajectory paths').selectOption('original');await expect(trace.locator('.trajectory-point')).toHaveCount(0);const original=await measure(0,'original');
+  const alternative=original.rows[0][0].alternatives.find((candidate:any)=>candidate.tokenId!==target.tokenId)!;
+  await trace.getByRole('button',{name:new RegExp('token '+alternative.tokenId+' from A$')}).click();await expect(trace.getByLabel('Chosen next token')).toHaveValue(String(alternative.tokenId));await expect(trace.locator('.trajectory-point')).toHaveCount(0);
+  await trace.getByRole('button',{name:'Measure token-by-token interactions',exact:true}).click();await expect(trace.getByTestId('trajectory-status')).toContainText('Token interactions complete.',{timeout:60000});
+  const pinned=await download(page,'Download token interactions');expect(pinned.rows[0][0].before).toBeCloseTo(alternative.probability,12);expect(pinned.rows.flat().every((point:any)=>point.targetTokenId===alternative.tokenId)).toBe(true);
+  await shared.getByLabel('Saved shared continuation').selectOption('trajectory-group-1');await trace.getByLabel('Interaction trajectory target mode').selectOption('fixed');await trace.getByLabel('Chosen next token').selectOption(String(target.tokenId));const expired=await measure(1,'edited');expect(expired.rows.flat().filter((p:any)=>p.index>0).every((p:any)=>p.interaction===0&&!p.active)).toBe(true);
+  const after=await download(page,'Download workspace');expect(after.root).toEqual(before.root);expect(after.nodes).toEqual(before.nodes);expect(after.sharedForks).toEqual(before.sharedForks);
+  await page.reload();await page.locator('.story-map-comparison > summary').click();await expect(trace.getByLabel('Interaction trajectory target mode')).toHaveValue('generated');await expect(trace.locator('.trajectory-point')).toHaveCount(0);
 });

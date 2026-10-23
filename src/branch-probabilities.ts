@@ -3,6 +3,12 @@ import { logSoftmax } from './engine/comparison';
 import { requireInput } from './engine/contracts';
 export interface BranchProbabilityRow { tokenId: number; before: number; after: number; delta: number; beforeRank: number; afterRank: number }
 export interface BranchProbabilities { selected: BranchProbabilityRow; rows: BranchProbabilityRow[]; beforeChoice: number; afterChoice: number }
+/** Non-additivity in raw probability, measured against one shared source distribution. */
+export function headPairInteraction(before: number, after: number, individuals: readonly number[]): { sumDelta: number; interaction: number } {
+  requireInput(individuals.length === 2 && [before, after, ...individuals].every(p => Number.isFinite(p) && p >= 0 && p <= 1), 'Use two individual probabilities and a shared source probability.');
+  const sumDelta = individuals.reduce((sum, probability) => sum + (probability - before), 0);
+  return { sumDelta, interaction: (after - before) - sumDelta };
+}
 /** Both logits describe the same exact prefix. BOS/PAD stay in softmax but cannot be generated. */
 export function branchProbabilities(before: ArrayLike<number>, after: ArrayLike<number>, selected: number, settings: Sampling, step: number): BranchProbabilities {
   requireInput(before.length === after.length && Number.isInteger(selected) && selected >= 0 && selected < before.length, 'Invalid branch probability comparison.');

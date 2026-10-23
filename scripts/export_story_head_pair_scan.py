@@ -22,7 +22,16 @@ def main():
                                            (sources[1]['source'], 'mute', [(0, 0)]),
                                            (sources[0]['source'], 'opposite', [(0, 2), (2, 0)]),
                                            (edited, 'opposite', [(0, 2), (2, 0)])]:
-            rows = []
+            rows, singles = [], {}
+            token = source['choice']['tokenId']
+            before = source['choice']['probability']
+            def individual(head, factor):
+                key = (*head, factor)
+                if key not in singles:
+                    plan = dict(source=source, edit=edit(head, factor), duration='prediction', maxTokens=1)
+                    logits, _ = model(torch.tensor([source['prefix']]), edits_at(plan, True, 0), capture_activations=False)
+                    singles[key] = float(logits[0, -1].softmax(-1)[token])
+                return singles[key]
             for a, b in itertools.combinations(heads, 2):
                 for first, second in factors:
                     edits = [edit(a, first), edit(b, second)]
@@ -31,23 +40,29 @@ def main():
                     values = logits[0, -1]
                     order = sorted([i for i in range(len(values)) if i not in (0, 2)], key=lambda i: (-float(values[i]), i))
                     probability = float(values.softmax(-1)[source['choice']['tokenId']])
-                    rows.append(dict(edits=edits, after=probability, rank=order.index(source['choice']['tokenId'])+1, choice=order[0]))
-            best_row = max(rows, key=lambda row: abs(row['after']-source['choice']['probability']))
-            best_plan = dict(source=source, edit=best_row['edits'][0], additionalEdits=[best_row['edits'][1]], duration='continuation', maxTokens=6)
-            best = dict(plan=best_plan)
-            for branch in ['original', 'edited']:
-                ids, choices = list(source['prefix']), []
-                for i in range(6):
-                    logits, _ = model(torch.tensor([ids]), edits_at(best_plan, branch == 'edited', i), capture_activations=False)
-                    values = logits[0,-1]
-                    masked = values.clone(); masked[0] = masked[2] = float('-inf')
-                    token = int(masked.argmax())
-                    choices.append(dict(tokenId=token, probability=float(values.softmax(-1)[token])))
-                    ids.append(token)
-                    if token == 1 or len(ids) >= model.config.contextLength:
-                        break
-                best[branch] = dict(tokenIds=ids, choices=choices)
-            cases.append(dict(source=source, strengths=strengths, rows=rows, best=best))
+                    probabilities = [individual(a, first), individual(b, second)]
+                    summed = sum(p-before for p in probabilities)
+                    rows.append(dict(edits=edits, after=probability, rank=order.index(source['choice']['tokenId'])+1, choice=order[0],
+                                     individualProbabilities=probabilities, sumDelta=summed, interaction=(probability-before)-summed))
+            def rollout(best_row):
+                best_plan = dict(source=source, edit=best_row['edits'][0], additionalEdits=[best_row['edits'][1]], duration='continuation', maxTokens=6)
+                best = dict(plan=best_plan)
+                for branch in ['original', 'edited']:
+                    ids, choices = list(source['prefix']), []
+                    for i in range(6):
+                        logits, _ = model(torch.tensor([ids]), edits_at(best_plan, branch == 'edited', i), capture_activations=False)
+                        values = logits[0,-1]
+                        masked = values.clone(); masked[0] = masked[2] = float('-inf')
+                        selected = int(masked.argmax())
+                        choices.append(dict(tokenId=selected, probability=float(values.softmax(-1)[selected])))
+                        ids.append(selected)
+                        if selected == 1 or len(ids) >= model.config.contextLength:
+                            break
+                    best[branch] = dict(tokenIds=ids, choices=choices)
+                return best
+            best = rollout(max(rows, key=lambda row: abs(row['after']-before)))
+            best_interaction = rollout(max(rows, key=lambda row: abs(row['interaction'])))
+            cases.append(dict(source=source, strengths=strengths, rows=rows, best=best, bestInteraction=best_interaction))
     (ROOT/'tests/fixtures/story-head-pair-scan-reference.json').write_text(json.dumps(dict(modelRevision=manifest['modelRevision'], cases=cases), indent=2)+'\n')
     print(f'Exported {sum(len(case["rows"]) for case in cases)} joint predictions across {len(cases)} full pair scans.')
 

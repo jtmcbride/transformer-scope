@@ -1,12 +1,23 @@
 import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-cpu';
 import { beforeAll, expect, it } from 'vitest';
-import { branchProbabilities } from '../../src/branch-probabilities';
+import { branchProbabilities, headPairInteraction } from '../../src/branch-probabilities';
 import { forkEdits, type ForkPlan } from '../../src/story-fork';
 import { RunEngine } from '../../src/engine/runs';
 import { loadShippedArtifact } from './retrieval-artifact';
 import reference from '../fixtures/branch-probabilities-reference.json';
 beforeAll(async () => { await tf.setBackend('cpu'); await tf.ready(); });
+it('measures non-additivity in raw probability rather than confusing its sign with the joint change', () => {
+  expect(headPairInteraction(.5, .6, [.55, .55]).interaction).toBeCloseTo(0, 14);
+  // Positive interaction despite a net decrease; negative interaction despite a net increase.
+  const positive = headPairInteraction(.5, .4, [.3, .3]);
+  expect(positive.sumDelta).toBeCloseTo(-.4,14); expect(positive.interaction).toBeCloseTo(.3,14);
+  expect(headPairInteraction(.5, .6, [.7, .7]).interaction).toBeCloseTo(-.3, 14);
+  expect(headPairInteraction(.5, .51, [.7, .7]).interaction).toBeCloseTo(-.39, 14);
+  for (const probabilities of [[], [.3], [.3, .4, .5], [.3, NaN], [.3, 1.1]]) {
+    expect(() => headPairInteraction(.5, .6, probabilities)).toThrow('two individual probabilities');
+  }
+});
 it('keeps raw softmax probabilities, excludes BOS/PAD from ranks, resolves ties, and reports sampled choices', () => {
   const settings = { temperature: .8, topP: 1, seed: 3, maxTokens: 3 };
   const before = [20, 1, 19, 1, 0, -.1, -.2, -.3, -.4, -.5];

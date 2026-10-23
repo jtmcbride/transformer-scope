@@ -1,4 +1,4 @@
-import { branchProbabilities, type BranchProbabilities } from './branch-probabilities';
+import { branchProbabilities, headPairInteraction, type BranchProbabilities } from './branch-probabilities';
 import { forkEdits, proposedEdits, type ForkPlan, type ForkPredict } from './story-fork';
 import type { HeadScaleIntervention } from './engine/contracts';
 export interface StoryProbabilities extends BranchProbabilities {
@@ -22,5 +22,5 @@ export async function measureStoryProbabilities(plan: ForkPlan, predict: ForkPre
     const row = branchProbabilities(before, alone, plan.source.choice.tokenId, plan.source.settings, plan.source.step).selected;
     individuals.push({ edit: structuredClone(edit), probability: row.after, delta: row.delta });
   }
-  return { ...report, individuals, interaction: report.selected.delta - individuals.reduce((sum, row) => sum + row.delta, 0) };
+  return { ...report, individuals, interaction: individuals.length === 2 ? headPairInteraction(report.selected.before, report.selected.after, individuals.map(row => row.probability)).interaction : 0 };
 }

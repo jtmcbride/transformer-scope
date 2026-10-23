@@ -21,7 +21,12 @@ async function startRedirect(page: Page, source = 5) {
   await page.getByLabel('Intervention type').selectOption('attention');
   await page.getByLabel('Layer', { exact: true }).selectOption('1');
   await page.getByLabel('Head', { exact: true }).selectOption('1');
-  await page.getByRole('button', { name: `Attend to position ${source}:`, exact: false }).click();
+  // Complete setup before activating a source; pending head changes can move the control panel.
+  await expect(page.locator('.completed-redirect > .eyebrow')).toHaveText('Completed redirect · Layer 2 · Head 2');
+  await expect(page.locator('.status')).toHaveText('Showing redirected attention');
+  const sourceButton = page.getByRole('button', { name: `Attend to position ${source}:`, exact: false });
+  await sourceButton.focus(); await page.keyboard.press('Enter');
+  await expect(sourceButton).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByTestId('redirect-connection')).toContainText(`Source ${source}:`);
   await expect(page.locator('.status')).toHaveText('Showing redirected attention');
 }

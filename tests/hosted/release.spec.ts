@@ -327,7 +327,7 @@ test('hosted continuation generates the independent original and edited story to
   }));
   await trace.locator('.trajectory-point[data-track="0"][data-offset="1"]').focus(); await page.keyboard.press('Enter');
   await expect(trace.getByRole('button', { pressed: true })).toHaveCount(2);
-  await expect(trace.getByRole('article', { name: 'Story B selected interaction', exact: true })).toContainText('story step 8');
+  await expect(trace.getByRole('article', { name: 'Story B selected interaction', exact: true })).toContainText(`story step ${traceRecord.nodes[1].plan.source.step+1}`);
   await testInfo.attach('hosted-token-interactions', { body: JSON.stringify(traceRecord), contentType: 'application/json' });
   await trace.screenshot({ path: testInfo.outputPath('hosted-interaction-tracks.png') });
   await shared.getByRole('button', { name: 'Open B comparison', exact: true }).click();

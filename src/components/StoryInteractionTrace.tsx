@@ -20,10 +20,11 @@ export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,o
   const key=JSON.stringify([checkpointKey(manifest),group,nodes,branch]);
   const captured=useMemo(()=>structuredClone({group,nodes,branch}),[key]);
   const owner=useRef<ModelClient|null>(null),epoch=useRef(0),chart=useRef<HTMLDivElement>(null);
-  const current=trace?.key===key?trace:null,rows=current?.rows??EMPTY,busy=!!current?.busy;
+  const current=!disabled&&trace?.key===key?trace:null,rows=current?.rows??EMPTY,busy=!!current?.busy;
   const counts=captured.nodes.map(node=>node.frame[branch]!.choices.length),total=counts[0]+counts[1],count=Math.max(...counts);
   const limit=rows.flat().reduce((max,row)=>Math.max(max,Math.abs(row.interaction)),0),encoder=useMemo(()=>new BpeTokenizer(tokenizer),[tokenizer]);
   useEffect(()=>{setTrace(null);setSelected(0);setFocused('');return()=>{++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);};},[key,onBusy]);
+  useEffect(()=>{if(disabled){++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);setTrace(null);setSelected(0);setFocused('');}},[disabled,onBusy]);
   function stop(){++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);setTrace(old=>old?.busy?{...old,busy:false,status:'Token trace stopped. Results are partial.',complete:false}:old);}
   async function start(){
     if(busy||disabled||!total)return;

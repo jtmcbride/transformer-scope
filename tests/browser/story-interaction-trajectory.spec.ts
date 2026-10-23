@@ -73,6 +73,7 @@ test('partial traces exclude competing work, keep unmeasured tokens missing, and
   await trace.getByRole('button',{name:'Stop token trace',exact:true}).click();const partial=await download(page,'Download token interactions');expect(partial.complete).toBe(false);expect(partial.rows.map((r:any[])=>r.length)).toEqual([1,0]);
   await expect(trace.locator('.trajectory-pending')).toHaveCount(3);await expect(trace.getByTestId('trajectory-status')).toContainText('Results are partial.');
   await shared.getByRole('button',{name:'Play both comparisons',exact:true}).click();await expect(trace.getByRole('button',{name:'Measure token-by-token interactions',exact:true})).toBeDisabled();await expect(trace.locator('.trajectory-point')).toHaveCount(0);
+  await expect(trace.getByRole('button',{name:'Download token interactions',exact:true})).toBeDisabled();
   await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.',{timeout:60000});
   const saved=await download(page,'Download workspace');expect(saved.root).toEqual(workspace.root);expect(saved.nodes[0]).toEqual(workspace.nodes[0]);expect(saved.nodes.slice(3)).toEqual(workspace.nodes.slice(3));
   for(const action of ['close','reset']){

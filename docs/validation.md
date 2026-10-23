@@ -342,3 +342,7 @@ A third trajectory browser case (78 per browser) checks a fixed target across di
 
 
 Local checks pass all 120 engine cases with four workers, all three Chromium trajectory flows, both WebKit chosen-target/lifecycle flows, the chosen-token flow in 390-pixel Chromium touch emulation, and the extended hosted continuation check against the production preview. WebKit exposed native selectors rendering below the intended size; the trace now uses consistently sized selectors, and the complete WebKit workflow passes. Type checking, production build, artifact audits, and whitespace checks pass. Full release CI and published-site checks remain separate evidence; touch emulation does not establish physical-device performance.
+
+Two initial release attempts on fresh runners passed the 119 other engine cases, including all fixed-target checks, but exceeded the existing exhaustive head-pair test's 120-second deadline (about 155 and 134 seconds; the previous release completed that file in about 73 seconds). CI now runs engine files with one worker so the exhaustive CPU sweep does not compete with other model-reference files. All 120 cases, their existing deadlines, numerical comparisons, and the 25-minute verification-job budget remain unchanged. The full serial run and subsequent release checks must pass; these interrupted attempts are not release successes.
+
+The complete local serial engine run passes all 120 cases across 29 files in 187.88 seconds, with the existing per-test deadlines unchanged. Remote verification must still pass before deployment.

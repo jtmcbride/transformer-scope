@@ -27,7 +27,8 @@ jobs:
           python3 -m unittest discover -s scripts -p 'test_retrieval_data.py'
           python3 -m unittest discover -s scripts -p 'test_artifacts.py'
           python3 -m unittest discover -s scripts -p 'test_text_pipeline.py'
-      - run: npm test
+      # Reference sweeps are CPU-bound; keep files from competing for the same runner CPU.
+      - run: npm test -- --maxWorkers=1
       - run: npm run build
       - run: npm run check:artifacts
       - name: Prefer the Ubuntu archive for browser dependencies

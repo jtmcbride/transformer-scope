@@ -53,6 +53,11 @@ it('publishes only complete replayed points, snapshots caller data and never fil
   const fresh=synthetic();let calls=0;const partial:InteractionTracks=[[],[]];
   await traceStoryInteractions(fresh.plans,fresh.frames,'edited',config,async(_,use)=>{await use(async()=>{calls++;return logits;});},(side,row)=>partial[side].push(row),()=>calls>=6);
   expect(partial[0]).toHaveLength(1);expect(partial[1]).toHaveLength(0);
+  const ended=synthetic(),eosLogits=[-99,2,-99,0,.1,.2],eos=chooseToken(eosLogits,ended.plans[0].source.settings,0);
+  ended.frames[0].edited={tokenIds:[...ended.plans[0].source.prefix,1],choices:[eos],finish:'end of story'};
+  const uneven:InteractionTracks=[[],[]];
+  await traceStoryInteractions(ended.plans,ended.frames,'edited',config,async(source,use)=>{await use(async()=>source.prefix.join(',')===ended.plans[0].source.prefix.join(',')?eosLogits:ended.logits);},(side,row)=>uneven[side].push(row),()=>false);
+  expect(uneven.map(track=>track.length)).toEqual([1,2]);expect(uneven[0][0].tokenId).toBe(1);
 });
 it('checks the actual edited-path replay, rejects changed choices and retains earlier points on a later source failure',async()=>{
   const {plans,frames,logits}=synthetic();frames[1].edited!.choices[0].probability=.1;const rows:InteractionTracks=[[],[]];

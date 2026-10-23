@@ -314,6 +314,22 @@ test('hosted continuation generates the independent original and edited story to
   await shared.screenshot({ path: testInfo.outputPath('hosted-shared-continuations.png') });
   await page.reload(); await page.locator('.story-map-comparison > summary').click();
   await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.');
+  const trace = shared.getByRole('region', { name: 'Head-pair interaction along the stories', exact: true });
+  await trace.getByRole('button', { name: 'Measure token-by-token interactions', exact: true }).click();
+  await expect(trace.getByTestId('trajectory-status')).toHaveText('Token interactions complete. 4 / 4 tokens measured.', { timeout: 60000 });
+  const traceDownload = page.waitForEvent('download');
+  await trace.getByRole('button', { name: 'Download token interactions', exact: true }).click();
+  const traceRecord = JSON.parse(await readFile((await (await traceDownload).path())!, 'utf8'));
+  expect(traceRecord.complete).toBe(true); expect(traceRecord.nodes).toEqual(sharedRecord.nodes); expect(traceRecord.branch).toBe('edited');
+  traceRecord.rows.forEach((rows: any[]) => rows.forEach((row: any, i: number) => {
+    expect(row.tokenId).toBe(example.edited.choices[i+1].tokenId); expect(Math.abs(row.interaction)).toBeLessThan(1e-12);
+    for (const p of [row.before, row.after, ...row.individualProbabilities]) expect(p).toBeCloseTo(example.edited.choices[i+1].probability, 5);
+  }));
+  await trace.locator('.trajectory-point[data-track="0"][data-offset="1"]').focus(); await page.keyboard.press('Enter');
+  await expect(trace.getByRole('button', { pressed: true })).toHaveCount(2);
+  await expect(trace.getByRole('article', { name: 'Story B selected interaction', exact: true })).toContainText('story step 8');
+  await testInfo.attach('hosted-token-interactions', { body: JSON.stringify(traceRecord), contentType: 'application/json' });
+  await trace.screenshot({ path: testInfo.outputPath('hosted-interaction-tracks.png') });
   await shared.getByRole('button', { name: 'Open B comparison', exact: true }).click();
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.');
   await fork.getByRole('button', { name: /^Inspect with head change token 8:/ }).click();

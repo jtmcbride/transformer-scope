@@ -11,13 +11,14 @@ import { StoryTokenInspector } from './StoryTokenInspector';
 interface Props { inputKey?: string; manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
 const defaults: Sampling = { temperature: 0, topP: .9, seed: 42, maxTokens: 24 };
 export function StoryContinuation(props: Props) {
-  return <StoryWorkspaceProvider manifest={props.manifest} inputKey={props.inputKey ?? JSON.stringify(props.tokens)}>{(data, navigation) => <StoryContinuationInner key={navigation} {...props} restored={data.root} />}</StoryWorkspaceProvider>;
+  return <StoryWorkspaceProvider manifest={props.manifest} tokenizer={props.tokenizer} inputKey={props.inputKey ?? JSON.stringify(props.tokens)}>{(data, navigation) => <StoryContinuationInner key={navigation} {...props} restored={data.root} />}</StoryWorkspaceProvider>;
 }
 function StoryContinuationInner(props: Props & { restored: import('../story-workspace').StoryRoot | null }) {
   const workspace = useStoryWorkspace()!;
   const [root] = useState(props.restored);
   // The saved story owns its exact prompt, independent of the main diagram's current input.
   props = root ? { ...props, tokens: root.tokens, prompt: root.prompt } : props;
+  props = { ...props,disabled:props.disabled || workspace.heatmapBusy };
   const [settings, setSettings] = useState(root?.settings ?? defaults);
   const [compare, setCompare] = useState(false);
   const [frame, setFrame] = useState<StoryFrame | null>(root?.frame ?? null);
@@ -30,6 +31,7 @@ function StoryContinuationInner(props: Props & { restored: import('../story-work
   initialized.current = true;
   const worker = useRef<ModelClient | null>(null);
   const loaded = useRef<ModelClient | null>(null);
+  useEffect(() => { if (workspace.heatmapBusy) stop(); },[workspace.heatmapBusy]);
   const epoch = useRef(0), flight = useRef(false), autoplay = useRef(false);
   const encoder = useMemo(() => new BpeTokenizer(props.tokenizer), [props.tokenizer]);
   useEffect(() => { if (frame && session.current) workspace.saveRoot({ prompt: props.prompt, tokens: props.tokens, settings: session.current.settings, edit: session.current.edit, frame }); }, [frame, workspace.saveRoot]);

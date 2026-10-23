@@ -281,6 +281,18 @@ test('hosted continuation generates the independent original and edited story to
   expect(savedWorkspace.nodes[1].plan.additionalEdits).toEqual(nestedRecord.plan.additionalEdits);
   expect(savedWorkspace.nodes[1].frame).toEqual(nestedRecord.frame);
   await testInfo.attach('hosted-story-workspace', { body: JSON.stringify(savedWorkspace), contentType: 'application/json' });
+  await page.locator('.story-map-comparison > summary').click();
+  const mapComparison = page.getByRole('region', { name: 'Compare story interaction heatmaps', exact: true });
+  await mapComparison.getByLabel('Comparison scan strengths').selectOption('normal');
+  await mapComparison.getByRole('button', { name: 'Scan both tokens', exact: true }).click();
+  await expect(mapComparison.getByTestId('comparison-map-status')).toHaveText('Heatmap comparison complete. A: 120 / 120 · B: 120 / 120 · 120 matching combinations.', { timeout: 90000 });
+  const differenceMap = mapComparison.getByRole('article', { name: 'Interaction difference map', exact: true });
+  await expect(differenceMap.locator('.pair-map-cell')).toHaveCount(240);
+  const differences = await differenceMap.locator('.pair-map-cell').evaluateAll(nodes => nodes.map(node => Number(node.getAttribute('data-interaction'))));
+  expect(differences.every(value => Math.abs(value) < 1e-12)).toBe(true);
+  await differenceMap.locator('.pair-map-cell').first().click();
+  await expect(mapComparison.getByTestId('compared-interaction-difference')).toHaveText('0.0000 pp');
+  await mapComparison.screenshot({ path: testInfo.outputPath('hosted-compared-story-heatmaps.png') });
   await page.getByRole('region', { name: 'Story branch workspace' }).screenshot({ path: testInfo.outputPath('hosted-branch-map.png') });
 });
 

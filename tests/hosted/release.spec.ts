@@ -227,7 +227,14 @@ test('hosted continuation generates the independent original and edited story to
   expect(parseFloat(await identityPair.getByTestId('pair-scan-after').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
   expect(parseFloat(await identityPair.getByTestId('pair-scan-interaction').innerText())).toBeCloseTo(0,4);
   await pairScan.getByLabel('Sort pair scan results').selectOption('interaction-negative');
-  await identityPair.getByRole('button', { name: 'Use pair layer 1 head 1 strength 1 and layer 2 head 2 strength 1', exact: true }).click();
+  const heatmap = pairScan.getByRole('region', { name: 'Head-pair interaction heatmap', exact: true });
+  await expect(heatmap.locator('.pair-map-cell')).toHaveCount(240);
+  await expect(heatmap.getByTestId('heatmap-coverage')).toContainText('120 / 120 unique combinations');
+  const identityCell = heatmap.locator('button[data-map-row="0"][data-map-column="5"]');
+  await expect(identityCell).toHaveText('0'); await identityCell.click();
+  expect(parseFloat(await heatmap.getByTestId('heatmap-selected-interaction').innerText())).toBeCloseTo(0,4);
+  await heatmap.screenshot({ path: testInfo.outputPath('hosted-head-pair-heatmap.png') });
+  await heatmap.getByRole('button', { name: 'Preview and use this pair', exact: true }).click();
   const pairPreview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
   await expect(pairPreview.getByTestId('combined-probability')).toBeVisible({ timeout: 60_000 });
   expect(parseFloat(await pairPreview.getByTestId('combined-probability').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);

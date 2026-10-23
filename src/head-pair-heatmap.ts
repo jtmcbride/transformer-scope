@@ -20,8 +20,15 @@ export function headPairHeatmap(rows: HeadPairScanRow[], config: ModelConfig, ro
   return { cells, limit, measured: seen.size, total: count*(count-1)/(rowFactor === columnFactor ? 2 : 1) };
 }
 
-export function interactionFill(value: number, limit: number): string {
+function interactionRGB(value: number, limit: number): number[] {
   const neutral = [246,247,250], end = value < 0 ? [36,91,151] : [176,75,24];
   const strength = limit > 0 ? Math.min(1,Math.abs(value)/limit) : 0;
-  return `rgb(${neutral.map((start,i) => Math.round(start+(end[i]-start)*strength)).join(', ')})`;
+  return neutral.map((start,i) => Math.round(start+(end[i]-start)*strength));
+}
+export const interactionFill = (value: number, limit: number) => `rgb(${interactionRGB(value,limit).join(', ')})`;
+/** Keep the sign readable at both saturated endpoints and intermediate colors. */
+export function interactionInk(value: number, limit: number): string {
+  const linear = interactionRGB(value,limit).map(v => v/255).map(v => v <= .04045 ? v/12.92 : ((v+.055)/1.055)**2.4);
+  const luminance = .2126*linear[0]+.7152*linear[1]+.0722*linear[2];
+  return 1.05/(luminance+.05) >= 4.5 ? '#fff' : '#000';
 }

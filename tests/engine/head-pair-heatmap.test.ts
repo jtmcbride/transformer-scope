@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { headPairHeatmap, headPairKey, interactionFill } from '../../src/head-pair-heatmap';
+import { headPairHeatmap, headPairKey, interactionFill, interactionInk } from '../../src/head-pair-heatmap';
 import { headPairTrials, type HeadPairScanRow } from '../../src/story-head-pair-scan';
 import { loadShippedArtifact } from './retrieval-artifact';
 import reference from '../fixtures/story-head-pair-scan-reference.json';
@@ -36,6 +36,12 @@ it('distinguishes pending cells from measured zeroes and shares the scale across
   expect(headPairKey(forward.cells[0][1]!.edits)).toBe(headPairKey(reverse.cells[1][0]!.edits));
   expect(headPairHeatmap([],config,1,1).measured).toBe(0);
   expect(interactionFill(0,0)).toBe(interactionFill(0,.25));
+  for (let i=-100;i<=100;i++) {
+    const rgb = interactionFill(i/100,1).match(/\d+/g)!.map(Number).map(v => v/255).map(v => v <= .04045 ? v/12.92 : ((v+.055)/1.055)**2.4);
+    const luminance = .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
+    const contrast = interactionInk(i/100,1) === '#fff' ? 1.05/(luminance+.05) : (luminance+.05)/.05;
+    expect(contrast).toBeGreaterThanOrEqual(4.5);
+  }
 });
 it('all nine axis-strength views retain all 1080 distinct all-strength trials without aggregation', () => {
   const rows = [...headPairTrials(config,'all')].map((edits,i) => ({ ...reference.cases[0].rows[0], edits, before: .2, delta: .1, interaction: i/2000 })) as HeadPairScanRow[];

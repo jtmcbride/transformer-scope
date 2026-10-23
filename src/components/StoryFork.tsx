@@ -9,6 +9,7 @@ import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import { useStoryWorkspace } from './StoryWorkspace';
 import type { ModelClient as AnalysisClient } from '../workers/client';
 import { StoryHeadScan } from './StoryHeadScan';
+import { StoryHeadPairScan } from './StoryHeadPairScan';
 import type { HeadScaleIntervention } from '../engine/contracts';
 import { BranchProbabilities } from './BranchProbabilities';
 import { StoryTokenInspector } from './StoryTokenInspector';
@@ -114,7 +115,8 @@ export function StoryFork(props: Props) {
     setPreview({ source: props.source, edit, ...(edits.length === 2 ? { additionalEdits: edits.slice(1) } : {}), duration, maxTokens: limit });
   }
   return <section ref={panel} className="story-fork" aria-label="Branch from selected token">
-    <StoryHeadScan source={props.source} manifest={props.manifest} tokenizer={props.tokenizer} disabled={busy || props.disabled} onStart={() => { stop(); props.onStart(); }} onChoose={chooseScan} onBusy={setScanning} />
+    <StoryHeadPairScan source={props.source} manifest={props.manifest} tokenizer={props.tokenizer} disabled={busy || props.disabled || scanning} onStart={() => { stop(); props.onStart(); }} onChoose={chooseScan} onBusy={setScanning} />
+    <StoryHeadScan source={props.source} manifest={props.manifest} tokenizer={props.tokenizer} disabled={busy || props.disabled || scanning} onStart={() => { stop(); props.onStart(); }} onChoose={chooseScan} onBusy={setScanning} />
     <p className="eyebrow">What if this head worked differently?</p><h3 ref={draftHeading} tabIndex={-1}>Continue two stories from step {props.source.step}.</h3>
     <p>Both paths start with the same text above and regenerate the selected token. Your existing story stays intact. Choose a head in the flow or compare two heads from the scan above.</p>
     {pair ? <div className="head-pair-draft" aria-label="Two-head draft"><strong>{forkEditLabel({ source: props.source, edit: pair[0], additionalEdits: pair.slice(1), duration, maxTokens: limit })}</strong><p>Both changes apply together, with the same duration.</p><button type="button" disabled={busy} onClick={() => { setPair(null); setPreview(null); }}>Use one head instead</button></div> : <div className="fork-head-heading"><strong>Layer {props.head.layer + 1} · Head {props.head.head + 1}</strong><span>Draft change for a new comparison</span></div>}

@@ -6,8 +6,8 @@ import { tokenLabel } from '../engine/tokenizer';
 import { scanStoryHeads, rankHeadScan, type HeadScanRow, type ScanOrder } from '../story-head-scan';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
-interface Props { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onStart: () => void; onChoose: (edits: HeadScaleIntervention[]) => void; onBusy: (busy: boolean) => void }
-export function StoryHeadScan(props: Props) {
+export interface StoryScanProps { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onStart: () => void; onChoose: (edits: HeadScaleIntervention[]) => void; onBusy: (busy: boolean) => void }
+export function StoryHeadScan(props: StoryScanProps) {
   const [rows, setRows] = useState<HeadScanRow[]>([]), [busy, setBusy] = useState(false), [status, setStatus] = useState('Ready to scan.'), [error, setError] = useState('');
   const [order, setOrder] = useState<ScanOrder>('absolute'), [all, setAll] = useState(false);
   const [selected, setSelected] = useState<HeadScaleIntervention[]>([]);

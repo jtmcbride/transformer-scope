@@ -378,3 +378,8 @@ Implemented 48 mute/normal/amplify trials on the selected token's shared prefix,
 ## Two-head story comparison slice
 
 Select two different heads and strengths from a completed or stopped scan, measure each alone and both together on the captured source prefix, then branch with both changes. Show the combined selected-token probability, alternatives, and interaction relative to the sum of individual percentage-point changes. Preserve inherited edits and expiry, both duration policies, nested inspection/further branching, and versioned workspace records with legacy import migration. Validate against independent PyTorch joint distributions and six-token rollouts, browser workflows, and the deployed release. Broader pair scanning, scan persistence, longer context, and existing model-quality/educational gates remain follow-up work.
+
+
+## Pair-scan story exploration slice
+
+Measure every distinct pair of heads on the selected token's captured prefix. Offer explicit mute, amplify, normal, mixed-strength (both assignments), and all-strength scopes; rank actual joint probability changes without shortlisting from individual effects. Reuse one immutable baseline per scan, release per-trial descriptors, support progress/stop/partial results, and exclude concurrent scans/generation. Selecting a result fills the existing pair preview and persistent story-branch workflow. Validate complete scopes and strongest-pair rollouts against independent PyTorch, plus browser lifecycle, saved branching, and the hosted release. Scan persistence, longer context, larger models, and existing quality/educational gates remain follow-up work.

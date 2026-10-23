@@ -216,9 +216,15 @@ test('hosted continuation generates the independent original and edited story to
   expect(parseFloat(await identityRow.getByTestId('scan-after').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
   await scan.getByRole('button', { name: 'Use layer 1 head 1 strength 1', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Scanned head probability preview', exact: true }).getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
-  await scan.getByLabel('Pair layer 1 head 1 strength 1', { exact: true }).check();
-  await scan.getByLabel('Pair layer 2 head 2 strength 1', { exact: true }).check();
-  await scan.getByRole('button', { name: 'Compare selected heads', exact: true }).click();
+  const pairScan = page.getByRole('region', { name: 'Scan head pairs at selected token', exact: true });
+  await pairScan.getByLabel('Pair scan strengths').selectOption('normal');
+  await pairScan.getByRole('button', { name: 'Scan head pairs', exact: true }).click();
+  await expect(pairScan.getByTestId('pair-scan-status')).toHaveText('Pair scan complete. 120 / 120 combinations measured.', { timeout: 90_000 });
+  await pairScan.screenshot({ path: testInfo.outputPath('hosted-head-pair-scan.png') });
+  await pairScan.getByRole('button', { name: 'Show all 120 pairs', exact: true }).click();
+  const identityPair = pairScan.locator('li[data-pair-first="0:0:1"][data-pair-second="1:1:1"]');
+  expect(parseFloat(await identityPair.getByTestId('pair-scan-after').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
+  await identityPair.getByRole('button', { name: 'Use pair layer 1 head 1 strength 1 and layer 2 head 2 strength 1', exact: true }).click();
   const pairPreview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
   await expect(pairPreview.getByTestId('combined-probability')).toBeVisible({ timeout: 60_000 });
   expect(parseFloat(await pairPreview.getByTestId('combined-probability').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);

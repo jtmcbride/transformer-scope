@@ -8,14 +8,17 @@ import { RunEngine } from '../../src/engine/runs';
 import { loadShippedArtifact } from './retrieval-artifact';
 import shared from '../fixtures/story-shared-forks-reference.json';
 import reference from '../fixtures/story-interaction-trajectories-reference.json';
+import fixed from '../fixtures/story-fixed-token-trajectories-reference.json';
 beforeAll(async()=>{await tf.setBackend('cpu');await tf.ready();});
 const config=loadShippedArtifact('tinystories').manifest.config;
 it('measures both targets on their own exact prefixes against independent PyTorch along all four shared scenarios',async()=>{
   const loaded=loadShippedArtifact('tinystories'),engine=new RunEngine(loaded.artifact),memory=tf.memory().numTensors;
   expect(reference.modelRevision).toBe(loaded.manifest.modelRevision);
+  const logitsCache=new Map<string,ArrayLike<number>>();
   async function predict(ids:number[],edits:Parameters<RunEngine['compare']>[0]['interventions']){
+    const key=JSON.stringify([ids,edits]);if(logitsCache.has(key))return logitsCache.get(key)!;
     const base=await engine.runBaseline(ids);let modified:string|undefined;
-    try{if(edits.length)modified=(await engine.compare({baselineRunId:base.runId,interventions:edits})).modifiedRunId;return (await engine.inspectActivation(modified??base.runId,{stage:'logits'},{position:ids.length-1})).values;}
+    try{if(edits.length)modified=(await engine.compare({baselineRunId:base.runId,interventions:edits})).modifiedRunId;const values=(await engine.inspectActivation(modified??base.runId,{stage:'logits'},{position:ids.length-1})).values;logitsCache.set(key,values);return values;}
     finally{if(modified)engine.releaseRun(modified);engine.releaseRun(base.runId);}
   }
   try{
@@ -34,6 +37,19 @@ it('measures both targets on their own exact prefixes against independent PyTorc
         for(const side of [0,1]){
           const expected=reference.cases[caseIndex][branch][side];expect(rows[side]).toHaveLength(expected.length);
           rows[side].forEach((row,i)=>{const r=expected[i];expect([row.index,row.step,row.tokenId,row.active]).toEqual([r.index,r.step,r.tokenId,r.active]);for(const field of ['before','after'] as const)expect(row[field]).toBeCloseTo(r[field],5);row.individualProbabilities.forEach((p,j)=>expect(p).toBeCloseTo(r.individualProbabilities[j],5));expect(Math.abs(row.interaction-r.interaction)).toBeLessThanOrEqual(4*5e-6);if(!row.active)expect(row.interaction).toBe(0);});
+        }
+        for(const target of fixed.targets){
+          const pinned:InteractionTracks=[[],[]],callsBefore=logitsCache.size;
+          await traceStoryInteractions(plans,frames,branch,config,async(source,use)=>{await use((ids,edits)=>{expect(ids).toEqual(source.prefix);return predict(ids,edits);});},(side,row)=>pinned[side].push(row),()=>false,{kind:'fixed',tokenId:target.tokenId});
+          expect(logitsCache.size).toBe(callsBefore); // Same four distributions; changing the target needs no additional model trial.
+          for(const side of [0,1])pinned[side].forEach((row,i)=>{
+            const expected=target.cases[caseIndex][branch][side][i];expect(row.targetTokenId).toBe(target.tokenId);expect(row.tokenId).toBe(expected.tokenId);
+            expect(row.recordedProbability).toBe(frames[side][branch]!.choices[i].probability);
+            for(const field of ['before','after'] as const)expect(row[field]).toBeCloseTo(expected[field],5);
+            row.individualProbabilities.forEach((p,j)=>expect(p).toBeCloseTo(expected.individualProbabilities[j],5));
+            expect(Math.abs(row.interaction-expected.interaction)).toBeLessThanOrEqual(4*5e-6);
+            expect(row.alternatives).toEqual(rows[side][i].alternatives);if(!row.active)expect(row.interaction).toBe(0);
+          });
         }
         expect(tf.memory().numTensors).toBe(memory);
       }
@@ -71,4 +87,15 @@ it('labels growing, fading and reversing magnitude at displayed precision withou
   expect(interactionTrend(point(0,.1))).toBe('Starting point');expect(interactionTrend(point(1,.2),point(0,.1))).toBe('Growing');expect(interactionTrend(point(1,.05),point(0,.1))).toBe('Fading');
   expect(interactionTrend(point(1,-.02),point(0,.1))).toBe('Reversed');expect(interactionTrend(point(1,0),point(0,.1))).toBe('Fading to zero');expect(interactionTrend(point(1,1e-10),point(0,-1e-10))).toBe('Near zero');
   expect(interactionTrend(point(1,.1),point(0,.1))).toBe('Steady');expect(interactionTrend(point(3,-.1),point(0,.1))).toBe('Starting point');
+});
+
+it('validates and snapshots fixed targets while replaying the actual generated choice',async()=>{
+  const {plans,frames,logits}=synthetic(),target={kind:'fixed' as const,tokenId:3},rows:InteractionTracks=[[],[]];let scopes=0;
+  await traceStoryInteractions(plans,frames,'edited',config,async(_,use)=>{scopes++;target.tokenId=4;await use(async()=>logits);},(side,row)=>rows[side].push(row),()=>false,target);
+  expect(scopes).toBe(4);expect(rows.flat().every(row=>row.targetTokenId===3&&row.tokenId===5&&row.before<row.recordedProbability)).toBe(true);
+  expect(rows[0][0].alternatives.map(row=>row.tokenId)).toEqual([4,3,1]);
+  const invalid=[0,2,-1,config.vocabularySize,3.5,NaN,Infinity];
+  for(const tokenId of invalid)await expect(traceStoryInteractions(plans,frames,'edited',config,async()=>{throw new Error('must not infer');},()=>{},()=>false,{kind:'fixed',tokenId})).rejects.toThrow('eligible next token');
+  const changed=synthetic();changed.frames[0].edited!.choices[0].probability=.01;
+  await expect(traceStoryInteractions(changed.plans,changed.frames,'edited',config,async(_,use)=>{await use(async()=>logits);},()=>{},()=>false,{kind:'fixed',tokenId:3})).rejects.toThrow('reproduced');
 });

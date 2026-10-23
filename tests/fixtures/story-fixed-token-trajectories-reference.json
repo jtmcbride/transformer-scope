@@ -1,0 +1,2943 @@
+{
+  "modelRevision": "23ee47f92cc78cc581abad5c53015276306d0f74ad04449527631c67b01666f6",
+  "targets": [
+    {
+      "tokenId": 471,
+      "cases": [
+        {
+          "original": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 1.9290472152988514e-07,
+                "after": 1.6372849813706125e-06,
+                "individualProbabilities": [
+                  9.832534715314978e-07,
+                  1.4532533043620788e-07
+                ],
+                "delta": 1.4443802598407274e-06,
+                "sumDelta": 7.427693589079354e-07,
+                "interaction": 7.01610900932792e-07
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 4.4268081182963215e-06,
+                "after": 3.341617230034899e-06,
+                "individualProbabilities": [
+                  3.571434206151025e-07,
+                  7.821152394171804e-06
+                ],
+                "delta": -1.0851908882614225e-06,
+                "sumDelta": -6.753204218057363e-07,
+                "interaction": -4.0987046645568626e-07
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 0.0004265392490196973,
+                "after": 0.0007493681623600423,
+                "individualProbabilities": [
+                  0.00022894518042448908,
+                  0.0013662810670211911
+                ],
+                "delta": 0.000322828913340345,
+                "sumDelta": 0.0007421477494062856,
+                "interaction": -0.00041931883606594056
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 1.698047391585078e-08,
+                "after": 5.6532454273394706e-09,
+                "individualProbabilities": [
+                  3.5589481361952835e-10,
+                  1.5992627666605586e-08
+                ],
+                "delta": -1.132722848851131e-08,
+                "sumDelta": -1.7612425351476446e-08,
+                "interaction": 6.285196862965137e-09
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 3.6910035028370203e-09,
+                "after": 2.8667244578173268e-08,
+                "individualProbabilities": [
+                  7.3756245555500755e-09,
+                  2.4575925738901105e-09
+                ],
+                "delta": 2.4976241075336247e-08,
+                "sumDelta": 2.4512101237661454e-09,
+                "interaction": 2.2525030951570102e-08
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 1.6891685827857827e-09,
+                "after": 2.3040120922246388e-09,
+                "individualProbabilities": [
+                  7.349263975164888e-10,
+                  3.3420746170520488e-09
+                ],
+                "delta": 6.14843509438856e-10,
+                "sumDelta": 6.986638489969721e-10,
+                "interaction": -8.382033955811607e-11
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 343,
+                "recordedProbability": 0.91471928358078,
+                "active": true,
+                "before": 2.476612280588597e-06,
+                "after": 9.797388884180691e-06,
+                "individualProbabilities": [
+                  5.255326868791599e-06,
+                  7.811547106939543e-07
+                ],
+                "delta": 7.320776603592094e-06,
+                "sumDelta": 1.083257018308359e-06,
+                "interaction": 6.237519585283735e-06
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 360,
+                "recordedProbability": 0.3710586726665497,
+                "active": true,
+                "before": 0.017651038244366646,
+                "after": 0.10417302697896957,
+                "individualProbabilities": [
+                  0.06801515817642212,
+                  0.056184303015470505
+                ],
+                "delta": 0.08652198873460293,
+                "sumDelta": 0.08889738470315933,
+                "interaction": -0.002375395968556404
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.7217422723770142,
+                "active": true,
+                "before": 1.7511116539026261e-06,
+                "after": 1.4594036656490061e-05,
+                "individualProbabilities": [
+                  6.534321073559113e-06,
+                  1.75479692643421e-06
+                ],
+                "delta": 1.2842925002587435e-05,
+                "sumDelta": 4.786894692188071e-06,
+                "interaction": 8.056030310399365e-06
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 265,
+                "recordedProbability": 0.36039212346076965,
+                "active": true,
+                "before": 1.053849473464652e-06,
+                "after": 4.152202745899558e-05,
+                "individualProbabilities": [
+                  3.218974234187044e-05,
+                  6.156676022328611e-07
+                ],
+                "delta": 4.046817798553093e-05,
+                "sumDelta": 3.0697710997174e-05,
+                "interaction": 9.77046698835693e-06
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 471,
+                "recordedProbability": 0.21234947443008423,
+                "active": true,
+                "before": 0.21234947443008423,
+                "after": 0.47848764061927795,
+                "individualProbabilities": [
+                  0.37778717279434204,
+                  0.2971442639827728
+                ],
+                "delta": 0.2661381661891937,
+                "sumDelta": 0.2502324879169464,
+                "interaction": 0.015905678272247314
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.2601844072341919,
+                "active": true,
+                "before": 0.0011719217291101813,
+                "after": 0.0008491824846714735,
+                "individualProbabilities": [
+                  0.00041764735942706466,
+                  0.0008100229897536337
+                ],
+                "delta": -0.00032273924443870783,
+                "sumDelta": -0.0011161731090396643,
+                "interaction": 0.0007934338646009564
+              }
+            ]
+          ],
+          "edited": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.6156371831893921,
+                "active": true,
+                "before": 1.9290472152988514e-07,
+                "after": 1.6372849813706125e-06,
+                "individualProbabilities": [
+                  9.832534715314978e-07,
+                  1.4532533043620788e-07
+                ],
+                "delta": 1.4443802598407274e-06,
+                "sumDelta": 7.427693589079354e-07,
+                "interaction": 7.01610900932792e-07
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 265,
+                "recordedProbability": 0.43431323766708374,
+                "active": true,
+                "before": 4.4268081182963215e-06,
+                "after": 3.341617230034899e-06,
+                "individualProbabilities": [
+                  3.571434206151025e-07,
+                  7.821152394171804e-06
+                ],
+                "delta": -1.0851908882614225e-06,
+                "sumDelta": -6.753204218057363e-07,
+                "interaction": -4.0987046645568626e-07
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 556,
+                "recordedProbability": 0.20057760179042816,
+                "active": true,
+                "before": 0.21068215370178223,
+                "after": 0.02911326102912426,
+                "individualProbabilities": [
+                  0.015316713601350784,
+                  0.4099004864692688
+                ],
+                "delta": -0.18156889267265797,
+                "sumDelta": 0.00385289266705513,
+                "interaction": -0.1854217853397131
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 1006,
+                "recordedProbability": 0.58660888671875,
+                "active": true,
+                "before": 0.00018718319188337773,
+                "after": 0.0028582746163010597,
+                "individualProbabilities": [
+                  0.0015223892405629158,
+                  0.00021522041060961783
+                ],
+                "delta": 0.002671091424417682,
+                "sumDelta": 0.0013632432674057782,
+                "interaction": 0.0013078481570119038
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 47,
+                "recordedProbability": 0.3565099537372589,
+                "active": true,
+                "before": 1.097449811027218e-07,
+                "after": 1.197009623865597e-06,
+                "individualProbabilities": [
+                  3.904590641923278e-07,
+                  1.6178049122572702e-07
+                ],
+                "delta": 1.0872646427628752e-06,
+                "sumDelta": 3.327495932126112e-07,
+                "interaction": 7.545150495502639e-07
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 408,
+                "recordedProbability": 0.4423704147338867,
+                "active": true,
+                "before": 2.8632038606701826e-07,
+                "after": 2.6263043650942564e-07,
+                "individualProbabilities": [
+                  8.16679417425803e-08,
+                  5.305373065311869e-07
+                ],
+                "delta": -2.3689949557592627e-08,
+                "sumDelta": 3.9564476139730687e-08,
+                "interaction": -6.325442569732331e-08
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 265,
+                "recordedProbability": 0.33802011609077454,
+                "active": true,
+                "before": 2.476612280588597e-06,
+                "after": 9.797388884180691e-06,
+                "individualProbabilities": [
+                  5.255326868791599e-06,
+                  7.811547106939543e-07
+                ],
+                "delta": 7.320776603592094e-06,
+                "sumDelta": 1.083257018308359e-06,
+                "interaction": 6.237519585283735e-06
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 471,
+                "recordedProbability": 0.6849777698516846,
+                "active": true,
+                "before": 0.7122601866722107,
+                "after": 0.6849777698516846,
+                "individualProbabilities": [
+                  0.5717347860336304,
+                  0.7759645581245422
+                ],
+                "delta": -0.027282416820526123,
+                "sumDelta": -0.07682102918624878,
+                "interaction": 0.049538612365722656
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 268,
+                "recordedProbability": 0.17329975962638855,
+                "active": true,
+                "before": 0.001972314203158021,
+                "after": 0.0009718180517666042,
+                "individualProbabilities": [
+                  0.0012872464722022414,
+                  0.0014971180353313684
+                ],
+                "delta": -0.0010004961513914168,
+                "sumDelta": -0.001160263898782432,
+                "interaction": 0.0001597677473910153
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 265,
+                "recordedProbability": 0.09812537580728531,
+                "active": true,
+                "before": 0.00017937876691576093,
+                "after": 2.0985458832001314e-05,
+                "individualProbabilities": [
+                  8.564061863580719e-05,
+                  0.00011921342957066372
+                ],
+                "delta": -0.00015839330808375962,
+                "sumDelta": -0.00015390348562505096,
+                "interaction": -4.489822458708659e-06
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 471,
+                "recordedProbability": 0.8002865314483643,
+                "active": true,
+                "before": 0.633510172367096,
+                "after": 0.8002865314483643,
+                "individualProbabilities": [
+                  0.4488525986671448,
+                  0.7664063572883606
+                ],
+                "delta": 0.1667763590812683,
+                "sumDelta": -0.05176138877868652,
+                "interaction": 0.21853774785995483
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 269,
+                "recordedProbability": 0.23122836649417877,
+                "active": true,
+                "before": 0.0013213255442678928,
+                "after": 0.0007991022430360317,
+                "individualProbabilities": [
+                  0.001379320863634348,
+                  0.0008837102795951068
+                ],
+                "delta": -0.0005222233012318611,
+                "sumDelta": -0.0003796199453063309,
+                "interaction": -0.0001426033559255302
+              }
+            ]
+          ]
+        },
+        {
+          "original": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 1.9290472152988514e-07,
+                "after": 1.6372849813706125e-06,
+                "individualProbabilities": [
+                  9.832534715314978e-07,
+                  1.4532533043620788e-07
+                ],
+                "delta": 1.4443802598407274e-06,
+                "sumDelta": 7.427693589079354e-07,
+                "interaction": 7.01610900932792e-07
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": false,
+                "before": 4.4268081182963215e-06,
+                "after": 4.4268081182963215e-06,
+                "individualProbabilities": [
+                  4.4268081182963215e-06,
+                  4.4268081182963215e-06
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": false,
+                "before": 0.0004265392490196973,
+                "after": 0.0004265392490196973,
+                "individualProbabilities": [
+                  0.0004265392490196973,
+                  0.0004265392490196973
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": false,
+                "before": 1.698047391585078e-08,
+                "after": 1.698047391585078e-08,
+                "individualProbabilities": [
+                  1.698047391585078e-08,
+                  1.698047391585078e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": false,
+                "before": 3.6910035028370203e-09,
+                "after": 3.6910035028370203e-09,
+                "individualProbabilities": [
+                  3.6910035028370203e-09,
+                  3.6910035028370203e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": false,
+                "before": 1.6891685827857827e-09,
+                "after": 1.6891685827857827e-09,
+                "individualProbabilities": [
+                  1.6891685827857827e-09,
+                  1.6891685827857827e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 343,
+                "recordedProbability": 0.91471928358078,
+                "active": true,
+                "before": 2.476612280588597e-06,
+                "after": 9.797388884180691e-06,
+                "individualProbabilities": [
+                  5.255326868791599e-06,
+                  7.811547106939543e-07
+                ],
+                "delta": 7.320776603592094e-06,
+                "sumDelta": 1.083257018308359e-06,
+                "interaction": 6.237519585283735e-06
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 360,
+                "recordedProbability": 0.3710586726665497,
+                "active": false,
+                "before": 0.017651038244366646,
+                "after": 0.017651038244366646,
+                "individualProbabilities": [
+                  0.017651038244366646,
+                  0.017651038244366646
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.7217422723770142,
+                "active": false,
+                "before": 1.7511116539026261e-06,
+                "after": 1.7511116539026261e-06,
+                "individualProbabilities": [
+                  1.7511116539026261e-06,
+                  1.7511116539026261e-06
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 265,
+                "recordedProbability": 0.36039212346076965,
+                "active": false,
+                "before": 1.053849473464652e-06,
+                "after": 1.053849473464652e-06,
+                "individualProbabilities": [
+                  1.053849473464652e-06,
+                  1.053849473464652e-06
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 471,
+                "recordedProbability": 0.21234947443008423,
+                "active": false,
+                "before": 0.21234947443008423,
+                "after": 0.21234947443008423,
+                "individualProbabilities": [
+                  0.21234947443008423,
+                  0.21234947443008423
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.2601844072341919,
+                "active": false,
+                "before": 0.0011719217291101813,
+                "after": 0.0011719217291101813,
+                "individualProbabilities": [
+                  0.0011719217291101813,
+                  0.0011719217291101813
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ]
+          ],
+          "edited": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.6156371831893921,
+                "active": true,
+                "before": 1.9290472152988514e-07,
+                "after": 1.6372849813706125e-06,
+                "individualProbabilities": [
+                  9.832534715314978e-07,
+                  1.4532533043620788e-07
+                ],
+                "delta": 1.4443802598407274e-06,
+                "sumDelta": 7.427693589079354e-07,
+                "interaction": 7.01610900932792e-07
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": false,
+                "before": 4.4268081182963215e-06,
+                "after": 4.4268081182963215e-06,
+                "individualProbabilities": [
+                  4.4268081182963215e-06,
+                  4.4268081182963215e-06
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": false,
+                "before": 0.0004265392490196973,
+                "after": 0.0004265392490196973,
+                "individualProbabilities": [
+                  0.0004265392490196973,
+                  0.0004265392490196973
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": false,
+                "before": 1.698047391585078e-08,
+                "after": 1.698047391585078e-08,
+                "individualProbabilities": [
+                  1.698047391585078e-08,
+                  1.698047391585078e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": false,
+                "before": 3.6910035028370203e-09,
+                "after": 3.6910035028370203e-09,
+                "individualProbabilities": [
+                  3.6910035028370203e-09,
+                  3.6910035028370203e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": false,
+                "before": 1.6891685827857827e-09,
+                "after": 1.6891685827857827e-09,
+                "individualProbabilities": [
+                  1.6891685827857827e-09,
+                  1.6891685827857827e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 265,
+                "recordedProbability": 0.33802011609077454,
+                "active": true,
+                "before": 2.476612280588597e-06,
+                "after": 9.797388884180691e-06,
+                "individualProbabilities": [
+                  5.255326868791599e-06,
+                  7.811547106939543e-07
+                ],
+                "delta": 7.320776603592094e-06,
+                "sumDelta": 1.083257018308359e-06,
+                "interaction": 6.237519585283735e-06
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 471,
+                "recordedProbability": 0.7122601866722107,
+                "active": false,
+                "before": 0.7122601866722107,
+                "after": 0.7122601866722107,
+                "individualProbabilities": [
+                  0.7122601866722107,
+                  0.7122601866722107
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 268,
+                "recordedProbability": 0.43951115012168884,
+                "active": false,
+                "before": 0.001972314203158021,
+                "after": 0.001972314203158021,
+                "individualProbabilities": [
+                  0.001972314203158021,
+                  0.001972314203158021
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 326,
+                "recordedProbability": 0.08606687933206558,
+                "active": false,
+                "before": 0.00017937876691576093,
+                "after": 0.00017937876691576093,
+                "individualProbabilities": [
+                  0.00017937876691576093,
+                  0.00017937876691576093
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 329,
+                "recordedProbability": 0.920093834400177,
+                "active": false,
+                "before": 0.00045064868754707277,
+                "after": 0.00045064868754707277,
+                "individualProbabilities": [
+                  0.00045064868754707277,
+                  0.00045064868754707277
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 312,
+                "recordedProbability": 0.5032509565353394,
+                "active": false,
+                "before": 0.00026784930378198624,
+                "after": 0.00026784930378198624,
+                "individualProbabilities": [
+                  0.00026784930378198624,
+                  0.00026784930378198624
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ]
+          ]
+        },
+        {
+          "original": [
+            [
+              {
+                "index": 0,
+                "step": 6,
+                "tokenId": 544,
+                "recordedProbability": 0.07098884135484695,
+                "active": true,
+                "before": 2.2631238607573323e-06,
+                "after": 1.6797746411612025e-06,
+                "individualProbabilities": [
+                  1.3963585843157489e-06,
+                  1.339611117145978e-06
+                ],
+                "delta": -5.833492195961298e-07,
+                "sumDelta": -1.7902780200529378e-06,
+                "interaction": 1.206928800456808e-06
+              },
+              {
+                "index": 1,
+                "step": 7,
+                "tokenId": 343,
+                "recordedProbability": 0.9947056174278259,
+                "active": true,
+                "before": 1.1070743255459092e-07,
+                "after": 1.831344178526706e-07,
+                "individualProbabilities": [
+                  1.1070743255459092e-07,
+                  1.831344178526706e-07
+                ],
+                "delta": 7.242698529807967e-08,
+                "sumDelta": 7.242698529807967e-08,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 8,
+                "tokenId": 388,
+                "recordedProbability": 0.503538191318512,
+                "active": true,
+                "before": 4.746612103190273e-05,
+                "after": 1.4293161257228348e-05,
+                "individualProbabilities": [
+                  4.746612103190273e-05,
+                  1.4293161257228348e-05
+                ],
+                "delta": -3.317295977467438e-05,
+                "sumDelta": -3.317295977467438e-05,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.3847779631614685,
+                "active": true,
+                "before": 1.785637238072013e-08,
+                "after": 2.195768367130313e-08,
+                "individualProbabilities": [
+                  1.785637238072013e-08,
+                  2.195768367130313e-08
+                ],
+                "delta": 4.1013112905829985e-09,
+                "sumDelta": 4.1013112905829985e-09,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.7070088982582092,
+                "active": true,
+                "before": 2.0597833554347744e-06,
+                "after": 6.224556159395433e-08,
+                "individualProbabilities": [
+                  2.0326638150436338e-08,
+                  2.6924608391709626e-06
+                ],
+                "delta": -1.99753779384082e-06,
+                "sumDelta": -1.40677923354815e-06,
+                "interaction": -5.907585602926702e-07
+              },
+              {
+                "index": 1,
+                "step": 10,
+                "tokenId": 265,
+                "recordedProbability": 0.2905227243900299,
+                "active": true,
+                "before": 1.4859965631330851e-06,
+                "after": 1.7190309620218613e-08,
+                "individualProbabilities": [
+                  6.854325551586271e-09,
+                  2.1082055354781915e-06
+                ],
+                "delta": -1.4688062535128665e-06,
+                "sumDelta": -8.569332652363926e-07,
+                "interaction": -6.11872988276474e-07
+              },
+              {
+                "index": 2,
+                "step": 11,
+                "tokenId": 471,
+                "recordedProbability": 0.33496275544166565,
+                "active": true,
+                "before": 0.33496275544166565,
+                "after": 0.0004947183188050985,
+                "individualProbabilities": [
+                  0.0015265673864632845,
+                  0.04279376193881035
+                ],
+                "delta": -0.33446803712286055,
+                "sumDelta": -0.6256051815580577,
+                "interaction": 0.2911371444351971
+              },
+              {
+                "index": 3,
+                "step": 12,
+                "tokenId": 268,
+                "recordedProbability": 0.2899411618709564,
+                "active": true,
+                "before": 0.0011596002150326967,
+                "after": 3.966636541008484e-06,
+                "individualProbabilities": [
+                  8.076256563072093e-06,
+                  0.0009903343161568046
+                ],
+                "delta": -0.0011556335784916882,
+                "sumDelta": -0.0013207898573455168,
+                "interaction": 0.00016515627885382855
+              }
+            ]
+          ],
+          "edited": [
+            [
+              {
+                "index": 0,
+                "step": 6,
+                "tokenId": 544,
+                "recordedProbability": 0.12766245007514954,
+                "active": true,
+                "before": 2.2631238607573323e-06,
+                "after": 1.6797746411612025e-06,
+                "individualProbabilities": [
+                  1.3963585843157489e-06,
+                  1.339611117145978e-06
+                ],
+                "delta": -5.833492195961298e-07,
+                "sumDelta": -1.7902780200529378e-06,
+                "interaction": 1.206928800456808e-06
+              },
+              {
+                "index": 1,
+                "step": 7,
+                "tokenId": 343,
+                "recordedProbability": 0.9895312786102295,
+                "active": true,
+                "before": 1.1070743255459092e-07,
+                "after": 1.831344178526706e-07,
+                "individualProbabilities": [
+                  1.1070743255459092e-07,
+                  1.831344178526706e-07
+                ],
+                "delta": 7.242698529807967e-08,
+                "sumDelta": 7.242698529807967e-08,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 8,
+                "tokenId": 360,
+                "recordedProbability": 0.4183031916618347,
+                "active": true,
+                "before": 4.746612103190273e-05,
+                "after": 1.4293161257228348e-05,
+                "individualProbabilities": [
+                  4.746612103190273e-05,
+                  1.4293161257228348e-05
+                ],
+                "delta": -3.317295977467438e-05,
+                "sumDelta": -3.317295977467438e-05,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.9020093679428101,
+                "active": true,
+                "before": 1.3748056026940958e-08,
+                "after": 4.9461316820043066e-08,
+                "individualProbabilities": [
+                  1.3748056026940958e-08,
+                  4.9461316820043066e-08
+                ],
+                "delta": 3.571326079310211e-08,
+                "sumDelta": 3.571326079310211e-08,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.9352989196777344,
+                "active": true,
+                "before": 2.0597833554347744e-06,
+                "after": 6.224556159395433e-08,
+                "individualProbabilities": [
+                  2.0326638150436338e-08,
+                  2.6924608391709626e-06
+                ],
+                "delta": -1.99753779384082e-06,
+                "sumDelta": -1.40677923354815e-06,
+                "interaction": -5.907585602926702e-07
+              },
+              {
+                "index": 1,
+                "step": 10,
+                "tokenId": 557,
+                "recordedProbability": 0.353495329618454,
+                "active": true,
+                "before": 1.4859965631330851e-06,
+                "after": 1.7190309620218613e-08,
+                "individualProbabilities": [
+                  6.854325551586271e-09,
+                  2.1082055354781915e-06
+                ],
+                "delta": -1.4688062535128665e-06,
+                "sumDelta": -8.569332652363926e-07,
+                "interaction": -6.11872988276474e-07
+              },
+              {
+                "index": 2,
+                "step": 11,
+                "tokenId": 47,
+                "recordedProbability": 0.9858221411705017,
+                "active": true,
+                "before": 3.985212799761939e-07,
+                "after": 1.3880795401988166e-09,
+                "individualProbabilities": [
+                  7.959540804236553e-10,
+                  1.7758111425791867e-07
+                ],
+                "delta": -3.971332004359951e-07,
+                "sumDelta": -6.186654916140455e-07,
+                "interaction": 2.215322911780504e-07
+              },
+              {
+                "index": 3,
+                "step": 12,
+                "tokenId": 268,
+                "recordedProbability": 0.44414687156677246,
+                "active": true,
+                "before": 1.174241560875089e-06,
+                "after": 1.4908476231312306e-08,
+                "individualProbabilities": [
+                  7.547626523773943e-09,
+                  1.336036120846984e-06
+                ],
+                "delta": -1.1593330846437766e-06,
+                "sumDelta": -1.00489937437942e-06,
+                "interaction": -1.544337102643567e-07
+              }
+            ]
+          ]
+        },
+        {
+          "original": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 1.9290472152988514e-07,
+                "after": 1.9290472152988514e-07,
+                "individualProbabilities": [
+                  1.9290472152988514e-07,
+                  1.9290472152988514e-07
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 4.4268081182963215e-06,
+                "after": 4.4268081182963215e-06,
+                "individualProbabilities": [
+                  4.4268081182963215e-06,
+                  4.4268081182963215e-06
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 0.0004265392490196973,
+                "after": 0.0004265392490196973,
+                "individualProbabilities": [
+                  0.0004265392490196973,
+                  0.0004265392490196973
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 1.698047391585078e-08,
+                "after": 1.698047391585078e-08,
+                "individualProbabilities": [
+                  1.698047391585078e-08,
+                  1.698047391585078e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 3.6910035028370203e-09,
+                "after": 3.6910035028370203e-09,
+                "individualProbabilities": [
+                  3.6910035028370203e-09,
+                  3.6910035028370203e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 1.6891685827857827e-09,
+                "after": 1.6891685827857827e-09,
+                "individualProbabilities": [
+                  1.6891685827857827e-09,
+                  1.6891685827857827e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 1.9290472152988514e-07,
+                "after": 1.9290472152988514e-07,
+                "individualProbabilities": [
+                  1.9290472152988514e-07,
+                  1.9290472152988514e-07
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 4.4268081182963215e-06,
+                "after": 4.4268081182963215e-06,
+                "individualProbabilities": [
+                  4.4268081182963215e-06,
+                  4.4268081182963215e-06
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 0.0004265392490196973,
+                "after": 0.0004265392490196973,
+                "individualProbabilities": [
+                  0.0004265392490196973,
+                  0.0004265392490196973
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 1.698047391585078e-08,
+                "after": 1.698047391585078e-08,
+                "individualProbabilities": [
+                  1.698047391585078e-08,
+                  1.698047391585078e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 3.6910035028370203e-09,
+                "after": 3.6910035028370203e-09,
+                "individualProbabilities": [
+                  3.6910035028370203e-09,
+                  3.6910035028370203e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 1.6891685827857827e-09,
+                "after": 1.6891685827857827e-09,
+                "individualProbabilities": [
+                  1.6891685827857827e-09,
+                  1.6891685827857827e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ]
+          ],
+          "edited": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 1.9290472152988514e-07,
+                "after": 1.9290472152988514e-07,
+                "individualProbabilities": [
+                  1.9290472152988514e-07,
+                  1.9290472152988514e-07
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 4.4268081182963215e-06,
+                "after": 4.4268081182963215e-06,
+                "individualProbabilities": [
+                  4.4268081182963215e-06,
+                  4.4268081182963215e-06
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 0.0004265392490196973,
+                "after": 0.0004265392490196973,
+                "individualProbabilities": [
+                  0.0004265392490196973,
+                  0.0004265392490196973
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 1.698047391585078e-08,
+                "after": 1.698047391585078e-08,
+                "individualProbabilities": [
+                  1.698047391585078e-08,
+                  1.698047391585078e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 3.6910035028370203e-09,
+                "after": 3.6910035028370203e-09,
+                "individualProbabilities": [
+                  3.6910035028370203e-09,
+                  3.6910035028370203e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 1.6891685827857827e-09,
+                "after": 1.6891685827857827e-09,
+                "individualProbabilities": [
+                  1.6891685827857827e-09,
+                  1.6891685827857827e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 1.9290472152988514e-07,
+                "after": 1.9290472152988514e-07,
+                "individualProbabilities": [
+                  1.9290472152988514e-07,
+                  1.9290472152988514e-07
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 4.4268081182963215e-06,
+                "after": 4.4268081182963215e-06,
+                "individualProbabilities": [
+                  4.4268081182963215e-06,
+                  4.4268081182963215e-06
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 0.0004265392490196973,
+                "after": 0.0004265392490196973,
+                "individualProbabilities": [
+                  0.0004265392490196973,
+                  0.0004265392490196973
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 1.698047391585078e-08,
+                "after": 1.698047391585078e-08,
+                "individualProbabilities": [
+                  1.698047391585078e-08,
+                  1.698047391585078e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 3.6910035028370203e-09,
+                "after": 3.6910035028370203e-09,
+                "individualProbabilities": [
+                  3.6910035028370203e-09,
+                  3.6910035028370203e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 1.6891685827857827e-09,
+                "after": 1.6891685827857827e-09,
+                "individualProbabilities": [
+                  1.6891685827857827e-09,
+                  1.6891685827857827e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "tokenId": 1,
+      "cases": [
+        {
+          "original": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 8.88155651454503e-13,
+                "after": 2.159483095814929e-12,
+                "individualProbabilities": [
+                  8.893895819470088e-13,
+                  1.2300185826472076e-12
+                ],
+                "delta": 1.2713274443604261e-12,
+                "sumDelta": 3.4309686168521036e-13,
+                "interaction": 9.282305826752157e-13
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 2.647519009579824e-11,
+                "after": 3.036493625985237e-11,
+                "individualProbabilities": [
+                  1.1146986979293505e-11,
+                  2.231547238662479e-11
+                ],
+                "delta": 3.889746164054131e-12,
+                "sumDelta": -1.9487920825678184e-11,
+                "interaction": 2.3377666989732315e-11
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 1.1086339485322227e-10,
+                "after": 1.7853691858249476e-09,
+                "individualProbabilities": [
+                  5.076520315228095e-10,
+                  4.100735029322067e-10
+                ],
+                "delta": 1.6745057909717254e-09,
+                "sumDelta": 6.959987447485716e-10,
+                "interaction": 9.785070462231538e-10
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 8.405783624709784e-09,
+                "after": 2.3610344582203346e-11,
+                "individualProbabilities": [
+                  1.4198965787859397e-11,
+                  1.2037104646367425e-08
+                ],
+                "delta": -8.38217328012758e-09,
+                "sumDelta": -4.760263637264284e-09,
+                "interaction": -3.621909642863297e-09
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 4.8091649773596146e-08,
+                "after": 2.911638152802709e-10,
+                "individualProbabilities": [
+                  9.604718131939194e-10,
+                  6.474560443336941e-09
+                ],
+                "delta": -4.7800485958315875e-08,
+                "sumDelta": -8.874826729066143e-08,
+                "interaction": 4.0947781332345556e-08
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 2.8169482805401325e-12,
+                "after": 2.987681174508594e-13,
+                "individualProbabilities": [
+                  1.977983071386677e-13,
+                  5.724123865874509e-12
+                ],
+                "delta": -2.518180163089273e-12,
+                "sumDelta": 2.8802561193291137e-13,
+                "interaction": -2.8062057750221844e-12
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 343,
+                "recordedProbability": 0.91471928358078,
+                "active": true,
+                "before": 1.21227738958396e-08,
+                "after": 1.19564691480889e-09,
+                "individualProbabilities": [
+                  4.478076243152884e-10,
+                  4.7802902969351635e-08
+                ],
+                "delta": -1.092712698103071e-08,
+                "sumDelta": 2.4005162801987723e-08,
+                "interaction": -3.493228978301843e-08
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 360,
+                "recordedProbability": 0.3710586726665497,
+                "active": true,
+                "before": 2.611076688197045e-09,
+                "after": 8.364347436895514e-09,
+                "individualProbabilities": [
+                  4.7068726694021734e-09,
+                  5.072621434010216e-09
+                ],
+                "delta": 5.753270748698469e-09,
+                "sumDelta": 4.5573407270183e-09,
+                "interaction": 1.1959300216801694e-09
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.7217422723770142,
+                "active": true,
+                "before": 1.6340401032266527e-07,
+                "after": 8.807324647364112e-09,
+                "individualProbabilities": [
+                  5.207410946894697e-09,
+                  3.4969346529578615e-07
+                ],
+                "delta": -1.5459668567530116e-07,
+                "sumDelta": 2.8092855597350308e-08,
+                "interaction": -1.8268954127265147e-07
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 265,
+                "recordedProbability": 0.36039212346076965,
+                "active": true,
+                "before": 6.802573579989257e-07,
+                "after": 3.650812274713644e-08,
+                "individualProbabilities": [
+                  9.438696046970563e-09,
+                  1.3093408597342204e-06
+                ],
+                "delta": -6.437492352517893e-07,
+                "sumDelta": -4.173516021666046e-08,
+                "interaction": -6.020140750351288e-07
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 471,
+                "recordedProbability": 0.21234947443008423,
+                "active": true,
+                "before": 3.061030895423755e-08,
+                "after": 3.315411944981861e-08,
+                "individualProbabilities": [
+                  3.570158924048883e-08,
+                  2.4716729996043796e-08
+                ],
+                "delta": 2.543810495581056e-09,
+                "sumDelta": -8.022986719424807e-10,
+                "interaction": 3.3461091675235366e-09
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.2601844072341919,
+                "active": true,
+                "before": 2.7049810569224064e-07,
+                "after": 1.7109954342231504e-08,
+                "individualProbabilities": [
+                  2.0142151058166746e-08,
+                  3.821461689312855e-07
+                ],
+                "delta": -2.5338815135000914e-07,
+                "sumDelta": -1.3870789139502904e-07,
+                "interaction": -1.146802599549801e-07
+              }
+            ]
+          ],
+          "edited": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.6156371831893921,
+                "active": true,
+                "before": 8.88155651454503e-13,
+                "after": 2.159483095814929e-12,
+                "individualProbabilities": [
+                  8.893895819470088e-13,
+                  1.2300185826472076e-12
+                ],
+                "delta": 1.2713274443604261e-12,
+                "sumDelta": 3.4309686168521036e-13,
+                "interaction": 9.282305826752157e-13
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 265,
+                "recordedProbability": 0.43431323766708374,
+                "active": true,
+                "before": 2.647519009579824e-11,
+                "after": 3.036493625985237e-11,
+                "individualProbabilities": [
+                  1.1146986979293505e-11,
+                  2.231547238662479e-11
+                ],
+                "delta": 3.889746164054131e-12,
+                "sumDelta": -1.9487920825678184e-11,
+                "interaction": 2.3377666989732315e-11
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 556,
+                "recordedProbability": 0.20057760179042816,
+                "active": true,
+                "before": 3.7556566745422515e-09,
+                "after": 2.20266667128044e-08,
+                "individualProbabilities": [
+                  8.698497921955095e-09,
+                  3.747135934872858e-09
+                ],
+                "delta": 1.8271010038262148e-08,
+                "sumDelta": 4.9343205077434504e-09,
+                "interaction": 1.3336689530518697e-08
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 1006,
+                "recordedProbability": 0.58660888671875,
+                "active": true,
+                "before": 6.763400061358948e-13,
+                "after": 2.349111356825251e-11,
+                "individualProbabilities": [
+                  1.172393085391299e-11,
+                  1.2959033802648068e-12
+                ],
+                "delta": 2.2814773562116614e-11,
+                "sumDelta": 1.1667154221906006e-11,
+                "interaction": 1.1147619340210607e-11
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 47,
+                "recordedProbability": 0.3565099537372589,
+                "active": true,
+                "before": 3.1242580137563758e-12,
+                "after": 2.4156100297129113e-12,
+                "individualProbabilities": [
+                  1.3065727970038021e-12,
+                  5.972398357118047e-12
+                ],
+                "delta": -7.086479840434645e-13,
+                "sumDelta": 1.0304551266090978e-12,
+                "interaction": -1.7391031106525623e-12
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 408,
+                "recordedProbability": 0.4423704147338867,
+                "active": true,
+                "before": 1.7043193523136324e-08,
+                "after": 3.662818937044676e-10,
+                "individualProbabilities": [
+                  6.073805347561745e-10,
+                  1.2062547405378155e-08
+                ],
+                "delta": -1.6676911629431856e-08,
+                "sumDelta": -2.141645910613832e-08,
+                "interaction": 4.739547476706463e-09
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 265,
+                "recordedProbability": 0.33802011609077454,
+                "active": true,
+                "before": 1.21227738958396e-08,
+                "after": 1.19564691480889e-09,
+                "individualProbabilities": [
+                  4.478076243152884e-10,
+                  4.7802902969351635e-08
+                ],
+                "delta": -1.092712698103071e-08,
+                "sumDelta": 2.4005162801987723e-08,
+                "interaction": -3.493228978301843e-08
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 471,
+                "recordedProbability": 0.6849777698516846,
+                "active": true,
+                "before": 6.248067840886051e-09,
+                "after": 3.3922304965017247e-09,
+                "individualProbabilities": [
+                  4.289656185818558e-09,
+                  3.5575737911131e-09
+                ],
+                "delta": -2.8558373443843266e-09,
+                "sumDelta": -4.648905704840445e-09,
+                "interaction": 1.7930683604561182e-09
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 268,
+                "recordedProbability": 0.17329975962638855,
+                "active": true,
+                "before": 5.279681047909435e-08,
+                "after": 1.1483308748339027e-09,
+                "individualProbabilities": [
+                  1.4855459085083567e-09,
+                  7.96686379089806e-08
+                ],
+                "delta": -5.1648479604260444e-08,
+                "sumDelta": -2.4439437140699738e-08,
+                "interaction": -2.7209042463560706e-08
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 265,
+                "recordedProbability": 0.09812537580728531,
+                "active": true,
+                "before": 1.3127234854692915e-09,
+                "after": 9.708500670058129e-11,
+                "individualProbabilities": [
+                  1.846232750013499e-10,
+                  7.826957415524305e-10
+                ],
+                "delta": -1.2156384787687102e-09,
+                "sumDelta": -1.6581279543848026e-09,
+                "interaction": 4.424894756160924e-10
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 471,
+                "recordedProbability": 0.8002865314483643,
+                "active": true,
+                "before": 8.466765066827975e-09,
+                "after": 2.9158853109834126e-08,
+                "individualProbabilities": [
+                  7.327406592594343e-08,
+                  6.467884894334475e-09
+                ],
+                "delta": 2.069208804300615e-08,
+                "sumDelta": 6.280842068662196e-08,
+                "interaction": -4.2116332643615806e-08
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 269,
+                "recordedProbability": 0.23122836649417877,
+                "active": true,
+                "before": 1.6941624991773097e-08,
+                "after": 1.0713481213286968e-09,
+                "individualProbabilities": [
+                  1.3871523929509522e-09,
+                  2.36993304980615e-08
+                ],
+                "delta": -1.58702768704444e-08,
+                "sumDelta": -8.796767092533742e-09,
+                "interaction": -7.073509777910658e-09
+              }
+            ]
+          ]
+        },
+        {
+          "original": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 8.88155651454503e-13,
+                "after": 2.159483095814929e-12,
+                "individualProbabilities": [
+                  8.893895819470088e-13,
+                  1.2300185826472076e-12
+                ],
+                "delta": 1.2713274443604261e-12,
+                "sumDelta": 3.4309686168521036e-13,
+                "interaction": 9.282305826752157e-13
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": false,
+                "before": 2.647519009579824e-11,
+                "after": 2.647519009579824e-11,
+                "individualProbabilities": [
+                  2.647519009579824e-11,
+                  2.647519009579824e-11
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": false,
+                "before": 1.1086339485322227e-10,
+                "after": 1.1086339485322227e-10,
+                "individualProbabilities": [
+                  1.1086339485322227e-10,
+                  1.1086339485322227e-10
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": false,
+                "before": 8.405783624709784e-09,
+                "after": 8.405783624709784e-09,
+                "individualProbabilities": [
+                  8.405783624709784e-09,
+                  8.405783624709784e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": false,
+                "before": 4.8091649773596146e-08,
+                "after": 4.8091649773596146e-08,
+                "individualProbabilities": [
+                  4.8091649773596146e-08,
+                  4.8091649773596146e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": false,
+                "before": 2.8169482805401325e-12,
+                "after": 2.8169482805401325e-12,
+                "individualProbabilities": [
+                  2.8169482805401325e-12,
+                  2.8169482805401325e-12
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 343,
+                "recordedProbability": 0.91471928358078,
+                "active": true,
+                "before": 1.21227738958396e-08,
+                "after": 1.19564691480889e-09,
+                "individualProbabilities": [
+                  4.478076243152884e-10,
+                  4.7802902969351635e-08
+                ],
+                "delta": -1.092712698103071e-08,
+                "sumDelta": 2.4005162801987723e-08,
+                "interaction": -3.493228978301843e-08
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 360,
+                "recordedProbability": 0.3710586726665497,
+                "active": false,
+                "before": 2.611076688197045e-09,
+                "after": 2.611076688197045e-09,
+                "individualProbabilities": [
+                  2.611076688197045e-09,
+                  2.611076688197045e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.7217422723770142,
+                "active": false,
+                "before": 1.6340401032266527e-07,
+                "after": 1.6340401032266527e-07,
+                "individualProbabilities": [
+                  1.6340401032266527e-07,
+                  1.6340401032266527e-07
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 265,
+                "recordedProbability": 0.36039212346076965,
+                "active": false,
+                "before": 6.802573579989257e-07,
+                "after": 6.802573579989257e-07,
+                "individualProbabilities": [
+                  6.802573579989257e-07,
+                  6.802573579989257e-07
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 471,
+                "recordedProbability": 0.21234947443008423,
+                "active": false,
+                "before": 3.061030895423755e-08,
+                "after": 3.061030895423755e-08,
+                "individualProbabilities": [
+                  3.061030895423755e-08,
+                  3.061030895423755e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.2601844072341919,
+                "active": false,
+                "before": 2.7049810569224064e-07,
+                "after": 2.7049810569224064e-07,
+                "individualProbabilities": [
+                  2.7049810569224064e-07,
+                  2.7049810569224064e-07
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ]
+          ],
+          "edited": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.6156371831893921,
+                "active": true,
+                "before": 8.88155651454503e-13,
+                "after": 2.159483095814929e-12,
+                "individualProbabilities": [
+                  8.893895819470088e-13,
+                  1.2300185826472076e-12
+                ],
+                "delta": 1.2713274443604261e-12,
+                "sumDelta": 3.4309686168521036e-13,
+                "interaction": 9.282305826752157e-13
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": false,
+                "before": 2.647519009579824e-11,
+                "after": 2.647519009579824e-11,
+                "individualProbabilities": [
+                  2.647519009579824e-11,
+                  2.647519009579824e-11
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": false,
+                "before": 1.1086339485322227e-10,
+                "after": 1.1086339485322227e-10,
+                "individualProbabilities": [
+                  1.1086339485322227e-10,
+                  1.1086339485322227e-10
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": false,
+                "before": 8.405783624709784e-09,
+                "after": 8.405783624709784e-09,
+                "individualProbabilities": [
+                  8.405783624709784e-09,
+                  8.405783624709784e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": false,
+                "before": 4.8091649773596146e-08,
+                "after": 4.8091649773596146e-08,
+                "individualProbabilities": [
+                  4.8091649773596146e-08,
+                  4.8091649773596146e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": false,
+                "before": 2.8169482805401325e-12,
+                "after": 2.8169482805401325e-12,
+                "individualProbabilities": [
+                  2.8169482805401325e-12,
+                  2.8169482805401325e-12
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 265,
+                "recordedProbability": 0.33802011609077454,
+                "active": true,
+                "before": 1.21227738958396e-08,
+                "after": 1.19564691480889e-09,
+                "individualProbabilities": [
+                  4.478076243152884e-10,
+                  4.7802902969351635e-08
+                ],
+                "delta": -1.092712698103071e-08,
+                "sumDelta": 2.4005162801987723e-08,
+                "interaction": -3.493228978301843e-08
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 471,
+                "recordedProbability": 0.7122601866722107,
+                "active": false,
+                "before": 6.248067840886051e-09,
+                "after": 6.248067840886051e-09,
+                "individualProbabilities": [
+                  6.248067840886051e-09,
+                  6.248067840886051e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 268,
+                "recordedProbability": 0.43951115012168884,
+                "active": false,
+                "before": 5.279681047909435e-08,
+                "after": 5.279681047909435e-08,
+                "individualProbabilities": [
+                  5.279681047909435e-08,
+                  5.279681047909435e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 326,
+                "recordedProbability": 0.08606687933206558,
+                "active": false,
+                "before": 1.3127234854692915e-09,
+                "after": 1.3127234854692915e-09,
+                "individualProbabilities": [
+                  1.3127234854692915e-09,
+                  1.3127234854692915e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 329,
+                "recordedProbability": 0.920093834400177,
+                "active": false,
+                "before": 8.027297049295612e-09,
+                "after": 8.027297049295612e-09,
+                "individualProbabilities": [
+                  8.027297049295612e-09,
+                  8.027297049295612e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 312,
+                "recordedProbability": 0.5032509565353394,
+                "active": false,
+                "before": 8.882764662709874e-11,
+                "after": 8.882764662709874e-11,
+                "individualProbabilities": [
+                  8.882764662709874e-11,
+                  8.882764662709874e-11
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ]
+          ]
+        },
+        {
+          "original": [
+            [
+              {
+                "index": 0,
+                "step": 6,
+                "tokenId": 544,
+                "recordedProbability": 0.07098884135484695,
+                "active": true,
+                "before": 2.7070641284154817e-09,
+                "after": 1.9004653753484924e-11,
+                "individualProbabilities": [
+                  1.530415377759553e-11,
+                  3.2002727134994302e-09
+                ],
+                "delta": -2.688059474661997e-09,
+                "sumDelta": -2.1985513895539377e-09,
+                "interaction": -4.895080851080591e-10
+              },
+              {
+                "index": 1,
+                "step": 7,
+                "tokenId": 343,
+                "recordedProbability": 0.9947056174278259,
+                "active": true,
+                "before": 3.337167486794357e-10,
+                "after": 1.6181210538146473e-10,
+                "individualProbabilities": [
+                  3.337167486794357e-10,
+                  1.6181210538146473e-10
+                ],
+                "delta": -1.7190464329797095e-10,
+                "sumDelta": -1.7190464329797095e-10,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 8,
+                "tokenId": 388,
+                "recordedProbability": 0.503538191318512,
+                "active": true,
+                "before": 5.654176016278711e-10,
+                "after": 2.3064820886542492e-10,
+                "individualProbabilities": [
+                  5.654176016278711e-10,
+                  2.3064820886542492e-10
+                ],
+                "delta": -3.347693927624462e-10,
+                "sumDelta": -3.347693927624462e-10,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.3847779631614685,
+                "active": true,
+                "before": 4.625815789444099e-12,
+                "after": 1.0324860541185976e-12,
+                "individualProbabilities": [
+                  4.625815789444099e-12,
+                  1.0324860541185976e-12
+                ],
+                "delta": -3.593329735325501e-12,
+                "sumDelta": -3.593329735325501e-12,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.7070088982582092,
+                "active": true,
+                "before": 1.657397206145106e-07,
+                "after": 4.3637166102783453e-10,
+                "individualProbabilities": [
+                  3.7226506321985653e-09,
+                  2.949195554435846e-08
+                ],
+                "delta": -1.6530334895348275e-07,
+                "sumDelta": -2.9826483505246415e-07,
+                "interaction": 1.329614860989814e-07
+              },
+              {
+                "index": 1,
+                "step": 10,
+                "tokenId": 265,
+                "recordedProbability": 0.2905227243900299,
+                "active": true,
+                "before": 6.387407438523951e-07,
+                "after": 4.864311176078218e-09,
+                "individualProbabilities": [
+                  1.6434739791293396e-08,
+                  1.7050793132966646e-07
+                ],
+                "delta": -6.338764326763169e-07,
+                "sumDelta": -1.0905388165838303e-06,
+                "interaction": 4.5666238390751346e-07
+              },
+              {
+                "index": 2,
+                "step": 11,
+                "tokenId": 471,
+                "recordedProbability": 0.33496275544166565,
+                "active": true,
+                "before": 2.7710930439184267e-08,
+                "after": 2.3359865153338433e-09,
+                "individualProbabilities": [
+                  1.079836042805482e-08,
+                  8.706503962230272e-08
+                ],
+                "delta": -2.5374943923850424e-08,
+                "sumDelta": 4.244153917198901e-08,
+                "interaction": -6.781648309583943e-08
+              },
+              {
+                "index": 3,
+                "step": 12,
+                "tokenId": 268,
+                "recordedProbability": 0.2899411618709564,
+                "active": true,
+                "before": 1.5686067911246937e-07,
+                "after": 5.066811900600321e-11,
+                "individualProbabilities": [
+                  7.292535325609251e-11,
+                  9.504533693416306e-08
+                ],
+                "delta": -1.5681001099346337e-07,
+                "sumDelta": -2.186030959375196e-07,
+                "interaction": 6.179308494405622e-08
+              }
+            ]
+          ],
+          "edited": [
+            [
+              {
+                "index": 0,
+                "step": 6,
+                "tokenId": 544,
+                "recordedProbability": 0.12766245007514954,
+                "active": true,
+                "before": 2.7070641284154817e-09,
+                "after": 1.9004653753484924e-11,
+                "individualProbabilities": [
+                  1.530415377759553e-11,
+                  3.2002727134994302e-09
+                ],
+                "delta": -2.688059474661997e-09,
+                "sumDelta": -2.1985513895539377e-09,
+                "interaction": -4.895080851080591e-10
+              },
+              {
+                "index": 1,
+                "step": 7,
+                "tokenId": 343,
+                "recordedProbability": 0.9895312786102295,
+                "active": true,
+                "before": 3.337167486794357e-10,
+                "after": 1.6181210538146473e-10,
+                "individualProbabilities": [
+                  3.337167486794357e-10,
+                  1.6181210538146473e-10
+                ],
+                "delta": -1.7190464329797095e-10,
+                "sumDelta": -1.7190464329797095e-10,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 8,
+                "tokenId": 360,
+                "recordedProbability": 0.4183031916618347,
+                "active": true,
+                "before": 5.654176016278711e-10,
+                "after": 2.3064820886542492e-10,
+                "individualProbabilities": [
+                  5.654176016278711e-10,
+                  2.3064820886542492e-10
+                ],
+                "delta": -3.347693927624462e-10,
+                "sumDelta": -3.347693927624462e-10,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.9020093679428101,
+                "active": true,
+                "before": 1.6174122041689998e-09,
+                "after": 2.821644029538106e-10,
+                "individualProbabilities": [
+                  1.6174122041689998e-09,
+                  2.821644029538106e-10
+                ],
+                "delta": -1.3352478012151892e-09,
+                "sumDelta": -1.3352478012151892e-09,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 9,
+                "tokenId": 47,
+                "recordedProbability": 0.9352989196777344,
+                "active": true,
+                "before": 1.657397206145106e-07,
+                "after": 4.3637166102783453e-10,
+                "individualProbabilities": [
+                  3.7226506321985653e-09,
+                  2.949195554435846e-08
+                ],
+                "delta": -1.6530334895348275e-07,
+                "sumDelta": -2.9826483505246415e-07,
+                "interaction": 1.329614860989814e-07
+              },
+              {
+                "index": 1,
+                "step": 10,
+                "tokenId": 557,
+                "recordedProbability": 0.353495329618454,
+                "active": true,
+                "before": 6.387407438523951e-07,
+                "after": 4.864311176078218e-09,
+                "individualProbabilities": [
+                  1.6434739791293396e-08,
+                  1.7050793132966646e-07
+                ],
+                "delta": -6.338764326763169e-07,
+                "sumDelta": -1.0905388165838303e-06,
+                "interaction": 4.5666238390751346e-07
+              },
+              {
+                "index": 2,
+                "step": 11,
+                "tokenId": 47,
+                "recordedProbability": 0.9858221411705017,
+                "active": true,
+                "before": 1.0647624115733834e-08,
+                "after": 1.5619668373382384e-13,
+                "individualProbabilities": [
+                  4.762942969714634e-13,
+                  4.513843521181116e-09
+                ],
+                "delta": -1.06474679190501e-08,
+                "sumDelta": -1.678092841598958e-08,
+                "interaction": 6.13346049693948e-09
+              },
+              {
+                "index": 3,
+                "step": 12,
+                "tokenId": 268,
+                "recordedProbability": 0.44414687156677246,
+                "active": true,
+                "before": 7.950207958629107e-08,
+                "after": 1.709989029714809e-12,
+                "individualProbabilities": [
+                  1.879061793316761e-12,
+                  2.2656214682115206e-08
+                ],
+                "delta": -7.950036959726136e-08,
+                "sumDelta": -1.3634606542867363e-07,
+                "interaction": 5.684569583141227e-08
+              }
+            ]
+          ]
+        },
+        {
+          "original": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 8.88155651454503e-13,
+                "after": 8.88155651454503e-13,
+                "individualProbabilities": [
+                  8.88155651454503e-13,
+                  8.88155651454503e-13
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 2.647519009579824e-11,
+                "after": 2.647519009579824e-11,
+                "individualProbabilities": [
+                  2.647519009579824e-11,
+                  2.647519009579824e-11
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 1.1086339485322227e-10,
+                "after": 1.1086339485322227e-10,
+                "individualProbabilities": [
+                  1.1086339485322227e-10,
+                  1.1086339485322227e-10
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 8.405783624709784e-09,
+                "after": 8.405783624709784e-09,
+                "individualProbabilities": [
+                  8.405783624709784e-09,
+                  8.405783624709784e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 4.8091649773596146e-08,
+                "after": 4.8091649773596146e-08,
+                "individualProbabilities": [
+                  4.8091649773596146e-08,
+                  4.8091649773596146e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 2.8169482805401325e-12,
+                "after": 2.8169482805401325e-12,
+                "individualProbabilities": [
+                  2.8169482805401325e-12,
+                  2.8169482805401325e-12
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 8.88155651454503e-13,
+                "after": 8.88155651454503e-13,
+                "individualProbabilities": [
+                  8.88155651454503e-13,
+                  8.88155651454503e-13
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 2.647519009579824e-11,
+                "after": 2.647519009579824e-11,
+                "individualProbabilities": [
+                  2.647519009579824e-11,
+                  2.647519009579824e-11
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 1.1086339485322227e-10,
+                "after": 1.1086339485322227e-10,
+                "individualProbabilities": [
+                  1.1086339485322227e-10,
+                  1.1086339485322227e-10
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 8.405783624709784e-09,
+                "after": 8.405783624709784e-09,
+                "individualProbabilities": [
+                  8.405783624709784e-09,
+                  8.405783624709784e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 4.8091649773596146e-08,
+                "after": 4.8091649773596146e-08,
+                "individualProbabilities": [
+                  4.8091649773596146e-08,
+                  4.8091649773596146e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 2.8169482805401325e-12,
+                "after": 2.8169482805401325e-12,
+                "individualProbabilities": [
+                  2.8169482805401325e-12,
+                  2.8169482805401325e-12
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ]
+          ],
+          "edited": [
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 8.88155651454503e-13,
+                "after": 8.88155651454503e-13,
+                "individualProbabilities": [
+                  8.88155651454503e-13,
+                  8.88155651454503e-13
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 2.647519009579824e-11,
+                "after": 2.647519009579824e-11,
+                "individualProbabilities": [
+                  2.647519009579824e-11,
+                  2.647519009579824e-11
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 1.1086339485322227e-10,
+                "after": 1.1086339485322227e-10,
+                "individualProbabilities": [
+                  1.1086339485322227e-10,
+                  1.1086339485322227e-10
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 8.405783624709784e-09,
+                "after": 8.405783624709784e-09,
+                "individualProbabilities": [
+                  8.405783624709784e-09,
+                  8.405783624709784e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 4.8091649773596146e-08,
+                "after": 4.8091649773596146e-08,
+                "individualProbabilities": [
+                  4.8091649773596146e-08,
+                  4.8091649773596146e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 2.8169482805401325e-12,
+                "after": 2.8169482805401325e-12,
+                "individualProbabilities": [
+                  2.8169482805401325e-12,
+                  2.8169482805401325e-12
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ],
+            [
+              {
+                "index": 0,
+                "step": 7,
+                "tokenId": 268,
+                "recordedProbability": 0.5236368775367737,
+                "active": true,
+                "before": 8.88155651454503e-13,
+                "after": 8.88155651454503e-13,
+                "individualProbabilities": [
+                  8.88155651454503e-13,
+                  8.88155651454503e-13
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 1,
+                "step": 8,
+                "tokenId": 343,
+                "recordedProbability": 0.5753060579299927,
+                "active": true,
+                "before": 2.647519009579824e-11,
+                "after": 2.647519009579824e-11,
+                "individualProbabilities": [
+                  2.647519009579824e-11,
+                  2.647519009579824e-11
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 2,
+                "step": 9,
+                "tokenId": 360,
+                "recordedProbability": 0.5672256946563721,
+                "active": true,
+                "before": 1.1086339485322227e-10,
+                "after": 1.1086339485322227e-10,
+                "individualProbabilities": [
+                  1.1086339485322227e-10,
+                  1.1086339485322227e-10
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 3,
+                "step": 10,
+                "tokenId": 47,
+                "recordedProbability": 0.765595018863678,
+                "active": true,
+                "before": 8.405783624709784e-09,
+                "after": 8.405783624709784e-09,
+                "individualProbabilities": [
+                  8.405783624709784e-09,
+                  8.405783624709784e-09
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 4,
+                "step": 11,
+                "tokenId": 557,
+                "recordedProbability": 0.39553403854370117,
+                "active": true,
+                "before": 4.8091649773596146e-08,
+                "after": 4.8091649773596146e-08,
+                "individualProbabilities": [
+                  4.8091649773596146e-08,
+                  4.8091649773596146e-08
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              },
+              {
+                "index": 5,
+                "step": 12,
+                "tokenId": 47,
+                "recordedProbability": 0.8741061687469482,
+                "active": true,
+                "before": 2.8169482805401325e-12,
+                "after": 2.8169482805401325e-12,
+                "individualProbabilities": [
+                  2.8169482805401325e-12,
+                  2.8169482805401325e-12
+                ],
+                "delta": 0.0,
+                "sumDelta": 0.0,
+                "interaction": 0.0
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

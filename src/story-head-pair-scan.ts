@@ -36,8 +36,9 @@ export function rankHeadPairScan(rows: HeadPairScanRow[], order: PairScanOrder):
   return [...rows].sort((a, b) => score(b) - score(a) || a.edits[0].layer - b.edits[0].layer || a.edits[0].head - b.edits[0].head || a.edits[1].layer - b.edits[1].layer || a.edits[1].head - b.edits[1].head || a.edits[0].factor - b.edits[0].factor || a.edits[1].factor - b.edits[1].factor);
 }
 /** Measure the actual joint distribution; each trial independently replaces only its two heads. */
-export async function scanStoryHeadPairs(source: StorySelection, config: ModelConfig, strengths: PairStrengths, predict: ForkPredict, emit: (row: HeadPairScanRow) => void, cancelled: () => boolean): Promise<void> {
+export async function scanStoryHeadPairs(source: StorySelection, config: ModelConfig, strengths: PairStrengths, predict: ForkPredict, emit: (row: HeadPairScanRow) => void, cancelled: () => boolean, targetTokenId = source.choice.tokenId): Promise<void> {
   factorsFor(strengths);
+  requireInput(Number.isInteger(targetTokenId) && targetTokenId > 0 && targetTokenId < config.vocabularySize && targetTokenId !== 2, 'Choose a valid output token.');
   const before = await storyScanReference(source, config, predict, cancelled);
   if (!before) return;
   const singles = new Map<string, number>();
@@ -49,7 +50,7 @@ export async function scanStoryHeadPairs(source: StorySelection, config: ModelCo
     validateInterventions(applied, config, source.prefix.length);
     const logits = await predict([...source.prefix], applied);
     if (cancelled()) return null;
-    const probability = branchProbabilities(before!, logits, source.choice.tokenId, source.settings, source.step).selected.after;
+    const probability = branchProbabilities(before!, logits, targetTokenId, source.settings, source.step).selected.after;
     singles.set(key, probability);
     return probability;
   }
@@ -59,7 +60,7 @@ export async function scanStoryHeadPairs(source: StorySelection, config: ModelCo
     validateInterventions(applied, config, source.prefix.length);
     const after = await predict([...source.prefix], applied);
     if (cancelled()) return;
-    const result = branchProbabilities(before, after, source.choice.tokenId, source.settings, source.step);
+    const result = branchProbabilities(before, after, targetTokenId, source.settings, source.step);
     const first = await individual(edits[0]);
     if (first === null || cancelled()) return;
     const second = await individual(edits[1]);

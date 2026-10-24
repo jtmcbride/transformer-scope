@@ -8,7 +8,7 @@ export type PositionDifferenceOrder = 'absolute' | 'increase' | 'decrease';
 export interface PositionDifference { index:number; a:InteractionPoint; b:InteractionPoint; difference:number }
 export interface TrajectoryBranchDraft {
   targetTokenId:number; sources:[StorySelection,StorySelection]; parents:[string,string]; labels:[string,string];
-  edits:[HeadScaleIntervention,HeadScaleIntervention]; origin:{kind?:'parent-probability';groupId:string;branch:StorySelection['branch'];index:number};
+  edits:[HeadScaleIntervention,HeadScaleIntervention]; origin:{kind?:'parent-probability'|'lineage-probability';groupId:string;branch:StorySelection['branch'];index:number};
 }
 /** Join exact generation offsets for one fixed target. Missing or differently targeted points are never zero-filled. */
 export function trajectoryDifferences(tracks:InteractionTracks,targetTokenId:number):PositionDifference[]{

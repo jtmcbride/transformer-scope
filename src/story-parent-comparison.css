@@ -1,7 +1,7 @@
 .story-parent-comparison { margin-top:24px; border-top:2px solid #8998af; padding:16px 0; min-width:0; }
-.story-parent-comparison > summary { cursor:pointer; font-weight:650; padding:12px 0; min-height:44px; }
+.story-parent-comparison > summary { cursor:pointer; font-weight:650; padding:12px 0; min-height:45px; }
 .story-parent-comparison h4 { margin:10px 0; }
-.story-map-comparison .story-parent-comparison select { min-height:44px; max-width:100%; padding:8px; }
+.story-map-comparison .story-parent-comparison .continuation-actions select { min-height:45px; max-width:100%; padding:8px; }
 .parent-trace-scroll { overflow:auto; max-width:100%; border:1px solid #d5dce8; border-radius:5px; padding:4px 2px 12px; }
 .parent-trace-track { padding:12px; }
 .parent-trace-track + .parent-trace-track { border-top:1px solid #d5dce8; }
@@ -24,7 +24,7 @@
 .parent-trace-details h5 { font-size:15px; margin:0 0 12px; }
 .parent-trace-detail { border-top:1px solid #d5dce8; margin-top:12px; padding-top:12px; }
 .parent-trace-detail h6 { font-size:14px; margin:0; }
-.parent-trace-detail button, .story-parent-comparison .continuation-actions button { min-height:44px; padding:9px; }
+.parent-trace-detail button, .story-map-comparison .story-parent-comparison .continuation-actions button { min-height:45px; padding:9px; }
 @media(max-width:700px) { .parent-trace-details { grid-template-columns:minmax(0,1fr); } }
 
 .parent-trace-plot > .parent-trace-pending, .parent-trace-no-difference { background:repeating-linear-gradient(135deg,#f4f6fa,#f4f6fa 4px,#e3e8f0 4px,#e3e8f0 6px); }

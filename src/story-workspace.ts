@@ -4,7 +4,7 @@ import { requireInput, validateTokens, validateInterventions, type HeadScaleInte
 import { SharedStoryFork } from './story-shared-fork';
 export interface StoryRoot { prompt: string; tokens: number[]; settings: Sampling; edit?: HeadScaleIntervention; frame: StoryFrame }
 export interface StoryNode { id: string; parentId: string | null; plan: ForkPlan; frame: StoryFrame }
-export interface SharedStoryGroup { id: string; nodeIds: [string, string]; labels: [string, string] }
+export interface SharedStoryGroup { id: string; nodeIds: [string, string]; labels: [string, string]; targetTokenId?: number }
 export interface StoryWorkspace { format: 'transformer-story-workspace'; version: 1 | 2 | 3; checkpoint: string; root: StoryRoot | null; nodes: StoryNode[]; route: string[]; sharedForks?: SharedStoryGroup[] }
 export function checkpointKey(m: ModelManifest) { return [m.modelId, m.modelRevision, m.weightsSha256, m.tokenizerSha256].join(':'); }
 export function emptyWorkspace(m: ModelManifest): StoryWorkspace { return { format: 'transformer-story-workspace', version: 3, checkpoint: checkpointKey(m), root: null, nodes: [], route: [], sharedForks: [] }; }
@@ -48,6 +48,7 @@ export function parseWorkspace(value: unknown, manifest: ModelManifest): StoryWo
     requireInput(!!group && typeof group.id === 'string' && group.id.length > 0 && group.id.length <= 100 && !groupIds.has(group.id), 'Invalid shared comparison ID.');
     requireInput(Array.isArray(group.nodeIds) && group.nodeIds.length === 2 && group.nodeIds.every(id => typeof id === 'string' && seen.has(id) && !members.has(id)) && group.nodeIds[0] !== group.nodeIds[1], 'Invalid shared comparison links.');
     requireInput(Array.isArray(group.labels) && group.labels.length === 2 && group.labels.every(label => typeof label === 'string' && label.length <= 200), 'Invalid shared comparison labels.');
+    requireInput(group.targetTokenId === undefined || Number.isInteger(group.targetTokenId) && group.targetTokenId >= 1 && group.targetTokenId !== 2 && group.targetTokenId < manifest.config.vocabularySize, 'Invalid shared comparison target token.');
     const nodes = group.nodeIds.map(id => w.nodes.find(node => node.id === id)!);
     const shared = new SharedStoryFork([nodes[0].plan,nodes[1].plan], manifest.config);
     shared.restore([nodes[0].frame,nodes[1].frame]);

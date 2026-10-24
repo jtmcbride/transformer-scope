@@ -36,7 +36,7 @@ def main():
             after=float(values.softmax(-1)[target]);individual=[singles[a],singles[b]];summed=sum(p-before for p in individual)
             rows.append(dict(edits=pair,before=before,after=after,delta=after-before,rank=order.index(target)+1,choice=order[0],individualProbabilities=individual,sumDelta=summed,interaction=after-before-summed))
         return rows
-    def rollout(pair,duration):
+    def rollout(pair,duration,target):
         plans=[dict(source=copy.deepcopy(source),edit=pair[0],additionalEdits=[pair[1]],duration=duration,maxTokens=4) for source in sources];frames=[]
         for plan in plans:
             frame={}
@@ -48,7 +48,19 @@ def main():
                     if token==1 or len(ids)>=model.config.contextLength:break
                 frame[branch]=dict(tokenIds=ids,choices=choices)
             frames.append(frame)
-        return dict(plans=plans,frames=frames)
+        tracks={}
+        for branch in ['original','edited']:
+            tracks[branch]=[]
+            for plan,frame in zip(plans,frames):
+                rows=[]
+                for i,choice in enumerate(frame[branch]['choices']):
+                    prefix=frame[branch]['tokenIds'][:len(plan['source']['prefix'])+i]
+                    before=float(predict(prefix,edits_at(plan,False,i)).softmax(-1)[target])
+                    after=float(predict(prefix,edits_at(plan,True,i)).softmax(-1)[target])
+                    rows.append(dict(index=i,step=plan['source']['step']+i,tokenId=choice['tokenId'],targetTokenId=target,
+                                     active=duration=='continuation' or i==0,before=before,after=after,delta=after-before))
+                tracks[branch].append(rows)
+        return dict(plans=plans,frames=frames,tracks=tracks)
     cases=[]
     with torch.no_grad():
         for target in [471,1]:
@@ -57,7 +69,7 @@ def main():
             branches={}
             for order in ['absolute','increase','decrease']:
                 best=max(changes,key=lambda r:abs(r['difference']) if order=='absolute' else r['difference'] if order=='increase' else -r['difference'])
-                branches[order]={duration:rollout(best['edits'],duration) for duration in ['continuation','prediction']}
+                branches[order]={duration:rollout(best['edits'],duration,target) for duration in ['continuation','prediction']}
             cases.append(dict(targetTokenId=target,rows=rows,changes=changes,branches=branches))
     data=dict(modelRevision=manifest['modelRevision'],nodeIds=[n['id'] for n in nodes],index=1,sources=sources,cases=cases)
     (ROOT/'tests/fixtures/chosen-token-scan-comparison-reference.json').write_text(json.dumps(data,indent=2)+'\n')

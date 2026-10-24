@@ -15,10 +15,10 @@ export type InteractionTracks = [InteractionPoint[],InteractionPoint[]];
 export type InteractionTarget = {kind:'generated'} | {kind:'fixed';tokenId:number};
 export type InteractionTrend = 'Starting point' | 'Near zero' | 'Growing' | 'Fading' | 'Fading to zero' | 'Reversed' | 'Steady';
 /** Trend labels use the same four-decimal percentage-point precision as the display, never raw round-off. */
-export function interactionTrend(point: InteractionPoint, previous?: InteractionPoint): InteractionTrend {
-  const current = Number((point.interaction*100).toFixed(4));
+export function interactionTrend(point: InteractionPoint, previous?: InteractionPoint, metric: 'interaction' | 'delta' = 'interaction'): InteractionTrend {
+  const current = Number((point[metric]*100).toFixed(4));
   if (!previous || previous.index !== point.index-1) return current === 0 ? 'Near zero' : 'Starting point';
-  const before = Number((previous.interaction*100).toFixed(4));
+  const before = Number((previous[metric]*100).toFixed(4));
   if (current === 0) return before === 0 ? 'Near zero' : 'Fading to zero';
   if (before*current < 0) return 'Reversed';
   return Math.abs(current) > Math.abs(before) ? 'Growing' : Math.abs(current) < Math.abs(before) ? 'Fading' : 'Steady';

@@ -37,7 +37,7 @@ export function SharedStoryBranches({workspace,draft,manifest,tokenizer,disabled
         if(workspace.nodes.length>498)throw new Error('This workspace needs room for two comparisons. Download it and reset the story to begin another.');
         const plans=draft.sources.map(source=>({source,edit:draft.edits[0],additionalEdits:[draft.edits[1]],duration,maxTokens:budget})) as [ForkPlan,ForkPlan];
         session=new SharedStoryFork(plans,manifest.config);
-        captured={id:crypto.randomUUID(),nodeIds:[crypto.randomUUID(),crypto.randomUUID()],labels:structuredClone(draft.labels)};
+        captured={id:crypto.randomUUID(),nodeIds:[crypto.randomUUID(),crypto.randomUUID()],labels:structuredClone(draft.labels),...(draft.targetTokenId===undefined?{}:{targetTokenId:draft.targetTokenId})};
         records=session.plans.map((plan,i)=>({id:captured.nodeIds[i],parentId:draft.parents[i],plan,frame:session.frames[i]})) as [StoryNode,StoryNode];
       }else{
         if(!group||!nodes||finished)return;

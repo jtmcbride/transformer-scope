@@ -67,6 +67,11 @@ it('migrates version 2 files and round trips linked shared continuations with va
   w.sharedForks=[{id:'shared',nodeIds:['side-0','side-1'],labels:['Original path','Changed path']}];w.route=nodeRoute(w.nodes,'side-1');
   expect(parseWorkspace(JSON.parse(JSON.stringify(w)),manifest)).toEqual(w);
   expect(()=>parseWorkspace({...w,version:2},manifest)).toThrow('version 3');
+  const original=structuredClone(w);
+  for(const target of [471,1]){w.sharedForks[0].targetTokenId=target;const restored=parseWorkspace(JSON.parse(JSON.stringify(w)),manifest);expect(restored.sharedForks![0].targetTokenId).toBe(target);expect(restored.nodes).toEqual(original.nodes);}
+  for(const target of [0,2,-1,manifest.config.vocabularySize,1.5,NaN,null,'471']){w.sharedForks[0].targetTokenId=target as any;expect(()=>parseWorkspace(w,manifest)).toThrow('target token');}
+  w.sharedForks=original.sharedForks;
+
   const corruptions=[
     (x:StoryWorkspace)=>x.sharedForks![0].nodeIds[1]='missing',
     (x:StoryWorkspace)=>x.sharedForks![0].nodeIds[1]='side-0',

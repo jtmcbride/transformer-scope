@@ -45,7 +45,8 @@ it('measures both targets on their own exact prefixes against independent PyTorc
           for(const side of [0,1])pinned[side].forEach((row,i)=>{
             const expected=target.cases[caseIndex][branch][side][i];expect(row.targetTokenId).toBe(target.tokenId);expect(row.tokenId).toBe(expected.tokenId);
             expect(row.recordedProbability).toBe(frames[side][branch]!.choices[i].probability);
-            for(const field of ['before','after'] as const)expect(row[field]).toBeCloseTo(expected[field],5);
+            for(const field of ['before','after','delta'] as const)expect(row[field]).toBeCloseTo(expected[field],5);
+            if(!row.active)expect(row.delta).toBe(0);
             row.individualProbabilities.forEach((p,j)=>expect(p).toBeCloseTo(expected.individualProbabilities[j],5));
             expect(Math.abs(row.interaction-expected.interaction)).toBeLessThanOrEqual(4*5e-6);
             expect(row.alternatives).toEqual(rows[side][i].alternatives);if(!row.active)expect(row.interaction).toBe(0);
@@ -98,4 +99,14 @@ it('validates and snapshots fixed targets while replaying the actual generated c
   for(const tokenId of invalid)await expect(traceStoryInteractions(plans,frames,'edited',config,async()=>{throw new Error('must not infer');},()=>{},()=>false,{kind:'fixed',tokenId})).rejects.toThrow('eligible next token');
   const changed=synthetic();changed.frames[0].edited!.choices[0].probability=.01;
   await expect(traceStoryInteractions(changed.plans,changed.frames,'edited',config,async(_,use)=>{await use(async()=>logits);},()=>{},()=>false,{kind:'fixed',tokenId:3})).rejects.toThrow('reproduced');
+});
+
+it('uses probability change rather than interaction for effect trends, including precision and missing offsets',()=>{
+  const point=(index:number,delta:number)=>({index,delta,interaction:-.5}) as InteractionPoint;
+  expect(interactionTrend(point(0,.1),undefined,'delta')).toBe('Starting point');
+  for(const [delta,trend] of [[.2,'Growing'],[.05,'Fading'],[-.1,'Reversed'],[0,'Fading to zero'],[.1,'Steady']] as const)
+    expect(interactionTrend(point(1,delta),point(0,.1),'delta')).toBe(trend);
+  expect(interactionTrend(point(1,1e-10),point(0,-1e-10),'delta')).toBe('Near zero');
+  expect(interactionTrend(point(3,-.1),point(0,.1),'delta')).toBe('Starting point');
+  expect(interactionTrend(point(1,.2),point(0,.1))).toBe('Steady');
 });

@@ -12000,7 +12000,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 7.792912697368592e-07,
+                    "delta": -2.5623259602980397e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.02911326102912426,
+                    "after": 0.0010146517306566238,
+                    "delta": -0.028098609298467636
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0028582746163010597,
+                    "after": 5.328734005161095e-06,
+                    "delta": -0.0028529458822958986
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 1.197009623865597e-06,
+                    "after": 3.9916692912811413e-05,
+                    "delta": 3.8719683288945816e-05
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.00012452845112420619,
+                    "delta": -0.6848532414005604
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0009718180517666042,
+                    "after": 5.499634880834492e-08,
+                    "delta": -0.0009717630554177958
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 2.0985458832001314e-05,
+                    "after": 1.9141450593451736e-06,
+                    "delta": -1.907131377265614e-05
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.8002865314483643,
+                    "after": 0.0001428027026122436,
+                    "delta": -0.800143728745752
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 7.792912697368592e-07,
+                    "delta": -2.5623259602980397e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.02911326102912426,
+                    "after": 0.0010146517306566238,
+                    "delta": -0.028098609298467636
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 8.453540067421272e-05,
+                    "after": 0.0011029638117179275,
+                    "delta": 0.0010184284110437147
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 351,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 1.5777033013364417e-09,
+                    "after": 8.932757822321946e-08,
+                    "delta": 8.774987492188302e-08
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 389,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.00012452845112420619,
+                    "delta": -0.6848532414005604
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 111,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0031787757761776447,
+                    "after": 2.315413496489782e-07,
+                    "delta": -0.0031785442348279958
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 389,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0005713526043109596,
+                    "after": 3.075792847084813e-07,
+                    "delta": -0.0005710450250262511
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 389,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0002589933865237981,
+                    "after": 4.6900295274099335e-06,
+                    "delta": -0.0002543033569963882
+                  }
+                ]
+              ]
+            }
           },
           "prediction": {
             "plans": [
@@ -12408,7 +12582,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 7.792912697368592e-07,
+                    "delta": -2.5623259602980397e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.02911326102912426,
+                    "after": 0.02911326102912426,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0028582746163010597,
+                    "after": 0.0028582746163010597,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 1.197009623865597e-06,
+                    "after": 1.197009623865597e-06,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.00012452845112420619,
+                    "delta": -0.6848532414005604
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0009718180517666042,
+                    "after": 0.0009718180517666042,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 2.0985458832001314e-05,
+                    "after": 2.0985458832001314e-05,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.8002865314483643,
+                    "after": 0.8002865314483643,
+                    "delta": 0.0
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 7.792912697368592e-07,
+                    "delta": -2.5623259602980397e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.02911326102912426,
+                    "after": 0.02911326102912426,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0028582746163010597,
+                    "after": 0.0028582746163010597,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 1.197009623865597e-06,
+                    "after": 1.197009623865597e-06,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 389,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.00012452845112420619,
+                    "delta": -0.6848532414005604
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 500,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0031787757761776447,
+                    "after": 0.0031787757761776447,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 327,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.00010461342026246712,
+                    "after": 0.00010461342026246712,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 5.9202644479228184e-05,
+                    "after": 5.9202644479228184e-05,
+                    "delta": 0.0
+                  }
+                ]
+              ]
+            }
           }
         },
         "increase": {
@@ -12818,7 +13166,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 2.2453028577729128e-05,
+                    "delta": 1.911141134769423e-05
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.02911326102912426,
+                    "after": 0.048524655401706696,
+                    "delta": 0.019411394372582436
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0028582746163010597,
+                    "after": 0.002320445841178298,
+                    "delta": -0.0005378287751227617
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 1.197009623865597e-06,
+                    "after": 1.6269818843284156e-06,
+                    "delta": 4.2997226046281867e-07
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.9239456653594971,
+                    "delta": 0.2389678955078125
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0009718180517666042,
+                    "after": 0.00025455126888118684,
+                    "delta": -0.0007172667828854173
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 2.0985458832001314e-05,
+                    "after": 3.487658977974206e-05,
+                    "delta": 1.3891130947740749e-05
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.8002865314483643,
+                    "after": 0.9142146706581116,
+                    "delta": 0.11392813920974731
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 2.2453028577729128e-05,
+                    "delta": 1.911141134769423e-05
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 339,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.02911326102912426,
+                    "after": 0.048524655401706696,
+                    "delta": 0.019411394372582436
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 101,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.309156282327308e-09,
+                    "after": 1.2971225205049564e-09,
+                    "delta": -2.0120337618223516e-09
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 680,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 6.520390627429151e-08,
+                    "after": 2.9824891445429103e-09,
+                    "delta": -6.22214171297486e-08
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.9239456653594971,
+                    "delta": 0.2389678955078125
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 316,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0009718180517666042,
+                    "after": 0.00025455126888118684,
+                    "delta": -0.0007172667828854173
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 121,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 6.749110980308615e-06,
+                    "after": 2.4609694264654536e-06,
+                    "delta": -4.288141553843161e-06
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 1465,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 1.8768296285998076e-05,
+                    "after": 5.765858986706007e-06,
+                    "delta": -1.3002437299292069e-05
+                  }
+                ]
+              ]
+            }
           },
           "prediction": {
             "plans": [
@@ -13226,7 +13748,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 2.2453028577729128e-05,
+                    "delta": 1.911141134769423e-05
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.02911326102912426,
+                    "after": 0.02911326102912426,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0028582746163010597,
+                    "after": 0.0028582746163010597,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 1.197009623865597e-06,
+                    "after": 1.197009623865597e-06,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.9239456653594971,
+                    "delta": 0.2389678955078125
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0009718180517666042,
+                    "after": 0.0009718180517666042,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 2.0985458832001314e-05,
+                    "after": 2.0985458832001314e-05,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.8002865314483643,
+                    "after": 0.8002865314483643,
+                    "delta": 0.0
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 2.2453028577729128e-05,
+                    "delta": 1.911141134769423e-05
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.02911326102912426,
+                    "after": 0.02911326102912426,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0028582746163010597,
+                    "after": 0.0028582746163010597,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 1.197009623865597e-06,
+                    "after": 1.197009623865597e-06,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.9239456653594971,
+                    "delta": 0.2389678955078125
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0009718180517666042,
+                    "after": 0.0009718180517666042,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 2.0985458832001314e-05,
+                    "after": 2.0985458832001314e-05,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.8002865314483643,
+                    "after": 0.8002865314483643,
+                    "delta": 0.0
+                  }
+                ]
+              ]
+            }
           }
         },
         "decrease": {
@@ -13636,7 +14332,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 7.792912697368592e-07,
+                    "delta": -2.5623259602980397e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.02911326102912426,
+                    "after": 0.0010146517306566238,
+                    "delta": -0.028098609298467636
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0028582746163010597,
+                    "after": 5.328734005161095e-06,
+                    "delta": -0.0028529458822958986
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 1.197009623865597e-06,
+                    "after": 3.9916692912811413e-05,
+                    "delta": 3.8719683288945816e-05
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.00012452845112420619,
+                    "delta": -0.6848532414005604
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0009718180517666042,
+                    "after": 5.499634880834492e-08,
+                    "delta": -0.0009717630554177958
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 2.0985458832001314e-05,
+                    "after": 1.9141450593451736e-06,
+                    "delta": -1.907131377265614e-05
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.8002865314483643,
+                    "after": 0.0001428027026122436,
+                    "delta": -0.800143728745752
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 7.792912697368592e-07,
+                    "delta": -2.5623259602980397e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.02911326102912426,
+                    "after": 0.0010146517306566238,
+                    "delta": -0.028098609298467636
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 8.453540067421272e-05,
+                    "after": 0.0011029638117179275,
+                    "delta": 0.0010184284110437147
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 351,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 1.5777033013364417e-09,
+                    "after": 8.932757822321946e-08,
+                    "delta": 8.774987492188302e-08
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 389,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.00012452845112420619,
+                    "delta": -0.6848532414005604
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 111,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0031787757761776447,
+                    "after": 2.315413496489782e-07,
+                    "delta": -0.0031785442348279958
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 389,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0005713526043109596,
+                    "after": 3.075792847084813e-07,
+                    "delta": -0.0005710450250262511
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 389,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.0002589933865237981,
+                    "after": 4.6900295274099335e-06,
+                    "delta": -0.0002543033569963882
+                  }
+                ]
+              ]
+            }
           },
           "prediction": {
             "plans": [
@@ -14044,7 +14914,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 7.792912697368592e-07,
+                    "delta": -2.5623259602980397e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.02911326102912426,
+                    "after": 0.02911326102912426,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0028582746163010597,
+                    "after": 0.0028582746163010597,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 1.197009623865597e-06,
+                    "after": 1.197009623865597e-06,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.00012452845112420619,
+                    "delta": -0.6848532414005604
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0009718180517666042,
+                    "after": 0.0009718180517666042,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 2.0985458832001314e-05,
+                    "after": 2.0985458832001314e-05,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.8002865314483643,
+                    "after": 0.8002865314483643,
+                    "delta": 0.0
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 3.341617230034899e-06,
+                    "after": 7.792912697368592e-07,
+                    "delta": -2.5623259602980397e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.02911326102912426,
+                    "after": 0.02911326102912426,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0028582746163010597,
+                    "after": 0.0028582746163010597,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 1.197009623865597e-06,
+                    "after": 1.197009623865597e-06,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 389,
+                    "targetTokenId": 471,
+                    "active": true,
+                    "before": 0.6849777698516846,
+                    "after": 0.00012452845112420619,
+                    "delta": -0.6848532414005604
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 500,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.0031787757761776447,
+                    "after": 0.0031787757761776447,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 327,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 0.00010461342026246712,
+                    "after": 0.00010461342026246712,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 268,
+                    "targetTokenId": 471,
+                    "active": false,
+                    "before": 5.9202644479228184e-05,
+                    "after": 5.9202644479228184e-05,
+                    "delta": 0.0
+                  }
+                ]
+              ]
+            }
           }
         }
       }
@@ -25867,7 +26911,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.7557396176925977e-06,
+                    "delta": 1.7557092527563378e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.20266667128044e-08,
+                    "after": 4.6433715397142805e-06,
+                    "delta": 4.621344873001476e-06
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.349111356825251e-11,
+                    "after": 3.1793705446148124e-09,
+                    "delta": 3.15587943104656e-09
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.4156100297129113e-12,
+                    "after": 1.1455424386852542e-09,
+                    "delta": 1.1431268286555413e-09
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 3.236043255583354e-08,
+                    "delta": 2.8968202059331816e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.1483308748339027e-09,
+                    "after": 1.090786128088439e-09,
+                    "delta": -5.7544746745463726e-11
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 9.708500670058129e-11,
+                    "after": 5.132710700905818e-09,
+                    "delta": 5.035625694205237e-09
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.9158853109834126e-08,
+                    "after": 4.889772498017919e-08,
+                    "delta": 1.9738871870345065e-08
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.7557396176925977e-06,
+                    "delta": 1.7557092527563378e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.20266667128044e-08,
+                    "after": 4.6433715397142805e-06,
+                    "delta": 4.621344873001476e-06
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.1083576278991814e-09,
+                    "after": 1.4029866406417568e-06,
+                    "delta": 1.4018782830138576e-06
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 351,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.2198622103762324e-12,
+                    "after": 1.2042988828397938e-09,
+                    "delta": 1.2030790206294176e-09
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 389,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 3.236043255583354e-08,
+                    "delta": 2.8968202059331816e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 111,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.862863650283543e-06,
+                    "after": 4.276196730046422e-09,
+                    "delta": -3.858587453553497e-06
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 389,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 7.84960946020874e-07,
+                    "after": 9.387855826048508e-09,
+                    "delta": -7.755730901948255e-07
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 389,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.2010839782305993e-05,
+                    "after": 4.976426382086174e-09,
+                    "delta": -1.2005863355923907e-05
+                  }
+                ]
+              ]
+            }
           },
           "prediction": {
             "plans": [
@@ -26275,7 +27493,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.7557396176925977e-06,
+                    "delta": 1.7557092527563378e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.20266667128044e-08,
+                    "after": 2.20266667128044e-08,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.349111356825251e-11,
+                    "after": 2.349111356825251e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.4156100297129113e-12,
+                    "after": 2.4156100297129113e-12,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 3.236043255583354e-08,
+                    "delta": 2.8968202059331816e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 1.1483308748339027e-09,
+                    "after": 1.1483308748339027e-09,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 9.708500670058129e-11,
+                    "after": 9.708500670058129e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.9158853109834126e-08,
+                    "after": 2.9158853109834126e-08,
+                    "delta": 0.0
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.7557396176925977e-06,
+                    "delta": 1.7557092527563378e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.20266667128044e-08,
+                    "after": 2.20266667128044e-08,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.349111356825251e-11,
+                    "after": 2.349111356825251e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.4156100297129113e-12,
+                    "after": 2.4156100297129113e-12,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 389,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 3.236043255583354e-08,
+                    "delta": 2.8968202059331816e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 500,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 3.862863650283543e-06,
+                    "after": 3.862863650283543e-06,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 327,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 9.887609841996436e-09,
+                    "after": 9.887609841996436e-09,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 3.77999668899065e-07,
+                    "after": 3.77999668899065e-07,
+                    "delta": 0.0
+                  }
+                ]
+              ]
+            }
           }
         },
         "increase": {
@@ -26685,7 +28077,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.5856999269203698e-08,
+                    "delta": 1.5826634332943845e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.20266667128044e-08,
+                    "after": 4.808425160263141e-07,
+                    "delta": 4.588158493135097e-07
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.349111356825251e-11,
+                    "after": 1.1586124282203514e-09,
+                    "delta": 1.1351213146520989e-09
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.4156100297129113e-12,
+                    "after": 1.1778585051747115e-11,
+                    "delta": 9.362975022034203e-12
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 1.5880602859397186e-06,
+                    "delta": 1.5846680554432169e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.1483308748339027e-09,
+                    "after": 2.863325505586545e-07,
+                    "delta": 2.8518421968382057e-07
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 9.708500670058129e-11,
+                    "after": 1.3927484054931938e-08,
+                    "delta": 1.3830399048231357e-08
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.9158853109834126e-08,
+                    "after": 2.440644493617583e-06,
+                    "delta": 2.411485640507749e-06
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.5856999269203698e-08,
+                    "delta": 1.5826634332943845e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 625,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.20266667128044e-08,
+                    "after": 4.808425160263141e-07,
+                    "delta": 4.588158493135097e-07
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 351,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.4054751246449513e-11,
+                    "after": 4.3780322249442616e-13,
+                    "delta": -2.3616948023955087e-11
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 351,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 5.60486656340912e-15,
+                    "after": 1.0005117597584011e-14,
+                    "delta": 4.400251034174891e-15
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 1.5880602859397186e-06,
+                    "delta": 1.5846680554432169e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 285,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.1483308748339027e-09,
+                    "after": 2.863325505586545e-07,
+                    "delta": 2.8518421968382057e-07
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 916,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 5.520312207352163e-09,
+                    "after": 6.10767074249452e-07,
+                    "delta": 6.052467620420998e-07
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 49,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.881977145818837e-08,
+                    "after": 1.753446440488915e-06,
+                    "delta": 1.7246266690307266e-06
+                  }
+                ]
+              ]
+            }
           },
           "prediction": {
             "plans": [
@@ -27093,7 +28659,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.5856999269203698e-08,
+                    "delta": 1.5826634332943845e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.20266667128044e-08,
+                    "after": 2.20266667128044e-08,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.349111356825251e-11,
+                    "after": 2.349111356825251e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.4156100297129113e-12,
+                    "after": 2.4156100297129113e-12,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 1.5880602859397186e-06,
+                    "delta": 1.5846680554432169e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 1.1483308748339027e-09,
+                    "after": 1.1483308748339027e-09,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 9.708500670058129e-11,
+                    "after": 9.708500670058129e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.9158853109834126e-08,
+                    "after": 2.9158853109834126e-08,
+                    "delta": 0.0
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.5856999269203698e-08,
+                    "delta": 1.5826634332943845e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.20266667128044e-08,
+                    "after": 2.20266667128044e-08,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.349111356825251e-11,
+                    "after": 2.349111356825251e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.4156100297129113e-12,
+                    "after": 2.4156100297129113e-12,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 1.5880602859397186e-06,
+                    "delta": 1.5846680554432169e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 1.1483308748339027e-09,
+                    "after": 1.1483308748339027e-09,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 9.708500670058129e-11,
+                    "after": 9.708500670058129e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.9158853109834126e-08,
+                    "after": 2.9158853109834126e-08,
+                    "delta": 0.0
+                  }
+                ]
+              ]
+            }
           }
         },
         "decrease": {
@@ -27503,7 +29243,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.7557396176925977e-06,
+                    "delta": 1.7557092527563378e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.20266667128044e-08,
+                    "after": 4.6433715397142805e-06,
+                    "delta": 4.621344873001476e-06
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.349111356825251e-11,
+                    "after": 3.1793705446148124e-09,
+                    "delta": 3.15587943104656e-09
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.4156100297129113e-12,
+                    "after": 1.1455424386852542e-09,
+                    "delta": 1.1431268286555413e-09
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 3.236043255583354e-08,
+                    "delta": 2.8968202059331816e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.1483308748339027e-09,
+                    "after": 1.090786128088439e-09,
+                    "delta": -5.7544746745463726e-11
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 9.708500670058129e-11,
+                    "after": 5.132710700905818e-09,
+                    "delta": 5.035625694205237e-09
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.9158853109834126e-08,
+                    "after": 4.889772498017919e-08,
+                    "delta": 1.9738871870345065e-08
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.7557396176925977e-06,
+                    "delta": 1.7557092527563378e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 2.20266667128044e-08,
+                    "after": 4.6433715397142805e-06,
+                    "delta": 4.621344873001476e-06
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.1083576278991814e-09,
+                    "after": 1.4029866406417568e-06,
+                    "delta": 1.4018782830138576e-06
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 351,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.2198622103762324e-12,
+                    "after": 1.2042988828397938e-09,
+                    "delta": 1.2030790206294176e-09
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 389,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 3.236043255583354e-08,
+                    "delta": 2.8968202059331816e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 111,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.862863650283543e-06,
+                    "after": 4.276196730046422e-09,
+                    "delta": -3.858587453553497e-06
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 389,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 7.84960946020874e-07,
+                    "after": 9.387855826048508e-09,
+                    "delta": -7.755730901948255e-07
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 389,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 1.2010839782305993e-05,
+                    "after": 4.976426382086174e-09,
+                    "delta": -1.2005863355923907e-05
+                  }
+                ]
+              ]
+            }
           },
           "prediction": {
             "plans": [
@@ -27911,7 +29825,181 @@
                   ]
                 }
               }
-            ]
+            ],
+            "tracks": {
+              "original": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.7557396176925977e-06,
+                    "delta": 1.7557092527563378e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.20266667128044e-08,
+                    "after": 2.20266667128044e-08,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.349111356825251e-11,
+                    "after": 2.349111356825251e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.4156100297129113e-12,
+                    "after": 2.4156100297129113e-12,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 3.236043255583354e-08,
+                    "delta": 2.8968202059331816e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 1.1483308748339027e-09,
+                    "after": 1.1483308748339027e-09,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 9.708500670058129e-11,
+                    "after": 9.708500670058129e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 471,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.9158853109834126e-08,
+                    "after": 2.9158853109834126e-08,
+                    "delta": 0.0
+                  }
+                ]
+              ],
+              "edited": [
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 265,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.036493625985237e-11,
+                    "after": 1.7557396176925977e-06,
+                    "delta": 1.7557092527563378e-06
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 556,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.20266667128044e-08,
+                    "after": 2.20266667128044e-08,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 1006,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.349111356825251e-11,
+                    "after": 2.349111356825251e-11,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 47,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 2.4156100297129113e-12,
+                    "after": 2.4156100297129113e-12,
+                    "delta": 0.0
+                  }
+                ],
+                [
+                  {
+                    "index": 0,
+                    "step": 8,
+                    "tokenId": 389,
+                    "targetTokenId": 1,
+                    "active": true,
+                    "before": 3.3922304965017247e-09,
+                    "after": 3.236043255583354e-08,
+                    "delta": 2.8968202059331816e-08
+                  },
+                  {
+                    "index": 1,
+                    "step": 9,
+                    "tokenId": 500,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 3.862863650283543e-06,
+                    "after": 3.862863650283543e-06,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 2,
+                    "step": 10,
+                    "tokenId": 327,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 9.887609841996436e-09,
+                    "after": 9.887609841996436e-09,
+                    "delta": 0.0
+                  },
+                  {
+                    "index": 3,
+                    "step": 11,
+                    "tokenId": 268,
+                    "targetTokenId": 1,
+                    "active": false,
+                    "before": 3.77999668899065e-07,
+                    "after": 3.77999668899065e-07,
+                    "delta": 0.0
+                  }
+                ]
+              ]
+            }
           }
         }
       }

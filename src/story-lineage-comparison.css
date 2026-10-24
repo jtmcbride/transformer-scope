@@ -1,0 +1,18 @@
+.story-lineage-comparison { margin-top:24px; border-top:2px solid #5d9084; padding:16px 0; min-width:0; }
+.story-lineage-comparison > summary { cursor:pointer; font-weight:650; padding:12px 0; min-height:45px; }
+.story-lineage-comparison h4 { margin:10px 0; }
+.story-lineage-comparison .continuation-actions label { min-width:0; max-width:100%; }
+.story-map-comparison .story-lineage-comparison .continuation-actions :is(select,button) { min-height:45px; max-width:100%; padding:9px; }
+.story-map-comparison .story-lineage-comparison .continuation-actions select { padding:8px 28px 8px 10px; }
+.story-map-comparison .story-lineage-comparison select { appearance:none; padding:8px 28px 8px 10px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%2334425d' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 9px center; }
+.lineage-three-bars > .lineage-bar { width:22%; }
+.lineage-original { left:7%; background:#5d9084; }
+.lineage-parent { left:39%; background:#c3cbd6; }
+.lineage-child { left:71%; background:#7965a9; }
+.lineage-history { margin:10px 0; font-size:12px; }
+.lineage-history > summary { cursor:pointer; padding:10px 0; min-height:45px; }
+.lineage-history li { margin:6px 0; }
+.story-map-comparison .story-lineage-comparison .parent-trace-detail button { min-height:45px; padding:9px; }
+.lineage-scroll { container-type:inline-size; }
+.lineage-scroll .parent-trace-track { width:max-content; min-width:100%; }
+.lineage-scroll .parent-trace-track > :is(h5,p,.lineage-history) { position:sticky; left:12px; width:calc(100cqw - 28px); max-width:100%; overflow-wrap:anywhere; }

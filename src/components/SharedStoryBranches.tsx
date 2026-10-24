@@ -11,6 +11,7 @@ import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import type { HeadPairScanRow } from '../story-head-pair-scan';
 import type { TrajectoryBranchDraft } from '../story-trajectory-differences';
 import { StoryParentComparison } from './StoryParentComparison';
+import { StoryLineageComparison } from './StoryLineageComparison';
 import { StoryInteractionTrace } from './StoryInteractionTrace';
 
 export interface SharedBranchDraft { origin?: TrajectoryBranchDraft['origin']; targetTokenId?: number; effects?: [HeadPairScanRow,HeadPairScanRow]; sources: [StorySelection,StorySelection]; parents: [string|null,string|null]; labels: [string,string]; edits: [HeadScaleIntervention,HeadScaleIntervention] }
@@ -22,8 +23,8 @@ export function SharedStoryBranches({workspace,draft:mapDraft,manifest,tokenizer
   const clearTraceDraft=useCallback((key:string)=>setTraceDraft(old=>old?.key===key?null:old),[]);
   const setupTraceDraft=useCallback((key:string,draft:TrajectoryBranchDraft)=>{setTraceDraft({key,draft});requestAnimationFrame(()=>{setup.current?.scrollIntoView({block:'start'});setup.current?.querySelector<HTMLElement>('select')?.focus({preventScroll:true});});},[]);
   const [selected,setSelected]=useState(''),[duration,setDuration]=useState<ForkDuration>('continuation'),[limit,setLimit]=useState(6);
-  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[traceBusy,setTraceBusy]=useState(false),[parentBusy,setParentBusy]=useState(false);
-  const working=busy||traceBusy||parentBusy;
+  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[traceBusy,setTraceBusy]=useState(false),[parentBusy,setParentBusy]=useState(false),[lineageBusy,setLineageBusy]=useState(false);
+  const working=busy||traceBusy||parentBusy||lineageBusy;
   useEffect(()=>{onBusy(working);},[working,onBusy]);
   const owner=useRef<ModelClient|null>(null),epoch=useRef(0),flight=useRef(false);
   const groups=workspace.sharedForks??[],group=groups.find(item=>item.id===selected)??groups.at(-1);
@@ -35,7 +36,7 @@ export function SharedStoryBranches({workspace,draft:mapDraft,manifest,tokenizer
   useEffect(()=>()=>{++epoch.current;owner.current?.dispose();onBusy(false);},[onBusy]);
   function stop(){++epoch.current;flight.current=false;owner.current?.dispose();owner.current=null;setBusy(false);}
   async function run(play:boolean,fresh=false){
-    if(flight.current||disabled||traceBusy||parentBusy)return;
+    if(flight.current||disabled||traceBusy||parentBusy||lineageBusy)return;
     setError('');
     let captured:SharedStoryGroup,records:[StoryNode,StoryNode],session:SharedStoryFork;
     try{
@@ -108,8 +109,9 @@ export function SharedStoryBranches({workspace,draft:mapDraft,manifest,tokenizer
             </div>;
           })}</article>;
       })}</div>
-      <StoryParentComparison key={`parent:${JSON.stringify([group.id,group.targetTokenId])}`} workspace={workspace} group={group} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled||traceBusy} onBusy={setParentBusy} onOpenStory={onOpenStory} onSetupBranch={setupTraceDraft} onClearBranch={clearTraceDraft} />
-      <StoryInteractionTrace key={JSON.stringify([group.id,group.targetTokenId])} group={group} nodes={nodes as [StoryNode,StoryNode]} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled||parentBusy} onBusy={setTraceBusy} onOpenStory={onOpenStory} onSetupBranch={setupTraceDraft} onClearBranch={clearTraceDraft} />
+      <StoryLineageComparison key={`lineage:${JSON.stringify([group.id,group.targetTokenId])}`} workspace={workspace} group={group} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled||traceBusy||parentBusy} onBusy={setLineageBusy} onOpenStory={onOpenStory} />
+      <StoryParentComparison key={`parent:${JSON.stringify([group.id,group.targetTokenId])}`} workspace={workspace} group={group} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled||traceBusy||lineageBusy} onBusy={setParentBusy} onOpenStory={onOpenStory} onSetupBranch={setupTraceDraft} onClearBranch={clearTraceDraft} />
+      <StoryInteractionTrace key={JSON.stringify([group.id,group.targetTokenId])} group={group} nodes={nodes as [StoryNode,StoryNode]} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled||parentBusy||lineageBusy} onBusy={setTraceBusy} onOpenStory={onOpenStory} onSetupBranch={setupTraceDraft} onClearBranch={clearTraceDraft} />
       <p className="hint">Highlighted tokens differ from their own reference at the same generation offset. A and B can start at different steps and sample differently. Open either comparison to inspect numbered tokens in the flow and make another head change. Shared results reopen together here; paused paths resume together.</p>
     </>}
     {error&&<p role="alert">Could not continue both stories: {error} Saved results are kept. Check the settings, or resume a paused comparison.</p>}

@@ -59,6 +59,11 @@ it('matches 56 independent three-version PyTorch traces, root-path ancestry, hor
       expect(snapshot).toEqual(before);
     }
     expect(missingOriginal).toBe(true);expect(differentOriginals).toBe(true);
+    // Repeated branches can outlive all saved original history; their recent comparison still works.
+    const beyond=lineageProbabilityWorkspace(),root=beyond.root!;root.frame.step=10;for(const path of ['original','edited'] as const){const track=root.frame[path]!;track.choices.splice(10);track.tokenIds.splice(root.tokens.length+10);delete track.finish;}
+    const late=captureLineageStories(beyond,beyond.sharedForks!.at(-1)!);expect(lineageCounts(late,'edited').map(track=>track.original)).toEqual([0,0]);await cpuChoices(late,'edited',predict);const lateRows=empty();
+    await traceLineageProbabilities(late,'edited',471,loaded.manifest.config,predict,(side,role,p)=>lateRows[side][role].push(p),()=>false);
+    expect(lateRows.map(track=>track.original)).toEqual([[],[]]);expect(originalDifferences(lateRows,471,'child')).toEqual([[],[]]);expect(parentDifferences(lateRows,471).map(track=>track.length)).toEqual([2,2]);
   }finally{engine.dispose();}expect(tf.memory().numTensors).toBe(memory);
 },120000);
 it('resolves direct root parents and rejects missing, cyclic or changed source links at any ancestry depth',()=>{

@@ -1,0 +1,36 @@
+import { expect, type Page, type TestInfo } from '@playwright/test';
+import reference from '../fixtures/lineage-probabilities-reference.json' with {type:'json'};
+import { downloadStory } from './chosen-token-pair-scan';
+
+/** Start with the latest CPU-generated descendants from parentPositionBranchWorkflow. */
+export async function lineageProbabilityComparisonWorkflow(page:Page,info?:TestInfo){
+  let calls=0;page.on('console',message=>{if(message.text()==='position-prefix')calls++;});
+  const shared=page.getByRole('region',{name:'Shared story continuations',exact:true}),before=await downloadStory(page,'Download workspace');
+  await shared.locator('.story-lineage-comparison > summary').click();const panel=shared.getByRole('region',{name:'Original, parent and latest story probabilities',exact:true}),chart=panel.getByRole('region',{name:'Original, parent and latest probability tracks',exact:true});
+  await expect(panel.getByLabel('Lineage comparison chosen token')).toHaveValue('471');
+  await panel.getByRole('button',{name:'Measure original, parent and latest probabilities',exact:true}).click();await expect(shared.getByRole('button',{name:'Measure token-by-token interactions',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Scan both tokens',exact:true})).toBeDisabled();
+  await expect(panel.getByTestId('lineage-status')).toContainText(/Lineage comparison (complete|failed)\./,{timeout:60000});await expect(panel.getByTestId('lineage-status')).toHaveText('Lineage comparison complete. 16 / 16 predictions measured.');
+  const record=await downloadStory(page,'Download lineage comparison'),expected=reference.cases.find(row=>row.rebranchReferenceIndex===2&&row.branch==='edited'&&row.targetTokenId===471)!;
+  expect(record.format).toBe('transformer-story-lineage-probabilities');expect(record.version).toBe(1);expect(record.complete).toBe(true);expect(record.backend).toBe('cpu');expect(record.targetTokenId).toBe(471);
+  for(const side of [0,1]){
+    const origin=record.snapshot.originals[side];expect(origin.root).toEqual(before.root);expect(origin.branch).toBe(expected.origins[side].branch);expect(origin.links.map((p:any)=>[p.sourceBranch,p.sourceStep])).toEqual(expected.origins[side].links.map(p=>[p.sourceBranch,p.sourceStep]));expect(origin.links.at(-1).nodeId).toBe(record.snapshot.children[side].id);await expect(panel.getByTestId(`lineage-origin-${side}`)).toContainText('4 forks to latest');
+    for(const role of ['original','parent','child'] as const){expect(record.rows[side][role]).toHaveLength(expected.rows[side][role].length);record.rows[side][role].forEach((point:any,i:number)=>{const r=expected.rows[side][role][i];expect(point.source.prefix).toEqual(r.prefix);expect([point.offset,point.source.step,point.source.choice.tokenId,point.targetTokenId]).toEqual([r.offset,r.step,r.tokenId,471]);expect(point.probability).toBeCloseTo(r.probability,5);});}
+    expect(record.recent[side]).toHaveLength(2);expect(record.cumulative[side]).toHaveLength(3);expect(record.earlier[side]).toHaveLength(2);
+    record.earlier[side].forEach((p:any)=>expect(p.difference+record.recent[side][p.offset].difference).toBeCloseTo(record.cumulative[side][p.offset].difference,12));
+  }
+  expect(Number(await chart.getAttribute('data-probability-limit'))).toBe(Math.max(...record.rows.flatMap((track:any)=>['original','parent','child'].flatMap(role=>track[role].map((p:any)=>p.probability)))));
+  if(info)await chart.screenshot({path:info.outputPath('original-parent-latest-probabilities-mobile.png')});
+  const limit=Math.max(...[...record.recent.flat(),...record.cumulative.flat()].map((p:any)=>Math.abs(p.difference))),measured=calls;
+  for(const metric of ['recent','cumulative']){await panel.getByLabel('Lineage comparison display').selectOption(metric);expect(Number(await chart.getAttribute('data-difference-limit'))).toBe(limit);await expect(chart).toHaveAttribute('data-metric',metric);}
+  const selected=panel.locator('.lineage-point[data-side="0"][data-offset="1"]');await selected.focus();await page.keyboard.press('Enter');await expect(panel.getByRole('button',{pressed:true})).toHaveCount(2);await page.keyboard.press('ArrowDown');await expect(panel.locator('.lineage-point[data-side="1"][data-offset="1"]')).toBeFocused();
+  for(const side of [0,1]){expect(parseFloat(await panel.getByTestId(`lineage-cumulative-${side}`).innerText())/100).toBeCloseTo(record.cumulative[side][1].difference,6);await expect(panel.getByRole('article',{name:`Story ${side===0?'A':'B'} lineage details`,exact:true})).toContainText('Recorded choice reproduced.');}
+  const tail=panel.locator('.lineage-point[data-side="0"][data-offset="2"]');await expect(tail).not.toHaveAttribute('data-parent');await expect(tail).not.toHaveAttribute('data-recent');await expect(tail).toHaveAttribute('data-cumulative');await tail.click();await expect(panel.getByTestId('lineage-recent-0')).toHaveText('No paired value');await expect(panel.getByTestId('lineage-cumulative-0')).not.toHaveText('No paired value');
+  await page.setViewportSize({width:390,height:844});expect(await panel.evaluate(el=>el.scrollWidth<=el.clientWidth+1&&el.getBoundingClientRect().right<=innerWidth)).toBe(true);expect(await chart.evaluate(el=>el.scrollWidth>el.clientWidth)).toBe(true);
+  const chartBounds=(await chart.boundingBox())!;for(const heading of await chart.getByRole('heading',{level:5}).all()){const bounds=(await heading.boundingBox())!;expect(bounds.x).toBeGreaterThanOrEqual(chartBounds.x);expect(bounds.x+bounds.width).toBeLessThanOrEqual(chartBounds.x+chartBounds.width);}
+  for(const control of [tail,panel.getByLabel('Lineage comparison display'),panel.getByRole('button',{name:'Measure original, parent and latest probabilities',exact:true})])expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  if(info){await chart.screenshot({path:info.outputPath('original-parent-latest-cumulative-tracks-mobile.png')});await panel.getByRole('article',{name:'Story A lineage details',exact:true}).screenshot({path:info.outputPath('original-parent-latest-details-mobile.png')});}
+  expect((await downloadStory(page,'Download lineage comparison')).rows).toEqual(record.rows);expect(calls).toBe(measured);
+  await panel.getByLabel('Lineage comparison latest paths').selectOption('original');await expect(panel.locator('.lineage-point')).toHaveCount(0);await panel.getByRole('button',{name:'Measure original, parent and latest probabilities',exact:true}).click();await expect(panel.getByTestId('lineage-status')).toContainText('Lineage comparison complete.',{timeout:60000});
+  const unchanged=await downloadStory(page,'Download lineage comparison');expect(unchanged.recent.flat().every((p:any)=>p.difference===0&&p.samePrefix)).toBe(true);expect(unchanged.cumulative.flat().some((p:any)=>Math.abs(p.difference)>1e-8)).toBe(true);expect((await downloadStory(page,'Download workspace')).nodes).toEqual(before.nodes);
+  await shared.locator('.story-lineage-comparison > summary').click();await shared.locator('.story-lineage-comparison > summary').click();await expect(panel.locator('.lineage-point')).toHaveCount(0);await expect(panel.getByLabel('Lineage comparison chosen token')).toHaveValue('471');await expect(page.getByRole('alert')).toHaveCount(0);
+}

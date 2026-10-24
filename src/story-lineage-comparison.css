@@ -16,3 +16,5 @@
 .lineage-scroll { container-type:inline-size; }
 .lineage-scroll .parent-trace-track { width:max-content; min-width:100%; }
 .lineage-scroll .parent-trace-track > :is(h5,p,.lineage-history) { position:sticky; left:12px; width:calc(100cqw - 28px); max-width:100%; overflow-wrap:anywhere; }
+.lineage-position-ranking { border-top-color:#5d9084; }
+.story-map-comparison .story-lineage-comparison .lineage-position-ranking select { min-height:45px; max-width:100%; padding:10px 28px 10px 10px; white-space:normal; }

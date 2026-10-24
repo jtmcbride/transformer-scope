@@ -5,13 +5,15 @@ import { tokenLabel } from '../engine/tokenizer';
 import { selectionEdits } from '../continuation';
 import { captureLineageStories, lineageCounts, originalDifferences, traceLineageProbabilities, type LineageProbabilityRows, type LineageRole } from '../story-lineage-probabilities';
 import { parentDifferences } from '../story-parent-probabilities';
+import { lineagePositionBranchDraft, lineagePositionChanges, lineagePositionScore, rankLineagePositions } from '../story-lineage-position-ranking';
+import type { PositionDifferenceOrder, TrajectoryBranchDraft } from '../story-trajectory-differences';
 import { checkpointKey, type SharedStoryGroup, type StoryWorkspace } from '../story-workspace';
 import { interactionFill } from '../head-pair-heatmap';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import '../story-lineage-comparison.css';
 
-interface Props { workspace:StoryWorkspace;group:SharedStoryGroup;manifest:ModelManifest;tokenizer:BpeDocument;disabled:boolean;onBusy:(value:boolean)=>void;onOpenStory:(id:string)=>void }
+interface Props { workspace:StoryWorkspace;group:SharedStoryGroup;manifest:ModelManifest;tokenizer:BpeDocument;disabled:boolean;onBusy:(value:boolean)=>void;onOpenStory:(id:string)=>void;onSetupBranch:(key:string,draft:TrajectoryBranchDraft)=>void;onClearBranch:(key:string)=>void }
 const empty=():LineageProbabilityRows=>[{original:[],parent:[],child:[]},{original:[],parent:[],child:[]}],EMPTY=empty();
 const roles=['original','parent','child'] as const;
 const label=(role:LineageRole)=>role==='original'?'Original':role==='parent'?'Parent':'Latest';
@@ -23,23 +25,28 @@ export function StoryLineageComparison(props:Props){
   const [open,setOpen]=useState(false);
   return <details className="story-lineage-comparison" open={open} onToggle={event=>setOpen(event.currentTarget.open)}><summary>Compare latest, parent, and original stories</summary>{open&&<LineageTrace {...props}/>}</details>;
 }
-function LineageTrace({workspace,group,manifest,tokenizer,disabled,onBusy,onOpenStory}:Props){
+function LineageTrace({workspace,group,manifest,tokenizer,disabled,onBusy,onOpenStory,onSetupBranch,onClearBranch}:Props){
   const snapshot=useMemo(()=>captureLineageStories(workspace,group),[workspace,group]);
   const [branch,setBranch]=useState<'original'|'edited'>('edited'),[target,setTarget]=useState(()=>group.targetTokenId??snapshot.children[0].plan.source.choice.tokenId);
   const [metric,setMetric]=useState<Metric>('probability'),[trace,setTrace]=useState<Trace|null>(null),[selected,setSelected]=useState(0),[focused,setFocused]=useState('');
-  const modelKey=checkpointKey(manifest),key=useMemo(()=>JSON.stringify([modelKey,snapshot,branch,target]),[modelKey,snapshot,branch,target]);
+  const [order,setOrder]=useState<PositionDifferenceOrder>('absolute');
+  const modelKey=checkpointKey(manifest),key=useMemo(()=>`lineage:${JSON.stringify([modelKey,snapshot,branch,target])}`,[modelKey,snapshot,branch,target]);
   const owner=useRef<ModelClient|null>(null),epoch=useRef(0),chart=useRef<HTMLDivElement>(null);
   const current=!disabled&&trace?.key===key?trace:null,rows=current?.rows??EMPTY,busy=!!current?.busy;
   const counts=lineageCounts(snapshot,branch),total=counts.reduce((sum,track)=>sum+track.original+track.parent+track.child,0),count=Math.max(...counts.map(track=>track.child));
   const recent=useMemo(()=>parentDifferences(rows,target),[rows,target]),cumulative=useMemo(()=>originalDifferences(rows,target,'child'),[rows,target]),earlier=useMemo(()=>originalDifferences(rows,target,'parent'),[rows,target]);
+  const positionChanges=useMemo(()=>lineagePositionChanges(rows,target),[rows,target]),ranked=useMemo(()=>rankLineagePositions(positionChanges,order),[positionChanges,order]);
+  const selectedChange=positionChanges.find(row=>row.offset===selected),pairedCount=Math.min(...counts.flatMap(track=>[track.original,track.child]));
   const all=rows.flatMap(track=>roles.flatMap(role=>track[role])),probabilityLimit=all.reduce((max,p)=>Math.max(max,p.probability),0);
   const differenceLimit=[...recent.flat(),...cumulative.flat()].reduce((max,p)=>Math.max(max,Math.abs(p.difference)),0);
   const encoder=useMemo(()=>new BpeTokenizer(tokenizer),[tokenizer]),options=useMemo(()=>tokenizer.tokens.map((_,id)=>id!==0&&id!==2&&<option key={id} value={id}>{tokenLabel(tokenizer,id)} · token {id}</option>),[tokenizer]);
-  useEffect(()=>{setTrace(null);setSelected(0);setFocused('');return()=>{++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);};},[key,onBusy]);
-  useEffect(()=>{if(disabled){++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);setTrace(null);}},[disabled,onBusy]);
-  function stop(){++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);setTrace(old=>old?.busy?{...old,busy:false,complete:false,status:'Lineage comparison stopped. Results are partial.'}:old);}
+  useEffect(()=>{setTrace(null);setSelected(0);setFocused('');return()=>{++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);onClearBranch(key);};},[key,onBusy,onClearBranch]);
+  useEffect(()=>{if(disabled){++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);setTrace(null);onClearBranch(key);}},[disabled,onBusy,onClearBranch,key]);
+  function stop(){++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);onClearBranch(key);setTrace(old=>old?.busy?{...old,busy:false,complete:false,status:'Lineage comparison stopped. Results are partial.'}:old);}
+  function jump(offset:number){onClearBranch(key);setSelected(offset);setMetric('cumulative');const point=chart.current?.querySelector<HTMLButtonElement>(`button[data-side="0"][data-offset="${offset}"]`);point?.focus({preventScroll:true});point?.scrollIntoView({block:'nearest',inline:'center'});}
   async function start(){
     if(busy||disabled||!count)return;
+    onClearBranch(key);
     const generation=++epoch.current,valid=()=>generation===epoch.current;setTrace({key,rows:empty(),busy:true,complete:false,status:'Measuring original, parent and latest probabilities…',error:''});setSelected(0);setFocused('');onBusy(true);
     const client=new ModelClient();owner.current=client;
     try{await loadStoryModel(client,manifest);if(!valid())return;
@@ -49,6 +56,7 @@ function LineageTrace({workspace,group,manifest,tokenizer,disabled,onBusy,onOpen
     finally{client.dispose();if(valid()){owner.current=null;onBusy(false);}}
   }
   function download(){if(!current)return;const data={format:'transformer-story-lineage-probabilities',version:1,checkpoint:modelKey,backend:'cpu',snapshot,childBranch:branch,targetTokenId:target,display:metric,rows,recent,cumulative,earlier,
+    positionChanges:ranked,positionChangeOrder:order,positionChangeDefinition:'difference = latest minus original per story; absolute score = max(abs(A), abs(B)); increase score = max(A, B); decrease score = min(A, B); requires original and latest measurements in both stories, independently of immediate-parent coverage',
     complete:current.complete&&rows.every((track,side)=>roles.every(role=>track[role].length===counts[side][role])),status:current.status,error:current.error||undefined,
     definitions:{original:'historical root path resolved through actual ancestry',horizon:'positions covered by the latest A/B continuations, aligned from each latest fork',recent:'latest minus immediate parent',cumulative:'latest minus original',earlier:'immediate parent minus original'}};
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='story-lineage-probabilities.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),0);}
@@ -76,11 +84,25 @@ function LineageTrace({workspace,group,manifest,tokenizer,disabled,onBusy,onOpen
           const values=roles.map(role=>({role,point:rows[side][role].find(p=>p.offset===offset)})),a=recent[side].find(p=>p.offset===offset),b=cumulative[side].find(p=>p.offset===offset),difference=metric==='cumulative'?b:a;
           const labels=values.map(({role,point})=>`${label(role)}: ${point?`${tokenLabel(tokenizer,point.source.choice.tokenId)} · ${percent(point.probability)}`:missing(side,role,offset)}`);
           const content=<><small>Offset {offset+1} · step {node.plan.source.step+offset}</small><span>{labels[0]}</span><span>{labels[1]}</span><span className={`parent-trace-plot ${metric==='probability'?'lineage-three-bars':`parent-trace-signed ${difference?'':'parent-trace-no-difference'}`}`} aria-hidden="true">{metric==='probability'?values.map(({role,point})=>point?<i key={role} className={`lineage-bar lineage-${role}`} style={{height:`${probabilityLimit?point.probability/probabilityLimit*96:0}%`}}/>:offset<counts[side][role]?<i key={role} className={`lineage-bar lineage-${role} parent-trace-pending`} style={{height:'96%'}}/>:null):difference?<i className="parent-trace-difference" style={{height:`${differenceLimit?Math.abs(difference.difference)/differenceLimit*48:0}%`,...(difference.difference>=0?{bottom:'50%'}:{top:'50%'}),background:interactionFill(difference.difference,differenceLimit)}}/>:null}</span><span>{labels[2]}</span><strong>{metric==='cumulative'?'Cumulative':'Recent'}: {difference?points(difference.difference):'No paired value'}</strong></>;
-          return values.some(p=>p.point)?<button key={offset} type="button" className="parent-trace-point lineage-point" data-side={side} data-offset={offset} data-original={values[0].point?.probability} data-parent={values[1].point?.probability} data-latest={values[2].point?.probability} data-recent={a?.difference} data-cumulative={b?.difference} aria-pressed={selected===offset} disabled={busy} tabIndex={`${side}:${offset}`===tabStop?0:-1} onFocus={()=>setFocused(`${side}:${offset}`)} onKeyDown={event=>move(event,side,offset)} onClick={()=>setSelected(offset)} aria-label={`Story ${side===0?'A':'B'}, offset ${offset+1}, step ${node.plan.source.step+offset}. Target ${tokenLabel(tokenizer,target)}. ${labels.join('. ')}. Recent ${a?points(a.difference):'not available'}. Cumulative ${b?points(b.difference):'not available'}.`}>{content}</button>:<div key={offset} className="parent-trace-unmeasured">{content}</div>;
+          return values.some(p=>p.point)?<button key={offset} type="button" className="parent-trace-point lineage-point" data-side={side} data-offset={offset} data-original={values[0].point?.probability} data-parent={values[1].point?.probability} data-latest={values[2].point?.probability} data-recent={a?.difference} data-cumulative={b?.difference} aria-pressed={selected===offset} disabled={busy} tabIndex={`${side}:${offset}`===tabStop?0:-1} onFocus={()=>setFocused(`${side}:${offset}`)} onKeyDown={event=>move(event,side,offset)} onClick={()=>{onClearBranch(key);setSelected(offset);}} aria-label={`Story ${side===0?'A':'B'}, offset ${offset+1}, step ${node.plan.source.step+offset}. Target ${tokenLabel(tokenizer,target)}. ${labels.join('. ')}. Recent ${a?points(a.difference):'not available'}. Cumulative ${b?points(b.difference):'not available'}.`}>{content}</button>:<div key={offset} className="parent-trace-unmeasured">{content}</div>;
         })}</div>
       </div>)}
     </div>
     <p className="hint">Select an offset to inspect all three versions in both stories. Tab enters a measured point; arrows move between offsets and A/B, Enter selects. Offsets align generation steps, not words. Older history is measured only over the latest continuations’ horizon.</p>
+    <section className="parent-position-ranking lineage-position-ranking" aria-label="Ranked original-to-latest probability changes">
+      <h5>Where did repeated rebranching change the chosen token most?</h5>
+      <label>Rank positions<select aria-label="Rank original-to-latest probability changes" value={order} onChange={event=>setOrder(event.target.value as PositionDifferenceOrder)}><option value="absolute">Largest change in either story (absolute)</option><option value="increase">Most positive change in either story</option><option value="decrease">Most negative change in either story</option></select></label>
+      <p data-testid="lineage-ranking-status">{positionChanges.length} / {pairedCount} offsets measured on both originals and both latest paths. {current?.complete?'Complete for these saved paths.':'Partial until measurement finishes.'} Each change is latest minus original. Ranking uses the larger absolute change, most positive change, or most negative change across A and B, without rounding. Immediate-parent values are not required.</p>
+      <ol aria-label="Positions ranked by original-to-latest probability change">{ranked.map(row=><li key={row.offset} data-offset={row.offset} data-score={lineagePositionScore(row,order)} data-a-change={row.a.difference} data-b-change={row.b.difference}>
+        <button type="button" disabled={busy||disabled} aria-current={selected===row.offset?'location':undefined} onClick={()=>jump(row.offset)} aria-label={`Jump to cumulative offset ${row.offset+1}, A step ${row.a.comparison.source.step}, B step ${row.b.comparison.source.step}, A change ${points(row.a.difference)}, B change ${points(row.b.difference)}`}>
+          <strong>Offset {row.offset+1} · {order==='absolute'?`largest magnitude ${(lineagePositionScore(row,order)*100).toFixed(4)} pp`:`${order==='increase'?'most positive':'most negative'} ${points(lineagePositionScore(row,order))}`}</strong>
+          {([row.a,row.b] as const).map((point,side)=><span key={side}>{side===0?'A':'B'} · step {point.comparison.source.step} · original {percent(point.original.probability)} → latest {percent(point.comparison.probability)} · {points(point.difference)}</span>)}
+        </button>
+      </li>)}</ol>
+      {!ranked.length&&<p>Measure the chosen token on both original and latest paths to rank positions. Missing, ended, or differently targeted predictions are excluded; measured zeroes remain.</p>}
+      <button type="button" disabled={busy||disabled||!selectedChange} onClick={()=>{if(selectedChange)onSetupBranch(key,lineagePositionBranchDraft(snapshot,branch,selectedChange));}}>Set up both latest branches from offset {selected+1}</button>
+      <p className="hint">Jump selects the offset in both cumulative tracks. Branch again from both latest continuations’ actual pre-token text with the saved pair and chosen target. Adjust strengths, duration and length before generating. Cumulative changes include changed context as well as head settings; the original stories stay saved.</p>
+    </section>
     <div className="parent-trace-details">{snapshot.children.map((node,side)=>{const a=recent[side].find(p=>p.offset===selected),b=cumulative[side].find(p=>p.offset===selected),c=earlier[side].find(p=>p.offset===selected);return <article key={node.id} aria-label={`Story ${side===0?'A':'B'} lineage details`}><h5>{side===0?'A':'B'} · offset {selected+1} · story step {node.plan.source.step+selected}</h5>
       <p>Latest − parent: <strong data-testid={`lineage-recent-${side}`}>{a?points(a.difference):'No paired value'}</strong></p><p>Parent − original: <strong data-testid={`lineage-earlier-${side}`}>{c?points(c.difference):'No paired value'}</strong></p><p>Latest − original: <strong data-testid={`lineage-cumulative-${side}`}>{b?points(b.difference):'No paired value'}</strong></p>
       {a&&b&&c&&<p>Recent change plus earlier change equals the cumulative change before display rounding. These compare each version’s own text and settings.</p>}

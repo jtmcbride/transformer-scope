@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BpeTokenizer, type BpeDocument } from '../engine/bpe';
 import type { HeadScaleIntervention, ModelManifest } from '../engine/contracts';
 import type { StorySelection } from '../continuation';
@@ -9,11 +9,17 @@ import { tokenLabel } from '../engine/tokenizer';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import type { HeadPairScanRow } from '../story-head-pair-scan';
+import type { TrajectoryBranchDraft } from '../story-trajectory-differences';
 import { StoryInteractionTrace } from './StoryInteractionTrace';
 
-export interface SharedBranchDraft { targetTokenId?: number; effects?: [HeadPairScanRow,HeadPairScanRow]; sources: [StorySelection,StorySelection]; parents: [string|null,string|null]; labels: [string,string]; edits: [HeadScaleIntervention,HeadScaleIntervention] }
+export interface SharedBranchDraft { origin?: TrajectoryBranchDraft['origin']; targetTokenId?: number; effects?: [HeadPairScanRow,HeadPairScanRow]; sources: [StorySelection,StorySelection]; parents: [string|null,string|null]; labels: [string,string]; edits: [HeadScaleIntervention,HeadScaleIntervention] }
 interface Props { workspace: StoryWorkspace; draft?: SharedBranchDraft; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onBusy: (value:boolean)=>void; onSave: (group:SharedStoryGroup,nodes:[StoryNode,StoryNode])=>void; onOpenStory:(id:string)=>void }
-export function SharedStoryBranches({workspace,draft,manifest,tokenizer,disabled,onBusy,onSave,onOpenStory}:Props) {
+export function SharedStoryBranches({workspace,draft:mapDraft,manifest,tokenizer,disabled,onBusy,onSave,onOpenStory}:Props) {
+  const [traceDraft,setTraceDraft]=useState<{key:string;draft:TrajectoryBranchDraft}|null>(null),setup=useRef<HTMLDivElement>(null);
+  const draft:SharedBranchDraft|undefined=traceDraft?.draft??mapDraft,mapDraftKey=JSON.stringify(mapDraft);
+  useEffect(()=>setTraceDraft(null),[mapDraftKey]);
+  const clearTraceDraft=useCallback((key:string)=>setTraceDraft(old=>old?.key===key?null:old),[]);
+  const setupTraceDraft=useCallback((key:string,draft:TrajectoryBranchDraft)=>{setTraceDraft({key,draft});requestAnimationFrame(()=>{setup.current?.scrollIntoView({block:'start'});setup.current?.querySelector<HTMLElement>('select')?.focus({preventScroll:true});});},[]);
   const [selected,setSelected]=useState(''),[duration,setDuration]=useState<ForkDuration>('continuation'),[limit,setLimit]=useState(6);
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[traceBusy,setTraceBusy]=useState(false);
   const working=busy||traceBusy;
@@ -46,7 +52,7 @@ export function SharedStoryBranches({workspace,draft,manifest,tokenizer,disabled
       }
     }catch(e){setError(e instanceof Error?e.message:String(e));return;}
     const generation=++epoch.current,valid=()=>generation===epoch.current;
-    setSelected(captured.id);flight.current=true;setBusy(true);onSave(captured,records);
+    setSelected(captured.id);if(fresh)setTraceDraft(null);flight.current=true;setBusy(true);onSave(captured,records);
     const client=new ModelClient();owner.current=client;
     try{
       await loadStoryModel(client,manifest);if(!valid())return;
@@ -68,13 +74,22 @@ export function SharedStoryBranches({workspace,draft,manifest,tokenizer,disabled
   }
   return <section className="shared-story-branches" aria-label="Shared story continuations">
     <p className="eyebrow">Try the same change in both contexts</p><h3>Branch both stories with one pair</h3>
-    {draft?<><p className="shared-pair-label">{forkEditLabel({source:draft.sources[0],edit:draft.edits[0],additionalEdits:[draft.edits[1]],duration,maxTokens:budget})}</p>
+    {draft?<div ref={setup}><p className="shared-pair-label">{forkEditLabel({source:draft.sources[0],edit:draft.edits[0],additionalEdits:[draft.edits[1]],duration,maxTokens:budget})}</p>
+      {traceDraft&&<div className="trajectory-branch-setup" role="group" aria-label="Rebranch both stories from trajectory">
+        <h4>Branch again from offset {traceDraft.draft.origin.index+1}</h4>
+        <p>Chosen target: {tokenLabel(tokenizer,traceDraft.draft.targetTokenId)}. A: step {traceDraft.draft.sources[0].step} · B: step {traceDraft.draft.sources[1].step} · {traceDraft.draft.origin.branch==='edited'?'with same head changes':'keep source settings'} paths.</p>
+        <p>Both references keep the head settings already active on their selected paths. Reapplying identical strengths can produce identical continuations; change a strength below to try a different intervention.</p>
+        {traceDraft.draft.edits.map((edit,i)=><label key={i}>Layer {edit.layer+1} · Head {edit.head+1}<select aria-label={`Rebranch ${i===0?'first':'second'} head strength`} disabled={working||disabled} value={edit.factor} onChange={event=>{const factor=Number(event.target.value);setTraceDraft(old=>old?{...old,draft:{...old.draft,edits:old.draft.edits.map((item,j)=>j===i?{...item,factor}:item) as TrajectoryBranchDraft['edits']}}:old);}}>
+          {![0,1,2].includes(edit.factor)&&<option value={edit.factor}>{edit.factor}× · saved strength</option>}<option value="0">0× · mute</option><option value="1">1× · normal</option><option value="2">2× · amplify</option>
+        </select></label>)}
+        <button type="button" disabled={working} onClick={()=>setTraceDraft(null)}>Cancel trajectory branch setup</button>
+      </div>}
       {draft.targetTokenId !== undefined && draft.effects && <div className="shared-pair-preview" role="group" aria-label="Chosen-token shared pair preview" data-target-token={draft.targetTokenId}><p><strong>Probability of {tokenLabel(tokenizer,draft.targetTokenId)}</strong> with this pair. The model still chooses the generated tokens normally.</p><dl>{draft.effects.map((row,i) => <div key={i} data-testid={`shared-target-preview-${i}`}><dt>Story {i === 0 ? 'A' : 'B'} · source → with pair</dt><dd>{(row.before*100).toFixed(4)}% → {(row.after*100).toFixed(4)}% · {row.delta>0?'+':''}{(row.delta*100).toFixed(4)} pp</dd></div>)}</dl></div>}
       <div className="continuation-actions"><label>Apply both changes<select aria-label="Shared head-change duration" value={duration} disabled={working||disabled} onChange={event=>setDuration(event.target.value as ForkDuration)}><option value="continuation">From each selected token onward</option><option value="prediction">Only each selected prediction</option></select></label>
         <label>New tokens per path<input aria-label="Shared continuation token limit" type="number" min="1" max={max} value={budget} disabled={working||disabled} onChange={event=>setLimit(Number(event.target.value))}/></label>
         <button type="button" className="primary" disabled={working||disabled||max<1} onClick={()=>void run(true,true)}>Branch both stories with this pair</button></div>
       <p className="hint">Regenerate each selected token and continue from there. Both sources receive exactly this pair and duration; each keeps its own other head settings, expiry, sampling settings, and global draws. Each reference keeps its source settings. New results are saved without changing either source story.</p>
-    </>:<p>Select a pair measured in both heatmaps to create a shared continuation. Saved shared comparisons remain available below.</p>}
+    </div>:<p>Select a pair measured in both heatmaps to create a shared continuation. Saved shared comparisons remain available below.</p>}
     {groups.length>0&&<label>Saved comparison<select aria-label="Saved shared continuation" value={group!.id} disabled={working} onChange={event=>{setSelected(event.target.value);setError('');}}>{groups.map((item,i)=><option key={item.id} value={item.id}>Shared comparison {i+1} · {item.labels[0]} / {item.labels[1]}</option>)}</select></label>}
     {group&&nodes&&<>
       <p className="shared-captured-settings">Saved changes: {forkEditLabel(nodes[0].plan)} · {nodes[0].plan.duration==='prediction'?'each selected prediction only':'from each selected token onward'} · up to {nodes[0].plan.maxTokens} new tokens per path.</p>
@@ -92,7 +107,7 @@ export function SharedStoryBranches({workspace,draft,manifest,tokenizer,disabled
             </div>;
           })}</article>;
       })}</div>
-      <StoryInteractionTrace key={JSON.stringify([group.id,group.targetTokenId])} group={group} nodes={nodes as [StoryNode,StoryNode]} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled} onBusy={setTraceBusy} onOpenStory={onOpenStory} />
+      <StoryInteractionTrace key={JSON.stringify([group.id,group.targetTokenId])} group={group} nodes={nodes as [StoryNode,StoryNode]} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled} onBusy={setTraceBusy} onOpenStory={onOpenStory} onSetupBranch={setupTraceDraft} onClearBranch={clearTraceDraft} />
       <p className="hint">Highlighted tokens differ from their own reference at the same generation offset. A and B can start at different steps and sample differently. Open either comparison to inspect numbered tokens in the flow and make another head change. Shared results reopen together here; paused paths resume together.</p>
     </>}
     {error&&<p role="alert">Could not continue both stories: {error} Saved results are kept. Check the settings, or resume a paused comparison.</p>}

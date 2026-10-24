@@ -1,6 +1,6 @@
 .story-interaction-trace { margin-top:24px; padding:20px 0; border-top:2px solid #8998af; min-width:0; }
 .story-interaction-trace h4 { margin:6px 0 12px; }
-.story-map-comparison .story-interaction-trace select { appearance:none; min-height:44px; padding:8px 28px 8px 10px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%2334425d' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 9px center; }
+.story-map-comparison .story-interaction-trace select, .story-map-comparison .trajectory-branch-setup select { appearance:none; min-height:44px; padding:8px 28px 8px 10px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%2334425d' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 9px center; }
 .trajectory-scroll { overflow:auto; max-width:100%; padding:4px 2px 12px; border:1px solid #d5dce8; border-radius:5px; scroll-padding:12px; }
 .trajectory-track { padding:12px; }
 .trajectory-track + .trajectory-track { border-top:1px solid #d5dce8; }
@@ -38,3 +38,15 @@
 
 .trajectory-effect-value { font-size:9px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
 .trajectory-gap { padding:12px; background:#f2eefb; border-left:3px solid #7965a9; }
+
+.trajectory-ranking { margin:20px 0; padding:16px; background:#f6f7fa; border-top:3px solid #7965a9; min-width:0; }
+.trajectory-ranking h5 { margin:0 0 12px; font-size:16px; }
+.trajectory-ranking ol { padding-left:24px; max-height:360px; overflow:auto; }
+.trajectory-ranking li { margin:8px 0; }
+.trajectory-ranking li button { display:flex; flex-direction:column; width:100%; min-height:44px; text-align:left; gap:6px; overflow-wrap:anywhere; }
+.trajectory-ranking li button[aria-current=location] { outline:2px solid #7965a9; background:#f2eefb; }
+.trajectory-ranking li strong { font-size:13px; }
+.trajectory-ranking li span { font-size:12px; }
+.trajectory-branch-setup { padding:16px; margin:12px 0; background:#f2eefb; border-left:3px solid #7965a9; }
+.trajectory-branch-setup label { display:inline-flex; flex-direction:column; margin:6px 14px 6px 0; }
+.trajectory-ranking > button, .trajectory-branch-setup > button { min-height:44px; padding:10px 12px; white-space:normal; }

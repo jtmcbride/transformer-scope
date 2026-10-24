@@ -9,18 +9,20 @@ import { interactionFill } from '../head-pair-heatmap';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, withStoryPrefix } from '../workers/story-runtime';
 import '../story-interaction-trace.css';
+import { trajectoryDifferences, rankTrajectoryDifferences, trajectoryBranchDraft, type PositionDifferenceOrder, type TrajectoryBranchDraft } from '../story-trajectory-differences';
 import { useStoryWorkspace } from './StoryWorkspace';
 
-interface Props {group:SharedStoryGroup;nodes:[StoryNode,StoryNode];manifest:ModelManifest;tokenizer:BpeDocument;disabled:boolean;onBusy:(value:boolean)=>void;onOpenStory:(id:string)=>void}
+interface Props {group:SharedStoryGroup;nodes:[StoryNode,StoryNode];manifest:ModelManifest;tokenizer:BpeDocument;disabled:boolean;onBusy:(value:boolean)=>void;onOpenStory:(id:string)=>void;onSetupBranch:(key:string,draft:TrajectoryBranchDraft)=>void;onClearBranch:(key:string)=>void}
 type Trace = {key:string;rows:InteractionTracks;busy:boolean;status:string;error:string;complete:boolean};
 const EMPTY:InteractionTracks=[[],[]];
 const points=(n:number)=>{const value=Number((n*100).toFixed(4));return `${value>0?'+':''}${value.toFixed(4)} pp`;};
 const probability=(n:number)=>`${(n*100).toFixed(4)}%`;
-export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,onBusy,onOpenStory}:Props){
+export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,onBusy,onOpenStory,onSetupBranch,onClearBranch}:Props){
   const workspace = useStoryWorkspace();
   const [branch,setBranch]=useState<'original'|'edited'>('edited'),[trace,setTrace]=useState<Trace|null>(null),[selected,setSelected]=useState(0),[focused,setFocused]=useState('');
   const [mode,setMode]=useState<'generated'|'fixed'>(group.targetTokenId===undefined?'generated':'fixed'),[chosenToken,setChosenToken]=useState(()=>group.targetTokenId??nodes[0].frame.edited?.choices[0]?.tokenId??nodes[0].plan.source.choice.tokenId);
   const [metric,setMetric]=useState<'interaction'|'probability'|'effect'>(group.targetTokenId===undefined?'interaction':'effect');
+  const [differenceOrder,setDifferenceOrder]=useState<PositionDifferenceOrder>('absolute');
   const target:InteractionTarget=mode==='fixed'?{kind:'fixed',tokenId:chosenToken}:{kind:'generated'};
   const key=JSON.stringify([checkpointKey(manifest),group,nodes,branch,target]);
   const captured=useMemo(()=>structuredClone({group,nodes,branch,target}),[key]);
@@ -32,12 +34,17 @@ export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,o
   const valueField=metric==='effect'?'delta':'interaction',signedLimit=metric==='effect'?effectLimit:limit;
   const probabilityLimit=rows.flat().reduce((max,row)=>Math.max(max,row.before,row.after),0);
   const storyTokens=useMemo(()=>[...new Set(nodes.flatMap(node=>[...node.frame.original.tokenIds,...(node.frame.edited?.tokenIds??[])]).filter(id=>id!==0&&id!==2))],[nodes]);
+  const differences=useMemo(()=>mode==='fixed'?trajectoryDifferences(rows,chosenToken):[],[rows,mode,chosenToken]);
+  const ranked=useMemo(()=>rankTrajectoryDifferences(differences,differenceOrder),[differences,differenceOrder]);
+  const selectedDifference=differences.find(row=>row.index===selected);
+  function jump(index:number){onClearBranch(key);setSelected(index);setMetric('effect');const point=chart.current?.querySelector<HTMLButtonElement>(`button[data-track="0"][data-offset="${index}"]`);point?.focus({preventScroll:true});point?.scrollIntoView({block:'nearest',inline:'center'});}
   function pin(tokenId:number){setChosenToken(tokenId);setMode('fixed');setMetric('effect');}
-  useEffect(()=>{setTrace(null);setSelected(0);setFocused('');return()=>{++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);};},[key,onBusy]);
-  useEffect(()=>{if(disabled){++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);setTrace(null);setSelected(0);setFocused('');}},[disabled,onBusy]);
+  useEffect(()=>{setTrace(null);setSelected(0);setFocused('');return()=>{++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);onClearBranch(key);};},[key,onBusy,onClearBranch]);
+  useEffect(()=>{if(disabled){onClearBranch(key);++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);setTrace(null);setSelected(0);setFocused('');}},[disabled,onBusy,onClearBranch,key]);
   function stop(){++epoch.current;owner.current?.dispose();owner.current=null;onBusy(false);setTrace(old=>old?.busy?{...old,busy:false,status:'Token trace stopped. Results are partial.',complete:false}:old);}
   async function start(){
     if(busy||disabled||!total)return;
+    onClearBranch(key);
     const generation=++epoch.current,valid=()=>generation===epoch.current;
     setTrace({key,rows:[[],[]],busy:true,status:'Measuring token interactions…',error:'',complete:false});setSelected(0);setFocused('');onBusy(true);
     const client=new ModelClient();owner.current=client;
@@ -51,7 +58,7 @@ export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,o
   }
   function download(){
     if(!current)return;
-    const data={format:'transformer-story-interaction-trajectory',version:2,checkpoint:checkpointKey(manifest),backend:'cpu',...captured,rows,complete:current.complete&&rows.every((track,i)=>track.length===counts[i]),status:current.status,error:current.error||undefined,display:metric,effectDefinition:'delta = p(pair) - p(source settings), on the same prefix and target',formula:'interaction = p(pair) - p(head 1) - p(head 2) + p(source settings)'};
+    const data={format:'transformer-story-interaction-trajectory',version:2,checkpoint:checkpointKey(manifest),backend:'cpu',...captured,rows,complete:current.complete&&rows.every((track,i)=>track.length===counts[i]),status:current.status,error:current.error||undefined,display:metric,positionDifferences:mode==='fixed'?ranked:undefined,positionDifferenceOrder:differenceOrder,positionDifferenceDefinition:'(p_pair_B - p_source_B) - (p_pair_A - p_source_A), matched generation offsets and fixed target',effectDefinition:'delta = p(pair) - p(source settings), on the same prefix and target',formula:'interaction = p(pair) - p(head 1) - p(head 2) + p(source settings)'};
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download='story-interaction-trajectory.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),0);
   }
   const coordinates=rows.flatMap((track,side)=>track.map(point=>`${side}:${point.index}`)),tabStop=coordinates.includes(focused)?focused:coordinates[0];
@@ -98,7 +105,7 @@ export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,o
               const label=choice?tokenLabel(tokenizer,choice.tokenId):'No token',trend=point?(point.active?interactionTrend(point,previous,valueField):'Expired'):choice?'Not measured':'No token';
               return point?<button type="button" className="trajectory-point" key={index} data-track={side} data-offset={index} data-interaction={point.interaction} data-delta={point.delta} data-active={point.active} data-target-token={point.targetTokenId} data-before={point.before} data-after={point.after} disabled={busy}
                 aria-label={`Story ${side===0?'A':'B'}, offset ${index+1}, step ${point.step}, ${label}. Target ${tokenLabel(tokenizer,point.targetTokenId)}. Source probability ${probability(point.before)}, both heads ${probability(point.after)}. Probability change ${points(point.delta)}. Interaction ${points(point.interaction)}. ${trend}.`} aria-pressed={selected===index}
-                tabIndex={`${side}:${index}`===tabStop?0:-1} onFocus={()=>setFocused(`${side}:${index}`)} onKeyDown={event=>move(event,side,index)} onClick={()=>setSelected(index)}
+                tabIndex={`${side}:${index}`===tabStop?0:-1} onFocus={()=>setFocused(`${side}:${index}`)} onKeyDown={event=>move(event,side,index)} onClick={()=>{onClearBranch(key);setSelected(index);}}
                 title={`Step ${point.step} · ${label}\nInteraction ${points(point.interaction)}\nSource ${probability(point.before)} → pair ${probability(point.after)}\nCombined probability change ${points(point.delta)}\n${trend}`}>
                 {metric!=='probability'?<span className="trajectory-plot" aria-hidden="true"><span className="trajectory-zero-line"/><i className={point.active?'':'trajectory-expired'} style={{height:`${signedLimit?Math.abs(point[valueField])/signedLimit*48:0}%`,...(point[valueField]>=0?{bottom:'50%'}:{top:'50%'}),background:interactionFill(point[valueField],signedLimit)}}/>{point[valueField]===0&&<b className="trajectory-zero-mark">0</b>}</span>:
                   <span className="trajectory-plot trajectory-probability" aria-hidden="true"><i className="trajectory-source-bar" style={{height:`${probabilityLimit?point.before/probabilityLimit*96:0}%`}}/><i className="trajectory-pair-bar" style={{height:`${probabilityLimit?point.after/probabilityLimit*96:0}%`}}/>{point.before===0&&point.after===0&&<b className="trajectory-zero-mark">0</b>}</span>}
@@ -110,6 +117,17 @@ export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,o
       </div>
       <p className="hint">Offsets align generation steps, not words. Tab enters a measured point; arrows move between tokens or tracks, Enter selects. {mode==='fixed'?'The chosen token stays fixed; the surrounding text can still differ, so changes do not isolate one cause.':'Each point can target a different token and context, so changes do not isolate one cause.'} For edits applied only once, later “Expired” zeroes reflect the saved duration, not a natural fade.</p>
       {mode==='fixed'&&rows[0][selected]&&rows[1][selected]&&<p className="trajectory-gap" data-testid="trajectory-effect-gap">At offset {selected+1}, B’s probability change minus A’s: <strong>{points(rows[1][selected].delta-rows[0][selected].delta)}</strong>. Each effect uses its own story’s prefix and source settings.</p>}
+      {mode==='fixed'&&<section className="trajectory-ranking" aria-label="Ranked probability-effect differences">
+        <h5>Where does this pair affect the two stories most differently?</h5>
+        <label>Rank positions<select aria-label="Rank token-position differences" value={differenceOrder} onChange={event=>setDifferenceOrder(event.target.value as PositionDifferenceOrder)}><option value="absolute">Largest difference (absolute)</option><option value="increase">Most positive B minus A</option><option value="decrease">Most negative B minus A</option></select></label>
+        <p data-testid="trajectory-ranking-status">{differences.length} / {Math.min(...counts)} offsets measured in both stories. {current?.complete?'Complete for these saved paths.':'Partial until both tracks finish.'} Difference = B’s probability change minus A’s, for the same chosen token. Offsets align generation steps, not words.</p>
+        <ol aria-label="Token positions ranked by probability-effect difference">{ranked.map(row=><li key={row.index} data-offset={row.index} data-difference={row.difference}><button type="button" disabled={busy||disabled} aria-current={selected===row.index?'location':undefined} onClick={()=>jump(row.index)} aria-label={`Jump to offset ${row.index+1}, A step ${row.a.step}, B step ${row.b.step}, difference ${points(row.difference)}`}>
+          <strong>Offset {row.index+1} · difference {points(row.difference)}</strong><span>A · step {row.a.step} · {tokenLabel(tokenizer,row.a.tokenId)} · {points(row.a.delta)}{!row.a.active?' · edits expired':''}</span><span>B · step {row.b.step} · {tokenLabel(tokenizer,row.b.tokenId)} · {points(row.b.delta)}{!row.b.active?' · edits expired':''}</span>
+        </button></li>)}</ol>
+        {!differences.length&&<p>Measure this chosen token in both tracks to rank matching positions. Unmeasured or ended positions are excluded.</p>}
+        <button type="button" disabled={busy||disabled||!selectedDifference} onClick={()=>{if(selectedDifference)onSetupBranch(key,trajectoryBranchDraft(captured.group,captured.nodes,captured.branch,selectedDifference));}}>Set up both branches from offset {selected+1}</button>
+        <p className="hint">Rebranch from both actual pre-token prefixes with this pair. Each path keeps its own head settings and sampling draw; an already-active pair can leave the text unchanged. Adjust strengths and duration in the setup above before generating.</p>
+      </section>}
       <div className="trajectory-details" aria-label="Selected trajectory token details">{captured.nodes.map((node,side)=>{
         const point=rows[side].find(row=>row.index===selected),previous=rows[side].find(row=>row.index===selected-1),letter=side===0?'A':'B';
         if(!point)return <article key={side}><h5>{letter} · offset {selected+1}</h5><p>{selected>=counts[side]?'No generated token at this offset.':'Not measured yet.'}</p></article>;

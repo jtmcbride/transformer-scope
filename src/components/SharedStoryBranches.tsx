@@ -92,7 +92,7 @@ export function SharedStoryBranches({workspace,draft,manifest,tokenizer,disabled
             </div>;
           })}</article>;
       })}</div>
-      <StoryInteractionTrace key={group.id} group={group} nodes={nodes as [StoryNode,StoryNode]} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled} onBusy={setTraceBusy} onOpenStory={onOpenStory} />
+      <StoryInteractionTrace key={JSON.stringify([group.id,group.targetTokenId])} group={group} nodes={nodes as [StoryNode,StoryNode]} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled} onBusy={setTraceBusy} onOpenStory={onOpenStory} />
       <p className="hint">Highlighted tokens differ from their own reference at the same generation offset. A and B can start at different steps and sample differently. Open either comparison to inspect numbered tokens in the flow and make another head change. Shared results reopen together here; paused paths resume together.</p>
     </>}
     {error&&<p role="alert">Could not continue both stories: {error} Saved results are kept. Check the settings, or resume a paused comparison.</p>}

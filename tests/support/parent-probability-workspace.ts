@@ -1,9 +1,9 @@
 import type { StoryWorkspace, StoryNode } from '../../src/story-workspace';
 import type { ForkPlan } from '../../src/story-fork';
 import type { StoryBranch, StoryFrame } from '../../src/continuation';
-import input from '../fixtures/story-trajectory-workspace.json';
-import branches from '../fixtures/trajectory-rebranches-reference.json';
-import reference from '../fixtures/parent-probabilities-reference.json';
+import input from '../fixtures/story-trajectory-workspace.json' with {type:'json'};
+import branches from '../fixtures/trajectory-rebranches-reference.json' with {type:'json'};
+import reference from '../fixtures/parent-probabilities-reference.json' with {type:'json'};
 
 export function parentProbabilityWorkspace(referenceIndex=6,targetTokenId=471):StoryWorkspace{
   const workspace=structuredClone(input.workspace) as unknown as StoryWorkspace;

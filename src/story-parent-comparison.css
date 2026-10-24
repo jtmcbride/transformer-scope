@@ -31,3 +31,11 @@
 .story-parent-comparison .continuation-actions label { min-width:0; max-width:100%; }
 .story-map-comparison .story-parent-comparison select { appearance:none; padding:8px 28px 8px 10px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%2334425d' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 9px center; }
 .parent-trace-unmeasured > span:not(.parent-trace-plot) { white-space:nowrap; text-overflow:ellipsis; overflow:hidden; }
+.parent-position-ranking { margin:20px 0; padding:16px; border-top:2px solid #8998af; background:#f6f7fa; min-width:0; }
+.parent-position-ranking h5 { margin:0 0 12px; font-size:15px; }
+.story-map-comparison .story-parent-comparison .parent-position-ranking select, .parent-position-ranking > button { min-height:45px; max-width:100%; padding:10px; white-space:normal; }
+.parent-position-ranking ol { padding-left:24px; }
+.parent-position-ranking li { margin:10px 0; }
+.parent-position-ranking li button { display:flex; flex-direction:column; width:100%; min-height:45px; padding:12px; gap:7px; text-align:left; white-space:normal; overflow-wrap:anywhere; }
+.parent-position-ranking li button[aria-current=location] { outline:2px solid #7965a9; outline-offset:-2px; }
+.story-map-comparison .shared-story-branches .parent-rebranch-draft :is(select,input,button) { min-height:45px; }

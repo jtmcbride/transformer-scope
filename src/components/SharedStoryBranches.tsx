@@ -75,15 +75,15 @@ export function SharedStoryBranches({workspace,draft:mapDraft,manifest,tokenizer
   }
   return <section className="shared-story-branches" aria-label="Shared story continuations">
     <p className="eyebrow">Try the same change in both contexts</p><h3>Branch both stories with one pair</h3>
-    {draft?<div ref={setup}><p className="shared-pair-label">{forkEditLabel({source:draft.sources[0],edit:draft.edits[0],additionalEdits:[draft.edits[1]],duration,maxTokens:budget})}</p>
-      {traceDraft&&<div className="trajectory-branch-setup" role="group" aria-label="Rebranch both stories from trajectory">
+    {draft?<div ref={setup} className={traceDraft?.draft.origin.kind==='parent-probability'?'parent-rebranch-draft':undefined}><p className="shared-pair-label">{forkEditLabel({source:draft.sources[0],edit:draft.edits[0],additionalEdits:[draft.edits[1]],duration,maxTokens:budget})}</p>
+      {traceDraft&&<div className="trajectory-branch-setup" role="group" aria-label={traceDraft.draft.origin.kind==='parent-probability'?'Rebranch both stories from parent comparison':'Rebranch both stories from trajectory'}>
         <h4>Branch again from offset {traceDraft.draft.origin.index+1}</h4>
         <p>Chosen target: {tokenLabel(tokenizer,traceDraft.draft.targetTokenId)}. A: step {traceDraft.draft.sources[0].step} · B: step {traceDraft.draft.sources[1].step} · {traceDraft.draft.origin.branch==='edited'?'with same head changes':'keep source settings'} paths.</p>
         <p>Both references keep the head settings already active on their selected paths. Reapplying identical strengths can produce identical continuations; change a strength below to try a different intervention.</p>
         {traceDraft.draft.edits.map((edit,i)=><label key={i}>Layer {edit.layer+1} · Head {edit.head+1}<select aria-label={`Rebranch ${i===0?'first':'second'} head strength`} disabled={working||disabled} value={edit.factor} onChange={event=>{const factor=Number(event.target.value);setTraceDraft(old=>old?{...old,draft:{...old.draft,edits:old.draft.edits.map((item,j)=>j===i?{...item,factor}:item) as TrajectoryBranchDraft['edits']}}:old);}}>
           {![0,1,2].includes(edit.factor)&&<option value={edit.factor}>{edit.factor}× · saved strength</option>}<option value="0">0× · mute</option><option value="1">1× · normal</option><option value="2">2× · amplify</option>
         </select></label>)}
-        <button type="button" disabled={working} onClick={()=>setTraceDraft(null)}>Cancel trajectory branch setup</button>
+        <button type="button" disabled={working} onClick={()=>setTraceDraft(null)}>{traceDraft.draft.origin.kind==='parent-probability'?'Cancel parent comparison branch setup':'Cancel trajectory branch setup'}</button>
       </div>}
       {draft.targetTokenId !== undefined && draft.effects && <div className="shared-pair-preview" role="group" aria-label="Chosen-token shared pair preview" data-target-token={draft.targetTokenId}><p><strong>Probability of {tokenLabel(tokenizer,draft.targetTokenId)}</strong> with this pair. The model still chooses the generated tokens normally.</p><dl>{draft.effects.map((row,i) => <div key={i} data-testid={`shared-target-preview-${i}`}><dt>Story {i === 0 ? 'A' : 'B'} · source → with pair</dt><dd>{(row.before*100).toFixed(4)}% → {(row.after*100).toFixed(4)}% · {row.delta>0?'+':''}{(row.delta*100).toFixed(4)} pp</dd></div>)}</dl></div>}
       <div className="continuation-actions"><label>Apply both changes<select aria-label="Shared head-change duration" value={duration} disabled={working||disabled} onChange={event=>setDuration(event.target.value as ForkDuration)}><option value="continuation">From each selected token onward</option><option value="prediction">Only each selected prediction</option></select></label>
@@ -108,7 +108,7 @@ export function SharedStoryBranches({workspace,draft:mapDraft,manifest,tokenizer
             </div>;
           })}</article>;
       })}</div>
-      <StoryParentComparison key={`parent:${JSON.stringify([group.id,group.targetTokenId])}`} workspace={workspace} group={group} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled||traceBusy} onBusy={setParentBusy} onOpenStory={onOpenStory} />
+      <StoryParentComparison key={`parent:${JSON.stringify([group.id,group.targetTokenId])}`} workspace={workspace} group={group} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled||traceBusy} onBusy={setParentBusy} onOpenStory={onOpenStory} onSetupBranch={setupTraceDraft} onClearBranch={clearTraceDraft} />
       <StoryInteractionTrace key={JSON.stringify([group.id,group.targetTokenId])} group={group} nodes={nodes as [StoryNode,StoryNode]} manifest={manifest} tokenizer={tokenizer} disabled={busy||disabled||parentBusy} onBusy={setTraceBusy} onOpenStory={onOpenStory} onSetupBranch={setupTraceDraft} onClearBranch={clearTraceDraft} />
       <p className="hint">Highlighted tokens differ from their own reference at the same generation offset. A and B can start at different steps and sample differently. Open either comparison to inspect numbered tokens in the flow and make another head change. Shared results reopen together here; paused paths resume together.</p>
     </>}

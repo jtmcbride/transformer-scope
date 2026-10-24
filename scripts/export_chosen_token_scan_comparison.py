@@ -73,7 +73,7 @@ def main():
             cases.append(dict(targetTokenId=target,rows=rows,changes=changes,branches=branches))
     data=dict(modelRevision=manifest['modelRevision'],nodeIds=[n['id'] for n in nodes],index=1,sources=sources,cases=cases)
     (ROOT/'tests/fixtures/chosen-token-scan-comparison-reference.json').write_text(json.dumps(data,indent=2)+'\n')
-    print('Exported 480 same-target pair measurements and 12 independent four-path continuation comparisons.')
+    print('Exported 480 same-target pair measurements and 12 independent four-path comparisons with 192 fixed-target effect points.')
 
 
 if __name__=='__main__':main()

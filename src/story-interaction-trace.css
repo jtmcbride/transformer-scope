@@ -35,3 +35,6 @@
 .trajectory-candidates { margin-top:14px; border-top:1px solid #d5dce8; }
 .trajectory-candidates ul { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:6px; }
 .trajectory-candidates button { margin-top:0; font-size:12px; }
+
+.trajectory-effect-value { font-size:9px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.trajectory-gap { padding:12px; background:#f2eefb; border-left:3px solid #7965a9; }

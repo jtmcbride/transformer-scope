@@ -63,8 +63,29 @@ export async function chosenComparisonWorkflow(page:Page,info?:TestInfo){
   record.nodes.forEach((node:any,side:number)=>{expect(node.parentId).toBe(reference.nodeIds[side]);expect(node.plan.source).toEqual(reference.sources[side]);expect([node.plan.edit,...node.plan.additionalEdits]).toEqual([expected.plans[side].edit,...expected.plans[side].additionalEdits]);
     for(const branch of ['original','edited'] as const){expect(node.frame[branch].tokenIds).toEqual(expected.frames[side][branch].tokenIds);node.frame[branch].choices.forEach((choice:any,i:number)=>expect(choice.probability).toBeCloseTo(expected.frames[side][branch].choices[i].probability,5));}
   });
+  expect(record.group.targetTokenId).toBe(471);
+  const trace=shared.getByRole('region',{name:'Head-pair interaction along the stories',exact:true});
+  await expect(trace.getByLabel('Interaction trajectory target mode')).toHaveValue('fixed');
+  await expect(trace.getByLabel('Chosen next token')).toHaveValue('471');
+  await expect(trace.getByLabel('Interaction trajectory display')).toHaveValue('effect');
+  await trace.getByRole('button',{name:'Measure token-by-token interactions',exact:true}).click();
+  await expect(trace.getByTestId('trajectory-status')).toHaveText('Token interactions complete. 8 / 8 tokens measured.',{timeout:60000});
+  const trajectory=await downloadStory(page,'Download token interactions');
+  expect(trajectory.display).toBe('effect');expect(trajectory.target).toEqual({kind:'fixed',tokenId:471});expect(trajectory.complete).toBe(true);expect(trajectory.nodes).toEqual(record.nodes);
+  for(const side of [0,1])trajectory.rows[side].forEach((row:any,i:number)=>{const r=expected.tracks.edited[side][i];expect([row.step,row.tokenId,row.targetTokenId,row.active]).toEqual([r.step,r.tokenId,r.targetTokenId,r.active]);for(const field of ['before','after','delta'] as const)expect(row[field]).toBeCloseTo(r[field],5);});
+  const chart=trace.getByRole('region',{name:'Scrollable token interaction tracks',exact:true});
+  expect(Number(await chart.getAttribute('data-effect-limit'))).toBe(Math.max(...trajectory.rows.flat().map((row:any)=>Math.abs(row.delta))));
+  await trace.locator('.trajectory-point[data-track="0"][data-offset="1"]').focus();await page.keyboard.press('Enter');
+  expect(parseFloat(await trace.getByTestId('trajectory-effect-0').innerText())/100).toBeCloseTo(trajectory.rows[0][1].delta,6);
+  expect(parseFloat(await trace.getByTestId('trajectory-effect-gap').locator('strong').innerText())/100).toBeCloseTo(trajectory.rows[1][1].delta-trajectory.rows[0][1].delta,6);
+  await page.keyboard.press('ArrowDown');await expect(trace.locator('.trajectory-point[data-track="1"][data-offset="1"]')).toBeFocused();
+  await page.setViewportSize({width:390,height:844});expect(await trace.evaluate(el=>el.scrollWidth<=el.clientWidth+1&&el.getBoundingClientRect().right<=innerWidth)).toBe(true);
+  expect((await trace.locator('.trajectory-point').first().boundingBox())!.width).toBeGreaterThanOrEqual(44);
+  if(info)await trace.screenshot({path:info.outputPath('chosen-token-effects-along-continuations-mobile.png')});
+  await page.setViewportSize({width:1440,height:1100});
   const workspace=await downloadStory(page,'Download workspace');expect(workspace.root).toEqual(input.workspace.root);expect(workspace.nodes.slice(0,input.workspace.nodes.length)).toEqual(input.workspace.nodes);expect(workspace.nodes).toHaveLength(input.workspace.nodes.length+2);
   await page.reload();await page.locator('.story-map-comparison > summary').click();
   await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.');expect((await downloadStory(page,'Download shared comparison')).nodes).toEqual(record.nodes);
+  await expect(trace.getByLabel('Chosen next token')).toHaveValue('471');await expect(trace.getByLabel('Interaction trajectory display')).toHaveValue('effect');await expect(trace.locator('.trajectory-point')).toHaveCount(0);
   await expect(page.getByRole('alert')).toHaveCount(0);
 }

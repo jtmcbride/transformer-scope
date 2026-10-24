@@ -4,13 +4,14 @@ import { beforeAll, expect, it } from 'vitest';
 import { chooseToken, drawAt, selectionEdits, type StorySelection } from '../../src/continuation';
 import { scanStoryHeatmaps, compareInteractions, rankInteractionChanges } from '../../src/story-heatmap-comparison';
 import type { HeadPairScanRow } from '../../src/story-head-pair-scan';
+import { traceStoryInteractions, type InteractionTracks } from '../../src/story-interaction-trajectory';
 import { SharedStoryFork } from '../../src/story-shared-fork';
 import type { ForkPlan } from '../../src/story-fork';
 import { RunEngine } from '../../src/engine/runs';
 import { loadShippedArtifact } from './retrieval-artifact';
 import reference from '../fixtures/chosen-token-scan-comparison-reference.json';
 beforeAll(async()=>{await tf.setBackend('cpu');await tf.ready();});
-it('compares 480 same-target pair effects and four-path branches against independent PyTorch',async()=>{
+it('compares 480 same-target pair effects, four-path branches and 192 trajectory points against independent PyTorch',async()=>{
   const memory=tf.memory().numTensors,loaded=loadShippedArtifact('tinystories'),engine=new RunEngine(loaded.artifact);
   const sources=structuredClone(reference.sources) as [StorySelection,StorySelection], cache=new Map<string,ArrayLike<number>>();
   const predict=async(ids:number[],edits:ReturnType<typeof selectionEdits>)=>{
@@ -52,6 +53,16 @@ it('compares 480 same-target pair effects and four-path branches against indepen
           const plans=expected.plans.map((plan,i)=>({...plan,source:sources[i]})) as [ForkPlan,ForkPlan],session=new SharedStoryFork(plans,loaded.manifest.config);
           while(!session.finished)await session.step(predict);
           session.frames.forEach((frame,i)=>{for(const branch of ['original','edited'] as const){expect(frame[branch]!.tokenIds).toEqual(expected.frames[i][branch].tokenIds);frame[branch]!.choices.forEach((choice,j)=>expect(choice.probability).toBeCloseTo(expected.frames[i][branch].choices[j].probability,5));}});
+          for(const branch of ['original','edited'] as const){
+            const tracks:InteractionTracks=[[],[]];
+            await traceStoryInteractions(session.plans,session.frames,branch,loaded.manifest.config,async(_,use)=>{await use(predict);},(side,row)=>tracks[side].push(row),()=>false,{kind:'fixed',tokenId:example.targetTokenId});
+            for(const side of [0,1])tracks[side].forEach((row,i)=>{const r=expected.tracks[branch][side][i];
+              expect([row.index,row.step,row.tokenId,row.targetTokenId,row.active]).toEqual([r.index,r.step,r.tokenId,r.targetTokenId,r.active]);
+              for(const field of ['before','after','delta'] as const)expect(row[field]).toBeCloseTo(r[field],5);
+              expect(row.delta).toBe(row.after-row.before);if(!row.active)expect(row.delta).toBe(0);
+            });
+          }
+
         }
       }
       expect(sources).toEqual(snapshot);

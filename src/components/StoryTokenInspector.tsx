@@ -88,10 +88,18 @@ export function StoryTokenInspector({ selection, manifest, tokenizer, count, onC
         <button type="button" onClick={onClose}>{depth ? 'Back to previous comparison' : 'Close token inspection'}</button>
       </div>
     </div>
+    <div className="story-inspection-context" aria-label="Active story inspection">
+      <span><small>Story</small><strong>{branch}{depth > 0 ? ` · branch depth ${depth}` : ''}</strong></span>
+      <span><small>Selected output</small><strong>Step {selection.step} · {label}</strong></span>
+      <span><small>Inspecting</small><strong>{node.kind === 'head' ? `Layer ${layer + 1} · Head ${head + 1}` : node.kind === 'stage' ? `Layer ${layer + 1} · ${node.stage}` : node.kind === 'embedding' ? 'Input embedding' : 'Prediction'}</strong></span>
+      <span><small>Captured changes</small><strong>{edits.length ? edits.map(edit => `L${edit.layer + 1}/H${edit.head + 1} ${edit.factor.toFixed(2)}×`).join(' + ') : 'Original model'}</strong></span>
+    </div>
+    <details className="token-context-details"><summary>Context and generation settings</summary>
     <p>This flow uses the {selection.prefix.length} input tokens <strong>before</strong> step {selection.step}, including the beginning token. The selected token is the output, not part of its own input.</p>
     <p className="inspection-prefix" aria-label="Context before selected token">{encoder.preview(selection.prefix) || '(Beginning of story)'}</p>
     <p className="hint">{edits.length ? `Captured ${edits.length === 1 ? 'edit' : 'edits'}: ${edits.map(edit => `Layer ${edit.layer + 1} · Head ${edit.head + 1} · ${edit.factor.toFixed(2)}×`).join('; ')} at all positions. Both diagram runs use this branch’s context; “without edit” is not the separately generated reference story.` : 'Original model with no intervention. Baseline and modified vectors are identical.'}</p>
     <p className="hint">{selection.settings.temperature === 0 ? 'Chosen by most-likely-token selection.' : `Chosen by seeded sampling · temperature ${selection.settings.temperature} · top-p ${selection.settings.topP} · seed ${selection.settings.seed}. A sampled token need not be the most likely token.`} Probabilities below are the raw model probabilities before sampling.</p>
+    </details>
     {error ? <div role="alert" className="error">{error} <button type="button" onClick={() => setRetry(value => value + 1)}>Retry token inspection</button></div> : !result ? <p role="status">Recomputing this recorded step…</p> : <>
       <div className="selected-token-result" data-testid="selected-token-result"><span>Generated token <strong>{label}</strong></span><span>Model probability <strong data-testid="selected-token-probability">{(target!.probability * 100).toFixed(4)}%</strong></span><span>Recorded choice reproduced</span></div>
       <VisualFlow config={manifest.config} tokens={selection.prefix.map(id => tokenLabel(tokenizer, id))} selected={node} comparison={result.comparison}

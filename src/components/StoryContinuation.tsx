@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { BpeTokenizer, type BpeDocument } from '../engine/bpe';
 import type { HeadScaleIntervention, ModelManifest } from '../engine/contracts';
 import { tokenLabel } from '../engine/tokenizer';
@@ -8,7 +8,7 @@ import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import { StoryWorkspaceProvider, useStoryWorkspace } from './StoryWorkspace';
 import { StoryTokenInspector } from './StoryTokenInspector';
 
-interface Props { inputKey?: string; manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
+interface Props { promptInspector?: ReactNode; inputKey?: string; manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
 const defaults: Sampling = { temperature: 0, topP: .9, seed: 42, maxTokens: 24 };
 export function StoryContinuation(props: Props) {
   return <StoryWorkspaceProvider manifest={props.manifest} tokenizer={props.tokenizer} inputKey={props.inputKey ?? JSON.stringify(props.tokens)}>{(data, navigation) => <StoryContinuationInner key={navigation} {...props} restored={data.root} />}</StoryWorkspaceProvider>;
@@ -112,7 +112,7 @@ function StoryContinuationInner(props: Props & { restored: import('../story-work
     const link = document.createElement('a'); link.href = url; link.download = 'story-continuation.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 0);
   }
   return <section id="story-continuation" className="story-continuation" aria-label="Token by token story continuation">
-    <div className="continuation-heading"><div><p className="eyebrow">One prediction becomes the next input</p><h2>Watch the story grow.</h2></div><p>Step through one token, or play a short continuation. Each token feeds the next prediction.</p></div>
+    <div className="continuation-heading"><div><p className="eyebrow">Generate → select a token → try a change</p><h2>Watch the story grow.</h2></div><p>Step through one token, or play a short continuation. Each token feeds the next prediction.</p></div>
     <div className="continuation-settings">
       <label>Choose words<select aria-label="Continuation sampling" disabled={frozen || busy} value={settings.temperature === 0 ? 'greedy' : 'sample'} onChange={event => setSettings({ ...settings, temperature: event.target.value === 'greedy' ? 0 : .8 })}><option value="greedy">Most likely token</option><option value="sample">Seeded sampling</option></select></label>
       {settings.temperature > 0 && <><label>Temperature<input aria-label="Continuation temperature" type="number" min="0.05" max="2" step="0.05" disabled={frozen || busy} value={settings.temperature} onChange={event => setSettings({ ...settings, temperature: Number(event.target.value) })} /></label>
@@ -129,6 +129,11 @@ function StoryContinuationInner(props: Props & { restored: import('../story-work
     {error && <p role="alert" className="error">{error}</p>}
     <div className={`continuation-stories ${frame?.edited ? 'paired-stories' : ''}`}>{story(frame?.original ?? { tokenIds: props.tokens, choices: [] }, 'Original')}{frame?.edited && story(frame.edited, 'Edited')}</div>
     {!!frame?.original.choices.length && <p className="hint">Select a numbered token to pause generation and inspect the computation that produced it.</p>}
+    {!selection && props.promptInspector && <details className="prompt-flow-inspector" open>
+      <summary>Inspect prompt computation <span>Current prompt · next prediction</span></summary>
+      <p className="hint">Explore the completed prompt below, or select a generated token above to inspect the computation that produced it.</p>
+      {props.promptInspector}
+    </details>}
     {selection && <StoryTokenInspector key={`${selection.branch}:${selection.step}`} selection={selection} manifest={props.manifest} tokenizer={props.tokenizer}
       onForkStart={stop}
       onClose={() => { workspace.focus(''); setSelection(null); document.querySelector<HTMLButtonElement>('.generated-tokens button[aria-pressed=true]')?.focus({ preventScroll: true }); }} onNavigate={index => inspect(selection.branch, index)}

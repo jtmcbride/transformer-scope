@@ -46,6 +46,10 @@ export function StoryWorkspaceProvider({ manifest, tokenizer, inputKey, children
     catch (e) { setError(`Could not open this workspace: ${String(e)}`); }
   }
   return <Context.Provider value={{ openPairScan: request => { navigate(request.nodeId); setPairScan(request); }, data, saveRoot, saveNode, navigate, focus, reset, heatmapBusy, setInspectorScanning }}>
+    {pairScan && scanNode && scanSelection ? <StoryTokenInspector key={`${pairScan.nodeId}:${pairScan.branch}:${pairScan.index}`} selection={scanSelection}
+      manifest={manifest} tokenizer={tokenizer} initialTargetTokenId={pairScan.targetTokenId} parentId={scanNode.id} depth={nodeRoute(data.nodes, scanNode.id).length}
+      startStep={scanNode.plan.source.step} count={scanNode.frame[pairScan.branch]!.choices.length}
+      onClose={() => navigate(scanNode.id)} onNavigate={index => setPairScan({ ...pairScan, index })} onForkStart={() => {}} /> : children(data, navigation)}
     <section className="story-workspace-map" aria-label="Story branch workspace">
       <div className="continuation-heading"><div><p className="eyebrow">Your paths through the story</p><h2>Story workspace</h2></div><span role="status">{saved ? 'Saved on this browser' : data.root ? 'Not saved yet' : 'Create a story to begin'}</span></div>
       <p>Keep comparisons, revisit their tokens, and explore another change. Downloads include the whole workspace. Run input or Reset story starts a new workspace; download first to keep this experiment.</p>
@@ -58,9 +62,6 @@ export function StoryWorkspaceProvider({ manifest, tokenizer, inputKey, children
       </nav>}
     </section>
     {data.root && <StoryHeatmapComparison workspace={data} manifest={manifest} tokenizer={tokenizer} disabled={inspectorScanning} onBusy={setHeatmapBusy} onOpenStory={navigate} onSaveShared={saveShared} />}
-    {pairScan && scanNode && scanSelection ? <StoryTokenInspector key={`${pairScan.nodeId}:${pairScan.branch}:${pairScan.index}`} selection={scanSelection}
-      manifest={manifest} tokenizer={tokenizer} initialTargetTokenId={pairScan.targetTokenId} parentId={scanNode.id} depth={nodeRoute(data.nodes, scanNode.id).length}
-      startStep={scanNode.plan.source.step} count={scanNode.frame[pairScan.branch]!.choices.length}
-      onClose={() => navigate(scanNode.id)} onNavigate={index => setPairScan({ ...pairScan, index })} onForkStart={() => {}} /> : children(data, navigation)}
+
   </Context.Provider>;
 }

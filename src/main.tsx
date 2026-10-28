@@ -5,5 +5,6 @@ import './flow.css';
 import './trace.css';
 import './visual.css';
 import './continuation.css';
+import './story-centered.css';
 
 createRoot(document.getElementById('root')!).render(<App />);

@@ -1,0 +1,37 @@
+/* The story is the entry point; its selected prediction owns the visible flow. */
+.story-centered.view-visual .notice { margin-bottom:12px; }
+.story-centered.view-visual .input-workbench { position:relative; padding:16px 22px; gap:8px; }
+.story-centered.view-visual .setup-row { margin-bottom:0; }
+.story-centered.view-visual .setup-row .step-heading { margin-bottom:0; }
+.story-centered.view-visual .input-editor { order:1; display:block; }
+.story-centered.view-visual .raw-input { margin-top:0; }
+.story-centered.view-visual .raw-input textarea { min-height:62px; height:62px; font:16px/1.5 Georgia,serif; }
+.story-centered.view-visual .raw-input .hint { margin:5px 0; font-size:11px; }
+.story-centered.view-visual .input-actions { margin-top:6px; }
+.story-centered.view-visual .input-actions .primary { min-height:36px; padding:8px 14px; }
+.story-centered.view-visual .story-examples { order:2; margin-top:0; }
+.story-centered.view-visual .text-model-about { order:3; margin-top:0; }
+.story-centered.view-visual .continuation-jump { display:none; }
+.story-centered.view-visual .story-continuation { margin:16px 0; padding:22px; }
+.story-centered.view-visual .continuation-heading { margin-bottom:12px; }
+.story-centered.view-visual .continuation-heading h2 { font-size:25px; }
+.story-centered.view-visual .story-continuation > .continuation-stories { margin-top:12px; }
+.prompt-flow-inspector { margin-top:24px; border-top:1px solid #dfe4ee; padding-top:16px; }
+.prompt-flow-inspector > summary { cursor:pointer; font-size:16px; font-weight:600; color:#58429a; padding:6px 0; }
+.prompt-flow-inspector > summary > span { margin-left:12px; color:#606c82; font-size:12px; font-weight:400; }
+.prompt-flow-inspector > .visual-flow { margin-top:14px; }
+.story-inspection-context { display:flex; flex-wrap:wrap; gap:14px 28px; margin:16px 0; padding:16px; border:1px solid #ddd3f5; border-radius:8px; background:#f7f5fc; }
+.story-inspection-context > span { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.story-inspection-context small { color:#606c82; font-size:12px; }
+.story-inspection-context strong { color:#58429a; font-size:13px; overflow-wrap:anywhere; }
+.token-context-details { font-size:13px; line-height:1.6; margin:14px 0; }
+.token-context-details > summary { cursor:pointer; color:#58429a; padding:6px 0; }
+.token-context-details p { margin:10px 0; }
+@media (max-width:800px) {
+  .story-centered.view-visual .input-workbench,.story-centered.view-visual .story-continuation { padding:16px; }
+  .story-centered.view-visual .continuation-heading > p { margin:8px 0 0; }
+  .prompt-flow-inspector > summary > span { display:block; margin:6px 0 0 16px; }
+  .story-inspection-context { gap:14px; }
+  .story-inspection-context > span { flex:1 1 40%; }
+  .story-centered.view-visual .prediction-summary { position:static; }
+}

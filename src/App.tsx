@@ -524,7 +524,15 @@ export default function App() {
     });
   }
 
-  return <main className={`flow-app view-${view} ${tracing.open ? 'trace-active' : ''}`}>
+  const promptFlow = c && display && tokenizer && <VisualFlow config={c} tokens={display.tokens.map(id => symbols![id])} selected={selectedNode}
+      comparison={display.comparison} attention={display.attention} layer={display.controls.layer} head={display.controls.head}
+      position={display.controls.mode === 'attention' ? display.controls.query : display.controls.position} pending={pending || loading || copying} ended={sessionEnded}
+      disabled={locked} onSelect={inspectNode} onDetails={() => setView('details')}
+      headControl={headControls.mode === 'head' ? { factor: headControls.factor, scope: headControls.scope === 'all' ? 'Applies at every input position' : `Applies at position ${headControls.scope}`,
+        onChange: factor => schedule({ ...headControls, factor }) } : undefined}
+      onReset={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })} />;
+
+  return <main className={`flow-app ${choice === 'tinystories' ? 'story-centered' : ''} view-${view} ${tracing.open ? 'trace-active' : ''}`}>
     <header className="masthead">
       <div className="wordmark"><span className="mark" aria-hidden="true">μ</span><div><p className="eyebrow">Follow a prediction through the model</p><h1>Transformer Microscope</h1></div></div>
       <span className={`status ${pending || loading || copying ? 'working' : ''}`} role="status">{loading ? 'Loading model…' : copying ? 'Preparing source input…' : pending ? `Computing…${display ? ` previous ${shown(display.controls)}` : ''}` : display ? `Showing ${shown(display.controls)}` : 'Ready'}</span>
@@ -551,18 +559,14 @@ export default function App() {
     </section>
     {error && <p className="error" role="alert">{error}
       {sessionEnded && <button type="button" className="secondary recover" onClick={() => void restart()}>Restart on CPU</button>}</p>}
-    {view === 'visual' && c && display && tokenizer && <VisualFlow config={c} tokens={display.tokens.map(id => symbols![id])} selected={selectedNode}
-      comparison={display.comparison} attention={display.attention} layer={display.controls.layer} head={display.controls.head}
-      position={display.controls.mode === 'attention' ? display.controls.query : display.controls.position} pending={pending || loading || copying} ended={sessionEnded}
-      disabled={locked} onSelect={inspectNode} onDetails={() => setView('details')}
-      headControl={headControls.mode === 'head' ? { factor: headControls.factor, scope: headControls.scope === 'all' ? 'Applies at every input position' : `Applies at position ${headControls.scope}`,
-        onChange: factor => schedule({ ...headControls, factor }) } : undefined}
-      onReset={() => schedule({ ...controlsRef.current, mode: 'head', factor: 1 })} />}
-    {choice === 'tinystories' && model && display && tokenizer?.kind === 'byte-bpe' && <StoryContinuation
-      key={model.runtimeGeneration} inputKey={display.comparison.baselineRunId} manifest={model.manifest} tokenizer={tokenizer}
-      tokens={display.tokens} prompt={completedText} draft={inputDraft} disabled={loading || pending || probing || sessionEnded}
-      edit={display.comparison.interventions[0]?.kind === 'head.scale' && display.comparison.interventions[0].tokens.kind === 'all' && display.comparison.interventions[0].factor !== 1 ? display.comparison.interventions[0] : undefined} />}
-    <div className="workspace flow-workspace">
+    {choice !== 'tinystories' && view === 'visual' && promptFlow}
+    {choice === 'tinystories' && model && display && tokenizer?.kind === 'byte-bpe' && <div hidden={view !== 'visual'}>
+      <StoryContinuation key={model.runtimeGeneration} inputKey={display.comparison.baselineRunId} manifest={model.manifest} tokenizer={tokenizer}
+        tokens={display.tokens} prompt={completedText} draft={inputDraft} disabled={loading || pending || probing || sessionEnded}
+        promptInspector={promptFlow}
+        edit={display.comparison.interventions[0]?.kind === 'head.scale' && display.comparison.interventions[0].tokens.kind === 'all' && display.comparison.interventions[0].factor !== 1 ? display.comparison.interventions[0] : undefined} />
+    </div>}
+    <div className="workspace flow-workspace" hidden={choice === 'tinystories' && view === 'visual'}>
       <div className="exploration">
         <section className="graph-pane" aria-label="Computation workspace" hidden={view === 'visual'}>
           <div className="step-heading"><span className="step-number">2</span><div><p className="eyebrow">Explore the computation</p><h2>Choose where to look</h2></div></div>

@@ -1,3 +1,4 @@
+import { openProbabilityDetails } from '../support/probability-details';
 import { openStoryAnalysis } from '../support/story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
@@ -40,6 +41,7 @@ test('scan ranks all changes, fills the chosen draft and preview, and branches w
   await page.setViewportSize({width:1440,height:1100}); await scan.getByRole('button',{name:'Show strongest eight',exact:true}).click(); await scan.screenshot({path:info.outputPath('head-scan.png')}); await scan.getByRole('button',{name:'Show all 48 results',exact:true}).click();
   await scan.getByRole('button',{name:'Use layer 1 head 1 strength 0',exact:true}).focus(); await page.keyboard.press('Enter');
   const preview=page.getByRole('region',{name:'Scanned head probability preview',exact:true});
+  await openProbabilityDetails(preview);
   await expect(preview.getByTestId('branch-choice-explanation')).toBeVisible({timeout:60000});
   const selected=preview.getByRole('list',{name:'Selected token probability'});
   expect(parseFloat(await selected.getByTestId('probability-after').innerText())/100).toBeCloseTo(reference.cases[0].rows[0].after,5);
@@ -71,6 +73,7 @@ test('scan cancellation and navigation discard late results, and scans retain an
   await page.getByLabel('Branch new-token limit').fill('1');
   await page.getByRole('button',{name:'Compare from this token',exact:true}).click();
   await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.',{timeout:60000});
+  await openProbabilityDetails(page.getByRole('region',{name:'Head change probabilities',exact:true}));
   await expect(page.getByRole('region',{name:'Head change probabilities',exact:true}).getByTestId('branch-choice-explanation')).toBeVisible({timeout:60000});
   pending=page.waitForEvent('console',m=>m.text()==='scan-baseline'); await scan.getByRole('button',{name:'Scan all heads',exact:true}).click(); await pending;
   await page.getByRole('button',{name:/^Inspect keep source settings token 7:/}).click();
@@ -110,6 +113,9 @@ for (const [index, duration] of ['continuation', 'prediction'].entries()) test(`
   await expect(scan.getByLabel('Two-head selection', { exact: true })).toContainText('2 / 2 heads selected');
   await pairButton.click();
   const preview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
+  await expect(preview.getByTestId('branch-change-summary')).toContainText('Both head changes together', { timeout: 60000 });
+  await expect(preview.locator('.branch-probability-details')).not.toHaveAttribute('open');
+  await openProbabilityDetails(preview);
   await expect(preview.getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60000 });
   for (const row of example.report.individuals) {
     const measured = preview.locator(`li[data-pair-layer="${row.edit.layer}"][data-pair-head="${row.edit.head}"]`);
@@ -118,6 +124,10 @@ for (const [index, duration] of ['continuation', 'prediction'].entries()) test(`
   }
   expect(parseFloat(await preview.getByTestId('sum-individual-deltas').innerText())/100).toBeCloseTo(example.report.individuals.reduce((sum, row) => sum + row.delta, 0), 5);
   const selected = example.report.rows.find(row => row.tokenId === example.plan.source.choice.tokenId)!;
+  await preview.getByText('Unrounded measurements', { exact: true }).click();
+  await expect(preview.locator('tr[data-raw-head]')).toHaveCount(2);
+  expect(Number(await preview.getByTestId('unrounded-interaction').innerText())).toBeCloseTo(example.report.interaction, 5);
+  expect(Number(await preview.locator(`tr[data-raw-token-id="${selected.tokenId}"]`).getByTestId('unrounded-after').innerText())).toBeCloseTo(selected.after, 5);
   expect(parseFloat(await preview.getByTestId('combined-probability').innerText())/100).toBeCloseTo(selected.after, 5);
   expect(parseFloat((await preview.getByTestId('head-interaction').locator('strong').innerText()))/100).toBeCloseTo(example.report.interaction, 5);
   for (const expected of example.report.rows) {
@@ -159,6 +169,7 @@ for (const [index, duration] of ['continuation', 'prediction'].entries()) test(`
   await page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button', { name: /^Comparison 1/ }).click();
   await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
   const report = page.getByRole('region', { name: 'Head change probabilities', exact: true });
+  await openProbabilityDetails(report);
   await expect(report.getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60000 });
   expect(parseFloat(await report.getByTestId('combined-probability').innerText())/100).toBeCloseTo(selected.after, 5);
   wait = page.waitForEvent('download'); await page.getByRole('button', { name: 'Download workspace', exact: true }).click();

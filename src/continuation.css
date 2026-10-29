@@ -95,6 +95,13 @@
 .branch-probabilities > .fork-status { margin:12px 0 4px; }
 .branch-probabilities > .fork-difference { margin:4px 0 14px; }
 .branch-probabilities .story-prose { font:19px/1.8 Georgia,serif; }
+.unrounded-probabilities { padding:12px 0; font-size:13px; color:#47546b; }
+.unrounded-probabilities > summary { cursor:pointer; color:#58429a; padding:8px 0; }
+.unrounded-probability-scroll { max-width:100%; overflow:auto; }
+.unrounded-probability-scroll table { width:100%; min-width:620px; border-collapse:collapse; font:12px/1.5 monospace; }
+.unrounded-probability-scroll th,.unrounded-probability-scroll td { padding:9px; text-align:left; border-bottom:1px solid #dfe4ee; white-space:nowrap; }
+.unrounded-probability-scroll th[scope=row] { font-weight:500; }
+@media(pointer:coarse) { .branch-probability-details > summary,.unrounded-probabilities > summary { min-height:44px; } }
 @media(max-width:700px) { .summary-probability-delta { display:block; margin:6px 0 0; } .branch-change-summary h3 { font-size:18px; } }
 @media(max-width:700px) { .branch-probabilities { padding:10px; } }
 .story-head-scan { margin:0 0 24px; padding-bottom:22px; border-bottom:1px solid #ddd3f5; }

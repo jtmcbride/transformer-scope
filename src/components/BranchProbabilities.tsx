@@ -24,6 +24,7 @@ export function BranchProbabilities({ plan, tokenizer, client, label: regionLabe
   }, [plan, client, retry, targetTokenId]);
   const data = report?.plan === plan && report.client === client && report.targetTokenId === targetTokenId ? report.value : null;
   const label = (id: number) => tokenLabel(tokenizer, id);
+  const readableLabel = (id: number) => label(id).replaceAll('␠', ' ').trim() || '(space)';
   function row(r: BranchProbabilityRow, selected = false) {
     return <li key={r.tokenId} className={selected ? 'probability-selected' : ''} data-token-id={r.tokenId}>
       <div className="branch-probability-token"><strong>{label(r.tokenId)}</strong><span>{selected ? 'Selected token' : 'Alternative'} · rank {r.beforeRank} → {r.afterRank}</span></div>
@@ -34,10 +35,10 @@ export function BranchProbabilities({ plan, tokenizer, client, label: regionLabe
   return <section className="branch-probabilities" aria-label={regionLabel}>
     <p className="eyebrow">{regionLabel === 'Scanned head probability preview' ? 'Preview for a new comparison' : 'What changed at the branch point?'}</p>
     {error ? <p role="alert">Could not measure this change: {error} <button type="button" onClick={() => setRetry(n => n + 1)}>Retry probability comparison</button></p> : !data ? <p role="status">Measuring the branch-point probabilities…</p> : <div className="branch-change-summary" data-testid="branch-change-summary">
-      <div><h3>{probabilityDirection(data.selected.delta)}: <span>{label(data.selected.tokenId)}</span></h3>
+      <div><h3>{probabilityDirection(data.selected.delta)}: <span title={label(data.selected.tokenId)}>“{readableLabel(data.selected.tokenId)}”</span></h3>
         <p><strong data-testid="summary-probabilities">{compactPercent(data.selected.before)}% → {compactPercent(data.selected.after)}%</strong>
           <span className="summary-probability-delta" data-testid="summary-probability-change">{data.selected.delta > 0 ? '+' : data.selected.delta < 0 ? '−' : ''}{compactPercent(Math.abs(data.selected.delta))} percentage points</span></p></div>
-      <p className="branch-choice-summary">{data.beforeChoice === data.afterChoice ? <>Both versions choose <strong>{label(data.afterChoice)}</strong> at this step.</> : <>Next token changes from <strong>{label(data.beforeChoice)}</strong> to <strong>{label(data.afterChoice)}</strong>.</>}
+      <p className="branch-choice-summary">{data.beforeChoice === data.afterChoice ? <>Both versions choose <strong title={label(data.afterChoice)}>“{readableLabel(data.afterChoice)}”</strong> at this step.</> : <>Next token changes from <strong title={label(data.beforeChoice)}>“{readableLabel(data.beforeChoice)}”</strong> to <strong title={label(data.afterChoice)}>“{readableLabel(data.afterChoice)}”</strong>.</>}
         <small>Step {plan.source.step} · {proposedEdits(plan).length === 2 ? 'Both head changes together' : 'One head change'} · Same starting text</small></p>
     </div>}
     {children}
@@ -56,6 +57,16 @@ export function BranchProbabilities({ plan, tokenizer, client, label: regionLabe
       <p className="hint">Strongest alternatives: the top five model predictions from either version, plus any generated choice. Ranks exclude the beginning and padding tokens.</p>
       <ul aria-label="Strongest token alternatives">{data.rows.filter(r => r.tokenId !== data.selected.tokenId).map(r => row(r))}</ul>
       <p className="hint">These are raw model probabilities before temperature, top-p and generation filtering; bars share a 0–100% scale. This measures the new head edit relative to the source’s captured settings. Head effects can interact. Values are rounded to four decimal places. Later predictions may also reflect ongoing head edits and, once tokens diverge, different input text.</p>
+      <details className="unrounded-probabilities"><summary>Unrounded measurements</summary>
+        <p>Probabilities and changes below use the full measured precision, on a 0–1 scale. A change of 0.01 equals one percentage point.</p>
+        <div className="unrounded-probability-scroll" role="region" aria-label="Scrollable unrounded measurements" tabIndex={0}>
+          <table aria-label="Unrounded probability measurements"><thead><tr><th scope="col">Token or head trial</th><th scope="col">Before</th><th scope="col">After</th><th scope="col">Change</th></tr></thead><tbody>
+            {data.rows.map(row => <tr key={`token:${row.tokenId}`} data-raw-token-id={row.tokenId}><th scope="row">{label(row.tokenId)}</th><td data-testid="unrounded-before">{row.before.toString()}</td><td data-testid="unrounded-after">{row.after.toString()}</td><td data-testid="unrounded-delta">{row.delta.toString()}</td></tr>)}
+            {data.individuals.map(row => <tr key={`head:${row.edit.layer}:${row.edit.head}`} data-raw-head={`${row.edit.layer}:${row.edit.head}`}><th scope="row">L{row.edit.layer+1}/H{row.edit.head+1} alone · {label(data.selected.tokenId)}</th><td>{data.selected.before.toString()}</td><td>{row.probability.toString()}</td><td>{row.delta.toString()}</td></tr>)}
+          </tbody></table>
+        </div>
+        {data.individuals.length === 2 && <p>Sum of individual changes: <span data-testid="unrounded-sum">{data.individuals.reduce((sum, row) => sum + row.delta, 0).toString()}</span>. Interaction: <span data-testid="unrounded-interaction">{data.interaction.toString()}</span>.</p>}
+      </details>
     </details>}
   </section>;
 }

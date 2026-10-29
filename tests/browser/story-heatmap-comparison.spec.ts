@@ -1,3 +1,4 @@
+import { openProbabilityDetails } from '../support/probability-details';
 import { openStoryAnalysis } from '../support/story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
@@ -18,6 +19,7 @@ async function ready(page:Page) {
   await openStoryAnalysis(page);
   await page.getByLabel('Branch new-token limit').fill('6');await page.getByRole('button',{name:'Compare from this token',exact:true}).click();
   await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.',{timeout:60000});
+  await openProbabilityDetails(page.getByRole('region',{name:'Head change probabilities',exact:true}));
   await expect(page.getByRole('region',{name:'Head change probabilities',exact:true}).getByTestId('probability-after').first()).toBeVisible({timeout:60000});
   await page.locator('.story-map-comparison > summary').click();
   const panel=page.getByRole('region',{name:'Compare story interaction heatmaps',exact:true});

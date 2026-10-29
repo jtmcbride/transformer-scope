@@ -1,3 +1,5 @@
+import { openProbabilityDetails } from '../support/probability-details';
+import { openStoryAnalysis } from '../support/story-analysis';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
@@ -198,6 +200,7 @@ test('hosted continuation generates the independent original and edited story to
   }
   await testInfo.attach('hosted-fork-record', { body: JSON.stringify(forkRecord, null, 2), contentType: 'application/json' });
   const probabilityPanel = page.getByRole('region', { name: 'Head change probabilities', exact: true });
+  await openProbabilityDetails(probabilityPanel);
   await expect(probabilityPanel.getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
   for (const expected of probabilityFixture.cases[3].rows) {
     const row = probabilityPanel.locator(`li[data-token-id="${expected.tokenId}"]`);
@@ -208,6 +211,7 @@ test('hosted continuation generates the independent original and edited story to
   await fork.getByRole('button', { name: /^Inspect with head change token 8:/ }).click();
   await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
   await expect(inspection).toContainText('Comparison 1 · With head change story · step 8');
+  await openStoryAnalysis(page);
   const scan = page.getByRole('region', { name: 'Scan heads at selected token', exact: true });
   await scan.getByRole('button', { name: 'Scan all heads', exact: true }).click();
   await expect(scan.getByTestId('head-scan-status')).toHaveText('Scan complete. 48 / 48 changes measured.', { timeout: 60_000 });
@@ -215,6 +219,7 @@ test('hosted continuation generates the independent original and edited story to
   const identityRow = scan.locator('li[data-scan-layer="0"][data-scan-head="0"][data-scan-factor="1"]');
   expect(parseFloat(await identityRow.getByTestId('scan-after').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
   await scan.getByRole('button', { name: 'Use layer 1 head 1 strength 1', exact: true }).click();
+  await openProbabilityDetails(page.getByRole('region', { name: 'Scanned head probability preview', exact: true }));
   await expect(page.getByRole('region', { name: 'Scanned head probability preview', exact: true }).getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
   const pairScan = page.getByRole('region', { name: 'Scan head pairs at selected token', exact: true });
   await expect(pairScan.getByLabel('Sort pair scan results')).toHaveValue('interaction-absolute');
@@ -236,6 +241,7 @@ test('hosted continuation generates the independent original and edited story to
   await heatmap.screenshot({ path: testInfo.outputPath('hosted-head-pair-heatmap.png') });
   await heatmap.getByRole('button', { name: 'Preview and use this pair', exact: true }).click();
   const pairPreview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
+  await openProbabilityDetails(pairPreview);
   await expect(pairPreview.getByTestId('combined-probability')).toBeVisible({ timeout: 60_000 });
   expect(parseFloat(await pairPreview.getByTestId('combined-probability').innerText()) / 100).toBeCloseTo(example.edited.choices[1].probability, 5);
   expect(parseFloat(await pairPreview.getByTestId('head-interaction').locator('strong').innerText())).toBeCloseTo(0, 4);

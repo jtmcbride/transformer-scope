@@ -1,3 +1,4 @@
+import { openProbabilityDetails } from './probability-details';
 import { openStoryAnalysis } from './story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, type Page, type TestInfo } from '@playwright/test';
@@ -53,6 +54,7 @@ export async function chosenScanWorkflow(page: Page, side: number, info?: TestIn
   await list.locator(':scope > li').first().getByRole('button').click();
   const expected=example[order], row=example.rows.find(r=>JSON.stringify(r.edits)===JSON.stringify([expected.plan.edit,...expected.plan.additionalEdits]))!;
   const preview=page.getByRole('region',{name:'Scanned head probability preview',exact:true});
+  await openProbabilityDetails(preview);
   await expect(preview.getByTestId('combined-probability')).toBeVisible({timeout:60000});
   const selected=preview.getByRole('list',{name:'Selected token probability'}).locator('li');
   await expect(selected).toHaveAttribute('data-token-id',String(example.targetTokenId));

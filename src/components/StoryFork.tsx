@@ -145,7 +145,7 @@ export function StoryFork(props: Props) {
       <p className="hint" data-testid="fork-captured-edit">Comparing {forkEditLabel(plan)} · {plan.duration === 'prediction' ? 'selected prediction only' : 'every prediction from this point'}. Source: {plan.source.branch} story, step {plan.source.step}.</p>
       <BranchProbabilities targetTokenId={targetTokenId} plan={plan} tokenizer={props.tokenizer} client={props.analysisClient}>
       <p className="fork-status" role="status">{busy ? 'Comparing · one token at a time…' : finished ? 'Branch comparison complete.' : `Comparison paused after ${frame.step} ${frame.step === 1 ? 'step' : 'steps'}.`}</p>
-      <p className="fork-difference" role="status">{difference === null ? frame.step ? 'The generated tokens match so far. A head edit need not change the story.' : 'Waiting for the first pair of tokens.' : `First different token at story step ${plan.source.step + difference}. Highlighted tokens differ at the same generation step.`}</p>
+      <p className="fork-difference" role="status">{difference === null ? frame.step ? finished ? `Both continuations match through ${frame.step} generated ${frame.step === 1 ? 'token' : 'tokens'}.` : 'The generated tokens match so far. A head edit need not change the story.' : 'Waiting for the first pair of tokens.' : `First different token at story step ${plan.source.step + difference}. Highlighted tokens differ at the same generation step.`}</p>
       <div className="continuation-stories paired-stories">{story(frame.original, 'Keep source settings', frame.edited!, 'original')}{story(frame.edited!, 'With head change', frame.original, 'edited')}</div>
       </BranchProbabilities>
     </>}

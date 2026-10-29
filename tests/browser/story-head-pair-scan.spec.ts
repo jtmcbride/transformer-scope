@@ -1,3 +1,4 @@
+import { openProbabilityDetails } from '../support/probability-details';
 import { openStoryAnalysis } from '../support/story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
@@ -85,6 +86,7 @@ test('full pair scan maps and ranks interactions, then branches from a heatmap c
   await map.screenshot({ path: info.outputPath('selected-head-pair-map.png') });
   await map.getByRole('button', { name: 'Preview and use this pair', exact: true }).focus(); await page.keyboard.press('Enter');
   const preview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
+  await openProbabilityDetails(preview);
   await expect(preview.getByTestId('combined-probability')).toBeVisible({ timeout: 60000 });
   expect(parseFloat(await preview.getByTestId('combined-probability').innerText())/100).toBeCloseTo(sorted[0].after, 5);
   expect(Math.abs(parseFloat(await preview.getByTestId('head-interaction').locator('strong').innerText())/100-sorted[0].interaction)).toBeLessThanOrEqual(4*5e-6+0.5e-6);
@@ -97,6 +99,7 @@ test('full pair scan maps and ranks interactions, then branches from a heatmap c
   for (const branch of ['original','edited'] as const) { expect(saved.frame[branch].tokenIds).toEqual(expected.bestInteraction[branch].tokenIds); saved.frame[branch].choices.forEach((choice: { probability: number }, i: number) => expect(choice.probability).toBeCloseTo(expected.bestInteraction[branch].choices[i].probability,5)); }
   await page.reload(); await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
   const report = page.getByRole('region', { name: 'Head change probabilities', exact: true });
+  await openProbabilityDetails(report);
   await expect(report.getByTestId('combined-probability')).toBeVisible({ timeout: 60000 });
   expect(parseFloat(await report.getByTestId('combined-probability').innerText())/100).toBeCloseTo(sorted[0].after,5);
   await expect(page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button')).toHaveCount(2);
@@ -140,6 +143,7 @@ test('partial mixed pair results retain inherited edits, exclude competing scans
   await expect(transposed).toHaveAttribute('aria-pressed','true');
   expect(Number(await transposed.getAttribute('data-interaction'))).toBeCloseTo(scannedInteraction/100,6);
   const preview = page.getByRole('region', { name: 'Scanned head probability preview', exact: true });
+  await openProbabilityDetails(preview);
   await expect(preview.getByTestId('combined-probability')).toBeVisible({ timeout: 60000 });
   expect(parseFloat(await preview.getByTestId('combined-probability').innerText())/100).toBeCloseTo(expected.after,5);
   expect(parseFloat(await preview.getByTestId('head-interaction').locator('strong').innerText())).toBeCloseTo(scannedInteraction,4);

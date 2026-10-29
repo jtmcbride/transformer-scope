@@ -453,3 +453,10 @@ Implement the approved UI review items 1–3: put TinyStories prompt, playback a
 Acceptance checks cover desktop playback/prose visibility, one visible flow, responsive/keyboard context navigation, closing and reopening both scan types without late writes, independent branch/scan reference values, saved-workspace restoration, shared comparisons, and lineage rebranching.
 
 Local validation (2026-10-28): 143 numerical tests passed across 36 files; public and built model artifacts passed integrity checks. All 96 Chromium scenarios are covered across the full run and focused reruns (one old reset/reload test needed to open the new analysis disclosure explicitly). Two WebKit layout/lifecycle checks and one emulated-touch scan workflow passed. Desktop checks include playback controls and opening prose visible at 1280×720; mobile checks include one flow, contained page width, context navigation, scan cancellation, and partial-result retention.
+
+
+## Story-first comparison results
+
+Implement approved UI review item 4: compact same-context probability summary, first differing token step, and paired stories before expandable precise probabilities and alternatives. Keep single-head, pair, and fixed-target previews consistent. Preserve raw signs and small nonzero effects, retain original four-decimal readouts and pair decomposition, and expose unrounded model measurements without changing inference or persistence. Verify reference values, identity and sampled branches, nested inspection, disclosures without story mutation, and mobile/touch layout.
+
+Local validation (2026-10-28): 145 numerical tests passed across 37 files. All 19 affected Chromium scenarios passed across the broad run and final focused rerun; two WebKit checks, one emulated-touch check, and the continuation deployment-harness workflow against localhost also passed. Checks cover story/report ordering, closed defaults, unrounded reference values, pair decomposition, sampled identity, nested branches, cancellation, persistence, and narrow-screen containment. Production build and public/built model artifact integrity checks passed. The public deployment was not changed.

@@ -276,7 +276,7 @@ test('hosted continuation generates the independent original and edited story to
   await page.reload();
   await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
   const map = page.getByRole('navigation', { name: 'Story branch map' });
-  await expect(map.getByRole('button')).toHaveCount(3);
+  await expect(map.getByRole('button', { name: /^(Source story$|Comparison \d+:)/ })).toHaveCount(3);
   await map.getByRole('button', { name: /^Comparison 2/ }).click();
   await expect(inspection.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60_000 });
   const workspaceDownload = page.waitForEvent('download');

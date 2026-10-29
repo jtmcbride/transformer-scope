@@ -127,7 +127,14 @@ test('forking an edited token retains a different captured head, replaces the sa
   await probabilityReport(page, probabilities.cases[2]);
   await inspection.getByRole('button', { name: 'Previous model layer', exact: true }).click();
   await inspection.getByRole('button', { name: 'L1 · Head 1', exact: true }).click();
-  await fork.getByRole('button', { name: 'Normal branch head', exact: true }).click();
+  // Both reads change the inspector's height above the draft controls.
+  // Wait for the selected head before clicking a preset below that content.
+  await expect(inspection.getByTestId('node-values')).toBeVisible();
+  await expect(inspection.locator('.visual-attention > summary')).toBeVisible();
+  const normal = fork.getByRole('button', { name: 'Normal branch head', exact: true });
+  await normal.click();
+  await expect(normal).toHaveAttribute('aria-pressed', 'true');
+  await expect(fork.getByLabel('Branch head strength')).toHaveValue('1');
   // Changing the draft must not relabel a finished comparison.
   await expect(fork.getByTestId('fork-captured-edit')).toContainText('Layer 2 · Head 2 · 0.00×');
   await fork.getByRole('button', { name: 'Start new branch comparison', exact: true }).click();

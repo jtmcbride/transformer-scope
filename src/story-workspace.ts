@@ -3,9 +3,11 @@ import { StoryFork, selectForkToken, type ForkPlan } from './story-fork';
 import { requireInput, validateTokens, validateInterventions, type HeadScaleIntervention, type ModelManifest } from './engine/contracts';
 import { SharedStoryFork } from './story-shared-fork';
 export interface StoryRoot { prompt: string; tokens: number[]; settings: Sampling; edit?: HeadScaleIntervention; frame: StoryFrame }
-export interface StoryNode { id: string; parentId: string | null; plan: ForkPlan; frame: StoryFrame }
+export interface StoryNode { id: string; parentId: string | null; plan: ForkPlan; frame: StoryFrame; name?: string }
 export interface SharedStoryGroup { id: string; nodeIds: [string, string]; labels: [string, string]; targetTokenId?: number }
-export interface StoryWorkspace { format: 'transformer-story-workspace'; version: 1 | 2 | 3; checkpoint: string; root: StoryRoot | null; nodes: StoryNode[]; route: string[]; sharedForks?: SharedStoryGroup[] }
+export interface StoryWorkspace { format: 'transformer-story-workspace'; version: 1 | 2 | 3; checkpoint: string; root: StoryRoot | null; nodes: StoryNode[]; route: string[]; sharedForks?: SharedStoryGroup[]; name?: string }
+export const workspaceNameLimit = 80;
+function validateName(name: unknown) { requireInput(name === undefined || typeof name === 'string' && name.trim().length > 0 && name.length <= workspaceNameLimit, 'Names must contain 1–80 characters.'); }
 export function checkpointKey(m: ModelManifest) { return [m.modelId, m.modelRevision, m.weightsSha256, m.tokenizerSha256].join(':'); }
 export function emptyWorkspace(m: ModelManifest): StoryWorkspace { return { format: 'transformer-story-workspace', version: 3, checkpoint: checkpointKey(m), root: null, nodes: [], route: [], sharedForks: [] }; }
 export function nodeRoute(nodes: StoryNode[], id: string): string[] {
@@ -19,6 +21,7 @@ export function parseWorkspace(value: unknown, manifest: ModelManifest): StoryWo
   const w = value as StoryWorkspace;
   requireInput(!!w && w.format === 'transformer-story-workspace' && [1,2,3].includes(w.version), 'Unsupported story workspace file.');
   requireInput(w.checkpoint === checkpointKey(manifest), 'This workspace uses a different checkpoint.');
+  validateName(w.name);
   requireInput(Array.isArray(w.nodes) && w.nodes.length <= 500 && Array.isArray(w.route), 'Invalid or oversized workspace.');
   if (w.root) {
     requireInput(typeof w.root.prompt === 'string' && w.root.prompt.length <= 100000, 'Invalid saved prompt.');
@@ -29,6 +32,7 @@ export function parseWorkspace(value: unknown, manifest: ModelManifest): StoryWo
   } else requireInput(w.nodes.length === 0, 'Comparisons need a source story.');
   const seen = new Set<string>();
   for (const node of w.nodes) {
+    validateName(node.name);
     requireInput(w.version >= 2 || node.plan.additionalEdits === undefined, 'Two-head comparisons need workspace version 2 or later.');
     requireInput(typeof node.id === 'string' && node.id.length <= 100 && !seen.has(node.id), 'Invalid or duplicate comparison ID.');
     requireInput(node.parentId === null || seen.has(node.parentId), 'A comparison must follow its parent.');

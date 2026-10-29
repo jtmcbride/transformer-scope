@@ -6,7 +6,7 @@ import { emptyWorkspace, nodeRoute, parseWorkspace, type StoryWorkspace, type St
 import type { BpeDocument } from '../engine/bpe';
 import { StoryHeatmapComparison } from './StoryHeatmapComparison';
 interface PairScanRequest { nodeId: string; branch: 'original' | 'edited'; index: number; targetTokenId: number }
-interface Store { openPairScan: (request: PairScanRequest) => void; data: StoryWorkspace; saveRoot: (root: StoryRoot) => void; saveNode: (node: StoryNode) => void; navigate: (id: string) => void; focus: (id: string) => void; reset: (remount?: boolean) => void; heatmapBusy: boolean; setInspectorScanning: (value: boolean) => void }
+interface Store { analysis: { heads: boolean; pairs: boolean }; setAnalysisOpen: (kind: 'heads' | 'pairs', open: boolean) => void; openPairScan: (request: PairScanRequest) => void; data: StoryWorkspace; saveRoot: (root: StoryRoot) => void; saveNode: (node: StoryNode) => void; navigate: (id: string) => void; focus: (id: string) => void; reset: (remount?: boolean) => void; heatmapBusy: boolean; setInspectorScanning: (value: boolean) => void }
 const Context = createContext<Store | null>(null);
 export function useStoryWorkspace() { return useContext(Context); }
 export function StoryWorkspaceProvider({ manifest, tokenizer, inputKey, children }: { manifest: ModelManifest; tokenizer: BpeDocument; inputKey: string; children: (data: StoryWorkspace, navigation: number) => ReactNode }) {
@@ -15,10 +15,12 @@ export function StoryWorkspaceProvider({ manifest, tokenizer, inputKey, children
   const [data, setData] = useState(initial.data), [navigation, setNavigation] = useState(0), [error, setError] = useState(initial.error), [saved, setSaved] = useState(false);
   const [heatmapBusy,setHeatmapBusy] = useState(false), [inspectorScanning,setInspectorScanning] = useState(false);
   const [pairScan, setPairScan] = useState<PairScanRequest | null>(null);
+  const [analysis, setAnalysis] = useState({ heads: false, pairs: false });
+  const setAnalysisOpen = useCallback((kind: 'heads' | 'pairs', open: boolean) => setAnalysis(old => old[kind] === open ? old : { ...old, [kind]: open }), []);
   const scanNode = data.nodes.find(node => node.id === pairScan?.nodeId);
   const scanSelection = useMemo(() => pairScan && scanNode ? selectForkToken(scanNode.plan, scanNode.frame, pairScan.branch, pairScan.index) : null, [scanNode, pairScan]);
   const input = useRef(inputKey);
-  function reset(remount = true) { setPairScan(null); setData(emptyWorkspace(manifest)); try { localStorage.removeItem(storageKey); } catch { /* Export remains available. */ } if (remount) setNavigation(n => n + 1); }
+  function reset(remount = true) { setPairScan(null); setAnalysis({ heads: false, pairs: false }); setData(emptyWorkspace(manifest)); try { localStorage.removeItem(storageKey); } catch { /* Export remains available. */ } if (remount) setNavigation(n => n + 1); }
   useEffect(() => { if (input.current !== inputKey) { input.current = inputKey; reset(); } }, [inputKey]);
   const saveRoot = useCallback((root: StoryRoot) => setData(old => ({ ...old, root })), []);
   const saveNode = useCallback((node: StoryNode) => setData(old => ({ ...old, nodes: old.nodes.some(n => n.id === node.id) ? old.nodes.map(n => n.id === node.id ? node : n) : [...old.nodes, node], route: [...nodeRoute(old.nodes, node.parentId ?? ''), node.id] })), []);
@@ -45,7 +47,7 @@ export function StoryWorkspaceProvider({ manifest, tokenizer, inputKey, children
     try { if (file.size > 10 * 1024 * 1024) throw new Error('Workspace files must be smaller than 10 MB.'); const next = parseWorkspace(JSON.parse(await file.text()), manifest); setPairScan(null); setData(next); setError(''); setNavigation(n => n + 1); }
     catch (e) { setError(`Could not open this workspace: ${String(e)}`); }
   }
-  return <Context.Provider value={{ openPairScan: request => { navigate(request.nodeId); setPairScan(request); }, data, saveRoot, saveNode, navigate, focus, reset, heatmapBusy, setInspectorScanning }}>
+  return <Context.Provider value={{ analysis, setAnalysisOpen, openPairScan: request => { navigate(request.nodeId); setAnalysisOpen('pairs', true); setPairScan(request); }, data, saveRoot, saveNode, navigate, focus, reset, heatmapBusy, setInspectorScanning }}>
     {pairScan && scanNode && scanSelection ? <StoryTokenInspector key={`${pairScan.nodeId}:${pairScan.branch}:${pairScan.index}`} selection={scanSelection}
       manifest={manifest} tokenizer={tokenizer} initialTargetTokenId={pairScan.targetTokenId} parentId={scanNode.id} depth={nodeRoute(data.nodes, scanNode.id).length}
       startStep={scanNode.plan.source.step} count={scanNode.frame[pairScan.branch]!.choices.length}

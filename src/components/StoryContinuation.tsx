@@ -113,7 +113,7 @@ function StoryContinuationInner(props: Props & { restored: import('../story-work
   }
   return <section id="story-continuation" className="story-continuation" aria-label="Token by token story continuation">
     <div className="continuation-heading"><div><p className="eyebrow">Generate → select a token → try a change</p><h2>Watch the story grow.</h2></div><p>Step through one token, or play a short continuation. Each token feeds the next prediction.</p></div>
-    <div className="continuation-settings">
+    <div className="continuation-toolbar"><div className="continuation-settings">
       <label>Choose words<select aria-label="Continuation sampling" disabled={frozen || busy} value={settings.temperature === 0 ? 'greedy' : 'sample'} onChange={event => setSettings({ ...settings, temperature: event.target.value === 'greedy' ? 0 : .8 })}><option value="greedy">Most likely token</option><option value="sample">Seeded sampling</option></select></label>
       {settings.temperature > 0 && <><label>Temperature<input aria-label="Continuation temperature" type="number" min="0.05" max="2" step="0.05" disabled={frozen || busy} value={settings.temperature} onChange={event => setSettings({ ...settings, temperature: Number(event.target.value) })} /></label>
         <label>Top-p<input aria-label="Continuation top-p" type="number" min="0.01" max="1" step="0.01" disabled={frozen || busy} value={settings.topP} onChange={event => setSettings({ ...settings, topP: Number(event.target.value) })} /></label>
@@ -121,16 +121,17 @@ function StoryContinuationInner(props: Props & { restored: import('../story-work
       <label>New-token limit<input aria-label="New-token limit" type="number" min="1" max="64" step="1" disabled={frozen || busy} value={settings.maxTokens} onChange={event => setSettings({ ...settings, maxTokens: Number(event.target.value) })} /></label>
       <label className="continuation-compare"><input type="checkbox" checked={frozen ? !!frame.edited : compare && !!props.edit} disabled={frozen || busy || !props.edit} onChange={event => setCompare(event.target.checked)} />Compare with current head edit</label>
     </div>
-    {settings.temperature > 0 && <p className="hint">Temperature controls variety. Top-p keeps the most likely choices; the seed makes a run repeatable with the same settings.</p>}
+    <div className="continuation-settings-copy">{settings.temperature > 0 && <p className="hint">Temperature controls variety. Top-p keeps the most likely choices; the seed makes a run repeatable with the same settings.</p>}
     <p className="hint">{captured ? `Captured edit: ${editLabel(captured)}. Reset to capture another edit.` : compare && props.edit ? `Will compare: ${editLabel(props.edit)}.` : 'Original model. For a comparison, edit a head at all positions, then enable Compare.'} Both versions use the same sampling draw at each step and follow their own generated text.</p>
-    <div className="continuation-actions"><button type="button" onClick={() => void generate(false)} disabled={busy || props.disabled || finished}>Step one token</button><button type="button" className="primary" onClick={() => void generate(true)} disabled={busy || props.disabled || finished}>Play story</button><button type="button" onClick={stop} disabled={!busy}>Stop generation</button><button type="button" onClick={reset} disabled={!frame && !busy}>Reset story</button>{frame && <button type="button" onClick={download} disabled={busy}>Download continuation</button>}</div>
+    </div><div className="continuation-actions"><button type="button" onClick={() => void generate(false)} disabled={busy || props.disabled || finished}>Step one token</button><button type="button" className="primary" onClick={() => void generate(true)} disabled={busy || props.disabled || finished}>Play story</button><button type="button" onClick={stop} disabled={!busy}>Stop generation</button><button type="button" onClick={reset} disabled={!frame && !busy}>Reset story</button>{frame && <button type="button" onClick={download} disabled={busy}>Download continuation</button>}</div>
     <p className="continuation-status" role="status">{busy ? playing ? 'Generating · one token at a time…' : 'Computing the next token…' : finished ? 'Continuation complete.' : frame ? `Paused after ${frame.step} ${frame.step === 1 ? 'step' : 'steps'}. Step or play to continue.` : 'Ready to continue the completed prompt.'}</p>
+    </div>
     {props.draft && <p className="hint">Your prompt has unrun edits. Generation uses the last completed prompt shown below; Run input starts a new story.</p>}
     {error && <p role="alert" className="error">{error}</p>}
     <div className={`continuation-stories ${frame?.edited ? 'paired-stories' : ''}`}>{story(frame?.original ?? { tokenIds: props.tokens, choices: [] }, 'Original')}{frame?.edited && story(frame.edited, 'Edited')}</div>
     {!!frame?.original.choices.length && <p className="hint">Select a numbered token to pause generation and inspect the computation that produced it.</p>}
     {!selection && props.promptInspector && <details className="prompt-flow-inspector" open>
-      <summary>Inspect prompt computation <span>Current prompt · next prediction</span></summary>
+      <summary>Inspect prompt computation <span>Current prompt · selected prediction</span></summary>
       <p className="hint">Explore the completed prompt below, or select a generated token above to inspect the computation that produced it.</p>
       {props.promptInspector}
     </details>}

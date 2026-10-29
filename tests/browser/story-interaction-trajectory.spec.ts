@@ -1,3 +1,4 @@
+import { openStoryAnalysis } from '../support/story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import input from '../fixtures/story-trajectory-workspace.json' with {type:'json'};
@@ -66,6 +67,7 @@ test('partial traces exclude competing work, keep unmeasured tokens missing, and
   await page.route('**/model.worker-*.js',async route=>{const response=await route.fetch();await route.fulfill({response,body:`${await response.text()}\n{let n=0;const dispatch=self.onmessage;self.onmessage=e=>{if(e.data?.command==='BASELINE'){console.info('trajectory-prefix-'+(++n));setTimeout(()=>dispatch.call(self,e),600);}else dispatch.call(self,e);};}`});});
   const {shared,trace}=await open(page,workspace);
   await shared.getByRole('button',{name:'Open A comparison',exact:true}).click();await page.getByRole('button',{name:/^Inspect with head change token 8:/}).click();await expect(page.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced',{timeout:60000});
+  await openStoryAnalysis(page, ['pairs']);
   await trace.getByRole('button',{name:'Measure token-by-token interactions',exact:true}).click();
   for(const name of ['Step both comparisons','Play both comparisons'])await expect(shared.getByRole('button',{name,exact:true})).toBeDisabled();
   await expect(page.getByRole('button',{name:'Scan both tokens',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Scan head pairs',exact:true})).toBeDisabled();

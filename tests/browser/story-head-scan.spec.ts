@@ -1,3 +1,4 @@
+import { openStoryAnalysis } from '../support/story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import reference from '../fixtures/story-head-scan-reference.json' with { type: 'json' };
@@ -14,6 +15,7 @@ async function ready(page: Page, edited=false) {
   await expect(page.locator('.continuation-status')).toHaveText('Continuation complete.',{timeout:60000});
   await page.getByRole('button',{name:edited ? /^Inspect edited token 7:/ : /^Inspect original token 6:/}).click();
   await expect(page.getByTestId('selected-token-result')).toBeVisible({timeout:60000});
+  await openStoryAnalysis(page);
 }
 test('scan ranks all changes, fills the chosen draft and preview, and branches with the measured edit', async ({page},info)=>{
   test.setTimeout(180000); await ready(page);

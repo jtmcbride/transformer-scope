@@ -1,3 +1,4 @@
+import { openStoryAnalysis } from '../support/story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import reference from '../fixtures/story-head-pair-scan-reference.json' with { type: 'json' };
@@ -11,6 +12,7 @@ async function ready(page: Page, edited = false) {
   await expect(page.locator('.continuation-status')).toHaveText('Continuation complete.', { timeout: 60000 });
   await page.getByRole('button', { name: edited ? /^Inspect edited token 7:/ : /^Inspect original token 6:/ }).click();
   await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
+  await openStoryAnalysis(page);
 }
 const pairName = (edits: { layer: number; head: number; factor: number }[]) => `Use pair layer ${edits[0].layer+1} head ${edits[0].head+1} strength ${edits[0].factor} and layer ${edits[1].layer+1} head ${edits[1].head+1} strength ${edits[1].factor}`;
 const pairKey = (edit: { layer: number; head: number; factor: number }) => `${edit.layer}:${edit.head}:${edit.factor}`;
@@ -109,10 +111,10 @@ test('partial mixed pair results retain inherited edits, exclude competing scans
   const scan = page.getByRole('region', { name: 'Scan head pairs at selected token', exact: true });
   await scan.getByLabel('Pair scan strengths').selectOption('opposite');
   const map = scan.getByRole('region', { name: 'Head-pair interaction heatmap', exact: true });
-  await expect(map.getByLabel('Heatmap strength assignment')).toHaveValue('0:2');
-  await expect(map.locator('.pair-map-cell')).toHaveCount(0);
+  await expect(map).toHaveCount(0);
   const first = page.waitForEvent('console', message => message.text() === 'pair-compare');
   await scan.getByRole('button', { name: 'Scan head pairs', exact: true }).click(); await first;
+  await expect(map.getByLabel('Heatmap strength assignment')).toHaveValue('0:2');
   await scan.getByRole('button', { name: 'Stop pair scan', exact: true }).click();
   await expect(scan.getByTestId('pair-scan-status')).toHaveText('Pair scan stopped. Results below are partial. 0 / 240 combinations measured.');
   await expect(map.locator('.pair-map-cell')).toHaveCount(0);
@@ -152,12 +154,12 @@ test('partial mixed pair results retain inherited edits, exclude competing scans
   await expect(page.getByRole('button', { name: 'Start new branch comparison', exact: true })).toBeEnabled();
   await expect(scan.getByTestId('pair-scan-status')).toHaveText('Ready to scan. 0 / 120 combinations measured.');
   await scan.getByLabel('Pair scan strengths').selectOption('all');
-  await expect(map.getByLabel('Heatmap strength assignment').locator('option')).toHaveCount(9);
-  await expect(map.locator('.pair-map-cell')).toHaveCount(0);
-  await map.getByLabel('Heatmap strength assignment').selectOption('2:1');
+  await expect(map).toHaveCount(0);
   await scan.getByRole('button', { name: 'Scan head pairs', exact: true }).click();
   await expect(list.locator('li').nth(1)).toBeVisible({ timeout: 60000 });
   await scan.getByRole('button', { name: 'Stop pair scan', exact: true }).click();
+  await expect(map.getByLabel('Heatmap strength assignment').locator('option')).toHaveCount(9);
+  await map.getByLabel('Heatmap strength assignment').selectOption('2:1');
   await map.getByLabel('Heatmap strength assignment').selectOption('0:0');
   await map.locator('button[data-map-row="0"][data-map-column="1"]').click();
   await map.getByLabel('Heatmap strength assignment').selectOption('2:2');
@@ -170,7 +172,6 @@ test('partial mixed pair results retain inherited edits, exclude competing scans
   await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
   await expect(scan.getByTestId('pair-scan-status')).toHaveText('Ready to scan. 0 / 120 combinations measured.');
   await expect(page.getByRole('button', { name: 'Scan all heads', exact: true })).toBeEnabled();
-  await expect(map.locator('.pair-map-cell')).toHaveCount(0);
-  await expect(map.getByTestId('heatmap-outside-view')).toHaveCount(0);
+  await expect(map).toHaveCount(0);
   await expect(page.getByRole('alert')).toHaveCount(0);
 });

@@ -14,6 +14,7 @@ export function StoryHeadPairScan(props: StoryScanProps & { targetTokenId: numbe
   const [rows, setRows] = useState<HeadPairScanRow[]>([]), [all, setAll] = useState(false);
   const [selectedKey, setSelectedKey] = useState('');
   const [busy, setBusy] = useState(false), [status, setStatus] = useState('Ready to scan.'), [error, setError] = useState('');
+  const [started, setStarted] = useState(false);
   const worker = useRef<ModelClient | null>(null), epoch = useRef(0);
   const heading = useRef<HTMLHeadingElement>(null), focused = useRef(false);
   useEffect(() => { if (props.targeted && !props.disabled && !focused.current) { focused.current = true; heading.current?.focus({ preventScroll: true }); heading.current?.scrollIntoView({ block: 'start' }); } }, [props.targeted, props.disabled]);
@@ -21,9 +22,10 @@ export function StoryHeadPairScan(props: StoryScanProps & { targetTokenId: numbe
   const total = pairScanTotal(props.manifest.config, strengths);
   useEffect(() => () => { ++epoch.current; worker.current?.dispose(); }, []);
   function stop() { ++epoch.current; worker.current?.dispose(); worker.current = null; setBusy(false); props.onBusy(false); setStatus('Pair scan stopped. Results below are partial.'); }
+  useEffect(() => { if (props.active === false && worker.current) stop(); }, [props.active]);
   async function scan() {
     if (busy || props.disabled) return;
-    props.onStart(); setRows([]); setSelectedKey(''); setAll(false); setError(''); setBusy(true); props.onBusy(true); setStatus('Scanning pairs…');
+    props.onStart(); setStarted(true); setRows([]); setSelectedKey(''); setAll(false); setError(''); setBusy(true); props.onBusy(true); setStatus('Scanning pairs…');
     const generation = ++epoch.current, current = () => generation === epoch.current;
     const owner = new ModelClient(); worker.current = owner;
     try {
@@ -49,7 +51,7 @@ export function StoryHeadPairScan(props: StoryScanProps & { targetTokenId: numbe
     {busy && <progress value={rows.length} max={total} aria-label="Head pair scan progress" />}
     {error && <p role="alert" className="error">Could not finish the pair scan: {error}</p>}
     {!!rows.length && <p>Selected token: <strong>{tokenLabel(props.tokenizer, props.targetTokenId)}</strong> · Source probability {(rows[0].before*100).toFixed(4)}%.</p>}
-    <HeadPairHeatmap key={strengths} rows={rows} config={props.manifest.config} strengths={strengths} disabled={busy || props.disabled} selectedKey={selectedKey} onSelect={row => setSelectedKey(headPairKey(row.edits))} onChoose={choose} />
+    {started && <HeadPairHeatmap key={strengths} rows={rows} config={props.manifest.config} strengths={strengths} disabled={busy || props.disabled} selectedKey={selectedKey} onSelect={row => setSelectedKey(headPairKey(row.edits))} onChoose={choose} />}
     {!!rows.length && <><h4>Ranked pairs</h4>
       <ol className="head-scan-results" aria-label="Ranked head pair changes">{visible.map(row => <li key={`${key(row.edits[0])}|${key(row.edits[1])}`} data-pair-first={key(row.edits[0])} data-pair-second={key(row.edits[1])} className={headPairKey(row.edits) === selectedKey ? 'pair-scan-selected' : ''}>
         <div><strong>{name(row.edits[0])} + {name(row.edits[1])}</strong><p>Both together: <span data-testid="pair-scan-after">{(row.after*100).toFixed(4)}%</span> · <b data-testid="pair-scan-delta">{points(row.delta)}</b> · rank {row.rank}</p>
@@ -58,6 +60,6 @@ export function StoryHeadPairScan(props: StoryScanProps & { targetTokenId: numbe
         <button type="button" disabled={busy || props.disabled} onClick={() => choose(row)} aria-label={`Use pair layer ${row.edits[0].layer+1} head ${row.edits[0].head+1} strength ${row.edits[0].factor} and layer ${row.edits[1].layer+1} head ${row.edits[1].head+1} strength ${row.edits[1].factor}`}>Use this pair</button>
       </li>)}</ol>
       {rows.length > 8 && <div className="continuation-actions"><button type="button" disabled={busy} onClick={() => setAll(!all)}>{all ? 'Show strongest eight pairs' : `Show all ${rows.length} pairs`}</button></div>}
-      <p className="hint">Raw model probability changes before sampling, relative to the captured source. Interaction measures non-additivity for this token and input, including the probability read-out. It does not establish a general head role. Rankings cover only the chosen strengths and completed trials; partial results cannot establish the strongest unmeasured pair. Use a pair to preview its individual and combined effects below, choose duration and token limit, then Compare from this token.</p></>}
+      <p className="hint">Raw model probability changes before sampling, relative to the captured source. Interaction measures non-additivity for this token and input, including the probability read-out. It does not establish a general head role. Rankings cover only the chosen strengths and completed trials; partial results cannot establish the strongest unmeasured pair. Use a pair to preview its individual and combined effects in the branch controls above, choose duration and token limit, then Compare from this token.</p></>}
   </section>;
 }

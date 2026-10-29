@@ -8,8 +8,7 @@ import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
 import { useStoryWorkspace } from './StoryWorkspace';
 import type { ModelClient as AnalysisClient } from '../workers/client';
-import { StoryHeadScan } from './StoryHeadScan';
-import { StoryHeadPairScan } from './StoryHeadPairScan';
+import { StoryAnalysis } from './StoryAnalysis';
 import type { HeadScaleIntervention } from '../engine/contracts';
 import { BranchProbabilities } from './BranchProbabilities';
 import { StoryTokenInspector } from './StoryTokenInspector';
@@ -124,10 +123,8 @@ export function StoryFork(props: Props) {
     setPreview({ source: props.source, edit, ...(edits.length === 2 ? { additionalEdits: edits.slice(1) } : {}), duration, maxTokens: limit });
   }
   return <section ref={panel} className="story-fork" aria-label="Branch from selected token">
-    <StoryHeadPairScan key={targetTokenId} targetTokenId={targetTokenId} targeted={props.initialTargetTokenId !== undefined || targetTokenId !== props.source.choice.tokenId} onTargetChange={id => { setTargetTokenId(id); setPreview(null); setPair(null); }} source={props.source} manifest={props.manifest} tokenizer={props.tokenizer} disabled={busy || props.disabled || scanning} onStart={() => { stop(); props.onStart(); }} onChoose={chooseScan} onBusy={value => {setScanning(value);workspace?.setInspectorScanning(value);}} />
-    <StoryHeadScan source={props.source} manifest={props.manifest} tokenizer={props.tokenizer} disabled={busy || props.disabled || scanning} onStart={() => { stop(); props.onStart(); }} onChoose={edits => { setTargetTokenId(props.source.choice.tokenId); chooseScan(edits); }} onBusy={value => {setScanning(value);workspace?.setInspectorScanning(value);}} />
     <p className="eyebrow">What if this head worked differently?</p><h3 ref={draftHeading} tabIndex={-1}>Continue two stories from step {props.source.step}.</h3>
-    <p>Both paths start with the same text above and regenerate the selected token. Your existing story stays intact. Choose a head in the flow or compare two heads from the scan above.</p>
+    <p>Both paths start with the same text above and regenerate the selected token. Choose a head in the flow, or open a scan below to find a change.</p>
     {pair ? <div className="head-pair-draft" aria-label="Two-head draft"><strong>{forkEditLabel({ source: props.source, edit: pair[0], additionalEdits: pair.slice(1), duration, maxTokens: limit })}</strong><p>Both changes apply together, with the same duration.</p><button type="button" disabled={busy} onClick={() => { setPair(null); setPreview(null); }}>Use one head instead</button></div> : <div className="fork-head-heading"><strong>Layer {props.head.layer + 1} · Head {props.head.head + 1}</strong><span>Draft change for a new comparison</span></div>}
     <div className="continuation-settings">
       {!pair && <><div className="fork-presets">{[{ value: 0, label: 'Mute' }, { value: 1, label: 'Normal' }, { value: 2, label: 'Amplify' }].map(preset => <button key={preset.value} type="button" disabled={busy} aria-label={`${preset.label} branch head`} aria-pressed={factor === preset.value} onClick={() => setFactor(preset.value)}>{preset.label}</button>)}</div>
@@ -135,12 +132,19 @@ export function StoryFork(props: Props) {
       <label>Apply edit<select aria-label="Branch edit duration" value={duration} disabled={busy} onChange={event => setDuration(event.target.value as ForkDuration)}><option value="continuation">From this token onward</option><option value="prediction">Only this prediction</option></select></label>
       <label>New tokens<input aria-label="Branch new-token limit" type="number" min="1" max={props.manifest.config.contextLength - props.source.prefix.length} value={limit} disabled={busy} onChange={event => setLimit(Number(event.target.value))} /></label>
     </div>
+
     <p className="hint">Scales {pair ? 'both heads' : 'this head'} at all input positions {duration === 'prediction' ? 'for the selected prediction, then restores the source settings.' : 'for each prediction from here onward.'} Both paths keep the recorded sampling settings and step-by-step draws.{selectionEdits(props.source).length > 0 && ' The reference keeps the captured edits and their expiry. Your change replaces the same head or adds another head.'}</p>
     <div className="continuation-actions"><button type="button" className="primary" disabled={busy || scanning || props.disabled} onClick={() => void run(true, true)}>{plan ? 'Start new branch comparison' : 'Compare from this token'}</button>
       {plan && <><button type="button" disabled={busy || scanning || finished || props.disabled || linked} onClick={() => void run(false)}>Step comparison</button><button type="button" disabled={busy || scanning || finished || props.disabled || linked} onClick={() => void run(true)}>Play comparison</button><button type="button" disabled={!busy} onClick={stop}>Stop comparison</button><button type="button" onClick={clear}>Clear comparison</button><button type="button" disabled={busy} onClick={download}>Download branch comparison</button></>}
     </div>
-    {linked && !finished && <p className="hint">These paths belong to a shared story comparison. Resume both together in Compare interaction maps across story tokens above.</p>}
     {preview && (pair || preview.edit.layer === props.head.layer && preview.edit.head === props.head.head && preview.edit.factor === factor) && <BranchProbabilities targetTokenId={targetTokenId} plan={preview} tokenizer={props.tokenizer} client={props.analysisClient} label="Scanned head probability preview" />}
+    <StoryAnalysis targetTokenId={targetTokenId} targeted={props.initialTargetTokenId !== undefined || targetTokenId !== props.source.choice.tokenId}
+      onTargetChange={id => { setTargetTokenId(id); setPreview(null); setPair(null); }} source={props.source} manifest={props.manifest} tokenizer={props.tokenizer}
+      disabled={busy || props.disabled || scanning} onStart={() => { stop(); props.onStart(); }}
+      onChoose={edits => { if (edits.length === 1) setTargetTokenId(props.source.choice.tokenId); chooseScan(edits); }}
+      onBusy={value => { setScanning(value); workspace?.setInspectorScanning(value); }} />
+    {linked && !finished && <p className="hint">These paths belong to a shared story comparison. Resume both together in Compare interaction maps across story tokens above.</p>}
+
     {error && <p role="alert" className="error">{error}</p>}
     {plan && frame && <>
       <p className="hint" data-testid="fork-captured-edit">Comparing {forkEditLabel(plan)} · {plan.duration === 'prediction' ? 'selected prediction only' : 'every prediction from this point'}. Source: {plan.source.branch} story, step {plan.source.step}.</p>

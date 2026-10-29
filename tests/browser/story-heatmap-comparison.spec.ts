@@ -1,3 +1,4 @@
+import { openStoryAnalysis } from '../support/story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import reference from '../fixtures/story-heatmap-comparison-reference.json' with { type:'json' };
@@ -14,6 +15,7 @@ async function ready(page:Page) {
   await page.getByLabel('New-token limit').fill('8');await page.getByRole('button',{name:'Play story',exact:true}).click();
   await expect(page.locator('.continuation-status')).toHaveText('Continuation complete.',{timeout:60000});
   await page.getByRole('button',{name:/^Inspect original token 6:/}).click();await expect(page.getByTestId('selected-token-result')).toBeVisible({timeout:60000});
+  await openStoryAnalysis(page);
   await page.getByLabel('Branch new-token limit').fill('6');await page.getByRole('button',{name:'Compare from this token',exact:true}).click();
   await expect(page.locator('.fork-status')).toHaveText('Branch comparison complete.',{timeout:60000});
   await expect(page.getByRole('region',{name:'Head change probabilities',exact:true}).getByTestId('probability-after').first()).toBeVisible({timeout:60000});
@@ -155,6 +157,7 @@ test('shared branching keeps atomic steps on worker failure, stop, close, reload
   record=await download(page,'Download shared comparison');record.nodes.forEach((n:any,i:number)=>assertSharedFrame(n.frame,sharedReference.cases[0].frames[i]));
   const workspace=await download(page,'Download workspace');expect(workspace.nodes).toHaveLength(3);expect(workspace.sharedForks).toEqual([record.group]);
   await panel.getByRole('button',{name:'Scan both tokens',exact:true}).click();await shared.getByRole('button',{name:'Open A comparison',exact:true}).click();
+  await openStoryAnalysis(page, ['pairs']);
   await expect(page.getByRole('button',{name:'Scan head pairs',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Start new branch comparison',exact:true})).toBeDisabled();
   await panel.getByRole('button',{name:'Stop map comparison',exact:true}).click();await expect(page.getByRole('button',{name:'Scan head pairs',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'Reset story',exact:true}).click();await expect(panel).toHaveCount(0);await expect(page.getByRole('alert')).toHaveCount(0);

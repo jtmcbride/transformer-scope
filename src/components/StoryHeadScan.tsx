@@ -6,7 +6,7 @@ import { tokenLabel } from '../engine/tokenizer';
 import { scanStoryHeads, rankHeadScan, type HeadScanRow, type ScanOrder } from '../story-head-scan';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
-export interface StoryScanProps { source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onStart: () => void; onChoose: (edits: HeadScaleIntervention[]) => void; onBusy: (busy: boolean) => void }
+export interface StoryScanProps { active?: boolean; source: StorySelection; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onStart: () => void; onChoose: (edits: HeadScaleIntervention[]) => void; onBusy: (busy: boolean) => void }
 export function StoryHeadScan(props: StoryScanProps) {
   const [rows, setRows] = useState<HeadScanRow[]>([]), [busy, setBusy] = useState(false), [status, setStatus] = useState('Ready to scan.'), [error, setError] = useState('');
   const [order, setOrder] = useState<ScanOrder>('absolute'), [all, setAll] = useState(false);
@@ -20,6 +20,7 @@ export function StoryHeadScan(props: StoryScanProps) {
   const total = props.manifest.config.layers * props.manifest.config.heads * 3;
   useEffect(() => () => { ++epoch.current; worker.current?.dispose(); }, []);
   function stop() { ++epoch.current; worker.current?.dispose(); worker.current = null; setBusy(false); props.onBusy(false); setStatus('Scan stopped. Results below are partial.'); }
+  useEffect(() => { if (props.active === false && worker.current) stop(); }, [props.active]);
   async function scan() {
     if (busy || props.disabled) return;
     props.onStart(); setRows([]); setSelected([]); setAll(false); setError(''); setBusy(true); props.onBusy(true); setStatus('Scanning…');
@@ -54,6 +55,6 @@ export function StoryHeadScan(props: StoryScanProps) {
         <button type="button" disabled={busy || props.disabled} onClick={() => props.onChoose([row.edit])} aria-label={`Use layer ${row.edit.layer+1} head ${row.edit.head+1} strength ${row.edit.factor}`}>Use this change</button>
       </li>)}</ol>
       {rows.length > 8 && <button type="button" onClick={() => setAll(!all)}>{all ? 'Show strongest eight' : `Show all ${rows.length} results`}</button>}
-      <p className="hint">Raw model probability changes before sampling. These are individual trials relative to the source; head effects can interact and need not add up. Partial results cannot establish the strongest change among unmeasured heads. Normal may restore a previously changed head. Use one result or compare two selected heads to fill the draft below; choose its duration and token limit, then Compare from this token.</p></>}
+      <p className="hint">Raw model probability changes before sampling. These are individual trials relative to the source; head effects can interact and need not add up. Partial results cannot establish the strongest change among unmeasured heads. Normal may restore a previously changed head. Use one result or compare two selected heads to fill the branch controls above; choose duration and token limit, then Compare from this token.</p></>}
   </section>;
 }

@@ -566,6 +566,7 @@ export default function App() {
         promptInspector={promptFlow}
         edit={display.comparison.interventions[0]?.kind === 'head.scale' && display.comparison.interventions[0].tokens.kind === 'all' && display.comparison.interventions[0].factor !== 1 ? display.comparison.interventions[0] : undefined} />
     </div>}
+    {choice === 'tinystories' && view === 'details' && <p className="prompt-workbench-context"><strong>Prompt computation</strong> · These controls use the completed prompt. Return to Visual flow to inspect generated story tokens.</p>}
     <div className="workspace flow-workspace" hidden={choice === 'tinystories' && view === 'visual'}>
       <div className="exploration">
         <section className="graph-pane" aria-label="Computation workspace" hidden={view === 'visual'}>

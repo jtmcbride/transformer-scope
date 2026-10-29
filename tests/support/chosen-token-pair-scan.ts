@@ -1,3 +1,4 @@
+import { openStoryAnalysis } from './story-analysis';
 import { readFile } from 'node:fs/promises';
 import { expect, type Page, type TestInfo } from '@playwright/test';
 import input from '../fixtures/story-trajectory-workspace.json' with { type: 'json' };
@@ -23,6 +24,7 @@ export async function openChosenScan(page: Page, side = 0) {
   await trace.getByRole('button',{name:`Scan head pairs for ${side ? 'B' : 'A'}’s chosen token`,exact:true}).click();
   await expect(page.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced',{timeout:60000});
   expect(parseFloat(await page.getByTestId('selected-token-probability').innerText())/100).toBeCloseTo(example.source.choice.probability,5);
+  await openStoryAnalysis(page);
   const scan = page.getByRole('region',{name:'Scan head pairs at selected token',exact:true});
   if (side) await scan.getByLabel('Pair scan target token').selectOption(String(example.targetTokenId));
   await expect(scan.getByLabel('Pair scan target token')).toHaveValue(String(example.targetTokenId));

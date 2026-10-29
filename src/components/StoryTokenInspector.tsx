@@ -4,7 +4,7 @@ import type { ModelManifest } from '../engine/contracts';
 import type { ComparisonResult } from '../engine/runs';
 import { tokenLabel } from '../engine/tokenizer';
 import { chooseToken, drawAt, selectionEdits, type StorySelection } from '../continuation';
-import type { FlowNode } from '../flow';
+import { stageNames, type FlowNode } from '../flow';
 import { ModelClient } from '../workers/client';
 import { VisualFlow } from './VisualFlow';
 import { NodeInspector } from './NodeInspector';
@@ -26,6 +26,7 @@ export function StoryTokenInspector({ selection, manifest, tokenizer, count, onC
   const initialHead = edits.at(-1);
   const [node, setNode] = useState<FlowNode>({ kind: 'readout' });
   const [retry, setRetry] = useState(0);
+  const [stageOpen, setStageOpen] = useState(false);
   const [result, setResult] = useState<{ client: ModelClient; comparison: ComparisonResult } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attention, setAttention] = useState<{ key: string; values: number[]; error?: string } | null>(null);
@@ -91,7 +92,7 @@ export function StoryTokenInspector({ selection, manifest, tokenizer, count, onC
     <div className="story-inspection-context" aria-label="Active story inspection">
       <span><small>Story</small><strong>{branch}{depth > 0 ? ` · branch depth ${depth}` : ''}</strong></span>
       <span><small>Selected output</small><strong>Step {selection.step} · {label}</strong></span>
-      <span><small>Inspecting</small><strong>{node.kind === 'head' ? `Layer ${layer + 1} · Head ${head + 1}` : node.kind === 'stage' ? `Layer ${layer + 1} · ${node.stage}` : node.kind === 'embedding' ? 'Input embedding' : 'Prediction'}</strong></span>
+      <span><small>Inspecting</small><strong>{node.kind === 'head' ? `Layer ${layer + 1} · Head ${head + 1}` : node.kind === 'stage' ? `Layer ${layer + 1} · ${stageNames[node.stage]}` : node.kind === 'embedding' ? 'Input embedding' : 'Prediction'}</strong></span>
       <span><small>Captured changes</small><strong>{edits.length ? edits.map(edit => `L${edit.layer + 1}/H${edit.head + 1} ${edit.factor.toFixed(2)}×`).join(' + ') : 'Original model'}</strong></span>
     </div>
     <details className="token-context-details"><summary>Context and generation settings</summary>
@@ -104,17 +105,20 @@ export function StoryTokenInspector({ selection, manifest, tokenizer, count, onC
       <div className="selected-token-result" data-testid="selected-token-result"><span>Generated token <strong>{label}</strong></span><span>Model probability <strong data-testid="selected-token-probability">{(target!.probability * 100).toFixed(4)}%</strong></span><span>Recorded choice reproduced</span></div>
       <VisualFlow config={manifest.config} tokens={selection.prefix.map(id => tokenLabel(tokenizer, id))} selected={node} comparison={result.comparison}
         attention={weights?.values ?? []} layer={layer} head={head} position={position} pending={false} ended={false} disabled={false}
-        onSelect={setNode} history={{ edited: edits.length > 0 }} />
+        onSelect={next => { setNode(next); setStageOpen(true); }} history={{ edited: edits.length > 0 }} />
     </>}
     </>}
-    <StoryFork initialTargetTokenId={initialTargetTokenId} source={selection} manifest={manifest} tokenizer={tokenizer} head={{ layer, head }} disabled={!result || childActive} onStart={onForkStart} onInspectChange={setChildActive} depth={depth} parentId={parentId} analysisClient={result?.client} onChooseHead={head => setNode({ kind: 'head', ...head })} />
+
     {!childActive && result && <>
       {weights?.error && <p role="alert" className="error">Could not read attention: {weights.error}</p>}
-      <div className="historical-node"><p className="eyebrow">Inside the selected stage</p>
+      <details className="historical-node" open={stageOpen} onToggle={event => setStageOpen(event.currentTarget.open)}><summary>Inspect stage values</summary>
+        {stageOpen && <>
         <p className="hint">Measured at the final input position, {position}. {edits.length ? 'Baseline = without edits on this same context. Modified = with the captured edits.' : 'Both columns describe the original model.'}</p>
         <NodeInspector node={node} client={result.client} baselineRunId={result.comparison.baselineRunId} modifiedRunId={result.comparison.modifiedRunId}
           position={position} symbol={tokenLabel(tokenizer, selection.prefix[position])} allowVector />
-      </div>
+        </>}
+      </details>
     </>}
+    <StoryFork initialTargetTokenId={initialTargetTokenId} source={selection} manifest={manifest} tokenizer={tokenizer} head={{ layer, head }} disabled={!result || childActive} onStart={onForkStart} onInspectChange={setChildActive} depth={depth} parentId={parentId} analysisClient={result?.client} onChooseHead={head => setNode({ kind: 'head', ...head })} />
   </section>;
 }

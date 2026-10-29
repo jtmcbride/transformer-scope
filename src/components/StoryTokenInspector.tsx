@@ -19,6 +19,7 @@ interface Props {
 export function StoryTokenInspector({ selection, manifest, tokenizer, count, onClose, onNavigate, onForkStart, startStep = 1, depth = 0, parentId, initialTargetTokenId }: Props) {
   const workspace = useStoryWorkspace();
   const currentNode = workspace?.data.nodes.find(n => n.id === workspace.data.route[depth]);
+  const comparisonName = workspace?.data.nodes.find(n => n.id === parentId)?.name;
   const initialChild = JSON.stringify(currentNode?.plan.source) === JSON.stringify(selection) && workspace?.data.route[depth + 1];
   const heading = useRef<HTMLHeadingElement>(null);
   const [childActive, setChildActive] = useState(!!initialChild);
@@ -90,7 +91,7 @@ export function StoryTokenInspector({ selection, manifest, tokenizer, count, onC
       </div>
     </div>
     <div className="story-inspection-context" aria-label="Active story inspection">
-      <span><small>Story</small><strong>{branch}{depth > 0 ? ` · branch depth ${depth}` : ''}</strong></span>
+      <span><small>Story</small><strong>{comparisonName ? `${comparisonName} · ` : ''}{branch}{depth > 0 ? ` · branch depth ${depth}` : ''}</strong></span>
       <span><small>Selected output</small><strong>Step {selection.step} · {label}</strong></span>
       <span><small>Inspecting</small><strong>{node.kind === 'head' ? `Layer ${layer + 1} · Head ${head + 1}` : node.kind === 'stage' ? `Layer ${layer + 1} · ${stageNames[node.stage]}` : node.kind === 'embedding' ? 'Input embedding' : 'Prediction'}</strong></span>
       <span><small>Captured changes</small><strong>{edits.length ? edits.map(edit => `L${edit.layer + 1}/H${edit.head + 1} ${edit.factor.toFixed(2)}×`).join(' + ') : 'Original model'}</strong></span>

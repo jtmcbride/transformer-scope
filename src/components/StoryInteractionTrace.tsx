@@ -4,7 +4,7 @@ import type { ModelManifest } from '../engine/contracts';
 import { tokenLabel } from '../engine/tokenizer';
 import { forkEditLabel, selectForkToken } from '../story-fork';
 import { interactionTrend, traceStoryInteractions, type InteractionTracks, type InteractionTarget } from '../story-interaction-trajectory';
-import { checkpointKey, type SharedStoryGroup, type StoryNode } from '../story-workspace';
+import { checkpointKey, storyAnalysisKey, type SharedStoryGroup, type StoryNode } from '../story-workspace';
 import { interactionFill } from '../head-pair-heatmap';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, withStoryPrefix } from '../workers/story-runtime';
@@ -24,7 +24,7 @@ export function StoryInteractionTrace({group,nodes,manifest,tokenizer,disabled,o
   const [metric,setMetric]=useState<'interaction'|'probability'|'effect'>(group.targetTokenId===undefined?'interaction':'effect');
   const [differenceOrder,setDifferenceOrder]=useState<PositionDifferenceOrder>('absolute');
   const target:InteractionTarget=mode==='fixed'?{kind:'fixed',tokenId:chosenToken}:{kind:'generated'};
-  const key=JSON.stringify([checkpointKey(manifest),group,nodes,branch,target]);
+  const key=storyAnalysisKey([checkpointKey(manifest),group,nodes,branch,target]);
   const captured=useMemo(()=>structuredClone({group,nodes,branch,target}),[key]);
   const owner=useRef<ModelClient|null>(null),epoch=useRef(0),chart=useRef<HTMLDivElement>(null);
   const current=!disabled&&trace?.key===key?trace:null,rows=current?.rows??EMPTY,busy=!!current?.busy;

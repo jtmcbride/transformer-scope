@@ -4,7 +4,7 @@ import type { HeadScaleIntervention, ModelManifest } from '../engine/contracts';
 import type { StorySelection } from '../continuation';
 import { firstForkDifference, forkEditLabel, type ForkDuration, type ForkPlan } from '../story-fork';
 import { SharedStoryFork } from '../story-shared-fork';
-import { checkpointKey, type SharedStoryGroup, type StoryNode, type StoryWorkspace } from '../story-workspace';
+import { checkpointKey, storyAnalysisKey, type SharedStoryGroup, type StoryNode, type StoryWorkspace } from '../story-workspace';
 import { tokenLabel } from '../engine/tokenizer';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
@@ -18,7 +18,7 @@ export interface SharedBranchDraft { origin?: TrajectoryBranchDraft['origin']; t
 interface Props { workspace: StoryWorkspace; draft?: SharedBranchDraft; manifest: ModelManifest; tokenizer: BpeDocument; disabled: boolean; onBusy: (value:boolean)=>void; onSave: (group:SharedStoryGroup,nodes:[StoryNode,StoryNode])=>void; onOpenStory:(id:string)=>void }
 export function SharedStoryBranches({workspace,draft:mapDraft,manifest,tokenizer,disabled,onBusy,onSave,onOpenStory}:Props) {
   const [traceDraft,setTraceDraft]=useState<{key:string;draft:TrajectoryBranchDraft}|null>(null),setup=useRef<HTMLDivElement>(null);
-  const draft:SharedBranchDraft|undefined=traceDraft?.draft??mapDraft,mapDraftKey=JSON.stringify(mapDraft);
+  const draft:SharedBranchDraft|undefined=traceDraft?.draft??mapDraft,mapDraftKey=storyAnalysisKey(mapDraft);
   useEffect(()=>setTraceDraft(null),[mapDraftKey]);
   const clearTraceDraft=useCallback((key:string)=>setTraceDraft(old=>old?.key===key?null:old),[]);
   const setupTraceDraft=useCallback((key:string,draft:TrajectoryBranchDraft)=>{setTraceDraft({key,draft});requestAnimationFrame(()=>{setup.current?.scrollIntoView({block:'start'});setup.current?.querySelector<HTMLElement>('select')?.focus({preventScroll:true});});},[]);
@@ -94,14 +94,14 @@ export function SharedStoryBranches({workspace,draft:mapDraft,manifest,tokenizer
         <button type="button" className="primary" disabled={working||disabled||max<1} onClick={()=>void run(true,true)}>Branch both stories with this pair</button></div>
       <p className="hint">Regenerate each selected token and continue from there. Both sources receive exactly this pair and duration; each keeps its own other head settings, expiry, sampling settings, and global draws. Each reference keeps its source settings. New results are saved without changing either source story.</p>
     </div>:<p>Select a pair measured in both heatmaps to create a shared continuation. Saved shared comparisons remain available below.</p>}
-    {groups.length>0&&<label>Saved comparison<select aria-label="Saved shared continuation" value={group!.id} disabled={working} onChange={event=>{setSelected(event.target.value);setError('');}}>{groups.map((item,i)=><option key={item.id} value={item.id}>Shared comparison {i+1} · {item.labels[0]} / {item.labels[1]}</option>)}</select></label>}
+    {groups.length>0&&<label>Saved comparison<select aria-label="Saved shared continuation" value={group!.id} disabled={working} onChange={event=>{setSelected(event.target.value);setError('');}}>{groups.map((item,i)=><option key={item.id} value={item.id}>Shared comparison {i+1} · {workspace.nodes.find(node=>node.id===item.nodeIds[0])?.name??item.labels[0]} / {workspace.nodes.find(node=>node.id===item.nodeIds[1])?.name??item.labels[1]}</option>)}</select></label>}
     {group&&nodes&&<>
       <p className="shared-captured-settings">Saved changes: {forkEditLabel(nodes[0].plan)} · {nodes[0].plan.duration==='prediction'?'each selected prediction only':'from each selected token onward'} · up to {nodes[0].plan.maxTokens} new tokens per path.</p>
       <div className="continuation-actions"><button type="button" disabled={working||disabled||finished} onClick={()=>void run(false)}>Step both comparisons</button><button type="button" disabled={working||disabled||finished} onClick={()=>void run(true)}>Play both comparisons</button><button type="button" disabled={!busy} onClick={stop}>Stop shared continuations</button><button type="button" disabled={working} onClick={download}>Download shared comparison</button></div>
       <p role="status" data-testid="shared-continuation-status">{busy?'Generating four paths · one token at a time…':finished?'Shared continuations complete.':`Shared continuations paused after ${step} ${step===1?'step':'steps'}.`}</p>
       <div className="shared-story-results">{nodes.map((node,side)=>{
         const common=encoder.preview(node.plan.source.prefix),different=firstForkDifference(node.frame),letter=side===0?'A':'B';
-        return <article key={node.id} aria-label={`Story ${letter} continuation comparison`}><h4>Story {letter} · {group.labels[side]}</h4><p>From step {node.plan.source.step}, before {tokenLabel(tokenizer,node.plan.source.choice.tokenId)}.</p>
+        return <article key={node.id} aria-label={`Story ${letter} continuation comparison`}><h4>Story {letter} · {node.name??group.labels[side]}</h4>{node.name&&<p>Source: {group.labels[side]}</p>}<p>From step {node.plan.source.step}, before {tokenLabel(tokenizer,node.plan.source.choice.tokenId)}.</p>
           <button type="button" onClick={()=>{stop();onOpenStory(node.id);}}>Open {letter} comparison</button>
           <p className="hint">{different===null?'The paths match so far.':`First change at story step ${node.plan.source.step+different}.`}</p>
           {(['original','edited'] as const).map(branch=>{const story=node.frame[branch]!,peer=node.frame[branch==='original'?'edited':'original']!;

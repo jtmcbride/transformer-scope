@@ -177,6 +177,6 @@ for (const [index, duration] of ['continuation', 'prediction'].entries()) test(`
   expect(workspace.version).toBe(3); expect(workspace.nodes[0].plan).toEqual(saved.plan); expect(workspace.nodes[0].frame).toEqual(saved.frame);
   await page.getByLabel('Open story workspace').setInputFiles({ name: 'pair-workspace.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(workspace)) });
   await expect(page.getByTestId('selected-token-result')).toBeVisible({ timeout: 60000 });
-  expect(await page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button').count()).toBe(3);
+  expect(await page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button', { name: /^(Source story$|Comparison \d+:)/ }).count()).toBe(3);
   await expect(page.getByRole('alert')).toHaveCount(0);
 });

@@ -41,5 +41,8 @@ export async function parentPositionBranchWorkflow(page:Page,info?:TestInfo){
   });
   const saved=await downloadStory(page,'Download workspace');expect(saved.root).toEqual(before.root);expect(saved.nodes.slice(0,before.nodes.length)).toEqual(before.nodes);expect(saved.nodes).toHaveLength(before.nodes.length+2);expect(saved.sharedForks).toHaveLength(before.sharedForks.length+1);
   await page.reload();await page.locator('.story-map-comparison > summary').click();expect((await downloadStory(page,'Download shared comparison')).nodes).toEqual(child.nodes);await expect(shared.getByLabel('Chosen next token')).toHaveValue('471');
-  await page.getByLabel('Open story workspace').setInputFiles({name:'ranked-parent-descendants.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(saved))});expect((await downloadStory(page,'Download shared comparison')).nodes).toEqual(child.nodes);await expect(page.getByRole('alert')).toHaveCount(0);
+  await page.getByLabel('Open story workspace').setInputFiles({name:'ranked-parent-descendants.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(saved))});
+  // Opening a separate workspace disposes the previous analysis and starts with it closed.
+  await expect(shared).toBeHidden();await page.locator('.story-map-comparison > summary').click();
+  expect((await downloadStory(page,'Download shared comparison')).nodes).toEqual(child.nodes);await expect(page.getByRole('alert')).toHaveCount(0);
 }

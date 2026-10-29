@@ -36,8 +36,14 @@ export function loadLibrary(raw: string | null, legacy: string | null, manifest:
     }
   } catch (e) {
     const recoveredId = makeId(), activeId = makeId();
+    const backup: WorkspaceEntry[] = [];
+    if (raw !== null && legacy !== null) {
+      try { backup.push({ id: makeId(), updatedAt: now, data: JSON.parse(legacy) }); }
+      catch { backup.push({ id: makeId(), updatedAt: now, data: legacy, recovered: true }); }
+    }
     return { library: { format: 'transformer-story-workspace-library', version: 1, activeId, entries: [
       { id: recoveredId, updatedAt: now, data: raw ?? legacy, recovered: true },
+      ...backup,
       { id: activeId, updatedAt: now, data: emptyWorkspace(manifest) },
     ] }, error: `Could not reopen the saved data. Its original contents are kept in Saved workspaces for download. ${String(e)}` };
   }
@@ -55,6 +61,7 @@ export function updateWorkspace(library: WorkspaceLibrary, update: (data: StoryW
 export function startWorkspace(library: WorkspaceLibrary, data: StoryWorkspace, entryId = id(), now = Date.now()): WorkspaceLibrary {
   // Empty drafts need no history entry; actual stories and recovered data are never evicted.
   const entries = library.entries.filter(entry => entry.id !== library.activeId || activeWorkspace(library).root !== null);
+  requireInput(entries.length < 1000, 'The library has reached 1,000 workspaces. Download and remove an older workspace before starting another.');
   return { ...library, activeId: entryId, entries: [...entries, { id: entryId, updatedAt: now, data }] };
 }
 export function openWorkspace(library: WorkspaceLibrary, entryId: string, manifest: ModelManifest): WorkspaceLibrary {

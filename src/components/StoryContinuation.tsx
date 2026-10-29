@@ -11,11 +11,12 @@ import { StoryTokenInspector } from './StoryTokenInspector';
 interface Props { promptInspector?: ReactNode; inputKey?: string; manifest: ModelManifest; tokenizer: BpeDocument; tokens: number[]; prompt: string; edit?: HeadScaleIntervention; disabled: boolean; draft: boolean }
 const defaults: Sampling = { temperature: 0, topP: .9, seed: 42, maxTokens: 24 };
 export function StoryContinuation(props: Props) {
-  return <StoryWorkspaceProvider manifest={props.manifest} tokenizer={props.tokenizer} inputKey={props.inputKey ?? JSON.stringify(props.tokens)}>{(data, navigation) => <StoryContinuationInner key={navigation} {...props} restored={data.root} />}</StoryWorkspaceProvider>;
+  return <StoryWorkspaceProvider manifest={props.manifest} tokenizer={props.tokenizer} inputKey={props.inputKey ?? JSON.stringify(props.tokens)}>{(data, navigation, workspaceTools) => <StoryContinuationInner key={navigation} {...props} restored={data.root} workspaceTools={workspaceTools} />}</StoryWorkspaceProvider>;
 }
-function StoryContinuationInner(props: Props & { restored: import('../story-workspace').StoryRoot | null }) {
+function StoryContinuationInner(props: Props & { restored: import('../story-workspace').StoryRoot | null; workspaceTools: ReactNode }) {
   const workspace = useStoryWorkspace()!;
   const [root] = useState(props.restored);
+  const savedPrompt = !!root && root.prompt !== props.prompt;
   // The saved story owns its exact prompt, independent of the main diagram's current input.
   props = root ? { ...props, tokens: root.tokens, prompt: root.prompt } : props;
   props = { ...props,disabled:props.disabled || workspace.heatmapBusy };
@@ -34,13 +35,13 @@ function StoryContinuationInner(props: Props & { restored: import('../story-work
   useEffect(() => { if (workspace.heatmapBusy) stop(); },[workspace.heatmapBusy]);
   const epoch = useRef(0), flight = useRef(false), autoplay = useRef(false);
   const encoder = useMemo(() => new BpeTokenizer(props.tokenizer), [props.tokenizer]);
-  useEffect(() => { if (frame && session.current) workspace.saveRoot({ prompt: props.prompt, tokens: props.tokens, settings: session.current.settings, edit: session.current.edit, frame }); }, [frame, workspace.saveRoot]);
+  useEffect(() => { if (frame && frame !== root?.frame && session.current) workspace.saveRoot({ prompt: props.prompt, tokens: props.tokens, settings: session.current.settings, edit: session.current.edit, frame }); }, [frame, workspace.saveRoot]);
   function stop() {
     ++epoch.current; autoplay.current = false; flight.current = false;
     worker.current?.dispose(); worker.current = null; setBusy(false); setPlaying(false);
   }
   useEffect(() => () => { ++epoch.current; autoplay.current = false; worker.current?.dispose(); }, []);
-  function reset() { stop(); session.current = null; setFrame(null); setSelection(null); setError(null); workspace.reset(false); }
+  function reset() { stop(); if (!workspace.reset(false)) return; session.current = null; setFrame(null); setSelection(null); setError(null); }
   function inspect(branch: StorySelection['branch'], index: number) {
     if (!frame || !session.current) return;
     stop();
@@ -112,7 +113,7 @@ function StoryContinuationInner(props: Props & { restored: import('../story-work
     const link = document.createElement('a'); link.href = url; link.download = 'story-continuation.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 0);
   }
   return <section id="story-continuation" className="story-continuation" aria-label="Token by token story continuation">
-    <div className="continuation-heading"><div><p className="eyebrow">Generate → select a token → try a change</p><h2>Watch the story grow.</h2></div><p>Step through one token, or play a short continuation. Each token feeds the next prediction.</p></div>
+    <div className="continuation-heading"><div><p className="eyebrow">Generate → select a token → try a change</p><h2>Watch the story grow.</h2></div><div className="continuation-workspace-tools">{props.workspaceTools}</div></div>
     <div className="continuation-toolbar"><div className="continuation-settings">
       <label>Choose words<select aria-label="Continuation sampling" disabled={frozen || busy} value={settings.temperature === 0 ? 'greedy' : 'sample'} onChange={event => setSettings({ ...settings, temperature: event.target.value === 'greedy' ? 0 : .8 })}><option value="greedy">Most likely token</option><option value="sample">Seeded sampling</option></select></label>
       {settings.temperature > 0 && <><label>Temperature<input aria-label="Continuation temperature" type="number" min="0.05" max="2" step="0.05" disabled={frozen || busy} value={settings.temperature} onChange={event => setSettings({ ...settings, temperature: Number(event.target.value) })} /></label>
@@ -127,6 +128,7 @@ function StoryContinuationInner(props: Props & { restored: import('../story-work
     <p className="continuation-status" role="status">{busy ? playing ? 'Generating · one token at a time…' : 'Computing the next token…' : finished ? 'Continuation complete.' : frame ? `Paused after ${frame.step} ${frame.step === 1 ? 'step' : 'steps'}. Step or play to continue.` : 'Ready to continue the completed prompt.'}</p>
     </div>
     {props.draft && <p className="hint">Your prompt has unrun edits. Generation uses the last completed prompt shown below; Run input starts a new story.</p>}
+    {savedPrompt && <p className="hint">This workspace uses its saved starting text below. Select a numbered token to inspect this story; Run input starts another workspace.</p>}
     {error && <p role="alert" className="error">{error}</p>}
     <div className={`continuation-stories ${frame?.edited ? 'paired-stories' : ''}`}>{story(frame?.original ?? { tokenIds: props.tokens, choices: [] }, 'Original')}{frame?.edited && story(frame.edited, 'Edited')}</div>
     {!!frame?.original.choices.length && <p className="hint">Select a numbered token to pause generation and inspect the computation that produced it.</p>}

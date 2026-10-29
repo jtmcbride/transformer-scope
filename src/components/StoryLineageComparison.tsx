@@ -7,7 +7,7 @@ import { captureLineageStories, lineageCounts, originalDifferences, traceLineage
 import { parentDifferences } from '../story-parent-probabilities';
 import { lineagePositionBranchDraft, lineagePositionChanges, lineagePositionScore, rankLineagePositions } from '../story-lineage-position-ranking';
 import type { PositionDifferenceOrder, TrajectoryBranchDraft } from '../story-trajectory-differences';
-import { checkpointKey, type SharedStoryGroup, type StoryWorkspace } from '../story-workspace';
+import { checkpointKey, storyAnalysisKey, type SharedStoryGroup, type StoryWorkspace } from '../story-workspace';
 import { interactionFill } from '../head-pair-heatmap';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
@@ -30,7 +30,7 @@ function LineageTrace({workspace,group,manifest,tokenizer,disabled,onBusy,onOpen
   const [branch,setBranch]=useState<'original'|'edited'>('edited'),[target,setTarget]=useState(()=>group.targetTokenId??snapshot.children[0].plan.source.choice.tokenId);
   const [metric,setMetric]=useState<Metric>('probability'),[trace,setTrace]=useState<Trace|null>(null),[selected,setSelected]=useState(0),[focused,setFocused]=useState('');
   const [order,setOrder]=useState<PositionDifferenceOrder>('absolute');
-  const modelKey=checkpointKey(manifest),key=useMemo(()=>`lineage:${JSON.stringify([modelKey,snapshot,branch,target])}`,[modelKey,snapshot,branch,target]);
+  const modelKey=checkpointKey(manifest),key=useMemo(()=>`lineage:${storyAnalysisKey([modelKey,snapshot,branch,target])}`,[modelKey,snapshot,branch,target]);
   const owner=useRef<ModelClient|null>(null),epoch=useRef(0),chart=useRef<HTMLDivElement>(null);
   const current=!disabled&&trace?.key===key?trace:null,rows=current?.rows??EMPTY,busy=!!current?.busy;
   const counts=lineageCounts(snapshot,branch),total=counts.reduce((sum,track)=>sum+track.original+track.parent+track.child,0),count=Math.max(...counts.map(track=>track.child));

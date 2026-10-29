@@ -4,7 +4,7 @@ import type { ModelManifest } from '../engine/contracts';
 import { tokenLabel } from '../engine/tokenizer';
 import { selectionEdits } from '../continuation';
 import { captureParentStories, parentCounts, parentDifferences, traceParentProbabilities, type ParentProbabilityRows, type ParentRole } from '../story-parent-probabilities';
-import { checkpointKey, type SharedStoryGroup, type StoryWorkspace } from '../story-workspace';
+import { checkpointKey, storyAnalysisKey, type SharedStoryGroup, type StoryWorkspace } from '../story-workspace';
 import { interactionFill } from '../head-pair-heatmap';
 import { ModelClient } from '../workers/client';
 import { loadStoryModel, predictStory } from '../workers/story-runtime';
@@ -27,7 +27,7 @@ function ParentTrace({workspace,group,manifest,tokenizer,disabled,onBusy,onOpenS
   const [branch,setBranch]=useState<'original'|'edited'>('edited'),[target,setTarget]=useState(()=>group.targetTokenId??snapshot.children[0].plan.source.choice.tokenId);
   const [metric,setMetric]=useState<'probability'|'difference'>('probability'),[trace,setTrace]=useState<Trace|null>(null),[selected,setSelected]=useState(0),[focused,setFocused]=useState('');
   const [order,setOrder]=useState<PositionDifferenceOrder>('absolute');
-  const key=`parent:${JSON.stringify([checkpointKey(manifest),snapshot,branch,target])}`,captured=useMemo(()=>structuredClone(snapshot),[key]);
+  const key=`parent:${storyAnalysisKey([checkpointKey(manifest),snapshot,branch,target])}`,captured=useMemo(()=>structuredClone(snapshot),[key]);
   const owner=useRef<ModelClient|null>(null),epoch=useRef(0),chart=useRef<HTMLDivElement>(null);
   const current=!disabled&&trace?.key===key?trace:null,rows=current?.rows??EMPTY,busy=!!current?.busy;
   const counts=parentCounts(captured,branch),total=counts.reduce((n,row)=>n+row.parent+row.child,0),count=Math.max(...counts.flatMap(row=>[row.parent,row.child]));

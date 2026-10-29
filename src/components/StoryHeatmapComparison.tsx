@@ -35,7 +35,7 @@ export function StoryHeatmapComparison({ workspace, manifest, tokenizer, disable
   const [forkBusy,setForkBusy] = useState(false);
   const owner = useRef<ModelClient | null>(null), epoch = useRef(0);
   const sharedPanel = useRef<HTMLDivElement>(null);
-  const paths = useMemo(() => workspaceStoryPaths(workspace),[workspace.root,workspace.nodes]);
+  const paths = useMemo(() => workspaceStoryPaths(workspace),[workspace.name,workspace.root,workspace.nodes]);
   const chosen = useMemo(() => { const preferred = paths.slice(-2); return picks.map((pick,i) => { const path = paths.find(path => path.id === pick.path) ?? preferred[i] ?? preferred[0]; return path ? { path, index:Math.min(pick.index,path.count-1) } : null; }); },[paths,picks]);
   const sources = useMemo(() => chosen.map(pick => pick?.path.select(pick.index)),[chosen]);
   const tokenOptions = useMemo(() => chosen.map(pick => pick ? Array.from({length:pick.path.count},(_,index) => ({index,step:pick.path.start+index,label:tokenLabel(tokenizer,pick.path.select(index).choice.tokenId)})) : []),[chosen,tokenizer]);

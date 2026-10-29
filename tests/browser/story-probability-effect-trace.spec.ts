@@ -39,7 +39,7 @@ test('saved chosen-token effects use aligned signed scales and effect trends, pr
   await page.reload();await page.locator('.story-map-comparison > summary').click();await expect(trace.getByLabel('Chosen next token')).toHaveValue('1');await expect(trace.getByLabel('Interaction trajectory display')).toHaveValue('effect');await expect(trace.locator('.trajectory-point')).toHaveCount(0);
   // Import can replace only the objective while keeping identical story/group IDs and frames.
   const replacement=structuredClone(workspace);replacement.sharedForks[1].targetTokenId=471;
-  async function replace(){await page.getByLabel('Open story workspace').setInputFiles({name:'replaced-objective.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(replacement))});}
+  async function replace(){await page.getByLabel('Open story workspace').setInputFiles({name:'replaced-objective.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(replacement))});await expect(shared).toBeHidden();await page.locator('.story-map-comparison > summary').click();}
   await replace();await expect(trace.getByLabel('Chosen next token')).toHaveValue('471');await expect(trace.getByLabel('Interaction trajectory display')).toHaveValue('effect');
   delete replacement.sharedForks[1].targetTokenId;await replace();await expect(trace.getByLabel('Interaction trajectory target mode')).toHaveValue('generated');await expect(trace.getByLabel('Interaction trajectory display')).toHaveValue('interaction');
   await expect(page.getByRole('alert')).toHaveCount(0);

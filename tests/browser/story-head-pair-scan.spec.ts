@@ -102,7 +102,7 @@ test('full pair scan maps and ranks interactions, then branches from a heatmap c
   await openProbabilityDetails(report);
   await expect(report.getByTestId('combined-probability')).toBeVisible({ timeout: 60000 });
   expect(parseFloat(await report.getByTestId('combined-probability').innerText())/100).toBeCloseTo(sorted[0].after,5);
-  await expect(page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button')).toHaveCount(2);
+  await expect(page.getByRole('navigation', { name: 'Story branch map' }).getByRole('button', { name: /^(Source story$|Comparison \d+:)/ })).toHaveCount(2);
   await page.getByRole('button', { name: /^Inspect with head change token 6:/ }).click();
   await expect(page.getByTestId('selected-token-result')).toContainText('Recorded choice reproduced', { timeout: 60000 });
   await expect(page.getByRole('alert')).toHaveCount(0);

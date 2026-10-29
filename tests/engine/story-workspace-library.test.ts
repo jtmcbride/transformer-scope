@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { activeWorkspace, loadLibrary, openWorkspace, persistLibrary, removeWorkspace, startWorkspace, updateWorkspace } from '../../src/story-workspace-library';
-import { emptyWorkspace, parseWorkspace, type StoryWorkspace } from '../../src/story-workspace';
+import { emptyWorkspace, mergeStoryNode, parseWorkspace, storyAnalysisKey, type StoryWorkspace } from '../../src/story-workspace';
+import { workspaceStoryPaths } from '../../src/story-heatmap-comparison';
 import { branchName, workspaceName } from '../../src/story-workspace-names';
 import { loadShippedArtifact } from './retrieval-artifact';
 import fixture from '../fixtures/story-trajectory-workspace.json';
@@ -35,6 +36,15 @@ it('updates just the active workspace and keeps every real history without evict
   expect(() => removeWorkspace(changed, changed.activeId)).toThrow('Open another');
 });
 
+it('reports a full library before replacing or evicting any saved workspace', () => {
+  const base = loadLibrary(null, JSON.stringify(story()), manifest, ids()).library;
+  const full = { ...base, entries: Array.from({ length: 1000 }, (_, i) => ({ ...base.entries[0], id: i === 0 ? base.activeId : `saved-${i}` })) };
+  expect(() => startWorkspace(full, emptyWorkspace(manifest), 'overflow')).toThrow('1,000 workspaces');
+  expect(full.entries).toHaveLength(1000);
+  expect(full.activeId).toBe(base.activeId);
+  expect(activeWorkspace(full)).toEqual(story());
+});
+
 it('replaces empty drafts while retaining real and unreadable saved work', () => {
   const raw = '{broken library';
   const loaded = loadLibrary(raw, null, manifest, ids(), 10);
@@ -44,6 +54,9 @@ it('replaces empty drafts while retaining real and unreadable saved work', () =>
   expect(next.entries[0]).toMatchObject({ data: raw, recovered: true });
   expect(() => openWorkspace(next, next.entries[0].id, manifest)).toThrow('Download');
   expect(loadLibrary(JSON.stringify(next), null, manifest).library.entries[0].data).toBe(raw);
+  const legacy = story(); legacy.name = 'Last legacy backup';
+  const recovered = loadLibrary(raw, JSON.stringify(legacy), manifest, ids(), 10);
+  expect(recovered.library.entries.some(entry => JSON.stringify(entry.data) === JSON.stringify(legacy))).toBe(true);
 });
 
 it('retains incompatible and invalid legacy data for download without executing it', () => {
@@ -92,4 +105,27 @@ it('describes the actual chosen token and head changes, while honoring custom na
   expect(branchName(changed, tokenizer as import('../../src/engine/bpe').BpeDocument)).toBe('A surprising turn');
   expect(workspaceName({ ...data, name: 'My experiment' })).toBe('My experiment');
   expect(workspaceName(emptyWorkspace(manifest))).toBe('New story');
+});
+
+it('refreshes path names while keeping numerical analysis identities and actual selections unchanged', () => {
+  const original = story(), changed = story();
+  changed.name = 'A new workspace name'; changed.nodes[0].name = 'The friendly path';
+  const before = workspaceStoryPaths(original), after = workspaceStoryPaths(changed);
+  expect(after.map(path => path.id)).toEqual(before.map(path => path.id));
+  after.forEach((path, index) => expect(path.select(0)).toEqual(before[index].select(0)));
+  expect(after.some(path => path.label.includes('The friendly path'))).toBe(true);
+  expect(storyAnalysisKey(changed)).toBe(storyAnalysisKey(original));
+  changed.nodes[0].plan.edit.factor = 1;
+  expect(storyAnalysisKey(changed)).not.toBe(storyAnalysisKey(original));
+});
+
+it('preserves renamed and cleared names when an in-flight comparison saves its captured record', () => {
+  const captured = story().nodes[0]; captured.name = 'Name captured before generation';
+  const renamed = { ...captured, name: 'My current name' };
+  expect(mergeStoryNode(renamed, captured).name).toBe('My current name');
+  const cleared: StoryWorkspace['nodes'][number] = { ...renamed }; delete cleared.name;
+  const next = mergeStoryNode(cleared, captured);
+  expect(next).not.toHaveProperty('name');
+  expect(next.plan).toEqual(captured.plan); expect(next.frame).toEqual(captured.frame);
+  expect(captured.name).toBe('Name captured before generation');
 });

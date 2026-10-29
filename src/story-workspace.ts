@@ -7,6 +7,13 @@ export interface StoryNode { id: string; parentId: string | null; plan: ForkPlan
 export interface SharedStoryGroup { id: string; nodeIds: [string, string]; labels: [string, string]; targetTokenId?: number }
 export interface StoryWorkspace { format: 'transformer-story-workspace'; version: 1 | 2 | 3; checkpoint: string; root: StoryRoot | null; nodes: StoryNode[]; route: string[]; sharedForks?: SharedStoryGroup[]; name?: string }
 export const workspaceNameLimit = 80;
+/** Streaming computation updates must retain the user's current name, including clearing it. */
+export function mergeStoryNode(current: StoryNode, incoming: StoryNode): StoryNode {
+  const { name: _capturedName, ...record } = incoming;
+  return { ...current, ...record };
+}
+/** Presentation names never invalidate a measured distribution or captured branch setup. */
+export function storyAnalysisKey(value: unknown): string { return JSON.stringify(value, (key, item) => key === 'name' || key === 'labels' ? undefined : item) ?? 'undefined'; }
 function validateName(name: unknown) { requireInput(name === undefined || typeof name === 'string' && name.trim().length > 0 && name.length <= workspaceNameLimit, 'Names must contain 1–80 characters.'); }
 export function checkpointKey(m: ModelManifest) { return [m.modelId, m.modelRevision, m.weightsSha256, m.tokenizerSha256].join(':'); }
 export function emptyWorkspace(m: ModelManifest): StoryWorkspace { return { format: 'transformer-story-workspace', version: 3, checkpoint: checkpointKey(m), root: null, nodes: [], route: [], sharedForks: [] }; }

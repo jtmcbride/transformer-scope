@@ -48,7 +48,9 @@ export async function trajectoryPositionBranchWorkflow(page:Page,info?:TestInfo)
   });
   const saved=await downloadStory(page,'Download workspace');expect(saved.root).toEqual(workspace.root);expect(saved.nodes.slice(0,workspace.nodes.length)).toEqual(workspace.nodes);expect(saved.nodes).toHaveLength(workspace.nodes.length+2);expect(saved.sharedForks).toHaveLength(3);
   await page.reload();await page.locator('.story-map-comparison > summary').click();expect((await downloadStory(page,'Download shared comparison')).nodes).toEqual(child.nodes);await expect(trace.getByLabel('Chosen next token')).toHaveValue('471');await expect(trace.locator('.trajectory-point')).toHaveCount(0);
-  await page.getByLabel('Open story workspace').setInputFiles({name:'nested-workspace.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(saved))});await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.');
+  await page.getByLabel('Open story workspace').setInputFiles({name:'nested-workspace.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(saved))});
+  await expect(shared).toBeHidden();await page.locator('.story-map-comparison > summary').click();
+  await expect(shared.getByTestId('shared-continuation-status')).toHaveText('Shared continuations complete.');
   await expect(page.getByRole('alert')).toHaveCount(0);
   return {child,saved};
 }

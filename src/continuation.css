@@ -82,6 +82,20 @@
 .branch-probability-bars { background:#f4f5f9; display:grid; gap:3px; }
 .branch-probability-bars i { height:5px; display:block; background:#9ca9bd; }
 .branch-probability-bars i + i { background:#7963cb; }
+.branch-change-summary { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px 24px; }
+.branch-change-summary h3 { font-size:20px; margin:0; }
+.branch-change-summary h3 > span { color:#58429a; font-family:monospace; }
+.branch-change-summary p { margin:8px 0; }
+.branch-change-summary strong { font-variant-numeric:tabular-nums; }
+.summary-probability-delta { display:inline-block; margin-left:12px; font-size:12px; color:#606c82; }
+.branch-choice-summary { max-width:380px; }
+.branch-choice-summary small { display:block; color:#606c82; font-size:11px; margin-top:6px; }
+.branch-probability-details { margin-top:18px; border-top:1px solid #dfe4ee; padding-top:8px; }
+.branch-probability-details > summary { cursor:pointer; font-size:14px; font-weight:600; color:#58429a; padding:10px 0; }
+.branch-probabilities > .fork-status { margin:12px 0 4px; }
+.branch-probabilities > .fork-difference { margin:4px 0 14px; }
+.branch-probabilities .story-prose { font:19px/1.8 Georgia,serif; }
+@media(max-width:700px) { .summary-probability-delta { display:block; margin:6px 0 0; } .branch-change-summary h3 { font-size:18px; } }
 @media(max-width:700px) { .branch-probabilities { padding:10px; } }
 .story-head-scan { margin:0 0 24px; padding-bottom:22px; border-bottom:1px solid #ddd3f5; }
 .story-head-scan p { font-size:13px; line-height:1.6; }

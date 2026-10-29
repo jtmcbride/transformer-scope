@@ -138,21 +138,22 @@ export function StoryFork(props: Props) {
       {plan && <><button type="button" disabled={busy || scanning || finished || props.disabled || linked} onClick={() => void run(false)}>Step comparison</button><button type="button" disabled={busy || scanning || finished || props.disabled || linked} onClick={() => void run(true)}>Play comparison</button><button type="button" disabled={!busy} onClick={stop}>Stop comparison</button><button type="button" onClick={clear}>Clear comparison</button><button type="button" disabled={busy} onClick={download}>Download branch comparison</button></>}
     </div>
     {preview && (pair || preview.edit.layer === props.head.layer && preview.edit.head === props.head.head && preview.edit.factor === factor) && <BranchProbabilities targetTokenId={targetTokenId} plan={preview} tokenizer={props.tokenizer} client={props.analysisClient} label="Scanned head probability preview" />}
-    <StoryAnalysis targetTokenId={targetTokenId} targeted={props.initialTargetTokenId !== undefined || targetTokenId !== props.source.choice.tokenId}
-      onTargetChange={id => { setTargetTokenId(id); setPreview(null); setPair(null); }} source={props.source} manifest={props.manifest} tokenizer={props.tokenizer}
-      disabled={busy || props.disabled || scanning} onStart={() => { stop(); props.onStart(); }}
-      onChoose={edits => { if (edits.length === 1) setTargetTokenId(props.source.choice.tokenId); chooseScan(edits); }}
-      onBusy={value => { setScanning(value); workspace?.setInspectorScanning(value); }} />
     {linked && !finished && <p className="hint">These paths belong to a shared story comparison. Resume both together in Compare interaction maps across story tokens above.</p>}
 
     {error && <p role="alert" className="error">{error}</p>}
     {plan && frame && <>
       <p className="hint" data-testid="fork-captured-edit">Comparing {forkEditLabel(plan)} · {plan.duration === 'prediction' ? 'selected prediction only' : 'every prediction from this point'}. Source: {plan.source.branch} story, step {plan.source.step}.</p>
-      <BranchProbabilities targetTokenId={targetTokenId} plan={plan} tokenizer={props.tokenizer} client={props.analysisClient} />
+      <BranchProbabilities targetTokenId={targetTokenId} plan={plan} tokenizer={props.tokenizer} client={props.analysisClient}>
       <p className="fork-status" role="status">{busy ? 'Comparing · one token at a time…' : finished ? 'Branch comparison complete.' : `Comparison paused after ${frame.step} ${frame.step === 1 ? 'step' : 'steps'}.`}</p>
       <p className="fork-difference" role="status">{difference === null ? frame.step ? 'The generated tokens match so far. A head edit need not change the story.' : 'Waiting for the first pair of tokens.' : `First different token at story step ${plan.source.step + difference}. Highlighted tokens differ at the same generation step.`}</p>
       <div className="continuation-stories paired-stories">{story(frame.original, 'Keep source settings', frame.edited!, 'original')}{story(frame.edited!, 'With head change', frame.original, 'edited')}</div>
+      </BranchProbabilities>
     </>}
+    <StoryAnalysis targetTokenId={targetTokenId} targeted={props.initialTargetTokenId !== undefined || targetTokenId !== props.source.choice.tokenId}
+      onTargetChange={id => { setTargetTokenId(id); setPreview(null); setPair(null); }} source={props.source} manifest={props.manifest} tokenizer={props.tokenizer}
+      disabled={busy || props.disabled || scanning} onStart={() => { stop(); props.onStart(); }}
+      onChoose={edits => { if (edits.length === 1) setTargetTokenId(props.source.choice.tokenId); chooseScan(edits); }}
+      onBusy={value => { setScanning(value); workspace?.setInspectorScanning(value); }} />
     <p className="hint">Select a numbered token in either path to inspect it and make another head change. Back to previous comparison returns here with these results intact. The {props.manifest.config.contextLength}-token context limit still applies. Every comparison stays in the story workspace. Use the branch map to reopen it, or download the workspace to keep a copy.</p>
   </section>;
 }

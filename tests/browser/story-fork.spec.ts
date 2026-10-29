@@ -1,3 +1,4 @@
+import { openProbabilityDetails } from '../support/probability-details';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import continuation from '../fixtures/continuation-reference.json' with { type: 'json' };
@@ -6,6 +7,7 @@ import probabilities from '../fixtures/branch-probabilities-reference.json' with
 
 async function probabilityReport(page: Page, example: typeof probabilities.cases[number]) {
   const report = page.getByRole('region', { name: 'Head change probabilities', exact: true });
+  await openProbabilityDetails(report);
   await expect(report.getByTestId('branch-choice-explanation')).toBeVisible({ timeout: 60_000 });
   for (const row of example.rows) {
     const measured = report.locator(`li[data-token-id="${row.tokenId}"]`);
@@ -66,6 +68,13 @@ test('forking an original token preserves its story and matches independent sust
   await expect(fork.locator('.fork-status')).toHaveText('Branch comparison complete.', { timeout: 90_000 });
   const sustained = await record(page);
   matches(sustained, reference.cases[0]);
+  const report = page.getByRole('region', { name: 'Head change probabilities', exact: true });
+  await expect(report.getByTestId('branch-change-summary')).toBeVisible({ timeout: 60_000 });
+  await expect(report.locator('.branch-probability-details')).not.toHaveAttribute('open');
+  await expect(report.locator('ul[aria-label="Strongest token alternatives"]')).toBeHidden();
+  const stories = report.locator('.paired-stories'), details = report.locator('.branch-probability-details');
+  expect(await stories.evaluate(el => el.getBoundingClientRect().bottom)).toBeLessThan(await details.evaluate(el => el.getBoundingClientRect().top));
+  await report.screenshot({ path: testInfo.outputPath('story-results-compact.png') });
   await probabilityReport(page, probabilities.cases[0]);
   await expect(fork.getByTestId('branch-choice-explanation')).toContainText('winning token’s probability also fell');
   await page.getByRole('button', { name: /^Inspect original token 6:/ }).click();
@@ -159,6 +168,7 @@ test('a sampled identity fork keeps the original draw counter through cancellati
   expect(saved.frame.original.choices).toEqual(source.frame.original.choices.slice(2));
   expect(saved.frame.edited).toEqual(saved.frame.original);
   expect(saved.firstDifferenceStep).toBeNull();
+  await openProbabilityDetails(fork.getByRole('region', { name: 'Head change probabilities', exact: true }));
   await expect(fork.getByTestId('branch-choice-explanation')).toContainText('Seeded sampling', { timeout: 60_000 });
   expect((await record(page, 'Download continuation')).frame).toEqual(source.frame);
   await fork.getByRole('button', { name: /^Inspect with head change token 3:/ }).click();
